@@ -1,0 +1,832 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Swift-internals | 猫·仁波切]]></title>
+  <link href="http://andelf.github.io/blog/categories/swift-internals/atom.xml" rel="self"/>
+  <link href="http://andelf.github.io/"/>
+  <updated>2015-05-23T11:34:24+08:00</updated>
+  <id>http://andelf.github.io/</id>
+  <author>
+    <name><![CDATA[猫·仁波切 (Feather)]]></name>
+    <email><![CDATA[andelf@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Swift Beta3 Changes ( Swift 在 Beta3 中的变化）]]></title>
+    <link href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/"/>
+    <updated>2014-07-08T17:22:11+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/07/08/swift-beta3-changes</id>
+    <content type="html"><![CDATA[<p>准确说是 beta2 <code>Swift version 1.0 (swift-600.0.34.4.8)</code> 到 beta3 <code>Swift version 1.0 (swift-600.0.38.7)</code> 的变化。</p>
+
+<p>对了，补充下。 beta1 <code>Swift version 1.0 (swift-600.0.34.4.5)</code> 到 beta2 几乎没有什么变化。</p>
+
+<h2>语法</h2>
+
+<p><code>nil</code> 成为关键字。</p>
+
+<p><code>[KeyType : ValueType]</code> 可以表示字典类型 <code>Dictionary&lt;KeyType, ValueType&gt;</code>。</p>
+
+<p><code>[Type]</code> 用于表示原 Array 类型 <code>Type[]</code>，等价 <code>Array&lt;T&gt;</code>，原用法会导致警告。</p>
+
+<p><del>增加 @noinline 属性</del></p>
+
+<p><code>..</code> 运算符改为 <code>..&lt;</code>，不容易和 <code>...</code> 混淆。</p>
+
+<h2>函数、类型</h2>
+
+<p>原 <code>sort()</code> 改名为 <code>sorted()</code>。新增 <code>sort()</code> 函数，参数为 <code>inout</code>。</p>
+
+<p>Index 类型中的 <code>.succ()</code> 变为 <code>.successor()</code>、 <code>.pred()</code> 变为 <code>.predecessor()</code>。</p>
+
+<h2>C/ObjC 交互变化</h2>
+
+<p>增加 <code>UnsafeMutableArray&lt;T&gt;</code> 类型。</p>
+
+<p>增加 <code>CFunctionPointer&lt;T&gt;</code> 类型。</p>
+
+<p>删除 <code>CConstVoidPointer</code>、 <code>CMutableVoidPointer</code>。替换为 <code>UnsafePointer&lt;()&gt;</code>、<code>ConstUnsafePointer&lt;Int32&gt;</code>。</p>
+
+<p>删除 <code>CConstPointer&lt;T&gt;</code>、<code>CMutablePointer&lt;T&gt;</code>。替换为 <code>UnsafePointer&lt;T&gt;</code>、<code>ConstUnsafePointer&lt;T&gt;</code>。</p>
+
+<p>这么一来指针操作简单了好多。原有会出现 <code>COpaquePointer</code> 的不合理情况，也都对应到适合的类型。</p>
+
+<p><code>CString</code> 可以从 <code>UnsafePointer&lt;UInt8&gt;</code> 和 <code>UnsafePointer&lt;CChar&gt;</code> 两种类型构造获得，之前只支持 <code>UInt8</code>。</p>
+
+<p>module.map 中头文件声明转换为 Swift 声明不再使用 C 兼容类型，直接使用 Swift 相应类型。原有 <code>CInt</code>，现在成为 <code>Int32</code>。</p>
+
+<p>结构体会自动添加构造函数 <code>init(field1:field2:...)</code> 这样。</p>
+
+<h3>nil</h3>
+
+<p>去掉了 <code>NilType</code>，增加了 <code>NilLiteralConvertible</code>， <code>nil</code> 成为关键字。可以认为是 nil 常量。</p>
+
+<p><code>
+protocol NilLiteralConvertible {
+  class func convertFromNilLiteral() -&gt; Self
+}
+</code></p>
+
+<p>除了 Optional 、上面所提到的指针类型外，<code>RawOptionSet</code> 也实现了该协议。</p>
+
+<h3>Array</h3>
+
+<p>去掉了 <code>.copy()</code>、<code>unshare()</code> 方法。</p>
+
+<p>增加了以下方法：</p>
+
+<p><code>
+func makeUnique(inout buffer: ArrayBuffer&lt;T&gt;, e: T, index: Int)
+func sorted(isOrderedBefore: (T, T) -&gt; Bool) -&gt; Array&lt;T&gt;
+</code></p>
+
+<p>看起来 <code>Array</code> 对底层容器的引用有了更好的控制 <code>ArrayBufferType</code> 增加了判断方法 <code>func isMutableAndUniquelyReferenced() -&gt; Bool</code>。</p>
+
+<p>Array 目前可以认为是真正的值类型。</p>
+
+<h3>指针</h3>
+
+<h4>增加了 <code>_Pointer</code> protocol</h4>
+
+<p><code>scala
+protocol _Pointer {
+  var value: RawPointer { get }
+  init(_ value: RawPointer)
+}
+</code></p>
+
+<p>表示一个类型可以对应到原生指针。</p>
+
+<p>同时成为内部桥接类型，编译器内部在转换时使用它（取出 RawPointer, 构造具体指针类型）。</p>
+
+<h2>模块</h2>
+
+<p>增加了  StdlibUnittest 模块。 <a href="https://github.com/andelf/Defines-Swift/blob/79ed8d40659e4d038f41e3c30b4b3358106bd50a/StdlibUnittest.swift">声明代码</a>。单元测试终于有了。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift Undocumented Grammar （Swift 黑语法）]]></title>
+    <link href="http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/"/>
+    <updated>2014-07-04T03:05:11+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar</id>
+    <content type="html"><![CDATA[<p>本文介绍 Swift 的 Undocumented 语法特性。</p>
+
+<p>电子书上介绍的 default function parameter 这里都不好意思拿出来写。</p>
+
+<p>咳咳。持续更新。</p>
+
+<h2>用关键字当变量名</h2>
+
+<p>Keywards as variable name.</p>
+
+<p><code>scala
+// escaped variable name
+let `let` = 1000
+dump(`let`, name: "variable named let")
+</code></p>
+
+<h2><code>new</code> 关键字</h2>
+
+<p>The <code>new</code> keyword.</p>
+
+<p>快速初始化数组。</p>
+
+<p><code>scala
+let an_array_with_100_zero = new(Int)[100]
+</code></p>
+
+<h2>protocol type</h2>
+
+<p>use <code>protocol&lt;Protocol1, Protocol2, ...&gt;</code> as a type.</p>
+
+<h2>How I find it?</h2>
+
+<p>瞎试出来的。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）]]></title>
+    <link href="http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/"/>
+    <updated>2014-07-04T01:05:55+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/07/04/cocoa-in-swift</id>
+    <content type="html"><![CDATA[<p>最近看到了 <a href="https://github.com/raywenderlich/swift-style-guide">Swift Style Guide</a> 个人觉得内容太少，
+Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。</p>
+
+<p>Swift 本身的特性，导致它在一些用法上和 Objective-C 上有所不同，比如 ObjC 的 struct 单纯和 C 的一样，但是在 Swift
+中的 struct 则要强大得多。</p>
+
+<p>个人认为比如 <code>CGPointMake</code> 这样的函数，理论上不应该出现在 Swift 代码中。而是应该用 <code>CGPoint(x:y:)</code>。</p>
+
+<p>本文可以作为参考手册使用。</p>
+
+<h2>标准库扩展</h2>
+
+<h3>ObjectiveC</h3>
+
+<p>值得注意的是 Selector 相关方法，实现了 <code>StringLiteralConvertible</code>。也可以从 <code>nil</code> 获得。</p>
+
+<h3>Foundation</h3>
+
+<p>这里忽略之前介绍过的 <code>_BridgedToObjectiveC</code> 相关内容。</p>
+
+<h4>协议附加</h4>
+
+<p>Sequence 协议</p>
+
+<p><code>
+NSMutableArray NSSet NSArray NSMutableDictionary NSMutableSet NSDictionary
+</code></p>
+
+<p>所有以上这些类型都可以通过 for-in 操作。</p>
+
+<p>*LiteralConvertible</p>
+
+<p><code>
+NSNumber NSString NSArray NSDictionary
+</code></p>
+
+<h4>隐式类型转换</h4>
+
+<p>CF 几乎都对应到了 NS 类型。这里略去</p>
+
+<ul>
+<li><code>NilType</code> &ndash;> <code>NSZone</code></li>
+<li><code>Dictionary&lt;KeyType: Hashable, ValueType&gt;</code> &ndash;> <code>NSDictionary</code></li>
+<li><code>NSDictionary</code> &ndash;> <code>Dictionary&lt;NSObject, AnyObject&gt;</code></li>
+<li><code>String</code> &lt;&ndash;> <code>NSString</code></li>
+<li><code>NSArray</code> &ndash;> <code>AnyObject[]</code></li>
+<li><code>A[]</code> &ndash;> <code>NSArray</code></li>
+<li><code>Float Double Int UInt Bool</code> &ndash;> <code>NSNumber</code></li>
+<li><code>NSRange</code> &ndash;> <code>Range&lt;Int&gt;</code> // 比较有意思的一个</li>
+</ul>
+
+
+<h4>方法扩展</h4>
+
+<p><code>scala
+// let s = NSSet(objects: 12, 32, 23, 12)
+extension NSSet {
+  convenience init(objects elements: AnyObject...)
+}
+extension NSOrderedSet {
+  convenience init(objects elements: AnyObject...)
+}
+// 这里注意，NSRange 和 Swift Range 对 range 结束的表述方法不同
+// NSRange 保存 range 元素个数
+// Swift Range 保存的是结束元素
+// let r = NSRange(0..20)
+extension NSRange {
+  init(_ x: Range&lt;Int&gt;)
+}
+// let prop = NSDictionary(objectsAndKeys: "Feather", "name", "Programming", "hobby")
+extension NSDictionary {
+  convenience init(objectsAndKeys objects: AnyObject...)
+}
+extension NSObject : CVarArg {
+  @objc func encode() -&gt; Word[]
+}
+</code></p>
+
+<p>字符串的扩展方法非常多。</p>
+
+<p><code>scala
+  static func availableStringEncodings() -&gt; NSStringEncoding[]
+  static func defaultCStringEncoding() -&gt; NSStringEncoding
+  static func localizedNameOfStringEncoding(encoding: NSStringEncoding) -&gt; String
+  static func localizedStringWithFormat(format: String, _ arguments: CVarArg...) -&gt; String
+  static func pathWithComponents(components: String[]) -&gt; String
+  static func stringWithContentsOfFile(path: String, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; String?
+  static func stringWithContentsOfFile(path: String, usedEncoding: CMutablePointer&lt;NSStringEncoding&gt; = default, error: NSErrorPointer = default) -&gt; String?
+  static func stringWithContentsOfURL(url: NSURL, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; String?
+  static func stringWithContentsOfURL(url: NSURL, usedEncoding enc: CMutablePointer&lt;NSStringEncoding&gt; = default, error: NSErrorPointer = default) -&gt; String?
+  static func stringWithCString(cString: CString, encoding enc: NSStringEncoding) -&gt; String?
+  static func stringWithUTF8String(bytes: CString) -&gt; String?
+  func canBeConvertedToEncoding(encoding: NSStringEncoding) -&gt; Bool
+  var capitalizedString: String { get }
+  func capitalizedStringWithLocale(locale: NSLocale) -&gt; String
+  func caseInsensitiveCompare(aString: String) -&gt; NSComparisonResult
+  func commonPrefixWithString(aString: String, options: NSStringCompareOptions) -&gt; String
+  func compare(aString: String, options mask: NSStringCompareOptions = default, range: Range&lt;String.Index&gt;? = default, locale: NSLocale? = default) -&gt; NSComparisonResult
+  func completePathIntoString(_ outputName: CMutablePointer&lt;String&gt; = default, caseSensitive: Bool, matchesIntoArray: CMutablePointer&lt;String[]&gt; = default, filterTypes: String[]? = default) -&gt; Int
+  func componentsSeparatedByCharactersInSet(separator: NSCharacterSet) -&gt; String[]
+  func componentsSeparatedByString(separator: String) -&gt; String[]
+  func cStringUsingEncoding(encoding: NSStringEncoding) -&gt; CChar[]?
+  func dataUsingEncoding(encoding: NSStringEncoding, allowLossyConversion: Bool = default) -&gt; NSData
+  var decomposedStringWithCanonicalMapping: String { get }
+  var decomposedStringWithCompatibilityMapping: String { get }
+  func enumerateLines(body: (line: String, inout stop: Bool) -&gt; ())
+  func enumerateLinguisticTagsInRange(range: Range&lt;String.Index&gt;, scheme tagScheme: String, options opts: NSLinguisticTaggerOptions, orthography: NSOrthography?, _ body: (String, Range&lt;String.Index&gt;, Range&lt;String.Index&gt;, inout Bool) -&gt; ())
+  func enumerateSubstringsInRange(range: Range&lt;String.Index&gt;, options opts: NSStringEnumerationOptions, _ body: (substring: String, substringRange: Range&lt;String.Index&gt;, enclosingRange: Range&lt;String.Index&gt;, inout Bool) -&gt; ())
+  var fastestEncoding: NSStringEncoding { get }
+  func fileSystemRepresentation() -&gt; CChar[]
+  func getBytes(inout buffer: UInt8[], maxLength: Int, usedLength: CMutablePointer&lt;Int&gt;, encoding: NSStringEncoding, options: NSStringEncodingConversionOptions, range: Range&lt;String.Index&gt;, remainingRange: CMutablePointer&lt;Range&lt;String.Index&gt;&gt;) -&gt; Bool
+  func getCString(inout buffer: CChar[], maxLength: Int, encoding: NSStringEncoding) -&gt; Bool
+  func getFileSystemRepresentation(inout buffer: CChar[], maxLength: Int) -&gt; Bool
+  func getLineStart(start: CMutablePointer&lt;String.Index&gt;, end: CMutablePointer&lt;String.Index&gt;, contentsEnd: CMutablePointer&lt;String.Index&gt;, forRange: Range&lt;String.Index&gt;)
+  func getParagraphStart(start: CMutablePointer&lt;String.Index&gt;, end: CMutablePointer&lt;String.Index&gt;, contentsEnd: CMutablePointer&lt;String.Index&gt;, forRange: Range&lt;String.Index&gt;)
+  var hash: Int { get }
+  static func stringWithBytes(bytes: UInt8[], length: Int, encoding: NSStringEncoding) -&gt; String?
+  static func stringWithBytesNoCopy(bytes: CMutableVoidPointer, length: Int, encoding: NSStringEncoding, freeWhenDone flag: Bool) -&gt; String?
+  init(utf16CodeUnits: CConstPointer&lt;unichar&gt;, count: Int)
+  init(utf16CodeUnitsNoCopy: CConstPointer&lt;unichar&gt;, count: Int, freeWhenDone flag: Bool)
+  init(format: String, _ _arguments: CVarArg...)
+  init(format: String, arguments: CVarArg[])
+  init(format: String, locale: NSLocale?, _ args: CVarArg...)
+  init(format: String, locale: NSLocale?, arguments: CVarArg[])
+  var lastPathComponent: String { get }
+  var utf16count: Int { get }
+  func lengthOfBytesUsingEncoding(encoding: NSStringEncoding) -&gt; Int
+  func lineRangeForRange(aRange: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
+  func linguisticTagsInRange(range: Range&lt;String.Index&gt;, scheme tagScheme: String, options opts: NSLinguisticTaggerOptions = default, orthography: NSOrthography? = default, tokenRanges: CMutablePointer&lt;Range&lt;String.Index&gt;[]&gt; = default) -&gt; String[]
+  func localizedCaseInsensitiveCompare(aString: String) -&gt; NSComparisonResult
+  func localizedCompare(aString: String) -&gt; NSComparisonResult
+  func localizedStandardCompare(string: String) -&gt; NSComparisonResult
+  func lowercaseStringWithLocale(locale: NSLocale) -&gt; String
+  func maximumLengthOfBytesUsingEncoding(encoding: NSStringEncoding) -&gt; Int
+  func paragraphRangeForRange(aRange: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
+  var pathComponents: String[] { get }
+  var pathExtension: String { get }
+  var precomposedStringWithCanonicalMapping: String { get }
+  var precomposedStringWithCompatibilityMapping: String { get }
+  func propertyList() -&gt; AnyObject
+  func propertyListFromStringsFileFormat() -&gt; Dictionary&lt;String, String&gt;
+  func rangeOfCharacterFromSet(aSet: NSCharacterSet, options mask: NSStringCompareOptions = default, range aRange: Range&lt;String.Index&gt;? = default) -&gt; Range&lt;String.Index&gt;
+  func rangeOfComposedCharacterSequenceAtIndex(anIndex: String.Index) -&gt; Range&lt;String.Index&gt;
+  func rangeOfComposedCharacterSequencesForRange(range: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
+  func rangeOfString(aString: String, options mask: NSStringCompareOptions = default, range searchRange: Range&lt;String.Index&gt;? = default, locale: NSLocale? = default) -&gt; Range&lt;String.Index&gt;
+  var smallestEncoding: NSStringEncoding { get }
+  func stringByAbbreviatingWithTildeInPath() -&gt; String
+  func stringByAddingPercentEncodingWithAllowedCharacters(allowedCharacters: NSCharacterSet) -&gt; String
+  func stringByAddingPercentEscapesUsingEncoding(encoding: NSStringEncoding) -&gt; String
+  func stringByAppendingFormat(format: String, _ arguments: CVarArg...) -&gt; String
+  func stringByAppendingPathComponent(aString: String) -&gt; String
+  func stringByAppendingPathExtension(ext: String) -&gt; String
+  func stringByAppendingString(aString: String) -&gt; String
+  var stringByDeletingLastPathComponent: String { get }
+  var stringByDeletingPathExtension: String { get }
+  var stringByExpandingTildeInPath: String { get }
+  func stringByFoldingWithOptions(options: NSStringCompareOptions, locale: NSLocale) -&gt; String
+  func stringByPaddingToLength(newLength: Int, withString padString: String, startingAtIndex padIndex: Int) -&gt; String
+  var stringByRemovingPercentEncoding: String { get }
+  func stringByReplacingCharactersInRange(range: Range&lt;String.Index&gt;, withString replacement: String) -&gt; String
+  func stringByReplacingOccurrencesOfString(target: String, withString replacement: String, options: NSStringCompareOptions = default, range searchRange: Range&lt;String.Index&gt;? = default) -&gt; String
+  func stringByReplacingPercentEscapesUsingEncoding(encoding: NSStringEncoding) -&gt; String
+  var stringByResolvingSymlinksInPath: String { get }
+  var stringByStandardizingPath: String { get }
+  func stringByTrimmingCharactersInSet(set: NSCharacterSet) -&gt; String
+  func stringsByAppendingPaths(paths: String[]) -&gt; String[]
+  func substringFromIndex(index: Int) -&gt; String
+  func substringToIndex(index: Int) -&gt; String
+  func substringWithRange(aRange: Range&lt;String.Index&gt;) -&gt; String
+  func uppercaseStringWithLocale(locale: NSLocale) -&gt; String
+  func writeToFile(path: String, atomically useAuxiliaryFile: Bool, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; Bool
+  func writeToURL(url: NSURL, atomically useAuxiliaryFile: Bool, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; Bool
+</code></p>
+
+<h3>CoreGraphics</h3>
+
+<p>几个常用基本类型都有了 Swift-style 的构造函数。其中 <code>CGRect</code> 有很多的相关运算都被封装为方法，很不错。</p>
+
+<p><code>scala
+extension CGPoint : Equatable {
+  static var zeroPoint: CGPoint
+  init()
+  init(x: Int, y: Int)
+}
+extension CGSize {
+  static var zeroSize: CGSize
+  init()
+  init(width: Int, height: Int)
+}
+extension CGVector {
+  static var zeroVector: CGVector
+  init(_ dx: CGFloat, _ dy: CGFloat)
+  init(_ dx: Int, _ dy: Int)
+}
+extension CGRect : Equatable {
+  // 全为 0
+  static var zeroRect: CGRect
+  // 原点为无穷大，表示空
+  static var nullRect: CGRect
+  // 原点无穷小，宽高无穷大
+  static var infiniteRect: CGRect
+  init()
+  init(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat)
+  init(x: Int, y: Int, width: Int, height: Int)
+  var width: CGFloat
+  var height: CGFloat
+  var minX: CGFloat
+  var minY: CGFloat
+  // 中点
+  var midX: CGFloat
+  var midY: CGFloat
+  var maxX: CGFloat
+  var maxY: CGFloat
+  var isNull: Bool
+  var isEmpty: Bool
+  var isInfinite: Bool
+  var standardizedRect: CGRect
+  func standardize()
+  var integerRect: CGRect
+  func integerize()
+  func rectByInsetting(#dx: CGFloat, dy: CGFloat) -&gt; CGRect
+  func inset(#dx: CGFloat, dy: CGFloat)
+  func rectByOffsetting(#dx: CGFloat, dy: CGFloat) -&gt; CGRect
+  func offset(#dx: CGFloat, dy: CGFloat)
+  func rectByUnion(withRect: CGRect) -&gt; CGRect
+  func union(withRect: CGRect)
+  func rectByIntersecting(withRect: CGRect) -&gt; CGRect
+  func intersect(withRect: CGRect)
+  func rectsByDividing(atDistance: CGFloat, fromEdge: CGRectEdge) -&gt; (slice: CGRect, remainder: CGRect)
+  func contains(rect: CGRect) -&gt; Bool
+  func contains(point: CGPoint) -&gt; Bool
+  func intersects(rect: CGRect) -&gt; Bool
+}
+</code></p>
+
+<h3>AppKit</h3>
+
+<p><code>scala
+extension NSGradient {
+  convenience init(colorsAndLocations objects: (AnyObject, CGFloat)...)
+}
+</code></p>
+
+<h3>UIKit</h3>
+
+<p><code>scala
+extension UIDeviceOrientation {
+  var isPortrait: Bool
+  // also isLandscape isValidInterfaceOrientation isFlat
+}
+extension UIInterfaceOrientation {
+  var isPortrait: Bool
+  var isLandscape: Bool
+}
+</code></p>
+
+<p>这个模块是交叉编译的。。不太容易获得信息。不过好在扩展内容不多。</p>
+
+<h3>SpriteKit</h3>
+
+<p><code>scala
+extension SKNode {
+  @objc subscript (name: String) -&gt; SKNode[] { get }
+}
+</code></p>
+
+<h2>特殊 Mirror 实现</h2>
+
+<p><code>
+NSSet NSDate NSArray NSRange NSURL NSDictionary NSString
+CGPoint CGRect CGSize
+NSView
+UIView
+SKTextureAtlas SKTexture SKSpriteNode SKShapeNode
+</code></p>
+
+<p>单独添加了自己的 <code>Mirror</code> 类型，单独实现。</p>
+
+<p><code>Mirror</code> 类型其实是为 <code>QuickLookObject</code> 准备的，也就是在 Xcode Playground 中快速查看。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift Type Hierarchy ( Swift 类型层次结构 ）]]></title>
+    <link href="http://andelf.github.io/blog/2014/06/30/swift-type-hierarchy/"/>
+    <updated>2014-06-30T15:10:41+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/06/30/swift-type-hierarchy</id>
+    <content type="html"><![CDATA[<p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>本文主要介绍 Swift 所有标准库类型的层次结构，及所有标准类型。本文可作为参考手册使用。</p>
+
+<p>本人不保证内容及时性和正确性，请善于怀疑并反馈。谢谢。</p>
+
+<p>本文探索 Swift 所有基础类型和高级类型，以及所有协议和他们之间的继承关系。</p>
+
+<p>为了简化问题，某些类型略去了中间的过渡类型，人肉保证不歧义。</p>
+
+<h2>Swift 基础类型</h2>
+
+<h3>数值类型</h3>
+
+<h4>位</h4>
+
+<pre><code>Bit
+</code></pre>
+
+<p>只有一位，实现为 <code>enum</code>， <code>.zero</code> 或 <code>.one</code>。简单明了。</p>
+
+<p>协议: <code>RandomAccessIndex IntegerArithmetic</code></p>
+
+<h4>整型</h4>
+
+<p>有符号:
+<code>
+Int Int8 Int16 Int32 Int64
+</code></p>
+
+<p>协议：<code>SignedInteger RandomAccessIndex BitwiseOperations SignedNumber CVarArg</code></p>
+
+<p>无符号:
+<code>
+UInt UInt8 UInt16 UInt32 UInt64
+</code>
+协议：<code>UnsignedInteger RandomAccessIndex BitwiseOperations</code></p>
+
+<p>别名:</p>
+
+<p><code>
+IntMax = Int64
+UIntMax = UInt64
+IntegerLiteralType = Int
+Word = Int // 字长
+UWord = UInt
+</code></p>
+
+<h4>浮点型</h4>
+
+<p><code>
+Float Double Float80
+</code></p>
+
+<p>别名：</p>
+
+<p><code>
+FloatLiteralType = Double
+Float64 = Double
+</code></p>
+
+<p>协议：<code>FloatingPointNumber</code>。</p>
+
+<h3>逻辑型</h3>
+
+<p>只有一个 <code>Bool</code>。</p>
+
+<p>实例： <code>true</code>、<code>false</code></p>
+
+<p>协议：<code>LogicValue</code>。</p>
+
+<h3>空</h3>
+
+<p>只有一个 <code>NilType</code>。</p>
+
+<p>唯一实例 <code>nil</code>。</p>
+
+<h3>字符（串）类型</h3>
+
+<ul>
+<li><code>String</code></li>
+<li><code>Character</code> Unicode 字符</li>
+<li><code>UnicodeScalar</code> 相当于 C 中的 <code>wchar_t</code></li>
+<li><code>CString</code> 用于表示 C 中的 <code>const char *</code>，请参考相关文章</li>
+<li><code>StaticString</code> 静态字符串，内部使用，例如 <code>fatalError</code></li>
+</ul>
+
+
+<p>别名：</p>
+
+<p><code>
+StringLiteralType = String
+ExtendedGraphemeClusterType = String
+</code></p>
+
+<p>官方文档</p>
+
+<blockquote><p><code>Character</code> represents some Unicode grapheme cluster as
+defined by a canonical, localized, or otherwise tailored
+segmentation algorithm.</p></blockquote>
+
+<p><code>String</code> 实现协议：<code>Collection ExtensibleCollection OutputStream TargetStream</code>。</p>
+
+<h3>Array 类型</h3>
+
+<ul>
+<li><code>Array&lt;T&gt;</code></li>
+<li><code>ContiguousArray&lt;T&gt;</code></li>
+</ul>
+
+
+<p>实现协议 <code>ArrayType</code>。</p>
+
+<p>内部容器：</p>
+
+<ul>
+<li><code>ArrayBuffer&lt;T&gt;</code></li>
+<li><code>ContiguousArrayBuffer&lt;T&gt;</code></li>
+</ul>
+
+
+<p>这两个类型看起来是 Array 的内部容器，一般不应该直接使用。</p>
+
+<h3>字典类型</h3>
+
+<p><code>Dictionary&lt;KeyType : Hashable, ValueType&gt;</code></p>
+
+<p>只实现了 <code>Collection</code>。</p>
+
+<h3>元祖类型</h3>
+
+<p>除正常元祖外，还有个特殊的别名</p>
+
+<pre><code>Void = ()
+</code></pre>
+
+<p>其实很多语言都这么定义的，比如 Haskell 。</p>
+
+<h3>Optional 类型</h3>
+
+<ul>
+<li><code>Optional&lt;T&gt;</code> 即 <code>T?</code></li>
+<li><code>ImplicitlyUnwrappedOptional&lt;T&gt;</code> 即 <code>T!</code></li>
+</ul>
+
+
+<p>实现协议: <code>LogicValue</code>，行为是判断是否为 <code>.None</code>。</p>
+
+<p>另外 <a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">Swift 的隐式类型转换</a>
+有提到，为什么 <code>nil</code> 可以给 <code>Optional</code> 类型赋值的问题。</p>
+
+<h3>C/ObjC 兼容类型</h3>
+
+<p><code>
+CBool = Bool
+CFloat = Float
+CDouble = Double
+CChar = Int8
+CSignedChar = Int8
+CUnsignedChar = UInt8
+CChar16 = UInt16
+CWideChar = UnicodeScalar
+CChar32 = UnicodeScalar
+CInt = Int32
+CUnsignedInt = UInt32
+CShort = Int16
+CUnsignedShort = UInt16
+CLong = Int
+CUnsignedLong = UInt
+CLongLong = Int64
+CUnsignedLongLong = UInt64
+</code></p>
+
+<p>具体使用参考 C 交互的几篇文章，基本没区别。</p>
+
+<h3>Any 类型</h3>
+
+<p><code>
+AnyObject
+// 别名
+Any = protocol&lt;&gt;
+AnyClass = AnyObject.Type
+</code></p>
+
+<p>还有个用在函数定义的类型签名上， <code>Any.Type</code>。</p>
+
+<p>顺便这里看到一个奇异的语法 <code>protocol&lt;&gt;</code>，这个也是 Swift 一种用来表示类型限制的方法，可以用在类型的位置，尖括号里可以是协议的列表。</p>
+
+<h3>指针类型</h3>
+
+<p><code>
+UnsafePointer&lt;T&gt;
+CMutableVoidPointer
+CConstVoidPointer
+COpaquePointer
+CConstPointer&lt;T&gt;
+AutoreleasingUnsafePointer&lt;T&gt;
+CVaListPointer
+CMutablePointer&lt;T&gt;
+</code></p>
+
+<p>参考 C 交互文章。</p>
+
+<ul>
+<li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">简析Swift和C的交互</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift 与 ObjC 和 C 的交互，第三部分</a></li>
+</ul>
+
+
+<h3>其他辅助类型</h3>
+
+<p>多了去了。比如 for-in 实现时候的 Generator 、比如反射时候用的 <code>*Mirror</code>、比如切片操作用的 <code>Range&lt;T&gt;</code>。比如内部储存类。</p>
+
+<p>还有储存辅助类 <code>OnHeap&lt;T&gt;</code> 等等。以后有机会再探索。</p>
+
+<h2>Swift 标准库协议</h2>
+
+<h3>打印相关 <code>Printable DebugPrintable</code></h3>
+
+<p><code>scala
+protocol Printable {
+  var description: String { get }
+}
+protocol DebugPrintable {
+  var debugDescription: String { get }
+}
+</code></p>
+
+<p>用于打印和字符串的 Interpolation 。</p>
+
+<h3><code>*LiteralConvertible</code></h3>
+
+<p>从字面常量获取。</p>
+
+<p><code>
+ArrayLiteralConvertible
+IntegerLiteralConvertible
+DictionaryLiteralConvertible
+CharacterLiteralConvertible
+FloatLiteralConvertible
+ExtendedGraphemeClusterLiteralConvertible
+StringLiteralConvertible
+</code></p>
+
+<p>其中字符串和字符的字面常量表示有所重合，也就是说 <code>"a"</code> 可以是字符串也可以是字符。<a href="http://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/">简析 Swift 中的 Pattern Match</a> 一文中就是遇到了类似的情况。</p>
+
+<h3><code>LogicValue</code></h3>
+
+<p>相当于重载 <code>if</code>、<code>while</code> 的行为。</p>
+
+<p><code>scala
+protocol LogicValue {
+  func getLogicValue() -&gt; Bool
+}
+</code></p>
+
+<h3><code>Sequence</code></h3>
+
+<p>相当于重载 for-in 。和 <code>Generator</code> 联用。</p>
+
+<p>```scala
+protocol Sequence {
+  typealias GeneratorType : Generator
+  func generate() &ndash;> GeneratorType
+}</p>
+
+<p>protocol Generator {
+  typealias Element
+  mutating func next() &ndash;> Element?
+}
+```</p>
+
+<p>```scala
+// for .. in { }
+var <strong>g = someSequence.generate()
+while let x = </strong>g.next() {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>}}
+```</p>
+
+<h3>整型、 Index 相关协议</h3>
+
+<p>这些协议都是用来表示容器类型的索引、及相关的索引运算。</p>
+
+<p>这里略去了部分私有内容。略去了 <code>Printable</code> 等。</p>
+
+<p><img class="left" src="/images/attachments/swift-integer.png" title="&lsquo;Swift Integer Type Hierarchy&rsquo;" ></p>
+
+<h3>RawOptionSet 相关协议</h3>
+
+<p>一般用来表示二进制的选项，类似于 C enum ，很多 Cocoa 的 flag 被映射到它。相当于一个 Wrapper 的作用。</p>
+
+<p><img class="left" src="/images/attachments/swift-rawoptset.png" title="&lsquo;Swift RawOptionSet&rsquo;" ></p>
+
+<p>可以看到要求被 Wrap 的对象支持 <code>BitwiseOperations</code>。</p>
+
+<h3>Array 相关协议</h3>
+
+<p>图中用虚线标注了和 <code>Generator</code> 的关系。</p>
+
+<p><img class="left" src="/images/attachments/swift-collection.png" title="&lsquo;Swift Collection Protocol&rsquo;" ></p>
+
+<p><code>Array&lt;T&gt;</code> 类型实现了 <code>ArrayType</code> 协议。</p>
+
+<p><code>Dictionary</code> 类型实现了 <code>Collection</code> 协议。</p>
+
+<h3>反射相关协议</h3>
+
+<p>包括 <code>Mirror</code>、<code>MirrorDisposition</code>、<code>Reflectable</code>。</p>
+
+<p>请参考 <a href="http://andelf.github.io/blog/2014/06/20/swift-reflection/">Swift 的反射</a>。</p>
+
+<h3>浮点数协议</h3>
+
+<p>只有一个 <code>FloatingPointNumber</code>。单独存在。是为了定义完整而存在。看官自己搞定。</p>
+
+<h3>IO 输出，伪输出相关</h3>
+
+<p><code>
+protocol Streamable {
+  func writeTo&lt;Target : OutputStream&gt;(inout target: Target)
+}
+</code></p>
+
+<p><code>Streamable</code> 表示可以被写入到输出流中，比如字符串、字符等。</p>
+
+<p><code>
+protocol OutputStream {
+  func write(string: String)
+}
+</code></p>
+
+<p><code>OutputStream</code> 表示一个输出流，比如标准输出（<code>stdout</code>），也可以表示一个伪输出流，例如字符串 <code>String</code>。</p>
+
+<p>标准输出的获取方法</p>
+
+<pre><code>var stdout = _Stdout()
+</code></pre>
+
+<p>看起来是私有结构，某一天不能用的话，别怪我。调用时候用 <code>inout</code> 引用语法。</p>
+
+<h3>CVarArg 处理</h3>
+
+<p><code>
+protocol CVarArg {
+  func encode() -&gt; Word[]
+}
+</code></p>
+
+<p>用于处理 C 函数的可变参数，参考 <a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a>。</p>
+
+<h3>Bridge 协议</h3>
+
+<p>这里有个疑问就是编译过程中这些 Bridge 协议有没有参与。目前还没办法确定。</p>
+
+<ul>
+<li><code>_BridgedToObjectiveC</code></li>
+<li><code>_ConditionallyBridgedToObjectiveC</code></li>
+</ul>
+
+
+<p>具体内容可以参考 <a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift 与 Objective-C 之间的交互</a>一文。</p>
+
+<h3>其他</h3>
+
+<p><code>Sink</code> 看起来是一个容器，可能是用来编码时使用。</p>
+
+<p><code>ArrayBufferType</code> 用于表示 <code>ArrayType</code> 的内部储存，看起来似乎也可以直接用。</p>
+
+<p><code>UnicodeCodec</code> 用于处理编码。有 <code>UTF8</code>、<code>UTF16</code>、<code>UTF32</code> 可用。</p>
+
+<p><code>ArrayBound</code> 用来处理数组边界，详细原理和作用过程未知。</p>
+
+<h2>总结</h2>
+
+<p>无。</p>
+
+<p>参考：</p>
+
+<ul>
+<li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

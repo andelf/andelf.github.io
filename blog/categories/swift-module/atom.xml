@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Swift-module | 猫·仁波切]]></title>
+  <link href="http://andelf.github.io/blog/categories/swift-module/atom.xml" rel="self"/>
+  <link href="http://andelf.github.io/"/>
+  <updated>2015-05-23T11:34:24+08:00</updated>
+  <id>http://andelf.github.io/</id>
+  <author>
+    <name><![CDATA[猫·仁波切 (Feather)]]></name>
+    <email><![CDATA[andelf@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[为第三方扩展创建 Swift 模块]]></title>
+    <link href="http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/"/>
+    <updated>2015-01-23T23:21:00+08:00</updated>
+    <id>http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules</id>
+    <content type="html"><![CDATA[<p>本文提出了一种将第三方扩展引入到 Swift 标准库的方法。</p>
+
+<p>以 Alamofire 为例，</p>
+
+<p>```
+cd Path-To-Alamofire-Src-Dir
+mkdir -p 32 64</p>
+
+<h1>创建动态链接库，及对应 Swift 模块，32/64版本</h1>
+
+<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphoneos) Alamofire.swift -target arm64-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib</p>
+
+<p>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64</p>
+
+<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphoneos) Alamofire.swift -target armv7-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib</p>
+
+<p>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64</p>
+
+<h1>创建 universal lib</h1>
+
+<p>lipo -create ./{32,64}/libswiftAlamofire.dylib  -output ./libswiftAlamofire.dylib</p>
+
+<h1>创建模拟器用 lib</h1>
+
+<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphonesimulator) Alamofire.swift -target i386-apple-ios7.1 -target-cpu yonah -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
+```</p>
+
+<p>其他相关 target
+<code>
+-target armv7-apple-ios7.1 -target-cpu cortex-a8
+-target arm64-apple-ios7.1 -target-cpu cyclone
+-target i386-apple-ios7.1 -target-cpu yonah
+-target x86_64-apple-ios7.1 -target-cpu core2
+</code></p>
+
+<p>其实你了解 Swift 模块结构的化，应该回想到，将第三方模块创建为 swiftmodule 应该是最靠谱的选择。不过实际操作发现，
+编译命令无法很方便地调整，主要是因为 xcodebuild 系统，和编译命令不知道怎么导出。也是略纠结。</p>
+
+<p>实际上，如果使用 Carthage 的话，即把第三方扩展作为 Framework 引入，会导致无法支持 iOS 7，但是 Swift 本身是支持 iOS 7 的，
+在编译命令和生成的文件中检查发现，对于 iOS 7，Swift 使用了纯静态模块编译的方法。所以其实我们引入第三方扩展的时候也可以这样做。</p>
+
+<p>以下是静态编译所需命令：</p>
+
+<p>```
+xcrun swift -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk macosx) SwiftyJSON.swift -c -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o</p>
+
+<p>ar rvs libswiftSwiftyJSON.a SwiftyJSON.o
+```</p>
+
+<p>如何使用？</p>
+
+<p>将编译结果扔到：</p>
+
+<p><code>
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static
+</code></p>
+
+<p>下对应目录。</p>
+
+<p>然后在 Xcode 里，直接 import。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)]]></title>
+    <link href="http://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library/"/>
+    <updated>2014-07-07T12:09:54+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library</id>
+    <content type="html"><![CDATA[<p>排名 16 了。啧啧。你看才刚出一个月。</p>
+
+<p>目前已经有了很多非常棒的 Swift 第三方库， JSON 处理啊、 HTTP 访问啊、 UIView 插件啊等等。</p>
+
+<p>如何科学地引用这些第三方库呢？</p>
+
+<h2>现状</h2>
+
+<p>CocoaPods 由于完全使用静态链接解决方法，过度依赖 Objective-C ，目前应该是官方 repo 有提到是 <code>-Xlinker</code> error , 这个问题之前我也遇到过，无解。除非手工执行 <code>ar</code> 不用 <code>ld</code> 和 <code>libtool</code>。</p>
+
+<p>小伙伴有用子目录的方法引用代码，貌似不错，还有就是直接用 <code>git submodule</code>，看起来维护性也可以。</p>
+
+<h2>简单解决方案</h2>
+
+<p>一个良好的第三方库应该实现为 Cocoa Touch Framework (实际内容为 Header + 动态链接库)。而不是直接把 Swift 代码 Copy 过来放入自己的项目。这里以一个简单项目为例，介绍如何科学使用。</p>
+
+<h3>目标描述</h3>
+
+<p>用 Swift 创建一个 Demo ，使用 SwiftyJSON 和 LTMorphingLabel 库。</p>
+
+<p>项目的名字叫 DemoApp 。</p>
+
+<h4>创建 Workspace</h4>
+
+<p>创建一个 Workspace ，名字随意，位置能找到就好。这个 Workspace 主要用来管理我们的项目及其依赖的第三方库。</p>
+
+<h4>创建 DemoApp</h4>
+
+<p>在 Workspace 创建一个 App ，因为是测试所以我选了 Single View Application 。</p>
+
+<h4>引入 SwiftyJSON</h4>
+
+<p>SwiftyJSON 是一个 Cocoa Touch Framework ，可以直接使用， <code>git clone</code> 后，添加项目到 Workspace 即可。</p>
+
+<p>尝试操作发现。。最容易最不会出错的方法就是直接从 Finder 里把 <code>.xcodeproj</code> 文件拖动到 Workspace 。</p>
+
+<h4>引入 LTMorphingLabel</h4>
+
+<p>LTMorphingLabel 是一个 App Deme 式项目。其中 Label View 的实现在一个子目录中。可以采用创建 Cocoa
+Touch Framework 的方法来引入这几个文件。</p>
+
+<p>当然也可以直接把目录拖到我们的 DemoApp 里，不过太原始粗暴了。</p>
+
+<h4>为 App 添加依赖</h4>
+
+<p>在 DemoApp 的 Genral 选项卡中，添加 Linked Frameworks and Libraries 。选择  Workspace 中 SwiftyJSON 和
+LTMorphingLabel 两个 <code>.framework</code> 。</p>
+
+<p>如果是直接选择来自其他项目的 <code>.framework</code> 而不是同一 Workspace ，那么这里也许还要同时加入 <code>Embedded Binaries</code>。</p>
+
+<h4>使用</h4>
+
+<p>添加好依赖后，就可以在 DemoApp 项目代码中 <code>import SwiftyJSON</code> 或者 <code>import LTMorphingLabel</code> 来使用对应的库。同时还可以用 Command + 鼠标点击的方法查看声明代码。</p>
+
+<h4>除错</h4>
+
+<p>比较坑爹的是，实际上按照以上方法， <code>LTMorphingLabel</code> 并不能正常使用，查看报错信息发现是自动生成的 <code>LTMorphingLabel-Swift.h</code> 有处语法无法被识别，编辑器找到 <code>.h</code> 文件，注释掉这行诡异代码即可。</p>
+
+<p>看起来目前的 Bridge Header 和 -emit-objc-header 实现还是有问题的。小伙伴一定要淡定。</p>
+
+<h2>对于非 Workspace</h2>
+
+<p>如果不喜欢使用 Workspace ，也可以将第三方库的编译结果，一个 <code>.framework</code> 目录拖到项目文件里，然后添加 <code>Embedded Binaries</code>。</p>
+
+<h2>评论</h2>
+
+<p>创建 Cocoa Touch Framework 选项中，可以使用 Swift 代码，此时编译结果（默认）会包含 <code>module.modulemap</code> 文件，
+之前有介绍过它的作用，通过它， Swift 可以使用第三方模块。参考 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a> 。</p>
+
+<p>实际上这个解决方案绕了一大圈，通过 Swift 文件导出 <code>ProjName-Swift.h</code>、然后 <code>module.modulemap</code> 模块描述文件引入、然后再由 Swift 导入。</p>
+
+<p>其实 <code>.framework</code> 同时也包含了 <code>ProjName.swiftmodule/[ARCH].swiftmodule</code> 不过看起来没有使用到，而且默认在 IDE 下也不支持 Swift 从 <code>.swiftmodule</code> 文件导入，比较坑。希望以后版本能加入支持。</p>
+
+<p><code>.framework</code> 包含了所有 Swift 标准库的动态链接库，小伙伴可能会以为这会导致编译后的 App 变大。其实大可放心，任何 Swift 语言的 App 都会包含这些动态链接库，而且只会包含一个副本。此方法对 App 最终的大小几乎无影响。</p>
+
+<p>注： 个人测试了下，发现这个 <code>.swiftmodule</code> 是可以通过其他方法使用的，绕过 <code>module.modulemap</code>，应该是更佳的解决方案，但是需要控制命令行参数。</p>
+
+<p>至于静态链接库，过时了。抛弃吧。</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 &ndash; 静态链接库）</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）]]></title>
+    <link href="http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/"/>
+    <updated>2014-06-25T21:20:55+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont</id>
+    <content type="html"><![CDATA[<p>声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>本文的发现基于个人研究。请尊重原创。</p>
+
+<h2>摘要</h2>
+
+<p>本文提出了一种可以编译 Swift 静态链接模块的方法，通过对 swift 编译命令行参数的控制，生成可以自由分发的静态链接库和 swift module 描述文件。同时还提出了导出 objC 头文件供 Objective-C 调用的可能。</p>
+
+<p>关键词： Swift 模块 静态链接库</p>
+
+<p>上次一篇文章 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a> 中提到：</p>
+
+<blockquote><p>静态链接库 .a 目前还没有找到方法， -Xlinker -static 会报错。</p></blockquote>
+
+<p>最近摸索了下用 Swift 创建静态链接库的方法。有所收获，这里记录下。</p>
+
+<h2>废话</h2>
+
+<p>我们中的很多人都知道，编译器编译的最后一个步骤一般都是链接，一般都是调用 <code>ld</code>。经过仔细分析，之前为什么不能生成 <code>.a</code> 静态链接库的原因，发现有如下问题：</p>
+
+<ul>
+<li><code>-Xlinker -static</code> 参数传递的时候， swift 命令本身不能识别，讲 <code>-dylib</code> 与 <code>-static</code> 一起传递（这倒不是问题，参数优先级，静态盖掉了动态）</li>
+<li>链接到 <code>-lSystem</code> 时候，这个库没有静态链接。</li>
+</ul>
+
+
+<p>所以总会报错。</p>
+
+<h3>思考</h3>
+
+<p>实际上之前的方法是走了弯路，根本没有必要去调用 <code>ld</code>，作为一个合格的 <code>.a</code> 静态链接库，只要有对应的 <code>.o</code> 就可以了，没必要去链接 <code>-lSystem</code>，也许是 swift 本身没有编译为静态链接库的参数支持。</p>
+
+<p>检查 Swift 标准库中的静态链接库，果然只包含对应 <code>.swift</code> 代码编译后的 <code>.o</code> 文件。（检查方法是用 <code>ar -t libName.a</code>）</p>
+
+<p>说到底， Swift 静态链接库的目标很简单，就是包含对应 Swift 模块的所有代码，这样就避免了对应动态链接库的引入。和什么 <code>-lSystem</code> 没啥相干。</p>
+
+<h2>解决方法 HOWTO</h2>
+
+<p>以 lingoer 的 <a href="https://github.com/lingoer/SwiftyJSON">SwiftyJSON</a> 为例。</p>
+
+<p>我们的目标很简单，就是生成 <code>ModName.swiftmodule</code>、<code>ModName.swiftdoc</code>(可选)、<code>libswiftModName.a</code> 三个文件。</p>
+
+<h3>编译</h3>
+
+<h4>生成 <code>.swiftmodule</code> <code>.swiftdoc</code></h4>
+
+<p><code>
+xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) SwiftyJSON.swift -emit-library -emit-module -module-name SwiftyJSON -v -o libswiftSwiftyJSON.dylib -module-link-name swiftSwiftyJSON
+</code></p>
+
+<h4>生成 <code>.o</code></h4>
+
+<p><code>
+xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) -c SwiftyJSON.swift -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o
+</code></p>
+
+<h4>生成 <code>.a</code></h4>
+
+<p><code>
+ar rvs libswiftSwiftyJSON.a SwiftyJSON.o
+</code></p>
+
+<p>大功告成。</p>
+
+<p>同时应该也可以用 <code>lipo</code> 来合成不同平台下的 <code>.a</code> 链接库。</p>
+
+<h3>使用</h3>
+
+<p>和静态链接库类似，需要 <code>-I</code> 包含 <code>.swiftmodule</code> 所在目录， <code>-L</code> 包含 <code>.a</code> 所在目录。</p>
+
+<p>如果动态链接库和静态链接库两者同时存在，可以依靠不同目录来区分。</p>
+
+<h2>你丫闲的！</h2>
+
+<p>可能不少人要群嘲，你这意义是啥。你丫闲的。</p>
+
+<p>其实在分发 library 的时候，很多时候我们需要二进制分发，希望别人可以方便地使用。这种情况下，静态链接更佳（虽然新的 iOS 8 支持动态链接，但是看起来是基于 Framework 的，略复杂些。）</p>
+
+<p>甚至我们可以用 <code>lipo</code> 创建全平台可用的静态链接库。多赞。</p>
+
+<h2>补充</h2>
+
+<p>多个 Swift 文件可以分别编译为 <code>.o</code> 然后用 <code>ar</code> 合并。</p>
+
+<p>对于 CocoaPods ，也许可以按照这个逻辑将 Swift 模块暴露出去。需要多加一个参数 <code>-emit-objc-header</code> （以及 <code>-emit-objc-header-path</code>）即可。</p>
+
+<h2>参考文献</h2>
+
+<ul>
+<li>我的另一篇 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）]]></title>
+    <link href="http://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/"/>
+    <updated>2014-06-23T20:15:39+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift</id>
+    <content type="html"><![CDATA[<p>声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>本文的发现基于个人研究。请尊重原创。已授权 CocoaChina 转载个人文章。</p>
+
+<p>本文介绍如何在 Swift 项目中使用 CocoaPods 。如果你已经精通 Bridging Header 的方法，请直接跳到 &ldquo;扩展 CocoaPods&rdquo; 一节。</p>
+
+<h2>什么是 CocoaPods</h2>
+
+<blockquote><p>CocoaPods is the dependency manager for Objective-C projects.
+It has thousands of libraries and can help you scale your projects elegantly. <sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></p></blockquote>
+
+<p>从介绍看，它是主要给 Objective-C 项目用的，但是我们可以很容易地混合 Objective-C 和 Swift 到同个项目，从而利用大量的 CocoaPods 库和 Swift 漂亮舒服的语法。</p>
+
+<p>作为 iOS 开发新手，一定是要紧跟前人脚步，学习使用 CocoaPods 。</p>
+
+<h2>基础用法</h2>
+
+<p>这里简单略过，请参考其他无数的文章。</p>
+
+<h3>安装</h3>
+
+<p>系统默认安装，可以参考其他教程<sup id="fnref:2"><a href="#fn:2" rel="footnote">2</a></sup> 。在命令行下执行。</p>
+
+<pre><code>sudo gem install cocoapods
+</code></pre>
+
+<p>我的环境是 HomeBrew</p>
+
+<p>```</p>
+
+<h1>添加 taobao Mirror 不然被墙掉没办法下载</h1>
+
+<p>gem sources -a <a href="http://ruby.taobao.org/">http://ruby.taobao.org/</a></p>
+
+<h1>安装</h1>
+
+<p>gem install cocoapods</p>
+
+<h1>更新命令</h1>
+
+<p>rbenv rehash</p>
+
+<h1>执行</h1>
+
+<p>pod</p>
+
+<h1>此时一般会下载官方的所有 PodSpec 库，也可以用 pod setup 初始化环境</h1>
+
+<p>```</p>
+
+<p>本文不打算在安装部分耗费太多时间。希望看到这里保证你的命令行下有可用的 <code>pod</code> 命令。</p>
+
+<h3>使用</h3>
+
+<p>假设我们已经有个项目，叫 ProjName ，需要使用一些注明的 CocoaPods 库，比如 AFNetworking<sup id="fnref:3"><a href="#fn:3" rel="footnote">3</a></sup>.</p>
+
+<p>首先，命令行 cd 到我们的项目目录，一般 ls 命令会看到如下几个文件夹：</p>
+
+<p><code>
+ProjName
+ProjName.xcodeproj
+ProjNameTests
+</code></p>
+
+<p>赞，就是这里，创建一个 <code>Podfile</code> 文本文件，写入如下内容</p>
+
+<p><code>
+platform :ios, "8.0"
+pod "AFNetworking", "~&gt; 2.0"
+</code></p>
+
+<p>一般这么简单的文件都是直接 nano 写。 :)</p>
+
+<p>直接创建 <code>Podfile</code> ， CocoaPods 会创建一个项目同名的 WorkSpace ，然后添加一个叫 Pods 的项目，这个项目编译结果是一个叫 <code>libPods.a</code>的链接库，
+它会添加到我们之前的 ProjName 项目中作为编译依赖。</p>
+
+<p>当然，通过命令行执行 <code>pod init</code> 也可以自动创建 <code>Podfile</code>，而且可以自动分析当前项目的 target ，相对来说更好，也更优雅。具体请参考官方手册。这样的好处是更细致，还可以区分多个子项目子 target 。原理大同小异。</p>
+
+<p>然后接下来，命令行执行 <code>open ProjName.xcworkspace</code>，注意这个可不是 <code>.xcodeproj</code>，这个是 CocoaPods 为我们创建的一个 WorkSpace ，包含我们之前的项目，和 Pods 依赖。</p>
+
+<p>开始编码过程。直接在代码里调用，比如写在某个按钮的 <code>@IBAction</code> 里：</p>
+
+<p>```scala</p>
+
+<pre><code>    let manager = AFHTTPRequestOperationManager()
+    let url = "http://api.openweathermap.org/data/2.5/weather"
+    println(url)
+
+    let params = ["lat": 39.26, "lon": 41.03, "cnt":0]
+    println(params)
+
+    manager.GET(url,
+        parameters: params,
+        success: { (operation: AFHTTPRequestOperation!,
+                    responseObject: AnyObject!) in
+            println("JSON: " + responseObject.description!)
+        },
+        failure: { (operation: AFHTTPRequestOperation!,
+                    error: NSError!) in
+            println("Error: " + error.localizedDescription)
+        })
+</code></pre>
+
+<p>```</p>
+
+<p>这里直接抄了 JakeLin 的 SwiftWeather 代码<sup id="fnref:4"><a href="#fn:4" rel="footnote">4</a></sup>，就一小段，希望他不会打我。</p>
+
+<h4>Swift 坑爹了</h4>
+
+<p>看起来貌似我们已经可以在 Swift 中使用 <code>AFNetworking</code> 了。结果刚写几句代码一堆类和变量找不到定义，而且坑爹的是很多时候我们只能靠猜测，判断这些 Objective-C 的定义转换成 Swift 定义是什么样子，用起来就是完全靠蒙！</p>
+
+<p>这不科学！</p>
+
+<p>这都三礼拜了，所以大家都摸索出了调用的方法，那就是按照和 Objective-C 代码混编的例子，添加 Bridging Header ！</p>
+
+<h4>继续</h4>
+
+<p>之前简单介绍过和  Objective-C 交互的内容<sup id="fnref:5"><a href="#fn:5" rel="footnote">5</a></sup>，大家可以去围观。</p>
+
+<p>一般说来，你在 Swift 项目新建 Objective-C 类的时候，直接弹出是否创建 Bridge Header 的窗口，点 YES 就是了，这时候一般多出来个 <code>ProjectName-Bridging-Header.h</code> 。然后删掉这个类， Bridging Header 头文件还在。</p>
+
+<p>在这个 Bridging Header 文件里写入要导入的 CocoaPods 库，就可以在 Swift 中使用了。</p>
+
+<pre><code>#import &lt;AFNetworking/AFNetworking.h&gt;
+</code></pre>
+
+<p>如果没有自动创建头文件的话，这个配置在项目的 Build Settings 中的 Swift Compiler &ndash; Code Generation 子项里。</p>
+
+<p>创建一个头文件，指定为 Bridging Header 也可以。</p>
+
+<p>然后编译，成功执行！</p>
+
+<h4>这就完事了？</h4>
+
+<p>实际上，前两天刚写一篇 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Swift 的模块系统</a> ， 把任意 Objective-C 库当做 Swift Module 是可行的。当时就觉得这个东西应该是可能完全进入 CocoaPods 的，但是在官方 repo 找了下发现，以前有人提过增加 <code>module.map</code> 支持，结果 CocoaPods 的人认为这个是 llvm 内部特性， issue 被关闭了。<a href="https://github.com/CocoaPods/CocoaPods/issues/2216">#2216</a> 最近又被提起，我在后面提了下 Swift 支持，希望官方靠谱。</p>
+
+<p>所以下面的内容，就是，我们是否可以在 CocoaPods 上加入 <code>module.map</code> 支持，然后直接在 Swift 中 <code>import ModuleName</code> ？</p>
+
+<h2>扩展 CocoaPods</h2>
+
+<p>考虑了多种方式，最后选择了 Hook 的方式。如果 Ruby 技术足够好，或许可以直接写个插件。或者直接改官方代码给官方提交。但是实在能力有限。相关的 <code>module.map</code> 语法参考 llvm 官方手册 <a href="http://clang.llvm.org/docs/Modules.html">Modules – Clang 3.5 documentation</a>。用了最简单的功能。也许遇到复杂的 PodSpec 就不起作用了，但是原理如此，相信小伙伴们已经知道怎么做了。</p>
+
+<p>目前我的 <code>Podfile</code> 大概是这个样子：</p>
+
+<p>```ruby
+platform :ios, &ldquo;8.0&rdquo;
+pod &ldquo;AFNetworking&rdquo;, &ldquo;~> 2.0&rdquo;
+pod &ldquo;Baidu-Maps-iOS-SDK&rdquo;, &ldquo;~> 2.0&rdquo;</p>
+
+<p>post_install do |installer|
+  File.open(&ldquo;#{installer.sandbox_root}/Headers/module.map&rdquo;, &lsquo;w&rsquo;) do |fp|</p>
+
+<pre><code>installer.pods.each do |pod|
+  normalized_pod_name = pod.name.gsub('-', '')
+  fp.write &lt;&lt;EOF
+</code></pre>
+
+<p>module #{normalized_pod_name} [system] {
+  umbrella &ldquo;#{pod.name}&rdquo;
+  export *
+}
+EOF</p>
+
+<pre><code>  puts "Generating Swift Module #{normalized_pod_name.green} for #{pod} OK!"
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p><code>post_install</code> 是 <code>Podfile</code> 的一种 hook 机制，可以用来加入自定义操作。我在这里的写的逻辑就是，针对所有的 Pod 生成一个 <code>module.map</code> 文件。
+位于 <code>Pods/Headers/</code>，这个目录被 CocoaPods 自动设置为项目的 Header Search Path 所以不需要额外处理。默认我们的 Swift 文件就找得到。</p>
+
+<p>其中 <code>normalized_pod_name</code> 用于处理百度地图 API SDK 这一类名字带减号的库，因为他们不能作为 Module Name ，实际上或许有更好的方法来处理。</p>
+
+<h3>实际效果</h3>
+
+<p>实测发现完全没有问题，直接 <code>import AFNetworking</code> 或者 <code>import BaiduMapsiOSSDK</code> 都可以。</p>
+
+<p>而且很不错的一点是，按住 Command 键，然后鼠标点击模块名、类名等，会跳转到 Swift 定义。</p>
+
+<h3>坑</h3>
+
+<p>遇到提示 <code>.pcm</code> 文件 outdate 的情况下需要你删除 <code>$HOME/Library/Developer/Xcode/DerivedData/ModuleCache</code> 目录，这个目录保存的是预编译模块，类似于预编译头文件。</p>
+
+<p>目前 Swift 还是有很多 BUG 的，调用 <code>NSObject</code> 也许会让编译器直接 segment fault ，不带任何出错信息。很伤情。此时请第一时间检查语法是否有诡异，其次将所有用到字符串或者 <code>Optional</code> 的地方都额外用变量处理，避免用字面常量。（个人经验）</p>
+
+<p>如果多次调用 <code>pod install</code> 并在其中修改过 <code>Podfile</code>，那么有可能你的项目依赖会乱掉，多了不存在的 <code>.a</code> 文件到依赖或者多次包含。手工在项目树和项目选项里删除就可以了。此类编译错误都是链接错误。</p>
+
+<h2>总结</h2>
+
+<p>本文提出了一种 Bridging Header 之外的使用 CocoaPods 库的方法。利用有限的 Ruby 知识写了个 Hook 。目前测试 OK 。</p>
+
+<h2>参考</h2>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p><a href="http://cocoapods.org/">CocoaPods Offical Site</a> CocoaPods 官网<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+<li id="fn:2">
+<p><a href="http://www.cocoachina.com/applenews/devnews/2014/0623/8917.html">CocoaPods &ndash; CocoaChina</a> CocoaChina 对 CocoaPods 的介绍<a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
+<li id="fn:3">
+<p><a href="https://github.com/AFNetworking/AFNetworking">AFNetworking &ndash; Github</a><a href="#fnref:3" rev="footnote">&#8617;</a></p></li>
+<li id="fn:4">
+<p><a href="https://github.com/JakeLin/SwiftWeather/blob/master/Swift%20Weather/ViewController.swift">SwiftWeather</a><a href="#fnref:4" rev="footnote">&#8617;</a></p></li>
+<li id="fn:5">
+<p><a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift and ObjectiveC Interop (Swift 与 Objective-C 之间的交互)</a><a href="#fnref:5" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Module System of Swift (简析 Swift 的模块系统)]]></title>
+    <link href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/"/>
+    <updated>2014-06-19T15:14:31+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/06/19/modules-for-swift</id>
+    <content type="html"><![CDATA[<p>声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>本文的发现基于个人研究。请尊重原创。</p>
+
+<h2>引子</h2>
+
+<blockquote><p>你之所以认为 Swift 最像 Scala, 那是因为你还没学过 Rust. &mdash;&mdash; 猫·仁波切</p></blockquote>
+
+<p>Swift 中模块是什么？当写下 Swift 中一句 <code>import Cocoa</code> 的时候到底整了个什么玩意？官方 ibook 很含糊只是提了半页不到。</p>
+
+<p>本文解决如下问题</p>
+
+<ul>
+<li>介绍 Swift 中两种可 import 的模块</li>
+<li>如何用 Swift 写一个可被其他 Swift 代码使用的模块</li>
+<li>分析 Swift 的标准库实现方式</li>
+</ul>
+
+
+<h2>第一部分 Clang 模块（系统模块）</h2>
+
+<p>Clang 模块是来自系统底层的模块，一般是 C/ObjC 的头文件。原始 API 通过它们暴露给 Swift ，编译时需要链接到对应的 Library。</p>
+
+<p>例如 <code>UIKit</code>、<code>Foundation</code> 模块，从这些模块 dump 出的定义来看，几乎是完全自动生成的。当然， <code>Foundation</code> 模块更像是自动生成 + 人工扩展（我是说其中的隐式类型转换定义、对 Swift 对象的扩展等，以及 <code>@availability</code> 禁用掉部分函数。）。相关函数声明可以从 <a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a> 获得。</p>
+
+<p>我可不觉得这些定义全部都是官方生成后给封装进去的。所以在整个 Xcode-6 beta2 目录树里进行了探索。</p>
+
+<p>在 Xcode 目录寻找相关信息，最后目标锁定到了一个特殊的文件名 <code>module.map</code>。</p>
+
+<p>原来这个文件叫 Module map(这个名字还真是缺乏想象力)，属于 llvm 的 Module 系统。本来是用来颠覆传统的 C/C++/Objc 中的 <code>#include</code> 和 <code>#import</code>。最早在 2012 年 11 月的 LLVM DevMeeting 中由 Apple 的 Doug Gregor 提出 <sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>。相关内容 CSDN 也有文章介绍，不过是直译版，没有提出自己见解 <sup id="fnref:2"><a href="#fn:2" rel="footnote">2</a></sup>。</p>
+
+<h3>关于 llvm Module 系统</h3>
+
+<p>2012 年提出概念，所以其实这个东西已经很早就实现了 。简单说就是用树形的结构化描述来取代以往的平坦式 <code>#include</code>， 例如传统的 <code>#include &lt;stdio.h&gt;</code> 现在变成了 <code>import std.io;</code>， 逼格更高。主要好处有：</p>
+
+<ul>
+<li>语义上完整描述了一个框架的作用</li>
+<li>提高编译时可扩展性，只编译或 include 一次。避免头文件多次引用，只解析一次头文件甚至不需要解析（类似预编译头文件）</li>
+<li>减少碎片化，每个 module 只处理一次，环境的变化不会导致不一致</li>
+<li>对工具友好，工具（语言编译器）可以获取更多关于 module 的信息，比如链接库，比如语言是 C++ 还是 C</li>
+<li>等等</li>
+</ul>
+
+
+<p>所以这么好的一个东西， Apple 作为 llvm 的主力，在它的下一代语言中采用几乎是一定的。</p>
+
+<p>算了，我是个半路出家的，之前没接触过 iOS / MacOSX 开发，其实 2013 年的 WWDC， Apple 为 Objective-C 加入的 <code>@import</code> 语法就是它。可以认为，这是第一次这个 Module 系统得到应用。</p>
+
+<h4>module.map 文件</h4>
+
+<p><code>module.map</code> 文件就是对一个框架，一个库的所有头文件的结构化描述。通过这个描述，桥接了新语言特性和老的头文件。默认文件名是 <code>module.modulemap</code>，<code>module.map</code> 其实是为了兼容老标准，不过现在 Xcode 里的还都是这个文件名，相信以后会改成新名字。</p>
+
+<p>文件的内容以 <code>Module Map Language</code> 描述，大概语法我从 llvm 官方文档 <sup id="fnref:3"><a href="#fn:3" rel="footnote">3</a></sup> 摘录一段，大家体会一下：</p>
+
+<p>```
+module MyLib {
+  explicit module A {</p>
+
+<pre><code>header "A.h"
+export *
+</code></pre>
+
+<p>  }</p>
+
+<p>  explicit module B {</p>
+
+<pre><code>header "B.h"
+export *
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>类似上面的语法，描述了 <code>MyLib</code>、<code>MyLib.A</code>、<code>MyLib.B</code> 这样的模块结构。</p>
+
+<p>官方文档 [^3] 中有更多相关内容，可以描述框架，描述系统头文件，控制导出的范围，描述依赖关系，链接参数等等。这里不多叙述，举个 libcurl 的例子：</p>
+
+<p>```
+module curl [system] [extern_c] {</p>
+
+<pre><code>header "/usr/include/curl/curl.h"
+link "curl"    
+export *
+</code></pre>
+
+<p>}
+```</p>
+
+<p>将此 <code>module.map</code> 文件放入任意文件夹，通过 Xcode 选项或者命令行参数，添加路径到 import search path （swift 的 -I 参数）。
+然后就可以在 Swift 代码里直接通过 <code>import curl</code> 导入所有的接口函数、结构体、常量等，(实测，发现 <code>curl_easy_setopt</code>
+无法自动导入，看起来是声明语法太复杂导致）。甚至可以直接从 swift repl 调用，体验脚本语言解释器般的快感（因为我们已经指定了链接到 curl 库）。</p>
+
+<p>Xcode 选项位于 Build Settings 下面的 Swift Compiler &ndash; Search Paths 。添加路劲即可。</p>
+
+<p>再举个复杂点的 <code>SDL2.framework</code> 的例子，看看如何实现树形的模块结构，这个需要把 <code>module.map</code> 放到 <code>.framework</code> 目录里</p>
+
+<p>```
+framework module SDL2 [system] {
+  umbrella header &ldquo;SDL.h&rdquo;
+  link -framework SDL2</p>
+
+<p>  module Version {</p>
+
+<pre><code>header "SDL_version.h"
+export *
+</code></pre>
+
+<p>  }</p>
+
+<p>  module Event {</p>
+
+<pre><code>header "SDL_events.h"
+export *
+</code></pre>
+
+<p>  }
+  // &hellip;.
+  export *
+  module * {</p>
+
+<pre><code>export *
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<h3>小结</h3>
+
+<p>Swift 的 C 模块（也是它的标准库部分）完全就是 llvm 的 Module 系统，在 import search path 的所有 module.map 中的模块都可以被识别，唯一缺点可能是如果有过于复杂用到太多高级 C 或者黑暗 C 语法的函数，无法很好识别，相信以后的版本会有所改善。</p>
+
+<p>所以当有人问 Swift 到底有多少标准库的时候，答案就是，基本上系统里所有的 Objective-C 和 C 头文件都可以调用。自 iOS 7 时代，这些头文件就已经被组织为 Module 了，包括标准 C 库 <code>Darwin.C</code>。同样因为 Module 系统来自于传统的 C/C++/Objc 头文件，所以 Swift 虽然可以有 <code>import ModA.ModB.ModC</code> 的语句，但是整个模块函数名字空间还是平坦的。</p>
+
+<p>一些有意思的模块可以探索探索，比如 <code>simd</code>，比如 <code>Python</code>（没错是的，直接调用 Python 解释器）等。</p>
+
+<p>另外 Swift 的 <code>-module-cache-path</code> 参数可以控制这类模块预编译头的存放位置（ .pcm 文件： pre compiled module）。</p>
+
+<p>Xcode 项目的 Build Settings ， Apple LLVM 6.0 &ndash; Language &ndash; Modules 有项目对 Module 支持的相关选项，默认是打开的。</p>
+
+<h2>第二部分 Swift 模块</h2>
+
+<p>说完了系统模块，该说 Swift 模块了。 Swift 自身的这个系统还是很赞的。</p>
+
+<p>本节介绍怎样用 Swift 创建一个可 import 的模块。</p>
+
+<h3>几个文件类型</h3>
+
+<p>先清楚几个文件类型。假设 <code>ModName.swift</code> 是我们的 Swift 源码文件。</p>
+
+<ul>
+<li><code>ModName.swiftmodule</code> Swift 的模块文件，有了它，才能 import</li>
+<li><code>ModName.swiftdoc</code> 保存了从源码获得的文档注释
+
+<ul>
+<li>文档注释以 <code>///</code> 开头</li>
+</ul>
+</li>
+<li><code>libswiftModName.dylib</code> 动态链接库</li>
+<li><code>libswiftModName.a</code>  静态链接库</li>
+</ul>
+
+
+<p>TODO: 目前有个疑问就是 <code>.swiftmodule</code> 和链接库到底什么时候用哪个，以及具体作用。</p>
+
+<h4>.swift 源码文件</h4>
+
+<p>先明确一个概念，一个 .swift 文件执行是从它的第一条非声明语句（表达式、控制结构）开始的，同时包括声明中的赋值部分（对应为 mov 指令或者 lea 指令），所有这些语句，构成了该 .swift 文件的 <code>top_level_code()</code> 函数。</p>
+
+<p>而所有的声明，包括结构体、类、枚举及其方法，都不属于 <code>top_level_code()</code> 代码部分，其中的代码逻辑，包含在其他区域，<code>top_level_code()</code> 可以直接调用他们。</p>
+
+<p>程序的入口是隐含的一个 <code>main(argc, argv)</code> 函数，该函数执行逻辑是设置全局变量 <code>C_ARGC</code> <code>C_ARGV</code>，然后调用 <code>top_level_code()</code>。</p>
+
+<p>不是所有的 .swift 文件都可以作为模块，目前看，任何包含表达式语句和控制控制的 .swift 文件都不可以作为模块。正常情况下模块可以包含全局变量(<code>var</code>)、全局常量(<code>let</code>)、结构体(<code>struct</code>)、类(<code>class</code>)、枚举(<code>enum</code>)、协议(<code>protocol</code>)、扩展(<code>extension</code>)、函数(func)、以及全局属性(<code>var { get set }</code>)。这里的全局，指的是定义在 top level 。</p>
+
+<p>这里说的表达式指 expression ，语句指 statement ，声明指 declaration 。可能和有些人对相关概念的定义不同。实际上我特无奈有些人纠结于概念问题，而不是问题本身，本来翻译过来的舶来品就有可能有误差，当你明白那指的是什么的时候，就可以了。</p>
+
+<h3>模块编译方法</h3>
+
+<p>这里先以命令行操作为例，</p>
+
+<p><code>
+xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) ModName.swift -emit-library -emit-module -module-name ModName -v -o libswiftModName.dylib -module-link-name swiftModName
+</code></p>
+
+<p>执行后获得 <code>ModName.swiftdoc</code>、<code>ModName.swiftmodule</code>、<code>libswiftModName.dylib</code>.</p>
+
+<p>这三个文件就可以表示一个可 import 的 Swift 模块。目前看起来 dylib 是必须得有的，否则链接过程报错。实际感觉 <code>.swiftmodule</code> 文件所包含的信息还需要继续挖掘挖掘。</p>
+
+<p>多个源码文件直接依次传递所有文件名即可。</p>
+
+<p>静态链接库 <code>.a</code> 目前还没有找到方法， <code>-Xlinker -static</code> 会报错。</p>
+
+<h4>命令行参数解释</h4>
+
+<p>相关命令行参数：</p>
+
+<ul>
+<li><code>-module-name &lt;value&gt;</code>       Name of the module to build 模块名</li>
+<li><code>-emit-library</code>              编译为链接库文件</li>
+<li><code>-emit-module-path &lt;path&gt;</code>   Emit an importable module to <path> 编译模块到路径（全路径，包含文件名）</li>
+<li><code>-emit-module</code>               Emit an importable module</li>
+<li><code>-module-link-name &lt;value&gt;</code>  Library to link against when using this module 该模块的链接库名，就是 <code>libswiftModName.dylib</code>，这个信息会直接写入到 <code>.swiftmodule</code></li>
+</ul>
+
+
+<h3>使用模块</h3>
+
+<p>使用模块就很简单了，记住两个参数：</p>
+
+<p><code>-I</code> 表示 import search path ，前面介绍过，保证 <code>.swiftmodule</code> 文件可以在 import search path 找到（这点很类似 module.map 文件，找得到这个就可以 import 可以编译）</p>
+
+<p><code>-L</code> 表示 链接库搜索路径，保证 <code>.dylib</code> 文件可以在其中找到，如果已经在系统链接库目录中，就不需要这个参数。</p>
+
+<p>例如：</p>
+
+<p><code>
+xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) mymodtest.swift -I. -L.
+</code></p>
+
+<p>此时表示所有 module 文件都在当前目录。</p>
+
+<p>这两个选项都可以在 Xcode 中指定，所以如果你有小伙伴编译好的 module 想在你的项目里用是完全 ok 的。</p>
+
+<h3>For Xcode</h3>
+
+<p>很不幸，没能在 Xcode 中找到编译模块的相关方法。等我发现如何搞定的时候我会补上这个坑。</p>
+
+<p>不过在任何含 Swift 项目的编译过程中， <code>.swiftmodule</code> 文件总是伴随着 <code>.o</code> 文件传递。</p>
+
+<h2>第三部分 瞎分析 .swiftmodule 文件</h2>
+
+<p>简单分析下一个 .swiftmodule 所包含的信息。</p>
+
+<h3>Foundation</h3>
+
+<p>这里先以标准库的 <code>Foundation.swiftmodule</code> 下手。</p>
+
+<p>用 hexdump 查看发现它包含所有导出符号，以及 mangled name 。还有个文件列表，表示它是从哪些文件获得的（可以是 .swift 也可以是 .swiftmodule ）。</p>
+
+<p>用 strings 列出内容，发现 Foundation 库有如下特征:</p>
+
+<p><code>
+...
+Foundation
+LLVM 3.5svn
+/SourceCache/compiler_KLONDIKE/compiler_KLONDIKE-600.0.34.4.8/src/tools/swift/stdlib/objc/Foundation/Foundation.swift
+/SourceCache/compiler_KLONDIKE/compiler_KLONDIKE-600.0.34.4.8/src/tools/swift/stdlib/objc/Foundation/KVO.swift
+/SourceCache/compiler_KLONDIKE/compiler_KLONDIKE-600.0.34.4.8/src/tools/swift/stdlib/objc/Foundation/NSStringAPI.swift
+CoreFoundation
+Foundation
+Swift
+swiftFoundation
+...
+</code></p>
+
+<p>可以大胆猜测对应下：</p>
+
+<ul>
+<li><code>-module-name</code> => <code>Foundation</code></li>
+<li>编译环境 => LLVM 3.5svn</li>
+<li>源文件列表 => &hellip;</li>
+<li>依赖列表 => <code>CoreFoundation</code>, <code>Foundation</code>, <code>Swift</code></li>
+<li><code>-module-link-name</code> => <code>swiftFoundation</code></li>
+</ul>
+
+
+<p>我由此猜测， <code>Foundation</code> 的确是只有少量 Swift 代码做桥接。然后通过 Clang 模块将剩下工作交到底层。</p>
+
+<p>分析其他类似模块也得到相同结果。</p>
+
+<h3>Swift 标准库</h3>
+
+<p>接下来有点好奇标准库 Swift 是怎么实现的。得到如下结果。</p>
+
+<p>节选重要部分到 <a href="https://gist.github.com/andelf/8f28ead66cdc3637f978">我的 Gist</a></p>
+
+<p>里面有些很有意思的信息，有兴趣的同学可以去看看。</p>
+
+<p>依赖模块 SwiftShims 是一个 <code>module.map</code> 定义的模块，桥接的部分头文件。源文件有相关信息和注释。大致意思是用来实现几个底层接口对象，比如 <code>NSRange</code> 邓。</p>
+
+<p>其中<code>-module-link-name</code> 是 <code>swift_stdlib_core</code>。</p>
+
+<h2>结论</h2>
+
+<p>LLVM Module 作为 Apple 提出的特性，已经被 Swift 完全采用，直接在它基础上建立了自己的模块系统。我相信它会影响到我们处理第三方库的方式方法。相信不久就会有相关工具基于它来管理依赖关系，比如老的 cocoapods<sup id="fnref:4"><a href="#fn:4" rel="footnote">4</a></sup> 可以加入新特性。</p>
+
+<p>用 Swift 写模块目前并没有很好的 IDE 支持，所以不是很方便。基于猜测验证，上面的方法可以实现在 Swift 里 import Swift 模块，方法和结果看起来完全和官方模块相同。</p>
+
+<p>Swift 的标准库完全是上面两种模块的结合体，用 Swift 模块封装 Clang 模块。这就解决了文章一开始提出的问题：为什么标准库大部分看起来是自动生成代码，少部分又好像是人工写的接口代码。</p>
+
+<h2>参考文献</h2>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>Modules &ndash; Doug Gregor, Apple, 2012 LLVM DevMeeting <a href="http://llvm.org/devmtg/2012-11/Gregor-Modules.pdf">PDF</a> <a href="http://llvm.org/devmtg/2012-11/videos/Gregor-Modules.mp4">Video</a><a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+<li id="fn:2">
+<p><a href="http://www.csdn.net/article/2012-11-28/2812274-module-replace-C-based-languages-headers">为什么应该用模块取代C/C++中的头文件？</a><a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
+<li id="fn:3">
+<p><a href="http://clang.llvm.org/docs/Modules.html">Modules &ndash; Clang 3.5 documentation</a><a href="#fnref:3" rev="footnote">&#8617;</a></p></li>
+<li id="fn:4">
+<p><a href="http://cocoapods.org/">CocoaPods</a><a href="#fnref:4" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
+]]></content>
+  </entry>
+  
+</feed>

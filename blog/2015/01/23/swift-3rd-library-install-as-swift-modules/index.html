@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>为第三方扩展创建 Swift 模块 - 猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="本文提出了一种将第三方扩展引入到 Swift 标准库的方法。 以 Alamofire 为例， 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+cd Path-To-Alamofire-Src-Dir
+mkdir -p 32 64 # 创建动态链接库，及对应 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">为第三方扩展创建 Swift 模块</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-23T23:21:00+08:00" pubdate data-updated="true">Jan 23<span>rd</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文提出了一种将第三方扩展引入到 Swift 标准库的方法。</p>
+
+<p>以 Alamofire 为例，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd Path-To-Alamofire-Src-Dir
+</span><span class='line'>mkdir -p 32 64
+</span><span class='line'>
+</span><span class='line'># 创建动态链接库，及对应 Swift 模块，32/64版本
+</span><span class='line'>xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphoneos) Alamofire.swift -target arm64-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
+</span><span class='line'>
+</span><span class='line'>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64
+</span><span class='line'>
+</span><span class='line'>xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphoneos) Alamofire.swift -target armv7-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
+</span><span class='line'>
+</span><span class='line'>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64
+</span><span class='line'>
+</span><span class='line'># 创建 universal lib
+</span><span class='line'>lipo -create ./{32,64}/libswiftAlamofire.dylib  -output ./libswiftAlamofire.dylib
+</span><span class='line'>
+</span><span class='line'># 创建模拟器用 lib
+</span><span class='line'>xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphonesimulator) Alamofire.swift -target i386-apple-ios7.1 -target-cpu yonah -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其他相关 target</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-target armv7-apple-ios7.1 -target-cpu cortex-a8
+</span><span class='line'>-target arm64-apple-ios7.1 -target-cpu cyclone
+</span><span class='line'>-target i386-apple-ios7.1 -target-cpu yonah
+</span><span class='line'>-target x86_64-apple-ios7.1 -target-cpu core2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其实你了解 Swift 模块结构的化，应该回想到，将第三方模块创建为 swiftmodule 应该是最靠谱的选择。不过实际操作发现，
+编译命令无法很方便地调整，主要是因为 xcodebuild 系统，和编译命令不知道怎么导出。也是略纠结。</p>
+
+<p>实际上，如果使用 Carthage 的话，即把第三方扩展作为 Framework 引入，会导致无法支持 iOS 7，但是 Swift 本身是支持 iOS 7 的，
+在编译命令和生成的文件中检查发现，对于 iOS 7，Swift 使用了纯静态模块编译的方法。所以其实我们引入第三方扩展的时候也可以这样做。</p>
+
+<p>以下是静态编译所需命令：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) SwiftyJSON.swift -c -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o
+</span><span class='line'>
+</span><span class='line'>ar rvs libswiftSwiftyJSON.a SwiftyJSON.o</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如何使用？</p>
+
+<p>将编译结果扔到：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift
+</span><span class='line'>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下对应目录。</p>
+
+<p>然后在 Xcode 里，直接 import。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-23T23:21:00+08:00" pubdate data-updated="true">Jan 23<span>rd</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/swift/'>swift</a>, <a class='category' href='/blog/categories/swift-module/'>swift-module</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/07/08/swift-beta3-changes/" title="Previous Post: Swift beta3 Changes ( Swift 在 beta3 中的变化）">&laquo; Swift beta3 Changes ( Swift 在 beta3 中的变化）</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/';
+        var disqus_url = 'http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

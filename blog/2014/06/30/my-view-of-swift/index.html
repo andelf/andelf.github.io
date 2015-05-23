@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>My View of Swift （闲扯对 Swift 语言的看法） - 猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="其实这是很早就像要说的了，大概当时信誓旦旦说要看完那本 epub 写个读后感谈谈对 Swift 看法什么的。后来不了了之。
+现在觉得这个时机或许差不多，对 Swift 的了解也算凑合了。 纯个人观点。 Swift 是系统编程语言 一开始大家还不太了解的时候，可能会有很多误解。现在好歹一个月了。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/2014/06/30/my-view-of-swift">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">My View of Swift （闲扯对 Swift 语言的看法）</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T11:05:13+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>其实这是很早就像要说的了，大概当时信誓旦旦说要看完那本 epub 写个读后感谈谈对 Swift 看法什么的。后来不了了之。
+现在觉得这个时机或许差不多，对 Swift 的了解也算凑合了。</p>
+
+<p>纯个人观点。</p>
+
+<h3>Swift 是系统编程语言</h3>
+
+<p>一开始大家还不太了解的时候，可能会有很多误解。现在好歹一个月了。误解终于少了。</p>
+
+<p>是的， Swift 是系统编程语言，原因是因为它 ABI 兼容 C （不包括 name mangling 部分）。基于强大的 llvm 生成具体平台代码。不是翻译为 Objective-C 的。</p>
+
+<p>编译器参数还显示， Swift 文件的中间编译结果（介于 Swift 代码和 llvm ir ）是 SIL ，猜测是 Swift Intermediate Language 。好像和 llvm ir 有所联系。而且至少有两个 stage 。</p>
+
+<p>不是脚本语言，也不是胶水语言。但是它的标准库 (import Swift 库) 几乎不含任何 IO 网络 等内容，随便做个功能强依赖 Cocoa 框架。也可以 <code>import Darwin</code> 用 C 语言的标准库来写。</p>
+
+<p>猜测写个 Python C 模块这种任务是可以轻易胜任的。</p>
+
+<p>而 Golang 、 Rust 本身 ABI 是和 C 不兼容的。虽然 Rust 通过 <code>extern "C"</code> 可以修改单个函数为兼容。</p>
+
+<h3>Swift 是现代语言</h3>
+
+<p>自动类型推导、泛型、 LLVM 。当然语言研究党都知道这些都是几十年前的“新东西”。</p>
+
+<h3>Swift 是半完成品</h3>
+
+<p>这么说主要是指 Swift 对 Cocoa 的库实在是太半吊子了。只是 Foundation 有 Bridge 支持，其他库中，明显的列表都无法支持 subscript 、 for-in 这样简单的操作。原因很简单，这些库都是自动转换 ObjC 头文件而来（参考模块那篇文章）。没有额外的封装代码。</p>
+
+<p>所以其实真要用起来，可能会很纠结。或者可以预计很快就有第三方的 Bridge 库给这些类型加上舒服的 Swift 支持。</p>
+
+<p>另外命令行没有静态链接库支持。只能用其他命令拼装。也侧面说明， Apple 希望开发者更多用动态链接库， Framework 。</p>
+
+<p>另外目前的编译器 coredump 、 stackoverflow 太多太多。错哪都不知道。</p>
+
+<h3>Swift 隐藏细节太多</h3>
+
+<p>就对应到 Foundation 类型这个特性太说，太多黑魔法，隐式类型转换、 BridgeToObjectiveC 协议、指针类型转换。</p>
+
+<p>这些隐藏的特性多少都会成为 Swift 的坑。</p>
+
+<p>要知道定义在 ObjC 库的 <code>NSString</code> 参数某些情况下在 Swift 中被转换为 <code>String</code>。 <code>NSArray</code> 都被转换为 <code>AnyObject[]</code>。即使有隐式类型转换，某些极端情况下，还是会有编译时错误。</p>
+
+<h3>Swfit 的性能</h3>
+
+<p>我没做过测试，但就语言特性来说， Swift 是比 ObjC 快的，因为静态类型使得他在编译时就已经知道调用函数的具体位置。而不是 Objective-C 的消息发送、 Selector 机制。</p>
+
+<p>目前来看， Swift 性能略差原因主要是编译器还没足够优化、还有就是 Cocoa 拖了后腿， Cocoa 本身有大量的 <code>AnyObject</code> 返回值。所以实际写 Swift 代码时，多用 <code>as</code> 一定是好习惯。明确类型。</p>
+
+<h3>Swift 的未来</h3>
+
+<p>我不知道。至少好像感觉很多培训机构都看到了前途开始疯狂的做视频。</p>
+
+<p>倒是觉得什么时候 Cocoa for Swift 出了才算它完全完成任务。</p>
+
+<p>总觉得 Cocoa 拖后腿，不然放到其他平台也不错。</p>
+
+<p>对了，之前不是在 App 开发领域，这才知道原来这个地盘水很深，太多唯利的培训机构，太多嗷嗷待哺等视频教程的新人。觉得挺有意思。就拿 ? ! 这个 Optional 为例，太多介绍的文章。可惜能说明白的太少太少。糊里糊涂做开发就是当前现状吧。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T11:05:13+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/swift/'>swift</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2014/06/30/my-view-of-swift/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2014/06/30/my-view-of-swift/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/06/28/swift-interop-with-c-slash-objc/" title="Previous Post: Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）">&laquo; Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/06/30/swift-type-hierarchy/" title="Next Post: Swift Type Hierarchy ( Swift 类型层次结构 ）">Swift Type Hierarchy ( Swift 类型层次结构 ） &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://andelf.github.io/blog/2014/06/30/my-view-of-swift/';
+        var disqus_url = 'http://andelf.github.io/blog/2014/06/30/my-view-of-swift/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

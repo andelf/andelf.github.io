@@ -1,0 +1,617 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Swift and C Interop(简析Swift和C的交互) - 猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="声明： 转载注明我或者 SwiftChina . weibo 其中 @asmname 的两个用法源于我的猜测验证，用到了 Xcode, lldb, nm, llvm ir 等工具或格式。 其中 name mangling 部分源自 WWDC。 相关的分析主要基于我 dump 出的 Swift &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Swift and C Interop(简析Swift和C的交互)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-15T00:11:44+08:00" pubdate data-updated="true">Jun 15<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>声明： 转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>其中 <code>@asmname</code> 的两个用法源于我的猜测验证，用到了 Xcode, lldb, nm, llvm ir 等工具或格式。</p>
+
+<p>其中 name mangling 部分源自 WWDC。</p>
+
+<p>相关的分析主要基于我 dump 出的 Swift 标准库声明代码，位于 <a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a>。</p>
+
+<p>目前有两个小部分还未完成。</p>
+
+<p>之前好像简单说过 Swift 和 Objective-C 的交互问题。其实我们也可以用 Swift 调用纯 C 代码或者基于 C 的第三方库。（这里不会也永远不会考虑 C++ 的情况，因为不支持，不过可以用 C 写 wrapper, 这个没有任何问题。）</p>
+
+<p>Swift 官方文档中，以及那本已经被迅速翻译为中文的 ibooks 书中，都提到了 Swift 调用 Objective-C 和 C 是有很好支持的。不过没有细节。</p>
+
+<p><del>这里不会考虑如何用 C 调用 Swift, 暂时，看心情。：）</del> 本内容包括 Swift 调用 C 和相应的 C 调用 Swift，项目混编。</p>
+
+<p>这里主要面向 MacOSX 应用。iOS 或许可以适用。</p>
+
+<p>先复习下区别。</p>
+
+<h2>第一部分 预备知识</h2>
+
+<h3>语言区别</h3>
+
+<p>说到底就是 C 少了很多东西。但是多了个指针。</p>
+
+<p>对于 C 来说，最头疼的莫过于指针，而 Swift 是一门没有指针的语言。是不是要吐血？相对来说指针不但代表者指针操作传参，还有指针运算等等。</p>
+
+<h2>第二部分 调用 C</h2>
+
+<p>这里主要讨论函数的调用。对于结构、枚举、类的兼容性暂时没尝试。</p>
+
+<h3>C 标准库</h3>
+
+<p>好消息是，对于标准库中的 C 函数，根本不需要考虑太多导入头文件神马的。比如 <code>strlen</code>、<code>putchar</code>、<code>vprintf</code>。当然 <code>vprintf</code> 需要多说几句，后面说。</p>
+
+<p>请直接 <code>import Darwin</code> 模块。</p>
+
+<p>这些标准库函数表示为 <code>Darwin.C.HEADER.name</code>。</p>
+
+<p>实际上由于 Swift 模块结构是平坦的，他们均位于 <code>Darwin</code> 中，所以基本上是直接用的。</p>
+
+<p>然后 <code>CoreFoundation</code> 用到了 <code>Darwin</code> ( @exported 导入，所以相当于这些名字也在 <code>CoreFoundation</code> 中)。</p>
+
+<p>然后 <code>Foundation</code> 用到了 <code>CoreFoundation</code> （也是 @exported 导入。）</p>
+
+<p>所以其实你导入 <code>Foundation</code> 的时候，这些 C 函数都是直接可用的。比如 <code>putchar</code> 一类。</p>
+
+<p>多说一句，<code>Cocoa</code> 当然也包含 <code>Foundation</code>。</p>
+
+<h3>C 函数</h3>
+
+<p>好吧假设你有个牛逼到顶天的算法是 C 写的，不对，假设是别人写的，牛逼到你只能凑合用却看不懂然后自己也写不出没空迁移的地步。</p>
+
+<p>我们直接创建一个 Swift 项目，然后 New File，添加一个 <code>.c</code> 文件。</p>
+
+<p>这时候 Xcode 会弹出对话框询问是否配置 Bridge Header，确认就可以了。也可以手动添加 Bridge Header，位置在项目的 Build Settings 中的 Swift Compiler &ndash; Code Generation 子项里。指向你的 Bridge Header 文件名就可以了。</p>
+
+<p>一般这个文件是 <code>ProjectName-Bridging-Header.h</code>。情况基本和与 Objective-C 混编没区别。</p>
+
+<p>剩下的工作就很简单了。在 <code>.c</code> 文件填上传说中的牛逼算法。在 <code>ProjectName-Bridging-Header.h</code> 中加上该函数原型或者引入相关的头文件。</p>
+
+<p>在 Swift 中调用的名字和 C 名字一样就可以了，比如你定义了一个 <code>int mycsort()</code> 那么在 Swift 中就是 <code>func mycsort() -&gt; CInt</code>。</p>
+
+<p>这时候问题来了。一个漂亮的问题。</p>
+
+<p>我的 C 函数名字和 Swift 标准库冲突怎么办？比如我定义了一个函数就叫 <code>println</code>，我们知道 Swift 里也有个 <code>println</code>。</p>
+
+<p>这样，如果直接调用会提示 <code>Ambiguous use of 'println'</code>。没辙了么？</p>
+
+<p>这里有个我发现的 Undocumented Featuer 或者说是 Undocumented Attribute。你转载好歹提下我好吧。（发现方法是通过 Xcode 查看定义，然后通过 nm 命令发现符号, 对照 llvm ir 确认的。)</p>
+
+<p>那就是 <code>@asmname("func_name_in_c")</code>。用于函数声明前。使用方法：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">println</span><span class="p">()</span> <span class="p">{</span> <span class="p">....</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="err">@</span><span class="n">asmname</span><span class="p">(</span><span class="s">&quot;println&quot;</span><span class="p">)</span> <span class="n">func</span> <span class="n">c_println</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">CInt</span> <span class="c1">// 声明，不需要 {} 函数体</span>
+</span><span class='line'><span class="n">c_println</span><span class="p">()</span> <span class="c1">// 调用</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也就是 C 中的同名函数，我们可以给赋予一个别名，然后正常调用。这么一看就基本没有问题了。至于类型问题，待会说，详细说。</p>
+
+<h3>C Framework</h3>
+
+<p>很多时候我们拿到的是第三方库，格式大概是个 Framework。比如 <code>SDL2.framework</code>。举这个例子是因为我想对来说比较熟悉 SDL2。</p>
+
+<p>直接用 Finder 找到这个 <code>.framework</code> 文件，拖动到当前项目的文件列表里，这样它将作为一个可以展开的文件夹样式存在于我们的项目中。</p>
+
+<p>在 <code>ProjectName-Bridging-Header.h</code> 中引入其中需要的 <code>.h</code>。</p>
+
+<p>比如我们引入 <code>SDL2.framework</code>，那么我们就需要写上 <code>#import &lt;SDL2/SDL.h&gt;</code>。</p>
+
+<p>然后在 Swift 文件里正常调用就好了。</p>
+
+<p>所以其实说到底核心就是那个 <code>ProjectName-Bridging-Header.h</code>，因为它是作为参数传递给 Swift 编译器的，所以 Swit 文件里可以从它找到定义的符号。</p>
+
+<p>但是，这个桥接头文件的一切都是隐式的，类型自动对应，所以很多时候需要我们在 Swift 里调用并封装。或者使用 <code>@asmname(...)</code> 避免名字冲突。</p>
+
+<h2>第三部分 类型转换</h2>
+
+<p>前面说到了 C 中有指针，而 Swift 中没有，同时基本类型还有很多不同。所以混编难免需要在两种语言的不同类型之间进行转换。</p>
+
+<p>牢记一个万能函数 <code>reinterpretCast&lt;T, U&gt;(T) -&gt; U</code>，只要 T, U sizeof 运算相等就可以直接转换。这个在之前的标准库函数里有提到。调用 C 代码的利器！</p>
+
+<h3>基本类型对应</h3>
+
+<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。简言之，不在对应为 C 别名类型，而是直接对应到 Siwft 类型。而指针类型简化为 <code>UnsafePointer&lt;T&gt;</code> 和 <code>ConstUnsafePointer&lt;T&gt;</code> 两种， <code>COpaquePointer</code> 依然存在。另新增了 <code>CFunctionPointer&lt;T&gt;</code>。</p>
+
+<ul>
+<li>int => CInt</li>
+<li>char => CChar / CSignedChar</li>
+<li>char* => CString</li>
+<li>unsigned long = > CUnsignedLong</li>
+<li>wchar_t => CWideChar</li>
+<li>double => CDouble</li>
+<li>T* => CMutablePointer<T></li>
+<li>void* => CMutableVoidPointer</li>
+<li>const T* => CConstPointer<T></li>
+<li>const void* => CConstVoidPointer</li>
+<li>&hellip;</li>
+</ul>
+
+
+<p>继续这个列表，你肯定会想这么多数值类型，怎么搞。其实大都是被 <code>typealias</code> 定义到 <code>UInt8</code>，<code>Double</code> 这些的。放心。C 中数值类型全部被明确地用别名定义到带 size 的 Swift 数值类型上。完全是一样用的。</p>
+
+<p>其实真正的 Pointer 类型只是 <code>UnsafePointer&lt;T&gt;</code>，大小与 C 保证一致，而对于这里不同类型的 Pointer，其实都是 <code>UnsafePointer</code>
+到它们的隐式类型转换。<del>还有个指针相关类型是 <code>COpaquePointer</code>，不过没试验怎么用</del>。</p>
+
+<p>UPDATE: 我们在调用的时候，更多地用到 <code>COpaquePointer</code>，我将再坑一篇介绍它。</p>
+
+<p>同时 <code>NilType</code>，也就是 <code>nil</code> 有到这些指针的隐式类型转换。所以可以当做任何一种指针的 <code>NULL</code> 用。</p>
+
+<p>还有个需要提到的类型是 CString, 他的内存 layout 等于 <code>UnsafePointer&lt;UInt8&gt;</code>，下面说。</p>
+
+<h3>CString</h3>
+
+<p>用于表示 <code>char *</code>，<code>\0</code> 结尾的 c 字符串，实际上似乎还看到了判断是否 ASCII 的选项，但是没试出来用法。</p>
+
+<p>实现了 <code>StringLiteralConvertible</code> 和 <code>LogicValue</code>。可以从字符串常量直接赋值获得 <code>CString</code>。<code>LogicValue</code> 也就是是 <code>if a_c_str {}</code>，实际是用于判断是否为 <code>NULL</code>，可用，但是不稳定，老 crash。</p>
+
+<p>运算符支持 <code>==</code>，判断两字符串是否相当，猜测实际是 <code>strcmp</code> 实现，对比 NULL 会 crash。Orz。</p>
+
+<p>CString 和 String 的转换通过一个 extension 实现，也是很方便。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">fromCString</span><span class="o">(</span><span class="n">cs</span><span class="k">:</span> <span class="kt">CString</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">fromCString</span><span class="o">(</span><span class="n">up</span><span class="k">:</span> <span class="kt">UnsafePointer&lt;CChar&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="c1">// 还有两个方便的工具方法。 Rust 背景的同学一定仰天长啸。太相似了。</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">withCString</span><span class="o">&lt;</span><span class="nc">Result</span><span class="o">&gt;(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">CString</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">Result</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Result</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">withCString</span><span class="o">&lt;</span><span class="nc">Result</span><span class="o">&gt;(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">UnsafePointer&lt;CChar&gt;</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">Result</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Result</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在我们的 Bridging Header 头文件中 <code>char *</code> 的类型会对应为 <code>UnsafePointer&lt;CChar&gt;</code>，而实际上 <code>CString</code> 更适合。所以在 Swift 代码中，往往我们要再次申明下这个函数。或者用一个函数封装下，转换成我们需要的类型。</p>
+
+<p>例如，假设在 Bridging Header 中我们声明了 <code>char * foo();</code>，那么，在 Swift 代码中我们可以用上面提到的方法：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@asmname</span><span class="o">(</span><span class="s">&quot;foo&quot;</span><span class="o">)</span> <span class="n">func</span> <span class="n">c_foo</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">CString</span>
+</span><span class='line'><span class="c1">// 注意这里没有 {}，只是声明</span>
+</span><span class='line'><span class="n">let</span> <span class="n">ret</span> <span class="k">=</span> <span class="n">c_foo</span><span class="o">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然也可以直接调用原始函数然后类型转换：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="n">raw</span> <span class="k">=</span> <span class="n">foo</span><span class="o">()</span> <span class="c1">// UnsafePointer&lt;Int8&gt; &lt;=&gt; UnsafePointer&lt;CChar&gt;</span>
+</span><span class='line'><span class="n">let</span> <span class="n">ret</span> <span class="k">=</span> <span class="nc">String</span><span class="o">.</span><span class="n">fromCString</span><span class="o">(</span><span class="n">ret</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果这里要转成 CString 就略复杂了，因为 CString 构造函数接受的参数是 <code>UnsafePointer&lt;UInt8&gt;</code>， 而 <code>CChar</code> 是 <code>Int8</code> 的别名，所以还牵扯到 Genrics 类型转换，不够方便。</p>
+
+<p>如果非要作为 CString 处理，可以用 <code>reinterpretCast()</code>，直接转换。但是请一定要知道自己在转换什么，确保类型的 sizeof 相同，确保转换本身有意义。</p>
+
+<p>例如获得环境变量字符串：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="n">key</span> <span class="k">=</span> <span class="s">&quot;PATH&quot;</span>
+</span><span class='line'><span class="c1">// 这里相当于把 UnsafePointer&lt;CChar&gt; 转为了 UnsafePointer&lt;UInt8&gt; 然后到 CString</span>
+</span><span class='line'><span class="n">let</span> <span class="n">path_str</span><span class="k">:</span> <span class="kt">CString</span> <span class="o">=</span> <span class="n">reinterpretCast</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="n">withCString</span><span class="o">(</span><span class="n">getenv</span><span class="o">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Unmanaged</h3>
+
+<p>这个先挖坑，随后填上。</p>
+
+<h3>VaList</h3>
+
+<p>这个也是坑，随后填上。</p>
+
+<h2>第三部分 C 调用 Swift</h2>
+
+<p>如果项目里加入了 C 文件，那么它可以调用我们的 Swift 函数么？答案是可以的，而且令人吃惊地透明。这也许是因为 Apple 所宣传的，Small Runtime 概念吧。极小的语言运行时。</p>
+
+<p>和 Objective-C 混编类似，配置好 Bridging Header 的项目，在 .c .h .m 文件中都可以使用一个叫做 <code>ProjectName-Swift.h</code> 的头文件，其中包含 Swift 代码导出的函数等。</p>
+
+<p>参考之前的 Objective-C 和 C 交互我们可以知道，说到底交互就是链接过程，只要链接的时候能找到符号就可以。</p>
+
+<p>不过不能高兴太早，Swift 是带类、枚举、协议、多态、泛型等的高级语言，符号处理明显要比 C 中的复杂的多，现代语言一般靠 name mangle 来解决这个问题。也就是说一个 Swift 函数，在编译到 .o 的时候，名字就不是原来那么简单了。比如 <code>__TFV5hello4Rectg9subscriptFOS_9DirectionSi</code> 这样的名字。</p>
+
+<p>Xcode 自带了个工具， 可以查看这些 mangled name 到底是什么东西：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">xcrun</span> <span class="n">swift</span><span class="o">-</span><span class="n">demangle</span> <span class="nc">__TFV5hello4Rectg9subscriptFOS_9DirectionSi</span>
+</span><span class='line'><span class="nc">_TFV5hello4Rectg9subscriptFOS_9DirectionSi</span> <span class="o">---&gt;</span> <span class="n">hello</span><span class="o">.</span><span class="nc">Rect</span><span class="o">.</span><span class="n">subscript</span><span class="o">.</span><span class="n">getter</span> <span class="o">(</span><span class="n">hello</span><span class="o">.</span><span class="nc">Direction</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Swift</span><span class="o">.</span><span class="nc">Int</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当我们从 C 调用的时候，应该规避这样的名字。还记得前面的 <code>@asmname</code> 么？没错，它可以用于指定 Swift 函数的符号名，我猜测应该有指定 mangled name 的作用，但是不是特别确定。</p>
+
+<p>这里随便指定个例子先。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@asmname</span><span class="o">(</span><span class="s">&quot;say_hello&quot;</span><span class="o">)</span> <span class="n">func</span> <span class="n">say_hello</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Double</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">println</span><span class="o">(</span><span class="s">&quot;This is say_hello() in swift&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mf">3.14</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后在 .c 文件中：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">#</span><span class="n">include</span> <span class="o">&lt;</span><span class="nc">ProjectName</span><span class="o">-</span><span class="nc">Swift</span><span class="o">.</span><span class="n">h</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">extern</span> <span class="n">double</span> <span class="n">say_hello</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">int</span> <span class="n">some_func</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">say_hello</span><span class="o">();</span> <span class="c1">// or capture its value and process it</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><del>当然这里的 extern 一行是可选的，因为实际上声明会存在于 ProjectName-Swift.h 中，只是为了避免首次编译警告而已（第二次以后的编译，其实这个 Header 已经被缓存起来了，这个牵扯到 Xcode 的编译过程）。</del> 错了。</p>
+
+<p>对于函数而言 extern 必须手动加上，对于 class  、 protocol ，会在生成的头文件里。</p>
+
+<p>按照这个思路，其实很容易实现 Swift 调用 C 中调用了 Swift 函数的函数。这意味着，可以通过简单的方法封装支持向 C 传递 Swift block 作为回调函数。难度中上，对于有过类似扩展编写经验的人来说很简单。</p>
+
+<h2>第四部分 编译过程</h2>
+
+<p>其实调用基本就这么多， Objective-C 那篇文章中说的编译过程同样有效。我 C-c C-v 下：</p>
+
+<ul>
+<li>编译所有 <code>X.swift</code> 文件到 <code>X.o</code> (with <code>-emit-objc-header</code>, <code>-import-objc-header</code>) (其中包含 <code>.swiftmodule</code> 子过程)
+
+<ul>
+<li>由于选项里有 <code>-emit-objc-header</code>，所以之后的 C 文件可以直接 import 对应的 <code>ProjectName-Swift.h</code></li>
+</ul>
+</li>
+<li>编译 <code>X.c</code> 到 <code>X.o</code></li>
+<li>链接所有 <code>.o</code> 生成可执行文件</li>
+</ul>
+
+
+<p>仔细理解上面的简简单单四行编译过程说明，你就明白为什么 .swfit 和 .c 可以互相调用了。其中两个 Header 文件起到了媒介的作用，一个将 .c/.m 文件中的定义暴露给 Swift，另一个将 .swift 中的定义暴露给 .c/.m 。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-15T00:11:44+08:00" pubdate data-updated="true">Jun 15<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/swift/'>swift</a>, <a class='category' href='/blog/categories/swift-interop/'>swift-interop</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/06/13/swift-misc/" title="Previous Post: Swift Misc">&laquo; Swift Misc</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/06/16/swift-runtime/" title="Next Post: Swift Runtime">Swift Runtime &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/';
+        var disqus_url = 'http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

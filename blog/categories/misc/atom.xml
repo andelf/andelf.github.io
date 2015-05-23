@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Misc | 猫·仁波切]]></title>
+  <link href="http://andelf.github.io/blog/categories/misc/atom.xml" rel="self"/>
+  <link href="http://andelf.github.io/"/>
+  <updated>2015-05-23T11:34:24+08:00</updated>
+  <id>http://andelf.github.io/</id>
+  <author>
+    <name><![CDATA[猫·仁波切 (Feather)]]></name>
+    <email><![CDATA[andelf@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Hello World!]]></title>
+    <link href="http://andelf.github.io/blog/2013/11/20/hello-world/"/>
+    <updated>2013-11-20T17:26:26+08:00</updated>
+    <id>http://andelf.github.io/blog/2013/11/20/hello-world</id>
+    <content type="html"><![CDATA[<p><code>haskell
+main = putStrLn "Hello World"
+</code></p>
+]]></content>
+  </entry>
+  
+</feed>

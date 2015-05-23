@@ -1,0 +1,554 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Swift 运算符重载、自定义运算符 - 猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="挖坑先。其实是ibooks书最后的参考手册部分。
+这里将手册相关内容都搬运了过来。:) Swift 对运算符重载的控制很类似 Haskell，而不是 C 系列。如下： 支持自定义运算符 / = - + * % &lt; &gt; ! &amp; | ^ . ~ 的任意组合。可以脑洞大开创造颜文字 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/2014/06/06/swift-operator-overload">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Swift 运算符重载、自定义运算符</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-06T10:28:02+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>挖坑先。其实是ibooks书最后的参考手册部分。
+这里将手册相关内容都搬运了过来。:)</p>
+
+<p>Swift 对运算符重载的控制很类似 Haskell，而不是 C 系列。如下：</p>
+
+<ul>
+<li>支持自定义运算符 <code>/ = - + * % &lt; &gt; ! &amp; | ^ . ~</code> 的任意组合。可以脑洞大开创造颜文字。</li>
+<li>支持前缀（例如默认的 <code>~，！，++, --</code> )，后缀（后置的 <code>++, --</code>)，中缀（<code>* /</code> 等等）运算符。</li>
+<li>支持自定义优先级。</li>
+</ul>
+
+
+<p>运算符重载通过函数定义来完成，其实运算符就是一个一元函数，或者是二元函数。</p>
+
+<p>所以那个传的很神的例子 numbers.sort(&lt;) 不算什么，说到底就是个比较函数而已。（来自Haskell的同学基本可以忽略这些内容了，这些太熟悉了）</p>
+
+<h2>关键字</h2>
+
+<p>首先介绍用到的关键字，不得不说，Swift的关键字和Swift前男友一样多。</p>
+
+<ul>
+<li>operator</li>
+<li>prefix 前缀运算符，比如 （取正+、取负- 、自增++、自减&mdash;）</li>
+<li>postfix 后缀运算符，比如（自增++、自减&mdash;），这两可以前缀也可以后缀</li>
+<li>infix 中缀，最常见二元运算</li>
+<li>precedence 优先级的意思，取值 0~255 ，纯数字，不可以带符号，下划线，指数e/p 表示</li>
+<li>associativity 结合性，可以是 left, right, 或者 none</li>
+</ul>
+
+
+<p>还有用到的属性，就是以 @ 开头的，这个理论上不算是关键字啊。别叫错了。（不过其实无所谓怎么叫，圈里有太多太多的人纠结于简单的定义为一个定义的名字争面红耳赤其实都说的一个意思。名字真的是很次要的东西，用英语吧）</p>
+
+<ul>
+<li>@prefix</li>
+<li>@postfix</li>
+<li>@infix</li>
+<li>@assignment 表示运算符具有“赋值”副作用，比如 <code>++, +=</code> 这样。</li>
+</ul>
+
+
+<p>先来个最简单的，假设我们有</p>
+
+<pre><code>struct Point {
+    var x: Int
+    var y: Int
+}
+let p = Point(x: 100, y: 200)
+</code></pre>
+
+<h2>前缀运算符</h2>
+
+<p>来个不靠谱的，假设我要执行 -p 这个操作。由于 &ldquo;&ndash;&rdquo; 已经是定义好了的运算符（减法），直接实现运算即可：</p>
+
+<pre><code>@prefix func - (pt: Point) -&gt; Point {
+    return Point(x: -pt.x, y: -pt.y)
+}
+println(-p) // 看起来高大上
+</code></pre>
+
+<p>@prefix  属性表示这个 &ndash; 运算作为前缀运算符处理，相当于取负。</p>
+
+<h2>中缀运算符</h2>
+
+<p>这么一来，接下来的需求就是两个点之和，“+“ 加法。同理 “+“已经定义，不需要再次定义。直接实现它</p>
+
+<pre><code>@infix func + (pt0: Point, pt1: Point) -&gt; Point {
+    return Point(x: pt0.x + pt1.x, y: pt0.y + pt1.y)
+}
+</code></pre>
+
+<p>可以在 Playground 里输入 p + p 看看结果。</p>
+
+<p>有了 p + p，直接实现乘法是不是更好呢？乘以一个 Int。这里 &ldquo;*&rdquo; 操作的两边就不是同个类型了。需要注意。</p>
+
+<pre><code>@infix func * (pt: Point, scale: Int) -&gt; Point {
+    return Point(x: pt.x * scale, y: pt.y * scale )
+}
+</code></pre>
+
+<p>输入 p * 3 查看效果，然后输入 3 * p 发现出错，所以运算符左右两边的顺序是很重要的。（来自Python的同学可能会知道 Py 的运算符重载的左右类型是有一个尝试顺序的， <code>__mul__, __rmul__</code> 等等）</p>
+
+<h2>后缀运算符</h2>
+
+<p>假设，我们的应用里，需要经常计算点到原点(0,0) 的距离，我们“发明”个新运算好了，我们就选一个 &ldquo;~!&#8221;， 来个后缀的，期望 &#8220;p~!&rdquo; 取得点到原点的距离。</p>
+
+<pre><code>operator postfix ~! {} // 定义新运算符
+@postfix func ~! (pt: Point) -&gt; Double {
+    return sqrt(NSNumber.convertFromIntegerLiteral(pt.x * pt.x + pt.y * pt.y).doubleValue)
+}
+</code></pre>
+
+<p>平方根算得略纠结。。。忽略好了。反正暂时这么可以调用。 然后输入 <code>p~!</code> 获得距离。</p>
+
+<h2>自定义中缀运算符</h2>
+
+<p>前面基本已经介绍了怎么重载运算符，怎么实现。以及简单介绍了后缀运算符的自定义。</p>
+
+<p>实际上中缀运算符（二元运算）牵扯到的优先级和结合性问题还是挺纠结的。要比前缀后缀复杂得多，当然重载就不涉及，因为是系统默认的优先级。</p>
+
+<p>默认的系统自带的我搬运到后面。</p>
+
+<p>定义中缀运算符首先要制定结合型和优先级。</p>
+
+<p>假设计算两个点之间的距离</p>
+
+<pre><code>operator infix &lt;~&gt; {
+    precedence 250 // 0~255 的一个值，具体多少请参考附录的列表
+    associativity left // 或者right, none
+}
+@infix func &lt;~&gt; (pt0: Point, pt1: Point) -&gt; Double {
+    return .... // x 之差平方 +  y 之差平方，然后开放
+}
+</code></pre>
+
+<h2>带赋值的运算符</h2>
+
+<p>前面说了一堆，其实忽略了一些特殊的情况，比如 &ldquo;+=&rdquo;, &ldquo;++&rdquo;, 它们的特点是，会修改原有的操作数，有赋值副作用。实际上实现起来大同小异。</p>
+
+<pre><code>@prefix @assignment func ++ (inout pt: Point) -&gt; Point {
+    pt.x += 1
+    pt.y += 1
+    return pt
+}
+</code></pre>
+
+<p>这里起作用的是 @assignment 属性，和 inout 关键字。</p>
+
+<p>对于 &ldquo;+=&rdquo; 二元操作，第一个操作数需要标记为 inout。类似。大家自己研究好了。</p>
+
+<h2>附录</h2>
+
+<p>从手册里搬运下优先级和结合性：</p>
+
+<p>级别 0~255</p>
+
+<ul>
+<li>Exponentiative (No associativity, precedence level 160)
+
+<ul>
+<li><code>&lt;&lt; Bitwise left shift</code></li>
+<li><code>&gt;&gt; Bitwise right shift</code></li>
+</ul>
+</li>
+<li>Multiplicative (Left associative, precedence level 150)
+
+<ul>
+<li><code>* Multiply</code></li>
+<li><code>/ Divide</code></li>
+<li><code>% Remainder</code></li>
+<li><code>&amp;* Multiply, ignoring overflow</code></li>
+<li><code>&amp;/ Divide, ignoring overflow</code></li>
+<li><code>&amp;% Remainder, ignoring overflow</code></li>
+<li><code>&amp; Bitwise AND</code></li>
+</ul>
+</li>
+<li>Additive (Left associative, precedence level 140)
+
+<ul>
+<li><code>+ Add</code></li>
+<li><code>- Subtract</code></li>
+<li><code>&amp;+ Add with overflow</code></li>
+<li><code>&amp;- Subtract with overflow</code></li>
+<li><code>| Bitwise OR</code></li>
+<li><code>^ Bitwise XOR</code></li>
+</ul>
+</li>
+<li>Range (No associativity, precedence level 135)
+
+<ul>
+<li><code>.. Half-closed range</code></li>
+<li><code>... Closed range</code></li>
+</ul>
+</li>
+<li>Cast (No associativity, precedence level 132)
+
+<ul>
+<li><code>is Type check</code></li>
+<li><code>as Type cast</code></li>
+</ul>
+</li>
+<li>Comparative (No associativity, precedence level 130)
+
+<ul>
+<li><code>&lt; Less than</code></li>
+<li><code>&lt;= Less than or equal</code></li>
+<li><code>&gt; Greater than</code></li>
+<li><code>&gt;= Greater than or equal</code></li>
+<li><code>== Equal</code></li>
+<li><code>!= Not equal</code></li>
+<li><code>=== Identical</code></li>
+<li><code>!== Not identical</code></li>
+<li><code>~= Pattern match</code></li>
+</ul>
+</li>
+<li>Conjunctive (Left associative, precedence level 120)
+
+<ul>
+<li><code>&amp;&amp; Logical AND</code></li>
+</ul>
+</li>
+<li>Disjunctive (Left associative, precedence level 110)
+
+<ul>
+<li><code>|| Logical OR</code></li>
+</ul>
+</li>
+<li>Ternary Conditional (Right associative, precedence level 100)
+
+<ul>
+<li><code>?: Ternary conditional</code></li>
+</ul>
+</li>
+<li>Assignment (Right associative, precedence level 90)
+
+<ul>
+<li><code>= Assign</code></li>
+<li><code>*= Multiply and assign</code></li>
+<li><code>/= Divide and assign</code></li>
+<li><code>%= Remainder and assign</code></li>
+<li><code>+= Add and assign</code></li>
+<li><code>-= Subtract and assign</code></li>
+<li><code>&lt;&lt;= Left bit shift and assign</code></li>
+<li><code>&gt;&gt;= Right bit shift and assign</code></li>
+<li><code>&amp;= Bitwise AND and assign</code></li>
+<li><code>^= Bitwise XOR and assign</code></li>
+<li><code>|= Bitwise OR and assign</code></li>
+<li><code>&amp;&amp;= Logical AND and assign</code></li>
+<li><code>||= Logical OR and assign</code></li>
+</ul>
+</li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-06T10:28:02+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/swift/'>swift</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2014/06/06/swift-operator-overload/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2014/06/06/swift-operator-overload/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/05/15/rust-tips/" title="Previous Post: Rust Tips">&laquo; Rust Tips</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/06/06/swift-standard-library/" title="Next Post: Swift Standard Library (Swift 标准库)">Swift Standard Library (Swift 标准库) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://andelf.github.io/blog/2014/06/06/swift-operator-overload/';
+        var disqus_url = 'http://andelf.github.io/blog/2014/06/06/swift-operator-overload/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

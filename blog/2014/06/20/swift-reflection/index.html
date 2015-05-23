@@ -1,0 +1,555 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Swift Reflection （Swift 的反射） - 猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="Swift 其实是支持反射的，不过功能略弱。本文介绍基本的反射用法和相关类型。 MetaType 和 Type 语法 The metatype of a class, structure, or enumeration type is the name of that type followed &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/2014/06/20/swift-reflection">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Swift Reflection （Swift 的反射）</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-20T23:48:51+08:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Swift 其实是支持反射的，不过功能略弱。本文介绍基本的反射用法和相关类型。</p>
+
+<h2>MetaType 和 Type 语法</h2>
+
+<blockquote><p>The metatype of a class, structure, or enumeration type is the name of that type followed by .Type. The metatype of a protocol type—not the concrete type that conforms to the protocol at runtime—is the name of that protocol followed by .Protocol. For example, the metatype of the class type SomeClass is SomeClass.Type and the metatype of the protocol SomeProtocol is SomeProtocol.Protocol.</p>
+
+<p>You can use the postfix self expression to access a type as a value. For example, SomeClass.self returns SomeClass itself, not an instance of SomeClass. And SomeProtocol.self returns SomeProtocol itself, not an instance of a type that conforms to SomeProtocol at runtime.</p></blockquote>
+
+<ul>
+<li>metatype-type &ndash;> <code>type</code>.<strong>Type</strong> | <code>type</code>.<strong>Protocol</strong></li>
+<li>type-as-value &ndash;> <code>type</code>.self</li>
+</ul>
+
+
+<p>其中 metatype-type 出现在代码中需要类型的地方， type-as-value 出现在代码中需要值、变量的地方。</p>
+
+<p><code>Any.Type</code> 类型大家可以猜下它表示什么。</p>
+
+<h2>基础定义</h2>
+
+<p>反射信息用 <code>Mirror</code> 类型表示，类型协议是 <code>Reflectable</code>，但实际看起来 <code>Reflectable</code> 没有任何作用。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protocol Reflectable {
+</span><span class='line'>  func getMirror() -&gt; Mirror
+</span><span class='line'>}
+</span><span class='line'>protocol Mirror {
+</span><span class='line'>  var value: Any { get }
+</span><span class='line'>  var valueType: Any.Type { get }
+</span><span class='line'>  var objectIdentifier: ObjectIdentifier? { get }
+</span><span class='line'>  var count: Int { get }
+</span><span class='line'>  subscript (i: Int) -&gt; (String, Mirror) { get }
+</span><span class='line'>  var summary: String { get }
+</span><span class='line'>  var quickLookObject: QuickLookObject? { get }
+</span><span class='line'>  var disposition: MirrorDisposition { get }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>实际上所有类型都实现了 <code>Reflectable</code>。</p>
+
+<p><code>Mirror</code> 协议相关字段：</p>
+
+<ul>
+<li><code>value</code> 相当于变量的 <code>as Any</code> 操作</li>
+<li><code>valueType</code> 获得变量类型</li>
+<li><code>objectIdentifier</code> 相当于一个 UInt 作用未知，可能是 metadata 表用到</li>
+<li><code>count</code> 子项目个数（可以是类、结构体的成员变量，也可以是字典，数组的数据）</li>
+<li><code>subscript(Int)</code> 访问子项目, 和子项目的名字</li>
+<li><code>summary</code> 相当于 <code>description</code></li>
+<li><code>quickLookObject</code> 是一个枚举，这个在 WWDC 有讲到，就是 Playground 代码右边栏的显示内容，比如常见类型，颜色，视图都可以</li>
+<li><code>disposition</code> 表示变量类型的性质，基础类型 or 结构 or 类 or 枚举 or 索引对象 or &hellip; 如下</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>enum MirrorDisposition {
+</span><span class='line'>  case Struct // 结构体
+</span><span class='line'>  case Class // 类
+</span><span class='line'>  case Enum // 枚举
+</span><span class='line'>  case Tuple // 元组
+</span><span class='line'>  case Aggregate // 基础类型
+</span><span class='line'>  case IndexContainer // 索引对象
+</span><span class='line'>  case KeyContainer // 键-值对象
+</span><span class='line'>  case MembershipContainer // 未知
+</span><span class='line'>  case Container // 未知
+</span><span class='line'>  case Optional // Type?
+</span><span class='line'>  var hashValue: Int { get }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过函数 <code>func reflect&lt;T&gt;(x: T) -&gt; Mirror</code> 可以获得反射对象 <code>Mirror</code> 。它定义在 <code>Any</code> 上，所有类型均可用。</p>
+
+<h2>实际操作</h2>
+
+<h3><code>.valueType</code> 处理</h3>
+
+<p><code>Any.Type</code> 是所有类型的元类型，所以 <code>.valueType</code> 属性表示类型。实际使用的时候还真是有点诡异：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let mir = reflect(someVal)
+</span><span class='line'>swith mir.valueType {
+</span><span class='line'>case _ as String.Type:
+</span><span class='line'>    println("type = string")
+</span><span class='line'>case _ as Range&lt;Int&gt;.Type:
+</span><span class='line'>    println("type = range of int")
+</span><span class='line'>case _ as Dictionary&lt;Int, Int&gt;.Type:
+</span><span class='line'>    println("type = dict of int")
+</span><span class='line'>case _ as Point.Type:
+</span><span class='line'>    println("type = a point struct")
+</span><span class='line'>default:
+</span><span class='line'>    println("unkown type")
+</span><span class='line'>}    </span></code></pre></td></tr></table></div></figure>
+
+
+<p>或者使用 <code>is</code> 判断：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>if mir.valueType is String.Type {
+</span><span class='line'>    println("!!!type =&gt; String")
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>勘误： 这里之前笔误了。遗漏了 <code>.valueType</code> 。</p>
+
+<p><code>is String</code> 判断变量是否是 String 类型，而 <code>is String.Type</code> 这里用来判断类型是否是 String 类型。</p>
+
+<h3><code>subscript(Int)</code> 处理</h3>
+
+<p>实测发现直接用 <code>mir[0]</code> 访问偶尔会出错，也许是 beta 的原因。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>for r in 0..mir.count {
+</span><span class='line'>    let (name, subref) = mir[r]
+</span><span class='line'>    prtln("name: \(name)")
+</span><span class='line'>    // visit sub Mirror here
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过上面的方法，基本上可以遍历大部分结构。</p>
+
+<h2>不同类型的处理</h2>
+
+<h3>Struct 结构体、 Class 类</h3>
+
+<ul>
+<li><code>.count</code> 为字段个数。</li>
+<li><code>subscript(Int)</code> 返回 （字段名，字段值反射 <code>Mirror</code>） 元组</li>
+<li><code>summary</code> 为 mangled name</li>
+</ul>
+
+
+<h3>Tuple 元组</h3>
+
+<ul>
+<li><code>.count</code> 为元组子元素个数</li>
+<li><code>subscript(Int)</code> 的 name 为 &ldquo;.0&rdquo;, &ldquo;.1&rdquo; &hellip;</li>
+</ul>
+
+
+<h3>Aggregate 基础类型</h3>
+
+<p>包括数字、字符串（含 <code>NSString</code>）、函数、部分 Foundation 类型、 MetaType 。</p>
+
+<p>很奇怪一点是测试发现枚举也被反射为基础类型。怀疑是没实现完。</p>
+
+<ul>
+<li><code>.count</code> 为 0</li>
+</ul>
+
+
+<h3>IndexContainer 索引对象</h3>
+
+<p>包括 <code>Array&lt;T&gt;</code>, <code>T[]</code>, <code>NSArray</code> 等。可以通过 subscript 访问。</p>
+
+<ul>
+<li><code>.count</code> 为元组子元素个数</li>
+<li><code>subscript(Int)</code> 的 name 为 &ldquo;[0]&rdquo;, &ldquo;[1]&rdquo; &hellip;</li>
+</ul>
+
+
+<h3>KeyContainer 键-值对象</h3>
+
+<p>包括 <code>Dictionary&lt;T, U&gt;</code>、<code>NSDictionary</code></p>
+
+<ul>
+<li><code>.count</code> 为元组子元素个数</li>
+<li><code>subscript(Int)</code> 的 name 为 &ldquo;[0]&rdquo;, &ldquo;[1]&rdquo; &hellip; 实际访问是 <code>(name, (reflect(key), reflect(val)))</code></li>
+</ul>
+
+
+<h3>Optional Type?</h3>
+
+<p>只包括 <code>Type?</code>，不包括 <code>Type!</code>。</p>
+
+<ul>
+<li><code>.count</code> 为 0 或者 1 (对应 nil 和有值的情况)</li>
+<li><code>subscript(Int)</code> , name 为 &ldquo;Some&rdquo;</li>
+</ul>
+
+
+<h3>其他</h3>
+
+<ul>
+<li>Enum 枚举 看起来是未使用</li>
+<li>MembershipContainer // 未知</li>
+<li>Container // 未知</li>
+</ul>
+
+
+<h2>示例代码</h2>
+
+<p><a href="https://gist.github.com/anonymous/190fc7ecee30e83a5dca">Gist</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-20T23:48:51+08:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/swift/'>swift</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2014/06/20/swift-reflection/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2014/06/20/swift-reflection/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/06/19/modules-for-swift/" title="Previous Post: Module System of Swift (简析 Swift 的模块系统)">&laquo; Module System of Swift (简析 Swift 的模块系统)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/06/23/use-cocoapods-with-swift/" title="Next Post: Use CocoaPods with Swift (在 Swift 中使用 CocoaPods） ">Use CocoaPods with Swift (在 Swift 中使用 CocoaPods）  &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://andelf.github.io/blog/2014/06/20/swift-reflection/';
+        var disqus_url = 'http://andelf.github.io/blog/2014/06/20/swift-reflection/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

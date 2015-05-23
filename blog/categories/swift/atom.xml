@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Swift | 猫·仁波切]]></title>
+  <link href="http://andelf.github.io/blog/categories/swift/atom.xml" rel="self"/>
+  <link href="http://andelf.github.io/"/>
+  <updated>2015-05-23T11:34:24+08:00</updated>
+  <id>http://andelf.github.io/</id>
+  <author>
+    <name><![CDATA[猫·仁波切 (Feather)]]></name>
+    <email><![CDATA[andelf@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[为第三方扩展创建 Swift 模块]]></title>
+    <link href="http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/"/>
+    <updated>2015-01-23T23:21:00+08:00</updated>
+    <id>http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules</id>
+    <content type="html"><![CDATA[<p>本文提出了一种将第三方扩展引入到 Swift 标准库的方法。</p>
+
+<p>以 Alamofire 为例，</p>
+
+<p>```
+cd Path-To-Alamofire-Src-Dir
+mkdir -p 32 64</p>
+
+<h1>创建动态链接库，及对应 Swift 模块，32/64版本</h1>
+
+<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphoneos) Alamofire.swift -target arm64-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib</p>
+
+<p>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64</p>
+
+<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphoneos) Alamofire.swift -target armv7-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib</p>
+
+<p>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64</p>
+
+<h1>创建 universal lib</h1>
+
+<p>lipo -create ./{32,64}/libswiftAlamofire.dylib  -output ./libswiftAlamofire.dylib</p>
+
+<h1>创建模拟器用 lib</h1>
+
+<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphonesimulator) Alamofire.swift -target i386-apple-ios7.1 -target-cpu yonah -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
+```</p>
+
+<p>其他相关 target
+<code>
+-target armv7-apple-ios7.1 -target-cpu cortex-a8
+-target arm64-apple-ios7.1 -target-cpu cyclone
+-target i386-apple-ios7.1 -target-cpu yonah
+-target x86_64-apple-ios7.1 -target-cpu core2
+</code></p>
+
+<p>其实你了解 Swift 模块结构的化，应该回想到，将第三方模块创建为 swiftmodule 应该是最靠谱的选择。不过实际操作发现，
+编译命令无法很方便地调整，主要是因为 xcodebuild 系统，和编译命令不知道怎么导出。也是略纠结。</p>
+
+<p>实际上，如果使用 Carthage 的话，即把第三方扩展作为 Framework 引入，会导致无法支持 iOS 7，但是 Swift 本身是支持 iOS 7 的，
+在编译命令和生成的文件中检查发现，对于 iOS 7，Swift 使用了纯静态模块编译的方法。所以其实我们引入第三方扩展的时候也可以这样做。</p>
+
+<p>以下是静态编译所需命令：</p>
+
+<p>```
+xcrun swift -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk macosx) SwiftyJSON.swift -c -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o</p>
+
+<p>ar rvs libswiftSwiftyJSON.a SwiftyJSON.o
+```</p>
+
+<p>如何使用？</p>
+
+<p>将编译结果扔到：</p>
+
+<p><code>
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static
+</code></p>
+
+<p>下对应目录。</p>
+
+<p>然后在 Xcode 里，直接 import。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift Beta3 Changes ( Swift 在 Beta3 中的变化）]]></title>
+    <link href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/"/>
+    <updated>2014-07-08T17:22:11+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/07/08/swift-beta3-changes</id>
+    <content type="html"><![CDATA[<p>准确说是 beta2 <code>Swift version 1.0 (swift-600.0.34.4.8)</code> 到 beta3 <code>Swift version 1.0 (swift-600.0.38.7)</code> 的变化。</p>
+
+<p>对了，补充下。 beta1 <code>Swift version 1.0 (swift-600.0.34.4.5)</code> 到 beta2 几乎没有什么变化。</p>
+
+<h2>语法</h2>
+
+<p><code>nil</code> 成为关键字。</p>
+
+<p><code>[KeyType : ValueType]</code> 可以表示字典类型 <code>Dictionary&lt;KeyType, ValueType&gt;</code>。</p>
+
+<p><code>[Type]</code> 用于表示原 Array 类型 <code>Type[]</code>，等价 <code>Array&lt;T&gt;</code>，原用法会导致警告。</p>
+
+<p><del>增加 @noinline 属性</del></p>
+
+<p><code>..</code> 运算符改为 <code>..&lt;</code>，不容易和 <code>...</code> 混淆。</p>
+
+<h2>函数、类型</h2>
+
+<p>原 <code>sort()</code> 改名为 <code>sorted()</code>。新增 <code>sort()</code> 函数，参数为 <code>inout</code>。</p>
+
+<p>Index 类型中的 <code>.succ()</code> 变为 <code>.successor()</code>、 <code>.pred()</code> 变为 <code>.predecessor()</code>。</p>
+
+<h2>C/ObjC 交互变化</h2>
+
+<p>增加 <code>UnsafeMutableArray&lt;T&gt;</code> 类型。</p>
+
+<p>增加 <code>CFunctionPointer&lt;T&gt;</code> 类型。</p>
+
+<p>删除 <code>CConstVoidPointer</code>、 <code>CMutableVoidPointer</code>。替换为 <code>UnsafePointer&lt;()&gt;</code>、<code>ConstUnsafePointer&lt;Int32&gt;</code>。</p>
+
+<p>删除 <code>CConstPointer&lt;T&gt;</code>、<code>CMutablePointer&lt;T&gt;</code>。替换为 <code>UnsafePointer&lt;T&gt;</code>、<code>ConstUnsafePointer&lt;T&gt;</code>。</p>
+
+<p>这么一来指针操作简单了好多。原有会出现 <code>COpaquePointer</code> 的不合理情况，也都对应到适合的类型。</p>
+
+<p><code>CString</code> 可以从 <code>UnsafePointer&lt;UInt8&gt;</code> 和 <code>UnsafePointer&lt;CChar&gt;</code> 两种类型构造获得，之前只支持 <code>UInt8</code>。</p>
+
+<p>module.map 中头文件声明转换为 Swift 声明不再使用 C 兼容类型，直接使用 Swift 相应类型。原有 <code>CInt</code>，现在成为 <code>Int32</code>。</p>
+
+<p>结构体会自动添加构造函数 <code>init(field1:field2:...)</code> 这样。</p>
+
+<h3>nil</h3>
+
+<p>去掉了 <code>NilType</code>，增加了 <code>NilLiteralConvertible</code>， <code>nil</code> 成为关键字。可以认为是 nil 常量。</p>
+
+<p><code>
+protocol NilLiteralConvertible {
+  class func convertFromNilLiteral() -&gt; Self
+}
+</code></p>
+
+<p>除了 Optional 、上面所提到的指针类型外，<code>RawOptionSet</code> 也实现了该协议。</p>
+
+<h3>Array</h3>
+
+<p>去掉了 <code>.copy()</code>、<code>unshare()</code> 方法。</p>
+
+<p>增加了以下方法：</p>
+
+<p><code>
+func makeUnique(inout buffer: ArrayBuffer&lt;T&gt;, e: T, index: Int)
+func sorted(isOrderedBefore: (T, T) -&gt; Bool) -&gt; Array&lt;T&gt;
+</code></p>
+
+<p>看起来 <code>Array</code> 对底层容器的引用有了更好的控制 <code>ArrayBufferType</code> 增加了判断方法 <code>func isMutableAndUniquelyReferenced() -&gt; Bool</code>。</p>
+
+<p>Array 目前可以认为是真正的值类型。</p>
+
+<h3>指针</h3>
+
+<h4>增加了 <code>_Pointer</code> protocol</h4>
+
+<p><code>scala
+protocol _Pointer {
+  var value: RawPointer { get }
+  init(_ value: RawPointer)
+}
+</code></p>
+
+<p>表示一个类型可以对应到原生指针。</p>
+
+<p>同时成为内部桥接类型，编译器内部在转换时使用它（取出 RawPointer, 构造具体指针类型）。</p>
+
+<h2>模块</h2>
+
+<p>增加了  StdlibUnittest 模块。 <a href="https://github.com/andelf/Defines-Swift/blob/79ed8d40659e4d038f41e3c30b4b3358106bd50a/StdlibUnittest.swift">声明代码</a>。单元测试终于有了。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)]]></title>
+    <link href="http://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library/"/>
+    <updated>2014-07-07T12:09:54+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library</id>
+    <content type="html"><![CDATA[<p>排名 16 了。啧啧。你看才刚出一个月。</p>
+
+<p>目前已经有了很多非常棒的 Swift 第三方库， JSON 处理啊、 HTTP 访问啊、 UIView 插件啊等等。</p>
+
+<p>如何科学地引用这些第三方库呢？</p>
+
+<h2>现状</h2>
+
+<p>CocoaPods 由于完全使用静态链接解决方法，过度依赖 Objective-C ，目前应该是官方 repo 有提到是 <code>-Xlinker</code> error , 这个问题之前我也遇到过，无解。除非手工执行 <code>ar</code> 不用 <code>ld</code> 和 <code>libtool</code>。</p>
+
+<p>小伙伴有用子目录的方法引用代码，貌似不错，还有就是直接用 <code>git submodule</code>，看起来维护性也可以。</p>
+
+<h2>简单解决方案</h2>
+
+<p>一个良好的第三方库应该实现为 Cocoa Touch Framework (实际内容为 Header + 动态链接库)。而不是直接把 Swift 代码 Copy 过来放入自己的项目。这里以一个简单项目为例，介绍如何科学使用。</p>
+
+<h3>目标描述</h3>
+
+<p>用 Swift 创建一个 Demo ，使用 SwiftyJSON 和 LTMorphingLabel 库。</p>
+
+<p>项目的名字叫 DemoApp 。</p>
+
+<h4>创建 Workspace</h4>
+
+<p>创建一个 Workspace ，名字随意，位置能找到就好。这个 Workspace 主要用来管理我们的项目及其依赖的第三方库。</p>
+
+<h4>创建 DemoApp</h4>
+
+<p>在 Workspace 创建一个 App ，因为是测试所以我选了 Single View Application 。</p>
+
+<h4>引入 SwiftyJSON</h4>
+
+<p>SwiftyJSON 是一个 Cocoa Touch Framework ，可以直接使用， <code>git clone</code> 后，添加项目到 Workspace 即可。</p>
+
+<p>尝试操作发现。。最容易最不会出错的方法就是直接从 Finder 里把 <code>.xcodeproj</code> 文件拖动到 Workspace 。</p>
+
+<h4>引入 LTMorphingLabel</h4>
+
+<p>LTMorphingLabel 是一个 App Deme 式项目。其中 Label View 的实现在一个子目录中。可以采用创建 Cocoa
+Touch Framework 的方法来引入这几个文件。</p>
+
+<p>当然也可以直接把目录拖到我们的 DemoApp 里，不过太原始粗暴了。</p>
+
+<h4>为 App 添加依赖</h4>
+
+<p>在 DemoApp 的 Genral 选项卡中，添加 Linked Frameworks and Libraries 。选择  Workspace 中 SwiftyJSON 和
+LTMorphingLabel 两个 <code>.framework</code> 。</p>
+
+<p>如果是直接选择来自其他项目的 <code>.framework</code> 而不是同一 Workspace ，那么这里也许还要同时加入 <code>Embedded Binaries</code>。</p>
+
+<h4>使用</h4>
+
+<p>添加好依赖后，就可以在 DemoApp 项目代码中 <code>import SwiftyJSON</code> 或者 <code>import LTMorphingLabel</code> 来使用对应的库。同时还可以用 Command + 鼠标点击的方法查看声明代码。</p>
+
+<h4>除错</h4>
+
+<p>比较坑爹的是，实际上按照以上方法， <code>LTMorphingLabel</code> 并不能正常使用，查看报错信息发现是自动生成的 <code>LTMorphingLabel-Swift.h</code> 有处语法无法被识别，编辑器找到 <code>.h</code> 文件，注释掉这行诡异代码即可。</p>
+
+<p>看起来目前的 Bridge Header 和 -emit-objc-header 实现还是有问题的。小伙伴一定要淡定。</p>
+
+<h2>对于非 Workspace</h2>
+
+<p>如果不喜欢使用 Workspace ，也可以将第三方库的编译结果，一个 <code>.framework</code> 目录拖到项目文件里，然后添加 <code>Embedded Binaries</code>。</p>
+
+<h2>评论</h2>
+
+<p>创建 Cocoa Touch Framework 选项中，可以使用 Swift 代码，此时编译结果（默认）会包含 <code>module.modulemap</code> 文件，
+之前有介绍过它的作用，通过它， Swift 可以使用第三方模块。参考 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a> 。</p>
+
+<p>实际上这个解决方案绕了一大圈，通过 Swift 文件导出 <code>ProjName-Swift.h</code>、然后 <code>module.modulemap</code> 模块描述文件引入、然后再由 Swift 导入。</p>
+
+<p>其实 <code>.framework</code> 同时也包含了 <code>ProjName.swiftmodule/[ARCH].swiftmodule</code> 不过看起来没有使用到，而且默认在 IDE 下也不支持 Swift 从 <code>.swiftmodule</code> 文件导入，比较坑。希望以后版本能加入支持。</p>
+
+<p><code>.framework</code> 包含了所有 Swift 标准库的动态链接库，小伙伴可能会以为这会导致编译后的 App 变大。其实大可放心，任何 Swift 语言的 App 都会包含这些动态链接库，而且只会包含一个副本。此方法对 App 最终的大小几乎无影响。</p>
+
+<p>注： 个人测试了下，发现这个 <code>.swiftmodule</code> 是可以通过其他方法使用的，绕过 <code>module.modulemap</code>，应该是更佳的解决方案，但是需要控制命令行参数。</p>
+
+<p>至于静态链接库，过时了。抛弃吧。</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 &ndash; 静态链接库）</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift Undocumented Grammar （Swift 黑语法）]]></title>
+    <link href="http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/"/>
+    <updated>2014-07-04T03:05:11+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar</id>
+    <content type="html"><![CDATA[<p>本文介绍 Swift 的 Undocumented 语法特性。</p>
+
+<p>电子书上介绍的 default function parameter 这里都不好意思拿出来写。</p>
+
+<p>咳咳。持续更新。</p>
+
+<h2>用关键字当变量名</h2>
+
+<p>Keywards as variable name.</p>
+
+<p><code>scala
+// escaped variable name
+let `let` = 1000
+dump(`let`, name: "variable named let")
+</code></p>
+
+<h2><code>new</code> 关键字</h2>
+
+<p>The <code>new</code> keyword.</p>
+
+<p>快速初始化数组。</p>
+
+<p><code>scala
+let an_array_with_100_zero = new(Int)[100]
+</code></p>
+
+<h2>protocol type</h2>
+
+<p>use <code>protocol&lt;Protocol1, Protocol2, ...&gt;</code> as a type.</p>
+
+<h2>How I find it?</h2>
+
+<p>瞎试出来的。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）]]></title>
+    <link href="http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/"/>
+    <updated>2014-07-04T01:05:55+08:00</updated>
+    <id>http://andelf.github.io/blog/2014/07/04/cocoa-in-swift</id>
+    <content type="html"><![CDATA[<p>最近看到了 <a href="https://github.com/raywenderlich/swift-style-guide">Swift Style Guide</a> 个人觉得内容太少，
+Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。</p>
+
+<p>Swift 本身的特性，导致它在一些用法上和 Objective-C 上有所不同，比如 ObjC 的 struct 单纯和 C 的一样，但是在 Swift
+中的 struct 则要强大得多。</p>
+
+<p>个人认为比如 <code>CGPointMake</code> 这样的函数，理论上不应该出现在 Swift 代码中。而是应该用 <code>CGPoint(x:y:)</code>。</p>
+
+<p>本文可以作为参考手册使用。</p>
+
+<h2>标准库扩展</h2>
+
+<h3>ObjectiveC</h3>
+
+<p>值得注意的是 Selector 相关方法，实现了 <code>StringLiteralConvertible</code>。也可以从 <code>nil</code> 获得。</p>
+
+<h3>Foundation</h3>
+
+<p>这里忽略之前介绍过的 <code>_BridgedToObjectiveC</code> 相关内容。</p>
+
+<h4>协议附加</h4>
+
+<p>Sequence 协议</p>
+
+<p><code>
+NSMutableArray NSSet NSArray NSMutableDictionary NSMutableSet NSDictionary
+</code></p>
+
+<p>所有以上这些类型都可以通过 for-in 操作。</p>
+
+<p>*LiteralConvertible</p>
+
+<p><code>
+NSNumber NSString NSArray NSDictionary
+</code></p>
+
+<h4>隐式类型转换</h4>
+
+<p>CF 几乎都对应到了 NS 类型。这里略去</p>
+
+<ul>
+<li><code>NilType</code> &ndash;> <code>NSZone</code></li>
+<li><code>Dictionary&lt;KeyType: Hashable, ValueType&gt;</code> &ndash;> <code>NSDictionary</code></li>
+<li><code>NSDictionary</code> &ndash;> <code>Dictionary&lt;NSObject, AnyObject&gt;</code></li>
+<li><code>String</code> &lt;&ndash;> <code>NSString</code></li>
+<li><code>NSArray</code> &ndash;> <code>AnyObject[]</code></li>
+<li><code>A[]</code> &ndash;> <code>NSArray</code></li>
+<li><code>Float Double Int UInt Bool</code> &ndash;> <code>NSNumber</code></li>
+<li><code>NSRange</code> &ndash;> <code>Range&lt;Int&gt;</code> // 比较有意思的一个</li>
+</ul>
+
+
+<h4>方法扩展</h4>
+
+<p><code>scala
+// let s = NSSet(objects: 12, 32, 23, 12)
+extension NSSet {
+  convenience init(objects elements: AnyObject...)
+}
+extension NSOrderedSet {
+  convenience init(objects elements: AnyObject...)
+}
+// 这里注意，NSRange 和 Swift Range 对 range 结束的表述方法不同
+// NSRange 保存 range 元素个数
+// Swift Range 保存的是结束元素
+// let r = NSRange(0..20)
+extension NSRange {
+  init(_ x: Range&lt;Int&gt;)
+}
+// let prop = NSDictionary(objectsAndKeys: "Feather", "name", "Programming", "hobby")
+extension NSDictionary {
+  convenience init(objectsAndKeys objects: AnyObject...)
+}
+extension NSObject : CVarArg {
+  @objc func encode() -&gt; Word[]
+}
+</code></p>
+
+<p>字符串的扩展方法非常多。</p>
+
+<p><code>scala
+  static func availableStringEncodings() -&gt; NSStringEncoding[]
+  static func defaultCStringEncoding() -&gt; NSStringEncoding
+  static func localizedNameOfStringEncoding(encoding: NSStringEncoding) -&gt; String
+  static func localizedStringWithFormat(format: String, _ arguments: CVarArg...) -&gt; String
+  static func pathWithComponents(components: String[]) -&gt; String
+  static func stringWithContentsOfFile(path: String, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; String?
+  static func stringWithContentsOfFile(path: String, usedEncoding: CMutablePointer&lt;NSStringEncoding&gt; = default, error: NSErrorPointer = default) -&gt; String?
+  static func stringWithContentsOfURL(url: NSURL, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; String?
+  static func stringWithContentsOfURL(url: NSURL, usedEncoding enc: CMutablePointer&lt;NSStringEncoding&gt; = default, error: NSErrorPointer = default) -&gt; String?
+  static func stringWithCString(cString: CString, encoding enc: NSStringEncoding) -&gt; String?
+  static func stringWithUTF8String(bytes: CString) -&gt; String?
+  func canBeConvertedToEncoding(encoding: NSStringEncoding) -&gt; Bool
+  var capitalizedString: String { get }
+  func capitalizedStringWithLocale(locale: NSLocale) -&gt; String
+  func caseInsensitiveCompare(aString: String) -&gt; NSComparisonResult
+  func commonPrefixWithString(aString: String, options: NSStringCompareOptions) -&gt; String
+  func compare(aString: String, options mask: NSStringCompareOptions = default, range: Range&lt;String.Index&gt;? = default, locale: NSLocale? = default) -&gt; NSComparisonResult
+  func completePathIntoString(_ outputName: CMutablePointer&lt;String&gt; = default, caseSensitive: Bool, matchesIntoArray: CMutablePointer&lt;String[]&gt; = default, filterTypes: String[]? = default) -&gt; Int
+  func componentsSeparatedByCharactersInSet(separator: NSCharacterSet) -&gt; String[]
+  func componentsSeparatedByString(separator: String) -&gt; String[]
+  func cStringUsingEncoding(encoding: NSStringEncoding) -&gt; CChar[]?
+  func dataUsingEncoding(encoding: NSStringEncoding, allowLossyConversion: Bool = default) -&gt; NSData
+  var decomposedStringWithCanonicalMapping: String { get }
+  var decomposedStringWithCompatibilityMapping: String { get }
+  func enumerateLines(body: (line: String, inout stop: Bool) -&gt; ())
+  func enumerateLinguisticTagsInRange(range: Range&lt;String.Index&gt;, scheme tagScheme: String, options opts: NSLinguisticTaggerOptions, orthography: NSOrthography?, _ body: (String, Range&lt;String.Index&gt;, Range&lt;String.Index&gt;, inout Bool) -&gt; ())
+  func enumerateSubstringsInRange(range: Range&lt;String.Index&gt;, options opts: NSStringEnumerationOptions, _ body: (substring: String, substringRange: Range&lt;String.Index&gt;, enclosingRange: Range&lt;String.Index&gt;, inout Bool) -&gt; ())
+  var fastestEncoding: NSStringEncoding { get }
+  func fileSystemRepresentation() -&gt; CChar[]
+  func getBytes(inout buffer: UInt8[], maxLength: Int, usedLength: CMutablePointer&lt;Int&gt;, encoding: NSStringEncoding, options: NSStringEncodingConversionOptions, range: Range&lt;String.Index&gt;, remainingRange: CMutablePointer&lt;Range&lt;String.Index&gt;&gt;) -&gt; Bool
+  func getCString(inout buffer: CChar[], maxLength: Int, encoding: NSStringEncoding) -&gt; Bool
+  func getFileSystemRepresentation(inout buffer: CChar[], maxLength: Int) -&gt; Bool
+  func getLineStart(start: CMutablePointer&lt;String.Index&gt;, end: CMutablePointer&lt;String.Index&gt;, contentsEnd: CMutablePointer&lt;String.Index&gt;, forRange: Range&lt;String.Index&gt;)
+  func getParagraphStart(start: CMutablePointer&lt;String.Index&gt;, end: CMutablePointer&lt;String.Index&gt;, contentsEnd: CMutablePointer&lt;String.Index&gt;, forRange: Range&lt;String.Index&gt;)
+  var hash: Int { get }
+  static func stringWithBytes(bytes: UInt8[], length: Int, encoding: NSStringEncoding) -&gt; String?
+  static func stringWithBytesNoCopy(bytes: CMutableVoidPointer, length: Int, encoding: NSStringEncoding, freeWhenDone flag: Bool) -&gt; String?
+  init(utf16CodeUnits: CConstPointer&lt;unichar&gt;, count: Int)
+  init(utf16CodeUnitsNoCopy: CConstPointer&lt;unichar&gt;, count: Int, freeWhenDone flag: Bool)
+  init(format: String, _ _arguments: CVarArg...)
+  init(format: String, arguments: CVarArg[])
+  init(format: String, locale: NSLocale?, _ args: CVarArg...)
+  init(format: String, locale: NSLocale?, arguments: CVarArg[])
+  var lastPathComponent: String { get }
+  var utf16count: Int { get }
+  func lengthOfBytesUsingEncoding(encoding: NSStringEncoding) -&gt; Int
+  func lineRangeForRange(aRange: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
+  func linguisticTagsInRange(range: Range&lt;String.Index&gt;, scheme tagScheme: String, options opts: NSLinguisticTaggerOptions = default, orthography: NSOrthography? = default, tokenRanges: CMutablePointer&lt;Range&lt;String.Index&gt;[]&gt; = default) -&gt; String[]
+  func localizedCaseInsensitiveCompare(aString: String) -&gt; NSComparisonResult
+  func localizedCompare(aString: String) -&gt; NSComparisonResult
+  func localizedStandardCompare(string: String) -&gt; NSComparisonResult
+  func lowercaseStringWithLocale(locale: NSLocale) -&gt; String
+  func maximumLengthOfBytesUsingEncoding(encoding: NSStringEncoding) -&gt; Int
+  func paragraphRangeForRange(aRange: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
+  var pathComponents: String[] { get }
+  var pathExtension: String { get }
+  var precomposedStringWithCanonicalMapping: String { get }
+  var precomposedStringWithCompatibilityMapping: String { get }
+  func propertyList() -&gt; AnyObject
+  func propertyListFromStringsFileFormat() -&gt; Dictionary&lt;String, String&gt;
+  func rangeOfCharacterFromSet(aSet: NSCharacterSet, options mask: NSStringCompareOptions = default, range aRange: Range&lt;String.Index&gt;? = default) -&gt; Range&lt;String.Index&gt;
+  func rangeOfComposedCharacterSequenceAtIndex(anIndex: String.Index) -&gt; Range&lt;String.Index&gt;
+  func rangeOfComposedCharacterSequencesForRange(range: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
+  func rangeOfString(aString: String, options mask: NSStringCompareOptions = default, range searchRange: Range&lt;String.Index&gt;? = default, locale: NSLocale? = default) -&gt; Range&lt;String.Index&gt;
+  var smallestEncoding: NSStringEncoding { get }
+  func stringByAbbreviatingWithTildeInPath() -&gt; String
+  func stringByAddingPercentEncodingWithAllowedCharacters(allowedCharacters: NSCharacterSet) -&gt; String
+  func stringByAddingPercentEscapesUsingEncoding(encoding: NSStringEncoding) -&gt; String
+  func stringByAppendingFormat(format: String, _ arguments: CVarArg...) -&gt; String
+  func stringByAppendingPathComponent(aString: String) -&gt; String
+  func stringByAppendingPathExtension(ext: String) -&gt; String
+  func stringByAppendingString(aString: String) -&gt; String
+  var stringByDeletingLastPathComponent: String { get }
+  var stringByDeletingPathExtension: String { get }
+  var stringByExpandingTildeInPath: String { get }
+  func stringByFoldingWithOptions(options: NSStringCompareOptions, locale: NSLocale) -&gt; String
+  func stringByPaddingToLength(newLength: Int, withString padString: String, startingAtIndex padIndex: Int) -&gt; String
+  var stringByRemovingPercentEncoding: String { get }
+  func stringByReplacingCharactersInRange(range: Range&lt;String.Index&gt;, withString replacement: String) -&gt; String
+  func stringByReplacingOccurrencesOfString(target: String, withString replacement: String, options: NSStringCompareOptions = default, range searchRange: Range&lt;String.Index&gt;? = default) -&gt; String
+  func stringByReplacingPercentEscapesUsingEncoding(encoding: NSStringEncoding) -&gt; String
+  var stringByResolvingSymlinksInPath: String { get }
+  var stringByStandardizingPath: String { get }
+  func stringByTrimmingCharactersInSet(set: NSCharacterSet) -&gt; String
+  func stringsByAppendingPaths(paths: String[]) -&gt; String[]
+  func substringFromIndex(index: Int) -&gt; String
+  func substringToIndex(index: Int) -&gt; String
+  func substringWithRange(aRange: Range&lt;String.Index&gt;) -&gt; String
+  func uppercaseStringWithLocale(locale: NSLocale) -&gt; String
+  func writeToFile(path: String, atomically useAuxiliaryFile: Bool, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; Bool
+  func writeToURL(url: NSURL, atomically useAuxiliaryFile: Bool, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; Bool
+</code></p>
+
+<h3>CoreGraphics</h3>
+
+<p>几个常用基本类型都有了 Swift-style 的构造函数。其中 <code>CGRect</code> 有很多的相关运算都被封装为方法，很不错。</p>
+
+<p><code>scala
+extension CGPoint : Equatable {
+  static var zeroPoint: CGPoint
+  init()
+  init(x: Int, y: Int)
+}
+extension CGSize {
+  static var zeroSize: CGSize
+  init()
+  init(width: Int, height: Int)
+}
+extension CGVector {
+  static var zeroVector: CGVector
+  init(_ dx: CGFloat, _ dy: CGFloat)
+  init(_ dx: Int, _ dy: Int)
+}
+extension CGRect : Equatable {
+  // 全为 0
+  static var zeroRect: CGRect
+  // 原点为无穷大，表示空
+  static var nullRect: CGRect
+  // 原点无穷小，宽高无穷大
+  static var infiniteRect: CGRect
+  init()
+  init(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat)
+  init(x: Int, y: Int, width: Int, height: Int)
+  var width: CGFloat
+  var height: CGFloat
+  var minX: CGFloat
+  var minY: CGFloat
+  // 中点
+  var midX: CGFloat
+  var midY: CGFloat
+  var maxX: CGFloat
+  var maxY: CGFloat
+  var isNull: Bool
+  var isEmpty: Bool
+  var isInfinite: Bool
+  var standardizedRect: CGRect
+  func standardize()
+  var integerRect: CGRect
+  func integerize()
+  func rectByInsetting(#dx: CGFloat, dy: CGFloat) -&gt; CGRect
+  func inset(#dx: CGFloat, dy: CGFloat)
+  func rectByOffsetting(#dx: CGFloat, dy: CGFloat) -&gt; CGRect
+  func offset(#dx: CGFloat, dy: CGFloat)
+  func rectByUnion(withRect: CGRect) -&gt; CGRect
+  func union(withRect: CGRect)
+  func rectByIntersecting(withRect: CGRect) -&gt; CGRect
+  func intersect(withRect: CGRect)
+  func rectsByDividing(atDistance: CGFloat, fromEdge: CGRectEdge) -&gt; (slice: CGRect, remainder: CGRect)
+  func contains(rect: CGRect) -&gt; Bool
+  func contains(point: CGPoint) -&gt; Bool
+  func intersects(rect: CGRect) -&gt; Bool
+}
+</code></p>
+
+<h3>AppKit</h3>
+
+<p><code>scala
+extension NSGradient {
+  convenience init(colorsAndLocations objects: (AnyObject, CGFloat)...)
+}
+</code></p>
+
+<h3>UIKit</h3>
+
+<p><code>scala
+extension UIDeviceOrientation {
+  var isPortrait: Bool
+  // also isLandscape isValidInterfaceOrientation isFlat
+}
+extension UIInterfaceOrientation {
+  var isPortrait: Bool
+  var isLandscape: Bool
+}
+</code></p>
+
+<p>这个模块是交叉编译的。。不太容易获得信息。不过好在扩展内容不多。</p>
+
+<h3>SpriteKit</h3>
+
+<p><code>scala
+extension SKNode {
+  @objc subscript (name: String) -&gt; SKNode[] { get }
+}
+</code></p>
+
+<h2>特殊 Mirror 实现</h2>
+
+<p><code>
+NSSet NSDate NSArray NSRange NSURL NSDictionary NSString
+CGPoint CGRect CGSize
+NSView
+UIView
+SKTextureAtlas SKTexture SKSpriteNode SKShapeNode
+</code></p>
+
+<p>单独添加了自己的 <code>Mirror</code> 类型，单独实现。</p>
+
+<p><code>Mirror</code> 类型其实是为 <code>QuickLookObject</code> 准备的，也就是在 Xcode Playground 中快速查看。</p>
+]]></content>
+  </entry>
+  
+</feed>

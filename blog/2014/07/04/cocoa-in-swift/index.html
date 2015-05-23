@@ -1,0 +1,786 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展） - 猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="最近看到了 Swift Style Guide 个人觉得内容太少，
+Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。 Swift 本身的特性，导致它在一些用法上和 Objective-C 上有所不同，比如 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/2014/07/04/cocoa-in-swift">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-04T01:05:55+08:00" pubdate data-updated="true">Jul 4<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>最近看到了 <a href="https://github.com/raywenderlich/swift-style-guide">Swift Style Guide</a> 个人觉得内容太少，
+Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。</p>
+
+<p>Swift 本身的特性，导致它在一些用法上和 Objective-C 上有所不同，比如 ObjC 的 struct 单纯和 C 的一样，但是在 Swift
+中的 struct 则要强大得多。</p>
+
+<p>个人认为比如 <code>CGPointMake</code> 这样的函数，理论上不应该出现在 Swift 代码中。而是应该用 <code>CGPoint(x:y:)</code>。</p>
+
+<p>本文可以作为参考手册使用。</p>
+
+<h2>标准库扩展</h2>
+
+<h3>ObjectiveC</h3>
+
+<p>值得注意的是 Selector 相关方法，实现了 <code>StringLiteralConvertible</code>。也可以从 <code>nil</code> 获得。</p>
+
+<h3>Foundation</h3>
+
+<p>这里忽略之前介绍过的 <code>_BridgedToObjectiveC</code> 相关内容。</p>
+
+<h4>协议附加</h4>
+
+<p>Sequence 协议</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>NSMutableArray NSSet NSArray NSMutableDictionary NSMutableSet NSDictionary</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所有以上这些类型都可以通过 for-in 操作。</p>
+
+<p>*LiteralConvertible</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>NSNumber NSString NSArray NSDictionary</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>隐式类型转换</h4>
+
+<p>CF 几乎都对应到了 NS 类型。这里略去</p>
+
+<ul>
+<li><code>NilType</code> &ndash;> <code>NSZone</code></li>
+<li><code>Dictionary&lt;KeyType: Hashable, ValueType&gt;</code> &ndash;> <code>NSDictionary</code></li>
+<li><code>NSDictionary</code> &ndash;> <code>Dictionary&lt;NSObject, AnyObject&gt;</code></li>
+<li><code>String</code> &lt;&ndash;> <code>NSString</code></li>
+<li><code>NSArray</code> &ndash;> <code>AnyObject[]</code></li>
+<li><code>A[]</code> &ndash;> <code>NSArray</code></li>
+<li><code>Float Double Int UInt Bool</code> &ndash;> <code>NSNumber</code></li>
+<li><code>NSRange</code> &ndash;> <code>Range&lt;Int&gt;</code> // 比较有意思的一个</li>
+</ul>
+
+
+<h4>方法扩展</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// let s = NSSet(objects: 12, 32, 23, 12)</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">NSSet</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">convenience</span> <span class="n">init</span><span class="o">(</span><span class="n">objects</span> <span class="n">elements</span><span class="k">:</span> <span class="kt">AnyObject...</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">NSOrderedSet</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">convenience</span> <span class="n">init</span><span class="o">(</span><span class="n">objects</span> <span class="n">elements</span><span class="k">:</span> <span class="kt">AnyObject...</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="c1">// 这里注意，NSRange 和 Swift Range 对 range 结束的表述方法不同</span>
+</span><span class='line'><span class="c1">// NSRange 保存 range 元素个数</span>
+</span><span class='line'><span class="c1">// Swift Range 保存的是结束元素</span>
+</span><span class='line'><span class="c1">// let r = NSRange(0..20)</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">NSRange</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="k">_</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Range&lt;Int&gt;</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="c1">// let prop = NSDictionary(objectsAndKeys: &quot;Feather&quot;, &quot;name&quot;, &quot;Programming&quot;, &quot;hobby&quot;)</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">NSDictionary</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">convenience</span> <span class="n">init</span><span class="o">(</span><span class="n">objectsAndKeys</span> <span class="n">objects</span><span class="k">:</span> <span class="kt">AnyObject...</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">NSObject</span> <span class="k">:</span> <span class="kt">CVarArg</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">@objc</span> <span class="kt">func</span> <span class="kt">encode</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">Word</span><span class="o">[]</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>字符串的扩展方法非常多。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">availableStringEncodings</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">NSStringEncoding</span><span class="o">[]</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">defaultCStringEncoding</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">NSStringEncoding</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">localizedNameOfStringEncoding</span><span class="o">(</span><span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">localizedStringWithFormat</span><span class="o">(</span><span class="n">format</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="k">_</span> <span class="n">arguments</span><span class="k">:</span> <span class="kt">CVarArg...</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">pathWithComponents</span><span class="o">(</span><span class="n">components</span><span class="k">:</span> <span class="kt">String</span><span class="o">[])</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">stringWithContentsOfFile</span><span class="o">(</span><span class="n">path</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">encoding</span> <span class="n">enc</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSErrorPointer</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">stringWithContentsOfFile</span><span class="o">(</span><span class="n">path</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">usedEncoding</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;NSStringEncoding&gt;</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSErrorPointer</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">stringWithContentsOfURL</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">NSURL</span><span class="o">,</span> <span class="n">encoding</span> <span class="n">enc</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSErrorPointer</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">stringWithContentsOfURL</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">NSURL</span><span class="o">,</span> <span class="n">usedEncoding</span> <span class="n">enc</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;NSStringEncoding&gt;</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSErrorPointer</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">stringWithCString</span><span class="o">(</span><span class="n">cString</span><span class="k">:</span> <span class="kt">CString</span><span class="o">,</span> <span class="n">encoding</span> <span class="n">enc</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">stringWithUTF8String</span><span class="o">(</span><span class="n">bytes</span><span class="k">:</span> <span class="kt">CString</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">canBeConvertedToEncoding</span><span class="o">(</span><span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">capitalizedString</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">capitalizedStringWithLocale</span><span class="o">(</span><span class="kt">locale:</span> <span class="kt">NSLocale</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">caseInsensitiveCompare</span><span class="o">(</span><span class="n">aString</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">NSComparisonResult</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">commonPrefixWithString</span><span class="o">(</span><span class="n">aString</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">options</span><span class="k">:</span> <span class="kt">NSStringCompareOptions</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">compare</span><span class="o">(</span><span class="n">aString</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">options</span> <span class="n">mask</span><span class="k">:</span> <span class="kt">NSStringCompareOptions</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">range</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;?</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">locale</span><span class="k">:</span> <span class="kt">NSLocale?</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">NSComparisonResult</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">completePathIntoString</span><span class="o">(</span><span class="k">_</span> <span class="n">outputName</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;String&gt;</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">caseSensitive</span><span class="k">:</span> <span class="kt">Bool</span><span class="o">,</span> <span class="n">matchesIntoArray</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;String</span><span class="o">[]&gt;</span> <span class="k">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">filterTypes</span><span class="k">:</span> <span class="kt">String</span><span class="o">[]?</span> <span class="k">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Int</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">componentsSeparatedByCharactersInSet</span><span class="o">(</span><span class="n">separator</span><span class="k">:</span> <span class="kt">NSCharacterSet</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">[]</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">componentsSeparatedByString</span><span class="o">(</span><span class="n">separator</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">[]</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">cStringUsingEncoding</span><span class="o">(</span><span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CChar</span><span class="o">[]?</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">dataUsingEncoding</span><span class="o">(</span><span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">,</span> <span class="n">allowLossyConversion</span><span class="k">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">NSData</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">decomposedStringWithCanonicalMapping</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="kt">decomposedStringWithCompatibilityMapping:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">enumerateLines</span><span class="o">(</span><span class="kt">body:</span> <span class="o">(</span><span class="kt">line:</span> <span class="kt">String</span><span class="o">,</span> <span class="kt">inout</span> <span class="kt">stop:</span> <span class="kt">Bool</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="o">())</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">enumerateLinguisticTagsInRange</span><span class="o">(</span><span class="n">range</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">scheme</span> <span class="n">tagScheme</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">options</span> <span class="n">opts</span><span class="k">:</span> <span class="kt">NSLinguisticTaggerOptions</span><span class="o">,</span> <span class="n">orthography</span><span class="k">:</span> <span class="kt">NSOrthography?</span><span class="o">,</span> <span class="k">_</span> <span class="n">body</span><span class="k">:</span> <span class="o">(</span><span class="kt">String</span><span class="o">,</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">,</span> <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">.</span><span class="nc">Index</span><span class="o">&gt;,</span> <span class="n">inout</span> <span class="nc">Bool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">())</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">enumerateSubstringsInRange</span><span class="o">(</span><span class="n">range</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">options</span> <span class="n">opts</span><span class="k">:</span> <span class="kt">NSStringEnumerationOptions</span><span class="o">,</span> <span class="k">_</span> <span class="n">body</span><span class="k">:</span> <span class="o">(</span><span class="kt">substring:</span> <span class="kt">String</span><span class="o">,</span> <span class="kt">substringRange:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">enclosingRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">inout</span> <span class="nc">Bool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">())</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">fastestEncoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">fileSystemRepresentation</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">CChar</span><span class="o">[]</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">getBytes</span><span class="o">(</span><span class="n">inout</span> <span class="n">buffer</span><span class="k">:</span> <span class="kt">UInt8</span><span class="o">[],</span> <span class="n">maxLength</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">usedLength</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;Int&gt;</span><span class="o">,</span> <span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">,</span> <span class="n">options</span><span class="k">:</span> <span class="kt">NSStringEncodingConversionOptions</span><span class="o">,</span> <span class="n">range</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">remainingRange</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;Range&lt;String.Index&gt;&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">getCString</span><span class="o">(</span><span class="n">inout</span> <span class="n">buffer</span><span class="k">:</span> <span class="kt">CChar</span><span class="o">[],</span> <span class="n">maxLength</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">getFileSystemRepresentation</span><span class="o">(</span><span class="n">inout</span> <span class="n">buffer</span><span class="k">:</span> <span class="kt">CChar</span><span class="o">[],</span> <span class="n">maxLength</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">getLineStart</span><span class="o">(</span><span class="n">start</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">end</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">contentsEnd</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">forRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">getParagraphStart</span><span class="o">(</span><span class="n">start</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">end</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">contentsEnd</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">forRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">)</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">hash</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">static</span> <span class="kt">func</span> <span class="kt">stringWithBytes</span><span class="o">(</span><span class="kt">bytes:</span> <span class="kt">UInt8</span><span class="o">[],</span> <span class="n">length</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">stringWithBytesNoCopy</span><span class="o">(</span><span class="n">bytes</span><span class="k">:</span> <span class="kt">CMutableVoidPointer</span><span class="o">,</span> <span class="n">length</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">,</span> <span class="n">freeWhenDone</span> <span class="n">flag</span><span class="k">:</span> <span class="kt">Bool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">utf16CodeUnits</span><span class="k">:</span> <span class="kt">CConstPointer&lt;unichar&gt;</span><span class="o">,</span> <span class="n">count</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">utf16CodeUnitsNoCopy</span><span class="k">:</span> <span class="kt">CConstPointer&lt;unichar&gt;</span><span class="o">,</span> <span class="n">count</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">freeWhenDone</span> <span class="n">flag</span><span class="k">:</span> <span class="kt">Bool</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">format</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="k">_</span> <span class="nc">_arguments</span><span class="k">:</span> <span class="kt">CVarArg...</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">format</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arguments</span><span class="k">:</span> <span class="kt">CVarArg</span><span class="o">[])</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">format</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">locale</span><span class="k">:</span> <span class="kt">NSLocale?</span><span class="o">,</span> <span class="k">_</span> <span class="n">args</span><span class="k">:</span> <span class="kt">CVarArg...</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">format</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">locale</span><span class="k">:</span> <span class="kt">NSLocale?</span><span class="o">,</span> <span class="n">arguments</span><span class="k">:</span> <span class="kt">CVarArg</span><span class="o">[])</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">lastPathComponent</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="kt">utf16count:</span> <span class="kt">Int</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">lengthOfBytesUsingEncoding</span><span class="o">(</span><span class="kt">encoding:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">Int</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">lineRangeForRange</span><span class="o">(</span><span class="n">aRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">.</span><span class="nc">Index</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">linguisticTagsInRange</span><span class="o">(</span><span class="n">range</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">,</span> <span class="n">scheme</span> <span class="n">tagScheme</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">options</span> <span class="n">opts</span><span class="k">:</span> <span class="kt">NSLinguisticTaggerOptions</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">orthography</span><span class="k">:</span> <span class="kt">NSOrthography?</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">tokenRanges</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;Range&lt;String.Index&gt;</span><span class="o">[]&gt;</span> <span class="k">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">[]</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">localizedCaseInsensitiveCompare</span><span class="o">(</span><span class="n">aString</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">NSComparisonResult</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">localizedCompare</span><span class="o">(</span><span class="n">aString</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">NSComparisonResult</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">localizedStandardCompare</span><span class="o">(</span><span class="n">string</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">NSComparisonResult</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">lowercaseStringWithLocale</span><span class="o">(</span><span class="n">locale</span><span class="k">:</span> <span class="kt">NSLocale</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">maximumLengthOfBytesUsingEncoding</span><span class="o">(</span><span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Int</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">paragraphRangeForRange</span><span class="o">(</span><span class="n">aRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">.</span><span class="nc">Index</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">pathComponents</span><span class="k">:</span> <span class="kt">String</span><span class="o">[]</span> <span class="o">{</span> <span class="n">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">pathExtension</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="kt">precomposedStringWithCanonicalMapping:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="kt">precomposedStringWithCompatibilityMapping:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">propertyList</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">AnyObject</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">propertyListFromStringsFileFormat</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Dictionary</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rangeOfCharacterFromSet</span><span class="o">(</span><span class="n">aSet</span><span class="k">:</span> <span class="kt">NSCharacterSet</span><span class="o">,</span> <span class="n">options</span> <span class="n">mask</span><span class="k">:</span> <span class="kt">NSStringCompareOptions</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">range</span> <span class="n">aRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;?</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">.</span><span class="nc">Index</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rangeOfComposedCharacterSequenceAtIndex</span><span class="o">(</span><span class="n">anIndex</span><span class="k">:</span> <span class="kt">String.Index</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">.</span><span class="nc">Index</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rangeOfComposedCharacterSequencesForRange</span><span class="o">(</span><span class="n">range</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">.</span><span class="nc">Index</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rangeOfString</span><span class="o">(</span><span class="n">aString</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">options</span> <span class="n">mask</span><span class="k">:</span> <span class="kt">NSStringCompareOptions</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">range</span> <span class="n">searchRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;?</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">locale</span><span class="k">:</span> <span class="kt">NSLocale?</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">.</span><span class="nc">Index</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">smallestEncoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">stringByAbbreviatingWithTildeInPath</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByAddingPercentEncodingWithAllowedCharacters</span><span class="o">(</span><span class="n">allowedCharacters</span><span class="k">:</span> <span class="kt">NSCharacterSet</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByAddingPercentEscapesUsingEncoding</span><span class="o">(</span><span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByAppendingFormat</span><span class="o">(</span><span class="n">format</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="k">_</span> <span class="n">arguments</span><span class="k">:</span> <span class="kt">CVarArg...</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByAppendingPathComponent</span><span class="o">(</span><span class="n">aString</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByAppendingPathExtension</span><span class="o">(</span><span class="n">ext</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByAppendingString</span><span class="o">(</span><span class="n">aString</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">stringByDeletingLastPathComponent</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="kt">stringByDeletingPathExtension:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="kt">stringByExpandingTildeInPath:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">stringByFoldingWithOptions</span><span class="o">(</span><span class="kt">options:</span> <span class="kt">NSStringCompareOptions</span><span class="o">,</span> <span class="kt">locale:</span> <span class="kt">NSLocale</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByPaddingToLength</span><span class="o">(</span><span class="n">newLength</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">withString</span> <span class="n">padString</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">startingAtIndex</span> <span class="n">padIndex</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">stringByRemovingPercentEncoding</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">stringByReplacingCharactersInRange</span><span class="o">(</span><span class="kt">range:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">,</span> <span class="kt">withString</span> <span class="kt">replacement:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByReplacingOccurrencesOfString</span><span class="o">(</span><span class="n">target</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">withString</span> <span class="n">replacement</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">options</span><span class="k">:</span> <span class="kt">NSStringCompareOptions</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">range</span> <span class="n">searchRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;?</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringByReplacingPercentEscapesUsingEncoding</span><span class="o">(</span><span class="n">encoding</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">stringByResolvingSymlinksInPath</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="kt">stringByStandardizingPath:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">stringByTrimmingCharactersInSet</span><span class="o">(</span><span class="kt">set:</span> <span class="kt">NSCharacterSet</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">stringsByAppendingPaths</span><span class="o">(</span><span class="n">paths</span><span class="k">:</span> <span class="kt">String</span><span class="o">[])</span> <span class="o">-&gt;</span> <span class="nc">String</span><span class="o">[]</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">substringFromIndex</span><span class="o">(</span><span class="n">index</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">substringToIndex</span><span class="o">(</span><span class="n">index</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">substringWithRange</span><span class="o">(</span><span class="n">aRange</span><span class="k">:</span> <span class="kt">Range&lt;String.Index&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">uppercaseStringWithLocale</span><span class="o">(</span><span class="n">locale</span><span class="k">:</span> <span class="kt">NSLocale</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">writeToFile</span><span class="o">(</span><span class="n">path</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">atomically</span> <span class="n">useAuxiliaryFile</span><span class="k">:</span> <span class="kt">Bool</span><span class="o">,</span> <span class="n">encoding</span> <span class="n">enc</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSErrorPointer</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">writeToURL</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">NSURL</span><span class="o">,</span> <span class="n">atomically</span> <span class="n">useAuxiliaryFile</span><span class="k">:</span> <span class="kt">Bool</span><span class="o">,</span> <span class="n">encoding</span> <span class="n">enc</span><span class="k">:</span> <span class="kt">NSStringEncoding</span><span class="o">,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSErrorPointer</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>CoreGraphics</h3>
+
+<p>几个常用基本类型都有了 Swift-style 的构造函数。其中 <code>CGRect</code> 有很多的相关运算都被封装为方法，很不错。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">CGPoint</span> <span class="k">:</span> <span class="kt">Equatable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">static</span> <span class="kt">var</span> <span class="kt">zeroPoint:</span> <span class="kt">CGPoint</span>
+</span><span class='line'>  <span class="kt">init</span><span class="o">()</span>
+</span><span class='line'>  <span class="kt">init</span><span class="o">(</span><span class="kt">x:</span> <span class="kt">Int</span><span class="o">,</span> <span class="kt">y:</span> <span class="kt">Int</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">CGSize</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">static</span> <span class="k">var</span> <span class="n">zeroSize</span><span class="k">:</span> <span class="kt">CGSize</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">width</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">height</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">CGVector</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">static</span> <span class="k">var</span> <span class="n">zeroVector</span><span class="k">:</span> <span class="kt">CGVector</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="k">_</span> <span class="n">dx</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="k">_</span> <span class="n">dy</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="k">_</span> <span class="n">dx</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="k">_</span> <span class="n">dy</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">CGRect</span> <span class="k">:</span> <span class="kt">Equatable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// 全为 0</span>
+</span><span class='line'>  <span class="kt">static</span> <span class="kt">var</span> <span class="kt">zeroRect:</span> <span class="kt">CGRect</span>
+</span><span class='line'>  <span class="c1">// 原点为无穷大，表示空</span>
+</span><span class='line'>  <span class="n">static</span> <span class="k">var</span> <span class="n">nullRect</span><span class="k">:</span> <span class="kt">CGRect</span>
+</span><span class='line'>  <span class="c1">// 原点无穷小，宽高无穷大</span>
+</span><span class='line'>  <span class="n">static</span> <span class="k">var</span> <span class="n">infiniteRect</span><span class="k">:</span> <span class="kt">CGRect</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="n">width</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="n">height</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">width</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">height</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">width</span><span class="k">:</span> <span class="kt">CGFloat</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">height</span><span class="k">:</span> <span class="kt">CGFloat</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">minX</span><span class="k">:</span> <span class="kt">CGFloat</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">minY</span><span class="k">:</span> <span class="kt">CGFloat</span>
+</span><span class='line'>  <span class="c1">// 中点</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">midX</span><span class="k">:</span> <span class="kt">CGFloat</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">midY</span><span class="k">:</span> <span class="kt">CGFloat</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">maxX</span><span class="k">:</span> <span class="kt">CGFloat</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">maxY</span><span class="k">:</span> <span class="kt">CGFloat</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">isNull</span><span class="k">:</span> <span class="kt">Bool</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">isEmpty</span><span class="k">:</span> <span class="kt">Bool</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">isInfinite</span><span class="k">:</span> <span class="kt">Bool</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">standardizedRect</span><span class="k">:</span> <span class="kt">CGRect</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">standardize</span><span class="o">()</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">integerRect</span><span class="k">:</span> <span class="kt">CGRect</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">integerize</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rectByInsetting</span><span class="o">(</span><span class="k">#</span><span class="n">dx</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="n">dy</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CGRect</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">inset</span><span class="o">(</span><span class="k">#</span><span class="n">dx</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="n">dy</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rectByOffsetting</span><span class="o">(</span><span class="k">#</span><span class="n">dx</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="n">dy</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CGRect</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">offset</span><span class="o">(</span><span class="k">#</span><span class="n">dx</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="n">dy</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rectByUnion</span><span class="o">(</span><span class="n">withRect</span><span class="k">:</span> <span class="kt">CGRect</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CGRect</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">union</span><span class="o">(</span><span class="n">withRect</span><span class="k">:</span> <span class="kt">CGRect</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rectByIntersecting</span><span class="o">(</span><span class="n">withRect</span><span class="k">:</span> <span class="kt">CGRect</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CGRect</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">intersect</span><span class="o">(</span><span class="n">withRect</span><span class="k">:</span> <span class="kt">CGRect</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">rectsByDividing</span><span class="o">(</span><span class="n">atDistance</span><span class="k">:</span> <span class="kt">CGFloat</span><span class="o">,</span> <span class="n">fromEdge</span><span class="k">:</span> <span class="kt">CGRectEdge</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">slice</span><span class="k">:</span> <span class="kt">CGRect</span><span class="o">,</span> <span class="n">remainder</span><span class="k">:</span> <span class="kt">CGRect</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">contains</span><span class="o">(</span><span class="n">rect</span><span class="k">:</span> <span class="kt">CGRect</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">contains</span><span class="o">(</span><span class="n">point</span><span class="k">:</span> <span class="kt">CGPoint</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">intersects</span><span class="o">(</span><span class="n">rect</span><span class="k">:</span> <span class="kt">CGRect</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>AppKit</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">NSGradient</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">convenience</span> <span class="n">init</span><span class="o">(</span><span class="n">colorsAndLocations</span> <span class="n">objects</span><span class="k">:</span> <span class="o">(</span><span class="kt">AnyObject</span><span class="o">,</span> <span class="kt">CGFloat</span><span class="o">)...)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>UIKit</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">UIDeviceOrientation</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">isPortrait</span><span class="k">:</span> <span class="kt">Bool</span>
+</span><span class='line'>  <span class="c1">// also isLandscape isValidInterfaceOrientation isFlat </span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">extension</span> <span class="nc">UIInterfaceOrientation</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">isPortrait</span><span class="k">:</span> <span class="kt">Bool</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">isLandscape</span><span class="k">:</span> <span class="kt">Bool</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个模块是交叉编译的。。不太容易获得信息。不过好在扩展内容不多。</p>
+
+<h3>SpriteKit</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">SKNode</span> <span class="o">{</span>
+</span><span class='line'>  <span class="nd">@objc</span> <span class="n">subscript</span> <span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">SKNode</span><span class="o">[]</span> <span class="o">{</span> <span class="n">get</span> <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>特殊 Mirror 实现</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nc">NSSet</span> <span class="nc">NSDate</span> <span class="nc">NSArray</span> <span class="nc">NSRange</span> <span class="nc">NSURL</span> <span class="nc">NSDictionary</span> <span class="nc">NSString</span>
+</span><span class='line'><span class="nc">CGPoint</span> <span class="nc">CGRect</span> <span class="nc">CGSize</span>
+</span><span class='line'><span class="nc">NSView</span>
+</span><span class='line'><span class="nc">UIView</span>
+</span><span class='line'><span class="nc">SKTextureAtlas</span> <span class="nc">SKTexture</span> <span class="nc">SKSpriteNode</span> <span class="nc">SKShapeNode</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>单独添加了自己的 <code>Mirror</code> 类型，单独实现。</p>
+
+<p><code>Mirror</code> 类型其实是为 <code>QuickLookObject</code> 准备的，也就是在 Xcode Playground 中快速查看。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-04T01:05:55+08:00" pubdate data-updated="true">Jul 4<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/swift/'>swift</a>, <a class='category' href='/blog/categories/swift-internals/'>swift-internals</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/06/30/swift-type-hierarchy/" title="Previous Post: Swift Type Hierarchy ( Swift 类型层次结构 ）">&laquo; Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/07/04/swift-undocumented-grammar/" title="Next Post: Swift Undocumented Grammar （Swift 黑语法）">Swift Undocumented Grammar （Swift 黑语法） &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/';
+        var disqus_url = 'http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

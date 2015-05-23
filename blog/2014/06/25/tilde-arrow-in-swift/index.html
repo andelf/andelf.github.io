@@ -1,0 +1,466 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ） - 猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="本文瞎写，没实际内容。请不用看了。 摘要 本文挖掘 Swift 标准库中的诡异操作符 ~&gt; 波浪箭头的作用。 正文 查看标准库定义的时候，发现了一个奇怪的运算符 ~&gt;，看起来高大上，所以探索下它到底起什么作用。 标准库对 ~&gt; 用到的地方很多，我取最简单的一个来做说明。 1
+2 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-25T22:44:29+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文瞎写，没实际内容。请不用看了。</p>
+
+<h2>摘要</h2>
+
+<p>本文挖掘 Swift 标准库中的诡异操作符 <code>~&gt;</code> 波浪箭头的作用。</p>
+
+<h2>正文</h2>
+
+<p>查看标准库定义的时候，发现了一个奇怪的运算符 <code>~&gt;</code>，看起来高大上，所以探索下它到底起什么作用。</p>
+
+<p>标准库对 <code>~&gt;</code> 用到的地方很多，我取最简单的一个来做说明。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protocol SignedNumber : _SignedNumber {
+</span><span class='line'>  func -(x: Self) -&gt; Self
+</span><span class='line'>  func ~&gt;(_: Self, _: (_Abs, ())) -&gt; Self
+</span><span class='line'>}
+</span><span class='line'>func ~&gt;&lt;T : _SignedNumber&gt;(x: T, _: (_Abs, ())) -&gt; T
+</span><span class='line'>func abs(_: CInt) -&gt; CInt
+</span><span class='line'>func abs&lt;T : SignedNumber&gt;(x: T) -&gt; T</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这是对有符号整型的一个协议，我去掉了额外的属性。事实上 <code>_Abs</code> 类型是一个空结构， <code>sizeof</code> 为 0 。</p>
+
+<p>写个测试程序，计算下 <code>abs(-100)</code> 看看情况，发现 <code>top_level_code()</code> 调用了 <code>SignedNumber</code> 版本的 <code>abs()</code>：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>callq  0x100001410               ; Swift.abs &lt;A : Swift.SignedNumber&gt;(A) -&gt; A</span></code></pre></td></tr></table></div></figure>
+
+
+<p>反汇编这个库函数，发现一个有意思的调用：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>callq  0x10000302a               ; symbol stub for: Swift._abs &lt;A&gt;(A) -&gt; (Swift._Abs, A)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个 <code>_abs()</code> 函数是私有函数， Swift 中把很多私有的函数、成员变量、结构、协议都以下划线开头，意思就是不希望我们去调用或者访问的函数，在缺乏成员访问控制的语言中，其实这么做也不错。大家可以借鉴。</p>
+
+<p>而 <code>_abs()</code> 函数很简单，将任意类型 T 直接封装成 <code>(_Abs, T)</code> 元组，返回。</p>
+
+<p>然后代码的逻辑就是用这个元祖解开重新组装，调用 <code>~&gt;</code>。逻辑如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// logic of abs() funciton</span>
+</span><span class='line'><span class="n">let</span> <span class="o">(</span><span class="n">operation</span><span class="o">,</span> <span class="k">val</span><span class="o">)</span> <span class="k">=</span> <span class="nc">_abs</span><span class="o">(-</span><span class="mi">100</span><span class="o">)</span>
+</span><span class='line'><span class="k">val</span> <span class="o">~&gt;</span> <span class="o">(</span><span class="n">operation</span><span class="o">,</span> <span class="o">())</span> <span class="c1">// 返回 100</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>到这里就清楚了。实际上 <code>~&gt;</code> 将一个简单的操作复杂化。多调用了层，实际开销主要在元祖的解开和重组装（实际开销理论上在优化模式下应该可以忽略，因为包含 <code>_Abs</code>， size 为 0）。</p>
+
+<p>到这里很多朋友应该已经知道怎么回事了。 <code>SignedNumber</code> 中的 <code>~&gt;</code> 操作是为我们提供了一个方法可以 hook 到标准库的 <code>abs()</code> 函数。来自 Haskell 的同学应该会见过这种单纯地用类型签名来实现函数分发调用的方式。</p>
+
+<h3>优点？</h3>
+
+<p>暂时正在考虑。想明白会发出来。</p>
+
+<h3>延伸</h3>
+
+<p>其实很多标准库函数都用到了类似的方法实现。都用到了 <code>~&gt;</code> 运算符。包括：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">countElements</span><span class="o">()</span>
+</span><span class='line'><span class="c1">// _countElements() 工具函数  _CountElements 结构</span>
+</span><span class='line'><span class="n">underestimateCount</span><span class="o">()</span>
+</span><span class='line'><span class="c1">// _underestimateCount() 、 _UnderestimateCount</span>
+</span><span class='line'><span class="n">advance</span><span class="o">()</span>
+</span><span class='line'><span class="c1">// _advance() 、 _Advance</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>等。</p>
+
+<h2>附录</h2>
+
+<p>这里列出部分定义：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Sequence</span> <span class="k">:</span> <span class="k">_</span><span class="kt">Sequence_</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">type</span><span class="kt">alias</span> <span class="kt">GeneratorType</span> <span class="kt">:</span> <span class="kt">Generator</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">generate</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">GeneratorType</span>
+</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="k">_:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">UnderestimateCount</span><span class="o">,</span> <span class="o">()))</span> <span class="o">-&gt;</span> <span class="nc">Int</span>
+</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;&lt;</span><span class="n">R</span><span class="o">&gt;(</span><span class="k">_:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">PreprocessingPass</span><span class="o">,</span> <span class="o">((</span><span class="kt">Self</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">R</span><span class="o">)))</span> <span class="o">-&gt;</span> <span class="n">R</span><span class="o">?</span>
+</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="k">_:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">CopyToNativeArrayBuffer</span><span class="o">,</span> <span class="o">()))</span> <span class="o">-&gt;</span> <span class="nc">ContiguousArrayBuffer</span><span class="o">&lt;</span><span class="nc">Self</span><span class="o">.</span><span class="nc">GeneratorType</span><span class="o">.</span><span class="nc">Element</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">protocol</span> <span class="nc">Collection</span> <span class="k">:</span> <span class="k">_</span><span class="kt">Collection</span><span class="o">,</span> <span class="nc">Sequence</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">subscript</span> <span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Self.IndexType</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">.</span><span class="nc">GeneratorType</span><span class="o">.</span><span class="nc">Element</span> <span class="o">{</span> <span class="n">get</span> <span class="o">}</span>
+</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="k">_:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">CountElements</span><span class="o">,</span> <span class="o">()))</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">.</span><span class="nc">IndexType</span><span class="o">.</span><span class="nc">DistanceType</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">protocol</span> <span class="nc">ForwardIndex</span> <span class="k">:</span> <span class="k">_</span><span class="kt">ForwardIndex</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">func</span> <span class="kt">~&gt;</span><span class="o">(</span><span class="kt">start:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_</span><span class="kt">:</span> <span class="o">(</span><span class="k">_</span><span class="kt">Distance</span><span class="o">,</span> <span class="kt">Self</span><span class="o">))</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">.</span><span class="nc">DistanceType</span>
+</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="n">start</span><span class="k">:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">Advance</span><span class="o">,</span> <span class="kt">Self.DistanceType</span><span class="o">))</span> <span class="o">-&gt;</span> <span class="nc">Self</span>
+</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="n">start</span><span class="k">:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">Advance</span><span class="o">,</span> <span class="o">(</span><span class="kt">Self.DistanceType</span><span class="o">,</span> <span class="kt">Self</span><span class="o">)))</span> <span class="o">-&gt;</span> <span class="nc">Self</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>相关更多声明代码信息请参考 我的 Github : <a href="https://github.com/andelf/Defines-Swift">andelf/Defines-Swift</a> 。</p>
+
+<h2>总结</h2>
+
+<p>通过 <code>~&gt;</code> 和 <code>protocol</code> 可以自定义编译器的行为。相当于 hook 标准库函数。由于内部实现未知，还不能继续断言它还有什么作用。</p>
+
+<p>但是和直接用 extension 实现协议的方法相比，这个有什么好处呢？待考。</p>
+
+<h2>更新</h2>
+
+<p>可以避免 <code>protocol</code> 中的静态函数混淆空间，如果用全局函数，那么相当于全局函数去调用静态函数。</p>
+
+<p>还有就是在使用操作符的时候，如果定义多个，那么需要编译器去寻找可用的一个版本。</p>
+
+<p>仔细查看目前的 <code>protocol</code> 实现，发现还是有点 BUG ，类型限制还是不清楚，表述高阶类型的时候。</p>
+
+<p>为了描述 <code>~&gt;</code> 的用法，我写了个 <a href="https://gist.github.com/andelf/6a8432ef0820de9991f6">Monad.swift</a> 。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-25T22:44:29+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/swift/'>swift</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/06/25/write-swift-module-with-swift-cont/" title="Previous Post: Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）">&laquo; Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/06/28/swift-interop-with-c-slash-objc/" title="Next Post: Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）">Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分） &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/';
+        var disqus_url = 'http://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

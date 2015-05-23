@@ -1,0 +1,790 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="Run with rustdoc -L. --plugin-path . --plugins dummy rust-sdl2/src/sdl2/lib.rs 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+#![crate_id = &quot;dummy#0.1& &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/page/4">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/29/a-rustdoc-plugin/">A Rustdoc Plugin</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-29T02:26:48+08:00" pubdate data-updated="true">Apr 29<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Run with</p>
+
+<pre><code>rustdoc -L. --plugin-path . --plugins dummy rust-sdl2/src/sdl2/lib.rs
+</code></pre>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">crate_id</span> <span class="o">=</span> <span class="s">&quot;dummy#0.1&quot;</span><span class="p">]</span>
+</span><span class='line'><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">crate_type</span> <span class="o">=</span> <span class="s">&quot;dylib&quot;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">extern</span> <span class="n">crate</span> <span class="n">rustdoc</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="n">rustdoc</span><span class="o">::</span><span class="n">clean</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="n">rustdoc</span><span class="o">::</span><span class="n">plugins</span><span class="o">::</span><span class="p">{</span><span class="n">PluginCallback</span><span class="p">,</span> <span class="n">PluginResult</span><span class="p">,</span> <span class="n">PluginJson</span><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#[no_mangle]</span>
+</span><span class='line'><span class="n">pub</span> <span class="k">fn</span> <span class="n">rustdoc_plugin_entrypoint</span><span class="p">(</span><span class="n">c</span><span class="o">:</span> <span class="n">clean</span><span class="o">::</span><span class="n">Crate</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PluginResult</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;loading extension ok!&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;crate =&gt; {}&quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">None</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/29/rust-tokenizer/">Rust Tokenizer</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-29T01:06:38+08:00" pubdate data-updated="true">Apr 29<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>A rust tokenizer from rust standard library.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="n">extern</span> <span class="n">crate</span> <span class="k">syntax</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">parse</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">ast</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">sess</span> <span class="o">=</span> <span class="n">parse</span><span class="o">::</span><span class="n">new_parse_sess</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">Vec</span><span class="o">::</span><span class="n">new</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">let</span> <span class="k">mut</span> <span class="n">p</span> <span class="o">=</span> <span class="n">parse</span><span class="o">::</span><span class="n">new_parser_from_file</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sess</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Path</span><span class="o">::</span><span class="n">new</span><span class="p">(</span><span class="s">&quot;./mytest.rs&quot;</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">while</span> <span class="n">p</span><span class="p">.</span><span class="n">token</span> <span class="o">!=</span> <span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="o">::</span><span class="n">EOF</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">p</span><span class="p">.</span><span class="n">bump</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;debug =&gt; {}&quot;</span><span class="p">,</span> <span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="o">::</span><span class="n">to_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">.</span><span class="n">token</span><span class="p">));</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>DONE!</p>
+
+<p><code>p.parse_token_tree()</code> will return a <code>TokenTree</code>, which is a nested
+token list.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/23/rust-syntax-extensions/">Rust Syntax Extensions</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-23T23:44:43+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>All rust ASTs are in <code>syntax::ast</code>. And extensions are in
+<code>syntax::ext</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">macro_registrar</span><span class="p">,</span> <span class="n">managed_boxes</span><span class="p">)];</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">extern</span> <span class="n">crate</span> <span class="k">syntax</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">ast</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">ast</span><span class="o">::</span><span class="n">Name</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">ext</span><span class="o">::</span><span class="n">base</span><span class="o">::</span><span class="n">SyntaxExtension</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#[macro_registrar]</span>
+</span><span class='line'><span class="n">pub</span> <span class="k">fn</span> <span class="n">macro_registrar</span><span class="p">(</span><span class="n">register</span><span class="o">:</span> <span class="o">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="o">|</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Managed boxes, the <code>@-pointer</code> is still used in rust compiler, so it
+is essential to enable this feature.</p>
+
+<p>where the doc says:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="c1">/// A name is a part of an identifier, representing a string or</span>
+</span><span class='line'><span class="n">gensym</span><span class="p">.</span> <span class="n">It</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">the</span> <span class="n">result</span> <span class="n">of</span> <span class="n">interning</span><span class="p">.</span>
+</span><span class='line'><span class="c1">/// created by token::intern()</span>
+</span><span class='line'><span class="k">type</span> <span class="n">Name</span> <span class="o">=</span> <span class="k">u32</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">/// An enum representing the different kinds of syntax extensions.</span>
+</span><span class='line'><span class="n">pub</span> <span class="k">enum</span> <span class="n">SyntaxExtension</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">/// A syntax extension that is attached to an item and creates new items</span>
+</span><span class='line'>    <span class="c1">/// based upon it.</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// `#[deriving(...)]` is an `ItemDecorator`.</span>
+</span><span class='line'>    <span class="n">ItemDecorator</span><span class="p">(</span><span class="n">ItemDecorator</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">/// A syntax extension that is attached to an item and modifies it</span>
+</span><span class='line'>    <span class="c1">/// in-place.</span>
+</span><span class='line'>    <span class="n">ItemModifier</span><span class="p">(</span><span class="n">ItemModifier</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">/// A normal, function-like syntax extension.</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// `bytes!` is a `NormalTT`.</span>
+</span><span class='line'>    <span class="n">NormalTT</span><span class="p">(</span><span class="o">~</span><span class="n">MacroExpander</span><span class="o">:</span><span class="err">&#39;</span><span class="n">static</span><span class="p">,</span> <span class="n">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">/// A function-like syntax extension that has an extra ident before</span>
+</span><span class='line'>    <span class="c1">/// the block.</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// `macro_rules!` is an `IdentTT`.</span>
+</span><span class='line'>    <span class="n">IdentTT</span><span class="p">(</span><span class="o">~</span><span class="n">IdentMacroExpander</span><span class="o">:</span><span class="err">&#39;</span><span class="n">static</span><span class="p">,</span> <span class="n">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">type</span> <span class="n">ItemDecorator</span> <span class="o">=</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">Span</span><span class="p">,</span> <span class="o">@</span><span class="n">MetaItem</span><span class="p">,</span> <span class="o">@</span><span class="n">Item</span><span class="p">,</span> <span class="o">|@</span><span class="n">Item</span><span class="o">|</span><span class="p">);</span>
+</span><span class='line'><span class="k">type</span> <span class="n">ItemModifier</span> <span class="o">=</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">Span</span><span class="p">,</span> <span class="o">@</span><span class="n">MetaItem</span><span class="p">,</span> <span class="o">@</span><span class="n">Item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">@</span><span class="n">Item</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pub</span> <span class="n">trait</span> <span class="n">MacroExpander</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">,</span> <span class="n">ecx</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">span</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">token_tree</span><span class="o">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">TokenTree</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pub</span> <span class="n">trait</span> <span class="n">IdentMacroExpander</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">,</span> <span class="n">cx</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">sp</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">ident</span><span class="o">:</span> <span class="n">Ident</span><span class="p">,</span> <span class="n">token_tree</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">TokenTree</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">/// The result of a macro expansion. The return values of the various</span>
+</span><span class='line'><span class="c1">/// methods are spliced into the AST at the callsite of the macro (or</span>
+</span><span class='line'><span class="c1">/// just into the compiler&#39;s internal macro table, for `make_def`).</span>
+</span><span class='line'><span class="n">pub</span> <span class="n">trait</span> <span class="n">MacResult</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">/// Define a new macro.</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">make_def</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Option</span><span class="o">&lt;</span><span class="n">MacroDef</span><span class="o">&gt;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">None</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">/// Create an expression.</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">make_expr</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Option</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Expr</span><span class="o">&gt;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">None</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">/// Create zero or more items.</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">make_items</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Option</span><span class="o">&lt;</span><span class="n">SmallVector</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Item</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">None</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">/// Create a statement.</span>
+</span><span class='line'>    <span class="c1">///</span>
+</span><span class='line'>    <span class="c1">/// By default this attempts to create an expression statement,</span>
+</span><span class='line'>    <span class="c1">/// returning None if that fails.</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">make_stmt</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Option</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Stmt</span><span class="o">&gt;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">self</span><span class="p">.</span><span class="n">make_expr</span><span class="p">()</span>
+</span><span class='line'>            <span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">e</span><span class="o">|</span> <span class="o">@</span><span class="n">codemap</span><span class="o">::</span><span class="n">respan</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">span</span><span class="p">,</span> <span class="n">ast</span><span class="o">::</span><span class="n">StmtExpr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ast</span><span class="o">::</span><span class="n">DUMMY_NODE_ID</span><span class="p">)))</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>How to call</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#[macro_registrar]</span>
+</span><span class='line'><span class="n">pub</span> <span class="k">fn</span> <span class="n">registrar</span><span class="p">(</span><span class="n">register</span><span class="o">:</span> <span class="o">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="o">|</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">register</span><span class="p">(</span><span class="n">token</span><span class="o">::</span><span class="n">intern</span><span class="p">(</span><span class="s">&quot;your_ext_name&quot;</span><span class="p">),</span> <span class="n">your_extension</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note: <code>registrar</code> is not <code>register</code>.</p>
+
+<p>How to create each part:</p>
+
+<p><code>Name</code> is generated from
+<code>syntax::parse::token::intern()</code>.</p>
+
+<p>For different SyntaxExtension Enum, write the function, and wrap in Enum constructor.</p>
+
+<h3>ItemDecorator</h3>
+
+<p><code>src/libsyntax/ext/deriving/mod.rs</code>. The
+<code>#[deriving(...)</code>.</p>
+
+<p>To make items from an existing item.</p>
+
+<h3>ItemModifier</h3>
+
+<p><code>src/test/auxiliary/macro_crate_test.rs</code></p>
+
+<p>Modify existing item.</p>
+
+<h3>NormalTT</h3>
+
+<p>Builtin sample in: <code>src/libsyntax/ext/base.rs</code> and sub dirs.
+Normal <code>macro_name!(...)</code> call.</p>
+
+<h3>IdentTT</h3>
+
+<p>Builtin sample in: <code>src/libsyntax/ext/tt/macro_rules.rs</code>, <code>pub fn add_new_extension</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="n">macro_name</span><span class="o">!</span> <span class="n">ident</span><span class="p">(</span>
+</span><span class='line'>    <span class="n">whatever</span> <span class="n">here</span><span class="p">...</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Aux</h2>
+
+<p>The <code>quote</code> feature.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">quote</span><span class="p">,</span> <span class="n">phase</span><span class="p">)]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This enables <code>quote_expr!(ExtCtxt, [Code])</code>, <code>quote_tokens!</code>,
+<code>quote_item!</code>, <code>quote_pat!</code>, <code>quote_stmt!</code>, <code>quote_ty!</code> macros,
+and generates corresponding ast type.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/21/erlang-tips/">Erlang 的一些好玩 Tips</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-21T11:36:18+08:00" pubdate data-updated="true">Nov 21<span>st</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>可以模拟OO, 模块级别的继承.</p>
+
+<pre><code>-extends(parent).
+</code></pre>
+
+<p>反编译 beam, 对加密过或者 hipe 的似乎无效.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='erlang'><span class='line'><span class="p">{</span><span class="n">ok</span><span class="p">,{_,[{</span><span class="n">abstract_code</span><span class="p">,{_,</span><span class="nv">AC</span><span class="p">}}]}}</span> <span class="o">=</span> <span class="nn">beam_lib</span><span class="p">:</span><span class="nf">chunks</span><span class="p">(</span><span class="nv">Beam</span><span class="p">,[</span><span class="n">abstract_code</span><span class="p">]).</span>
+</span><span class='line'><span class="nn">io</span><span class="p">:</span><span class="nf">fwrite</span><span class="p">(</span><span class="s">&quot;</span><span class="si">~s~n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nn">erl_prettypr</span><span class="p">:</span><span class="nf">format</span><span class="p">(</span><span class="nn">erl_syntax</span><span class="p">:</span><span class="nf">form_list</span><span class="p">(</span><span class="nv">AC</span><span class="p">))]).</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>语句块, 比较少用到.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='erlang'><span class='line'><span class="k">begin</span>
+</span><span class='line'>   <span class="p">...</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Parameterised Modules 参数化模块, 也是模拟 OO 的.
+很多 web 框架都这么用, 不过这货在 R16 被去掉了, 也是&hellip; 其实挺恶心.</p>
+
+<pre><code>-module(xxx, [Arg1, Arg2]).
+</code></pre>
+
+<p>Stateful Modules, 用于替换 Parameterised Modules. 将模块和对应状态保存在 tuple 里,
+看起来像是调用某一对象的方法一样.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='erlang'><span class='line'><span class="nv">X</span> <span class="o">=</span> <span class="p">{</span><span class="nv">Mod</span><span class="p">,</span> <span class="nv">P1</span><span class="p">,</span> <span class="nv">P2</span><span class="p">,</span> <span class="p">...,</span> <span class="nv">Pn</span><span class="p">},</span>
+</span><span class='line'><span class="nv">X</span><span class="p">:</span><span class="nv">Func</span><span class="p">(</span><span class="nv">A1</span><span class="p">,</span> <span class="nv">A2</span><span class="p">,</span> <span class="p">...,</span> <span class="nv">An</span><span class="p">).</span>
+</span><span class='line'><span class="c">%% 等价于</span>
+</span><span class='line'><span class="nv">Mod</span><span class="p">:</span><span class="nv">Func</span><span class="p">(</span><span class="nv">A1</span><span class="p">,</span> <span class="nv">A2</span><span class="p">,</span> <span class="p">...,</span> <span class="nv">An</span><span class="p">,</span> <span class="nv">X</span><span class="p">).</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所以 web 框架就转为使用这个特性了, 看起来很无害而且不反 FP.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/20/hello-world/">Hello World!</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-20T17:26:26+08:00" pubdate data-updated="true">Nov 20<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='haskell'><span class='line'><span class="nf">main</span> <span class="ow">=</span> <span class="n">putStrLn</span> <span class="s">&quot;Hello World&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/3/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
