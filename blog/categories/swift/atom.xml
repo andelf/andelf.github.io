@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Swift | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/swift/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2015-07-15T23:34:54+08:00</updated>
+  <updated>2015-07-15T23:37:50+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -18,7 +18,8 @@
     <link href="http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling/"/>
     <updated>2015-06-09T15:27:58+08:00</updated>
     <id>http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling</id>
-    <content type="html"><![CDATA[<p>protocol ErrorType {
+    <content type="html"><![CDATA[<p>```
+protocol ErrorType {
   var <em>domain: String { get }
   var </em>code: Int { get }
 }</p>
@@ -27,11 +28,13 @@
 
 <p>@asmname(&ldquo;swift_stdlib_getErrorCode&rdquo;) func _stdlib_getErrorCode<T : ErrorType>(x: UnsafePointer<T>) &ndash;> Int</p>
 
-<p>@asmname(&ldquo;swift_stdlib_getErrorDomainNSString&rdquo;) func _stdlib_getErrorDomainNSString<T : ErrorType>(x: UnsafePointer<T>) &ndash;> AnyObject</p>
+<p>@asmname(&ldquo;swift_stdlib_getErrorDomainNSString&rdquo;) func _stdlib_getErrorDomainNSString<T : ErrorType>(x: UnsafePointer<T>) &ndash;> AnyObject
+```</p>
 
 <h2>Foundation</h2>
 
-<p>protocol <em>ObjectiveCBridgeableErrorType : ErrorType {
+<p>```
+protocol <em>ObjectiveCBridgeableErrorType : ErrorType {
   init?(</em>bridgedNSError: NSError)
 }</p>
 
@@ -90,11 +93,13 @@ func _stdlib_bridgeNSErrorToErrorType<T : _ObjectiveCBridgeableErrorType>(error:
 func ~=(match: NSCocoaError, error: ErrorType) &ndash;> Bool
 protocol _BridgedNSError : </strong>BridgedNSError, <em>ObjectiveCBridgeableErrorType, Hashable {
   static var </em>NSErrorDomain: String { get }
-}</p>
+}
+```</p>
 
 <p>ErrorType 在 Swift 中表示。</p>
 
-<p>extension NSError : ErrorType {
+<p>```
+extension NSError : ErrorType {
   @objc dynamic var _domain: String {</p>
 
 <pre><code>@objc dynamic get {}
@@ -107,9 +112,8 @@ protocol _BridgedNSError : </strong>BridgedNSError, <em>ObjectiveCBridgeableErro
 </code></pre>
 
 <p>  }
-}</p>
-
-<p>CFError</p>
+}
+```</p>
 ]]></content>
   </entry>
   

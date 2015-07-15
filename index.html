@@ -149,98 +149,151 @@
   </header>
 
 
-  <div class="entry-content"><p>protocol ErrorType {
-  var <em>domain: String { get }
-  var </em>code: Int { get }
-}</p>
+  <div class="entry-content"><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protocol ErrorType {
+</span><span class='line'>  var _domain: String { get }
+</span><span class='line'>  var _code: Int { get }
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@asmname("swift_bridgeErrorTypeToNSError") func _bridgeErrorTypeToNSError(e: ErrorType) -&gt; AnyObject
+</span><span class='line'>
+</span><span class='line'>@asmname("swift_stdlib_getErrorCode") func _stdlib_getErrorCode&lt;T : ErrorType&gt;(x: UnsafePointer&lt;T&gt;) -&gt; Int
+</span><span class='line'>
+</span><span class='line'>@asmname("swift_stdlib_getErrorDomainNSString") func _stdlib_getErrorDomainNSString&lt;T : ErrorType&gt;(x: UnsafePointer&lt;T&gt;) -&gt; AnyObject</span></code></pre></td></tr></table></div></figure>
 
-<p>@asmname(&ldquo;swift_bridgeErrorTypeToNSError&rdquo;) func _bridgeErrorTypeToNSError(e: ErrorType) &ndash;> AnyObject</p>
-
-<p>@asmname(&ldquo;swift_stdlib_getErrorCode&rdquo;) func _stdlib_getErrorCode<T : ErrorType>(x: UnsafePointer<T>) &ndash;> Int</p>
-
-<p>@asmname(&ldquo;swift_stdlib_getErrorDomainNSString&rdquo;) func _stdlib_getErrorDomainNSString<T : ErrorType>(x: UnsafePointer<T>) &ndash;> AnyObject</p>
 
 <h2>Foundation</h2>
 
-<p>protocol <em>ObjectiveCBridgeableErrorType : ErrorType {
-  init?(</em>bridgedNSError: NSError)
-}</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protocol _ObjectiveCBridgeableErrorType : ErrorType {
+</span><span class='line'>  init?(_bridgedNSError: NSError)
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>struct NSCocoaError : RawRepresentable, _BridgedNSError, _ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError, Hashable, Equatable {
+</span><span class='line'>  let rawValue: Int
+</span><span class='line'>  init(rawValue: Int)
+</span><span class='line'>  static var _NSErrorDomain: String {
+</span><span class='line'>    get {}
+</span><span class='line'>  }
+</span><span class='line'>  typealias RawValue = Int
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>infix func ==(a: _GenericObjCError, b: _GenericObjCError) -&gt; Bool
+</span><span class='line'>infix func ==(a: _GenericObjCError, b: _GenericObjCError) -&gt; Bool
+</span><span class='line'>func ==&lt;T : __BridgedNSError where T.RawValue : SignedIntegerType&gt;(lhs: T, rhs: T) -&gt; Bool
+</span><span class='line'>
+</span><span class='line'>@available(OSX 10.11, iOS 9.0, *)
+</span><span class='line'>func resolveError(error: NSError?) throws
+</span><span class='line'>
+</span><span class='line'>enum _GenericObjCError : ErrorType {
+</span><span class='line'>  case NilError
+</span><span class='line'>  var hashValue: Int {
+</span><span class='line'>    get {}
+</span><span class='line'>  }
+</span><span class='line'>  var _domain: String {
+</span><span class='line'>    get {}
+</span><span class='line'>  }
+</span><span class='line'>  var _code: Int {
+</span><span class='line'>    get {}
+</span><span class='line'>  }
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@asmname("swift_stdlib_bridgeNSErrorToErrorType")
+</span><span class='line'>func _stdlib_bridgeNSErrorToErrorType&lt;T : _ObjectiveCBridgeableErrorType&gt;(error: NSError, out: UnsafeMutablePointer&lt;T&gt;) -&gt; Bool
+</span><span class='line'>
+</span><span class='line'>@asmname("swift_convertNSErrorToErrorType") func _convertNSErrorToErrorType(error: NSError?) -&gt; ErrorType
+</span><span class='line'>
+</span><span class='line'>@objc enum NSURLError : Int, _BridgedNSError, _ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { ... }
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>protocol __BridgedNSError : RawRepresentable {
+</span><span class='line'>  static var _NSErrorDomain: String { get }
+</span><span class='line'>}
+</span><span class='line'>@asmname("swift_convertErrorTypeToNSError") func _convertErrorTypeToNSError(error: ErrorType) -&gt; NSError
+</span><span class='line'>func ~=(match: NSCocoaError, error: ErrorType) -&gt; Bool
+</span><span class='line'>protocol _BridgedNSError : __BridgedNSError, _ObjectiveCBridgeableErrorType, Hashable {
+</span><span class='line'>  static var _NSErrorDomain: String { get }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
-<p>struct NSCocoaError : RawRepresentable, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, <em>_BridgedNSError, Hashable, Equatable {
-  let rawValue: Int
-  init(rawValue: Int)
-  static var </em>NSErrorDomain: String {</p>
-
-<pre><code>get {}
-</code></pre>
-
-<p>  }
-  typealias RawValue = Int
-}</p>
-
-<p>infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
-infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
-func ==<T : __BridgedNSError where T.RawValue : SignedIntegerType>(lhs: T, rhs: T) &ndash;> Bool</p>
-
-<p>@available(OSX 10.11, iOS 9.0, *)
-func resolveError(error: NSError?) throws</p>
-
-<p>enum _GenericObjCError : ErrorType {
-  case NilError
-  var hashValue: Int {</p>
-
-<pre><code>get {}
-</code></pre>
-
-<p>  }
-  var _domain: String {</p>
-
-<pre><code>get {}
-</code></pre>
-
-<p>  }
-  var _code: Int {</p>
-
-<pre><code>get {}
-</code></pre>
-
-<p>  }
-}</p>
-
-<p>@asmname(&ldquo;swift_stdlib_bridgeNSErrorToErrorType&rdquo;)
-func _stdlib_bridgeNSErrorToErrorType<T : _ObjectiveCBridgeableErrorType>(error: NSError, out: UnsafeMutablePointer<T>) &ndash;> Bool</p>
-
-<p>@asmname(&ldquo;swift_convertNSErrorToErrorType&rdquo;) func _convertNSErrorToErrorType(error: NSError?) &ndash;> ErrorType</p>
-
-<p>@objc enum NSURLError : Int, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { &hellip; }</p>
-
-<p>protocol <strong>BridgedNSError : RawRepresentable {
-  static var <em>NSErrorDomain: String { get }
-}
-@asmname(&ldquo;swift_convertErrorTypeToNSError&rdquo;) func </em>convertErrorTypeToNSError(error: ErrorType) &ndash;> NSError
-func ~=(match: NSCocoaError, error: ErrorType) &ndash;> Bool
-protocol _BridgedNSError : </strong>BridgedNSError, <em>ObjectiveCBridgeableErrorType, Hashable {
-  static var </em>NSErrorDomain: String { get }
-}</p>
 
 <p>ErrorType 在 Swift 中表示。</p>
 
-<p>extension NSError : ErrorType {
-  @objc dynamic var _domain: String {</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>extension NSError : ErrorType {
+</span><span class='line'>  @objc dynamic var _domain: String {
+</span><span class='line'>    @objc dynamic get {}
+</span><span class='line'>  }
+</span><span class='line'>  @objc dynamic var _code: Int {
+</span><span class='line'>    @objc dynamic get {}
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
-<pre><code>@objc dynamic get {}
-</code></pre>
-
-<p>  }
-  @objc dynamic var _code: Int {</p>
-
-<pre><code>@objc dynamic get {}
-</code></pre>
-
-<p>  }
-}</p>
-
-<p>CFError</p>
 </div>
   
   
