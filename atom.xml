@@ -4,7 +4,7 @@
   <title><![CDATA[猫·仁波切]]></title>
   <link href="http://andelf.github.io/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2015-05-23T11:34:24+08:00</updated>
+  <updated>2015-07-15T23:34:54+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -12,6 +12,142 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[广州实时工具App逆向]]></title>
+    <link href="http://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus/"/>
+    <updated>2015-06-18T17:39:06+08:00</updated>
+    <id>http://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus</id>
+    <content type="html"><![CDATA[<p>简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。</p>
+
+<p><a href="https://github.com/andelf/guangzhou-realtime-bus">Github: guangzhou-realtime-bus</a></p>
+
+<ul>
+<li>生成 e=3 的 1024 位 RSA 密钥对</li>
+<li>公钥串用查表加密(byte 映射)，然后 base64 封装发送给服务器</li>
+<li>服务器返回一串用公钥加密过的数据</li>
+<li>用本地私钥解密后，该数据包含未知96字节的一段数据和 DES Key</li>
+<li>从此通信用 DES 加密</li>
+</ul>
+
+
+<p>base64封装过程：先打包字符串长度，然后是原始字符串（JSON），然后是<code>0x10</code>(md5字符串长度)，
+然后是 md5 校验值。整个二进制字符串用 base64 转码，POST 给服务器。</p>
+
+<p>具体的登录注册过程还需要进一步抓包分析，不过暂时兴趣不在这里了。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift 2.0 的错误处理(Swift 2.0 Error Handling)]]></title>
+    <link href="http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling/"/>
+    <updated>2015-06-09T15:27:58+08:00</updated>
+    <id>http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling</id>
+    <content type="html"><![CDATA[<p>protocol ErrorType {
+  var <em>domain: String { get }
+  var </em>code: Int { get }
+}</p>
+
+<p>@asmname(&ldquo;swift_bridgeErrorTypeToNSError&rdquo;) func _bridgeErrorTypeToNSError(e: ErrorType) &ndash;> AnyObject</p>
+
+<p>@asmname(&ldquo;swift_stdlib_getErrorCode&rdquo;) func _stdlib_getErrorCode<T : ErrorType>(x: UnsafePointer<T>) &ndash;> Int</p>
+
+<p>@asmname(&ldquo;swift_stdlib_getErrorDomainNSString&rdquo;) func _stdlib_getErrorDomainNSString<T : ErrorType>(x: UnsafePointer<T>) &ndash;> AnyObject</p>
+
+<h2>Foundation</h2>
+
+<p>protocol <em>ObjectiveCBridgeableErrorType : ErrorType {
+  init?(</em>bridgedNSError: NSError)
+}</p>
+
+<p>struct NSCocoaError : RawRepresentable, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, <em>_BridgedNSError, Hashable, Equatable {
+  let rawValue: Int
+  init(rawValue: Int)
+  static var </em>NSErrorDomain: String {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  typealias RawValue = Int
+}</p>
+
+<p>infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
+infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
+func ==<T : __BridgedNSError where T.RawValue : SignedIntegerType>(lhs: T, rhs: T) &ndash;> Bool</p>
+
+<p>@available(OSX 10.11, iOS 9.0, *)
+func resolveError(error: NSError?) throws</p>
+
+<p>enum _GenericObjCError : ErrorType {
+  case NilError
+  var hashValue: Int {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  var _domain: String {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  var _code: Int {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>@asmname(&ldquo;swift_stdlib_bridgeNSErrorToErrorType&rdquo;)
+func _stdlib_bridgeNSErrorToErrorType<T : _ObjectiveCBridgeableErrorType>(error: NSError, out: UnsafeMutablePointer<T>) &ndash;> Bool</p>
+
+<p>@asmname(&ldquo;swift_convertNSErrorToErrorType&rdquo;) func _convertNSErrorToErrorType(error: NSError?) &ndash;> ErrorType</p>
+
+<p>@objc enum NSURLError : Int, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { &hellip; }</p>
+
+<p>protocol <strong>BridgedNSError : RawRepresentable {
+  static var <em>NSErrorDomain: String { get }
+}
+@asmname(&ldquo;swift_convertErrorTypeToNSError&rdquo;) func </em>convertErrorTypeToNSError(error: ErrorType) &ndash;> NSError
+func ~=(match: NSCocoaError, error: ErrorType) &ndash;> Bool
+protocol _BridgedNSError : </strong>BridgedNSError, <em>ObjectiveCBridgeableErrorType, Hashable {
+  static var </em>NSErrorDomain: String { get }
+}</p>
+
+<p>ErrorType 在 Swift 中表示。</p>
+
+<p>extension NSError : ErrorType {
+  @objc dynamic var _domain: String {</p>
+
+<pre><code>@objc dynamic get {}
+</code></pre>
+
+<p>  }
+  @objc dynamic var _code: Int {</p>
+
+<pre><code>@objc dynamic get {}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>CFError</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[北京实时公交分析]]></title>
+    <link href="http://andelf.github.io/blog/2015/06/01/beijing-realtime-bus/"/>
+    <updated>2015-06-01T13:17:50+08:00</updated>
+    <id>http://andelf.github.io/blog/2015/06/01/beijing-realtime-bus</id>
+    <content type="html"><![CDATA[<p>361 条线路，705条单向线路。 aibang 负责数据服务。</p>
+
+<p>每辆车，每15秒更新一次 GPS，</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[为第三方扩展创建 Swift 模块]]></title>
@@ -3603,697 +3739,6 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
 
 
 <p>All code in swift file goes to <code>top_level_code</code>。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Swift and C Interop(简析Swift和C的交互)]]></title>
-    <link href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/"/>
-    <updated>2014-06-15T00:11:44+08:00</updated>
-    <id>http://andelf.github.io/blog/2014/06/15/swift-and-c-interop</id>
-    <content type="html"><![CDATA[<p>声明： 转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
-
-<p>其中 <code>@asmname</code> 的两个用法源于我的猜测验证，用到了 Xcode, lldb, nm, llvm ir 等工具或格式。</p>
-
-<p>其中 name mangling 部分源自 WWDC。</p>
-
-<p>相关的分析主要基于我 dump 出的 Swift 标准库声明代码，位于 <a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a>。</p>
-
-<p>目前有两个小部分还未完成。</p>
-
-<p>之前好像简单说过 Swift 和 Objective-C 的交互问题。其实我们也可以用 Swift 调用纯 C 代码或者基于 C 的第三方库。（这里不会也永远不会考虑 C++ 的情况，因为不支持，不过可以用 C 写 wrapper, 这个没有任何问题。）</p>
-
-<p>Swift 官方文档中，以及那本已经被迅速翻译为中文的 ibooks 书中，都提到了 Swift 调用 Objective-C 和 C 是有很好支持的。不过没有细节。</p>
-
-<p><del>这里不会考虑如何用 C 调用 Swift, 暂时，看心情。：）</del> 本内容包括 Swift 调用 C 和相应的 C 调用 Swift，项目混编。</p>
-
-<p>这里主要面向 MacOSX 应用。iOS 或许可以适用。</p>
-
-<p>先复习下区别。</p>
-
-<h2>第一部分 预备知识</h2>
-
-<h3>语言区别</h3>
-
-<p>说到底就是 C 少了很多东西。但是多了个指针。</p>
-
-<p>对于 C 来说，最头疼的莫过于指针，而 Swift 是一门没有指针的语言。是不是要吐血？相对来说指针不但代表者指针操作传参，还有指针运算等等。</p>
-
-<h2>第二部分 调用 C</h2>
-
-<p>这里主要讨论函数的调用。对于结构、枚举、类的兼容性暂时没尝试。</p>
-
-<h3>C 标准库</h3>
-
-<p>好消息是，对于标准库中的 C 函数，根本不需要考虑太多导入头文件神马的。比如 <code>strlen</code>、<code>putchar</code>、<code>vprintf</code>。当然 <code>vprintf</code> 需要多说几句，后面说。</p>
-
-<p>请直接 <code>import Darwin</code> 模块。</p>
-
-<p>这些标准库函数表示为 <code>Darwin.C.HEADER.name</code>。</p>
-
-<p>实际上由于 Swift 模块结构是平坦的，他们均位于 <code>Darwin</code> 中，所以基本上是直接用的。</p>
-
-<p>然后 <code>CoreFoundation</code> 用到了 <code>Darwin</code> ( @exported 导入，所以相当于这些名字也在 <code>CoreFoundation</code> 中)。</p>
-
-<p>然后 <code>Foundation</code> 用到了 <code>CoreFoundation</code> （也是 @exported 导入。）</p>
-
-<p>所以其实你导入 <code>Foundation</code> 的时候，这些 C 函数都是直接可用的。比如 <code>putchar</code> 一类。</p>
-
-<p>多说一句，<code>Cocoa</code> 当然也包含 <code>Foundation</code>。</p>
-
-<h3>C 函数</h3>
-
-<p>好吧假设你有个牛逼到顶天的算法是 C 写的，不对，假设是别人写的，牛逼到你只能凑合用却看不懂然后自己也写不出没空迁移的地步。</p>
-
-<p>我们直接创建一个 Swift 项目，然后 New File，添加一个 <code>.c</code> 文件。</p>
-
-<p>这时候 Xcode 会弹出对话框询问是否配置 Bridge Header，确认就可以了。也可以手动添加 Bridge Header，位置在项目的 Build Settings 中的 Swift Compiler &ndash; Code Generation 子项里。指向你的 Bridge Header 文件名就可以了。</p>
-
-<p>一般这个文件是 <code>ProjectName-Bridging-Header.h</code>。情况基本和与 Objective-C 混编没区别。</p>
-
-<p>剩下的工作就很简单了。在 <code>.c</code> 文件填上传说中的牛逼算法。在 <code>ProjectName-Bridging-Header.h</code> 中加上该函数原型或者引入相关的头文件。</p>
-
-<p>在 Swift 中调用的名字和 C 名字一样就可以了，比如你定义了一个 <code>int mycsort()</code> 那么在 Swift 中就是 <code>func mycsort() -&gt; CInt</code>。</p>
-
-<p>这时候问题来了。一个漂亮的问题。</p>
-
-<p>我的 C 函数名字和 Swift 标准库冲突怎么办？比如我定义了一个函数就叫 <code>println</code>，我们知道 Swift 里也有个 <code>println</code>。</p>
-
-<p>这样，如果直接调用会提示 <code>Ambiguous use of 'println'</code>。没辙了么？</p>
-
-<p>这里有个我发现的 Undocumented Featuer 或者说是 Undocumented Attribute。你转载好歹提下我好吧。（发现方法是通过 Xcode 查看定义，然后通过 nm 命令发现符号, 对照 llvm ir 确认的。)</p>
-
-<p>那就是 <code>@asmname("func_name_in_c")</code>。用于函数声明前。使用方法：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">println</span><span class="p">()</span> <span class="p">{</span> <span class="p">....</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="err">@</span><span class="n">asmname</span><span class="p">(</span><span class="s">&quot;println&quot;</span><span class="p">)</span> <span class="n">func</span> <span class="n">c_println</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">CInt</span> <span class="c1">// 声明，不需要 {} 函数体</span>
-</span><span class='line'><span class="n">c_println</span><span class="p">()</span> <span class="c1">// 调用</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>也就是 C 中的同名函数，我们可以给赋予一个别名，然后正常调用。这么一看就基本没有问题了。至于类型问题，待会说，详细说。</p>
-
-<h3>C Framework</h3>
-
-<p>很多时候我们拿到的是第三方库，格式大概是个 Framework。比如 <code>SDL2.framework</code>。举这个例子是因为我想对来说比较熟悉 SDL2。</p>
-
-<p>直接用 Finder 找到这个 <code>.framework</code> 文件，拖动到当前项目的文件列表里，这样它将作为一个可以展开的文件夹样式存在于我们的项目中。</p>
-
-<p>在 <code>ProjectName-Bridging-Header.h</code> 中引入其中需要的 <code>.h</code>。</p>
-
-<p>比如我们引入 <code>SDL2.framework</code>，那么我们就需要写上 <code>#import &lt;SDL2/SDL.h&gt;</code>。</p>
-
-<p>然后在 Swift 文件里正常调用就好了。</p>
-
-<p>所以其实说到底核心就是那个 <code>ProjectName-Bridging-Header.h</code>，因为它是作为参数传递给 Swift 编译器的，所以 Swit 文件里可以从它找到定义的符号。</p>
-
-<p>但是，这个桥接头文件的一切都是隐式的，类型自动对应，所以很多时候需要我们在 Swift 里调用并封装。或者使用 <code>@asmname(...)</code> 避免名字冲突。</p>
-
-<h2>第三部分 类型转换</h2>
-
-<p>前面说到了 C 中有指针，而 Swift 中没有，同时基本类型还有很多不同。所以混编难免需要在两种语言的不同类型之间进行转换。</p>
-
-<p>牢记一个万能函数 <code>reinterpretCast&lt;T, U&gt;(T) -&gt; U</code>，只要 T, U sizeof 运算相等就可以直接转换。这个在之前的标准库函数里有提到。调用 C 代码的利器！</p>
-
-<h3>基本类型对应</h3>
-
-<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。简言之，不在对应为 C 别名类型，而是直接对应到 Siwft 类型。而指针类型简化为 <code>UnsafePointer&lt;T&gt;</code> 和 <code>ConstUnsafePointer&lt;T&gt;</code> 两种， <code>COpaquePointer</code> 依然存在。另新增了 <code>CFunctionPointer&lt;T&gt;</code>。</p>
-
-<ul>
-<li>int => CInt</li>
-<li>char => CChar / CSignedChar</li>
-<li>char* => CString</li>
-<li>unsigned long = > CUnsignedLong</li>
-<li>wchar_t => CWideChar</li>
-<li>double => CDouble</li>
-<li>T* => CMutablePointer<T></li>
-<li>void* => CMutableVoidPointer</li>
-<li>const T* => CConstPointer<T></li>
-<li>const void* => CConstVoidPointer</li>
-<li>&hellip;</li>
-</ul>
-
-
-<p>继续这个列表，你肯定会想这么多数值类型，怎么搞。其实大都是被 <code>typealias</code> 定义到 <code>UInt8</code>，<code>Double</code> 这些的。放心。C 中数值类型全部被明确地用别名定义到带 size 的 Swift 数值类型上。完全是一样用的。</p>
-
-<p>其实真正的 Pointer 类型只是 <code>UnsafePointer&lt;T&gt;</code>，大小与 C 保证一致，而对于这里不同类型的 Pointer，其实都是 <code>UnsafePointer</code>
-到它们的隐式类型转换。<del>还有个指针相关类型是 <code>COpaquePointer</code>，不过没试验怎么用</del>。</p>
-
-<p>UPDATE: 我们在调用的时候，更多地用到 <code>COpaquePointer</code>，我将再坑一篇介绍它。</p>
-
-<p>同时 <code>NilType</code>，也就是 <code>nil</code> 有到这些指针的隐式类型转换。所以可以当做任何一种指针的 <code>NULL</code> 用。</p>
-
-<p>还有个需要提到的类型是 CString, 他的内存 layout 等于 <code>UnsafePointer&lt;UInt8&gt;</code>，下面说。</p>
-
-<h3>CString</h3>
-
-<p>用于表示 <code>char *</code>，<code>\0</code> 结尾的 c 字符串，实际上似乎还看到了判断是否 ASCII 的选项，但是没试出来用法。</p>
-
-<p>实现了 <code>StringLiteralConvertible</code> 和 <code>LogicValue</code>。可以从字符串常量直接赋值获得 <code>CString</code>。<code>LogicValue</code> 也就是是 <code>if a_c_str {}</code>，实际是用于判断是否为 <code>NULL</code>，可用，但是不稳定，老 crash。</p>
-
-<p>运算符支持 <code>==</code>，判断两字符串是否相当，猜测实际是 <code>strcmp</code> 实现，对比 NULL 会 crash。Orz。</p>
-
-<p>CString 和 String 的转换通过一个 extension 实现，也是很方便。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">fromCString</span><span class="o">(</span><span class="n">cs</span><span class="k">:</span> <span class="kt">CString</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
-</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">fromCString</span><span class="o">(</span><span class="n">up</span><span class="k">:</span> <span class="kt">UnsafePointer&lt;CChar&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="c1">// 还有两个方便的工具方法。 Rust 背景的同学一定仰天长啸。太相似了。</span>
-</span><span class='line'><span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">withCString</span><span class="o">&lt;</span><span class="nc">Result</span><span class="o">&gt;(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">CString</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">Result</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Result</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">withCString</span><span class="o">&lt;</span><span class="nc">Result</span><span class="o">&gt;(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">UnsafePointer&lt;CChar&gt;</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">Result</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Result</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在我们的 Bridging Header 头文件中 <code>char *</code> 的类型会对应为 <code>UnsafePointer&lt;CChar&gt;</code>，而实际上 <code>CString</code> 更适合。所以在 Swift 代码中，往往我们要再次申明下这个函数。或者用一个函数封装下，转换成我们需要的类型。</p>
-
-<p>例如，假设在 Bridging Header 中我们声明了 <code>char * foo();</code>，那么，在 Swift 代码中我们可以用上面提到的方法：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@asmname</span><span class="o">(</span><span class="s">&quot;foo&quot;</span><span class="o">)</span> <span class="n">func</span> <span class="n">c_foo</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">CString</span>
-</span><span class='line'><span class="c1">// 注意这里没有 {}，只是声明</span>
-</span><span class='line'><span class="n">let</span> <span class="n">ret</span> <span class="k">=</span> <span class="n">c_foo</span><span class="o">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当然也可以直接调用原始函数然后类型转换：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="n">raw</span> <span class="k">=</span> <span class="n">foo</span><span class="o">()</span> <span class="c1">// UnsafePointer&lt;Int8&gt; &lt;=&gt; UnsafePointer&lt;CChar&gt;</span>
-</span><span class='line'><span class="n">let</span> <span class="n">ret</span> <span class="k">=</span> <span class="nc">String</span><span class="o">.</span><span class="n">fromCString</span><span class="o">(</span><span class="n">ret</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果这里要转成 CString 就略复杂了，因为 CString 构造函数接受的参数是 <code>UnsafePointer&lt;UInt8&gt;</code>， 而 <code>CChar</code> 是 <code>Int8</code> 的别名，所以还牵扯到 Genrics 类型转换，不够方便。</p>
-
-<p>如果非要作为 CString 处理，可以用 <code>reinterpretCast()</code>，直接转换。但是请一定要知道自己在转换什么，确保类型的 sizeof 相同，确保转换本身有意义。</p>
-
-<p>例如获得环境变量字符串：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="n">key</span> <span class="k">=</span> <span class="s">&quot;PATH&quot;</span>
-</span><span class='line'><span class="c1">// 这里相当于把 UnsafePointer&lt;CChar&gt; 转为了 UnsafePointer&lt;UInt8&gt; 然后到 CString</span>
-</span><span class='line'><span class="n">let</span> <span class="n">path_str</span><span class="k">:</span> <span class="kt">CString</span> <span class="o">=</span> <span class="n">reinterpretCast</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="n">withCString</span><span class="o">(</span><span class="n">getenv</span><span class="o">))</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Unmanaged</h3>
-
-<p>这个先挖坑，随后填上。</p>
-
-<h3>VaList</h3>
-
-<p>这个也是坑，随后填上。</p>
-
-<h2>第三部分 C 调用 Swift</h2>
-
-<p>如果项目里加入了 C 文件，那么它可以调用我们的 Swift 函数么？答案是可以的，而且令人吃惊地透明。这也许是因为 Apple 所宣传的，Small Runtime 概念吧。极小的语言运行时。</p>
-
-<p>和 Objective-C 混编类似，配置好 Bridging Header 的项目，在 .c .h .m 文件中都可以使用一个叫做 <code>ProjectName-Swift.h</code> 的头文件，其中包含 Swift 代码导出的函数等。</p>
-
-<p>参考之前的 Objective-C 和 C 交互我们可以知道，说到底交互就是链接过程，只要链接的时候能找到符号就可以。</p>
-
-<p>不过不能高兴太早，Swift 是带类、枚举、协议、多态、泛型等的高级语言，符号处理明显要比 C 中的复杂的多，现代语言一般靠 name mangle 来解决这个问题。也就是说一个 Swift 函数，在编译到 .o 的时候，名字就不是原来那么简单了。比如 <code>__TFV5hello4Rectg9subscriptFOS_9DirectionSi</code> 这样的名字。</p>
-
-<p>Xcode 自带了个工具， 可以查看这些 mangled name 到底是什么东西：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">xcrun</span> <span class="n">swift</span><span class="o">-</span><span class="n">demangle</span> <span class="nc">__TFV5hello4Rectg9subscriptFOS_9DirectionSi</span>
-</span><span class='line'><span class="nc">_TFV5hello4Rectg9subscriptFOS_9DirectionSi</span> <span class="o">---&gt;</span> <span class="n">hello</span><span class="o">.</span><span class="nc">Rect</span><span class="o">.</span><span class="n">subscript</span><span class="o">.</span><span class="n">getter</span> <span class="o">(</span><span class="n">hello</span><span class="o">.</span><span class="nc">Direction</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Swift</span><span class="o">.</span><span class="nc">Int</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当我们从 C 调用的时候，应该规避这样的名字。还记得前面的 <code>@asmname</code> 么？没错，它可以用于指定 Swift 函数的符号名，我猜测应该有指定 mangled name 的作用，但是不是特别确定。</p>
-
-<p>这里随便指定个例子先。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@asmname</span><span class="o">(</span><span class="s">&quot;say_hello&quot;</span><span class="o">)</span> <span class="n">func</span> <span class="n">say_hello</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Double</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">println</span><span class="o">(</span><span class="s">&quot;This is say_hello() in swift&quot;</span><span class="o">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="mf">3.14</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>然后在 .c 文件中：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">#</span><span class="n">include</span> <span class="o">&lt;</span><span class="nc">ProjectName</span><span class="o">-</span><span class="nc">Swift</span><span class="o">.</span><span class="n">h</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">extern</span> <span class="n">double</span> <span class="n">say_hello</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">int</span> <span class="n">some_func</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">say_hello</span><span class="o">();</span> <span class="c1">// or capture its value and process it</span>
-</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><del>当然这里的 extern 一行是可选的，因为实际上声明会存在于 ProjectName-Swift.h 中，只是为了避免首次编译警告而已（第二次以后的编译，其实这个 Header 已经被缓存起来了，这个牵扯到 Xcode 的编译过程）。</del> 错了。</p>
-
-<p>对于函数而言 extern 必须手动加上，对于 class  、 protocol ，会在生成的头文件里。</p>
-
-<p>按照这个思路，其实很容易实现 Swift 调用 C 中调用了 Swift 函数的函数。这意味着，可以通过简单的方法封装支持向 C 传递 Swift block 作为回调函数。难度中上，对于有过类似扩展编写经验的人来说很简单。</p>
-
-<h2>第四部分 编译过程</h2>
-
-<p>其实调用基本就这么多， Objective-C 那篇文章中说的编译过程同样有效。我 C-c C-v 下：</p>
-
-<ul>
-<li>编译所有 <code>X.swift</code> 文件到 <code>X.o</code> (with <code>-emit-objc-header</code>, <code>-import-objc-header</code>) (其中包含 <code>.swiftmodule</code> 子过程)
-
-<ul>
-<li>由于选项里有 <code>-emit-objc-header</code>，所以之后的 C 文件可以直接 import 对应的 <code>ProjectName-Swift.h</code></li>
-</ul>
-</li>
-<li>编译 <code>X.c</code> 到 <code>X.o</code></li>
-<li>链接所有 <code>.o</code> 生成可执行文件</li>
-</ul>
-
-
-<p>仔细理解上面的简简单单四行编译过程说明，你就明白为什么 .swfit 和 .c 可以互相调用了。其中两个 Header 文件起到了媒介的作用，一个将 .c/.m 文件中的定义暴露给 Swift，另一个将 .swift 中的定义暴露给 .c/.m 。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Swift Misc]]></title>
-    <link href="http://andelf.github.io/blog/2014/06/13/swift-misc/"/>
-    <updated>2014-06-13T13:53:13+08:00</updated>
-    <id>http://andelf.github.io/blog/2014/06/13/swift-misc</id>
-    <content type="html"><![CDATA[<p>Just Notes. Keep Updating.</p>
-
-<h2>escaped variable name</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>let `let` = 1000
-</span><span class='line'>dump(`let`, name: "variable named let")</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Optimise Parameter</h2>
-
-<ul>
-<li><code>-Onone</code> // optimization off, safety checks on</li>
-<li><code>-O</code> // optimization on,  safety checks on</li>
-<li><code>-Ofast</code> // optimization on,  safety checks off</li>
-</ul>
-
-
-<h2>High Level Optimization</h2>
-
-<ul>
-<li>Removing abstraction penalties</li>
-<li>Generic specialization</li>
-<li>Devirtualization (Resolving dynamic method calls at compile-time)
-
-<ul>
-<li>If Swift can see where you constructed the object</li>
-<li>If Swift knows that a class doesn&rsquo;t have any subclasses</li>
-<li>If you&rsquo;ve marked a method with the @final attribute</li>
-</ul>
-</li>
-<li>ARC optimization</li>
-<li>Enum analysis</li>
-<li>Alias analysis</li>
-<li>Value propagation</li>
-<li>Library optimizations on strings, arrays, etc.</li>
-</ul>
-
-
-<h2>Closure Memoize</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">func</span> <span class="n">memoize</span><span class="o">&lt;</span><span class="n">T</span><span class="k">:</span> <span class="kt">Hashable</span><span class="o">,</span> <span class="n">U</span><span class="o">&gt;(</span> <span class="n">body</span><span class="k">:</span> <span class="o">(</span><span class="kt">T</span><span class="o">)</span><span class="kt">-&gt;U</span> <span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">T</span><span class="o">)-&gt;</span><span class="n">U</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">memo</span> <span class="k">=</span> <span class="nc">Dictionary</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">U</span><span class="o">&gt;()</span>
-</span><span class='line'>  <span class="k">return</span> <span class="o">{</span> <span class="n">x</span> <span class="n">in</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">let</span> <span class="n">q</span> <span class="k">=</span> <span class="n">memo</span><span class="o">[</span><span class="kt">x</span><span class="o">]</span> <span class="o">{</span> <span class="k">return</span> <span class="n">q</span> <span class="o">}</span>
-</span><span class='line'>    <span class="n">let</span> <span class="n">r</span> <span class="k">=</span> <span class="n">body</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
-</span><span class='line'>    <span class="n">memo</span><span class="o">[</span><span class="kt">x</span><span class="o">]</span> <span class="k">=</span> <span class="n">r</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">r</span>
-</span><span class='line'><span class="o">}</span> <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">func</span> <span class="n">memoize</span><span class="o">&lt;</span><span class="n">T</span><span class="k">:</span> <span class="kt">Hashable</span><span class="o">,</span> <span class="n">U</span><span class="o">&gt;(</span> <span class="n">body</span><span class="k">:</span> <span class="o">((</span><span class="kt">T</span><span class="o">)</span><span class="kt">-&gt;U</span><span class="o">,</span> <span class="kt">T</span><span class="o">)-&gt;</span><span class="n">U</span> <span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">T</span><span class="o">)-&gt;</span><span class="n">U</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">memo</span> <span class="k">=</span> <span class="nc">Dictionary</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">U</span><span class="o">&gt;()</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">result</span><span class="k">:</span> <span class="o">((</span><span class="kt">T</span><span class="o">)</span><span class="kt">-&gt;U</span><span class="o">)</span><span class="kt">!</span>
-</span><span class='line'>  <span class="n">result</span> <span class="k">=</span> <span class="o">{</span> <span class="n">x</span> <span class="n">in</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">let</span> <span class="n">q</span> <span class="k">=</span> <span class="n">memo</span><span class="o">[</span><span class="kt">x</span><span class="o">]</span> <span class="o">{</span> <span class="k">return</span> <span class="n">q</span> <span class="o">}</span>
-</span><span class='line'>    <span class="n">let</span> <span class="n">r</span> <span class="k">=</span> <span class="n">body</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
-</span><span class='line'>    <span class="n">memo</span><span class="o">[</span><span class="kt">x</span><span class="o">]</span> <span class="k">=</span> <span class="n">r</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">r</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="n">result</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>lldb</h2>
-
-<h3>Raw Display</h3>
-
-<p>(lldb) fr v -R age</p>
-
-<h3>Protocol</h3>
-
-<p>fr v val</p>
-
-<p>fr v -d r val</p>
-
-<h3>misc</h3>
-
-<p>repl // repl loop</p>
-
-<p>// find stop reason
-t i // thread info
-// how did this code get called, list frames
-bt // thread backtrace</p>
-
-<p>一般主要查找 top_level_code 位置，找到出错未知</p>
-
-<p>// what is the failure conditions
-f 1 // frame select 1</p>
-
-<p>p foo // expression foo</p>
-
-<p>b filename.swift:8
-b func_name</p>
-
-<p>br s -r timestwo.<em>String // breakpoint set &mdash;func-regex timestwo.</em>String</p>
-
-<p>b *
-br m -c “valueInCents &lt; Int(amountInCents)”  // breakpoint modify &mdash;condition “&hellip;”
-br m -c &ldquo;&hellip;.&rdquo; 3.1</p>
-
-<p>b *
-br co a //  breakpoint command add // enter commands, <code>DONE</code> to end</p>
-
-<p>br l // breakpoint list</p>
-
-<p>br dis 1 // breakpoint disable 1</p>
-
-<h3>Infos</h3>
-
-<p>The stop reason tells you what happened</p>
-
-<ul>
-<li><code>EXC_BAD_INSTRUCTION</code>  Assertion</li>
-<li><code>SIGABRT</code> Exception (usually Objective-C)</li>
-<li><code>EXC_BAD_ACCESS</code>  Memory error</li>
-</ul>
-
-
-<p>The stack tells you how it happened
-The expression command helps you inspect variables</p>
-
-<h2>swift-demangle</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">xcrun</span> <span class="n">swift</span><span class="o">-</span><span class="n">demangle</span> <span class="nc">__TIFSs4dumpU__FTQ_4nameGSqSS_6indentSi8maxDepthSi8maxItemsSi_Q_A1_</span>
-</span><span class='line'><span class="nc">_TIFSs4dumpU__FTQ_4nameGSqSS_6indentSi8maxDepthSi8maxItemsSi_Q_A1_</span> <span class="o">---&gt;</span>
-</span><span class='line'><span class="nc">Swift</span><span class="o">.(</span><span class="n">dump</span> <span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;(</span><span class="n">A</span><span class="o">,</span> <span class="n">name</span> <span class="k">:</span> <span class="kt">Swift.String?</span><span class="o">,</span> <span class="n">indent</span> <span class="k">:</span> <span class="kt">Swift.Int</span><span class="o">,</span> <span class="n">maxDepth</span> <span class="k">:</span> <span class="kt">Swift.Int</span><span class="o">,</span> <span class="n">maxItems</span> <span class="k">:</span> <span class="kt">Swift.Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="o">).(</span><span class="n">default</span> <span class="n">argument</span> <span class="mi">2</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>dispatch queue</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">Foundation</span>
-</span><span class='line'><span class="k">var</span> <span class="n">queue</span> <span class="k">:</span> <span class="kt">dispatch_queue_t</span> <span class="o">=</span> <span class="n">dispatch_queue_create</span><span class="o">(</span><span class="s">&quot;my_queue&quot;</span><span class="o">,</span> <span class="n">nil</span><span class="o">)</span>
-</span><span class='line'><span class="n">dispatch_sync</span><span class="o">(</span><span class="n">queue</span><span class="o">)</span> <span class="o">{</span><span class="n">println</span><span class="o">(</span><span class="err">“</span><span class="n">world</span><span class="err">&quot;</span><span class="o">)}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Upcast vs Downcast</h2>
-
-<p>A matter of idom</p>
-
-<p>Upcast: T to AnyObject</p>
-
-<p>Downcast: AnyObject <code>as</code> T</p>
-
-<h2>Swift Array <code>T[]</code></h2>
-
-<p>Two representations.</p>
-
-<ul>
-<li>Native Array => |len|cap|0|1|2|..|</li>
-<li>Cocoa Array => NSArray obj</li>
-</ul>
-
-
-<h2>Unmanaged</h2>
-
-<p>Used in CF.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">struct</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="k">:</span> <span class="kt">AnyObject&gt;</span> <span class="o">{</span><span class="err"> </span>
-</span><span class='line'>  <span class="kt">func</span> <span class="kt">takeUnretainedValue</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">T</span>   <span class="c1">// for +0 returns</span>
-</span><span class='line'>  <span class="kt">func</span> <span class="kt">takeRetainedValue</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">T</span> <span class="err"> </span> <span class="c1">// for +1 returns </span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">func</span> <span class="n">retain</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="err"> </span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">release</span><span class="o">()</span><span class="err"> </span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">autorelease</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">}</span><span class="err"> </span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Weak Reference</h2>
-
-<p>Weak references are optional values</p>
-
-<ul>
-<li>Use strong references from owners to the objects they own</li>
-<li>Use weak references among objects with independent lifetimes</li>
-<li>Use unowned references from owned objects with the same lifetime //  互相绑定的引用，生命周期相同</li>
-</ul>
-
-
-<h2>Initializer</h2>
-
-<ul>
-<li>Initialize all values before you use them</li>
-<li>Set all stored properties first, then call super.init</li>
-<li>Designated initializers only delegate up</li>
-<li>Convenience initializers only delegate across</li>
-</ul>
-
-
-<h2>Capture List</h2>
-
-<p>避免循环引用</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">init</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">onChange</span> <span class="k">=</span> <span class="o">{[</span><span class="kt">unowned</span> <span class="kt">self</span><span class="o">]</span> <span class="n">temp</span> <span class="n">in</span>
-</span><span class='line'>    <span class="n">self</span><span class="o">.</span><span class="n">currentTemp</span> <span class="k">=</span> <span class="n">temp</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>QuickLookObject</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">enum</span> <span class="nc">QuickLookObject</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Text</span><span class="o">(</span><span class="nc">String</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Int</span><span class="o">(</span><span class="nc">Int64</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">UInt</span><span class="o">(</span><span class="nc">UInt64</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Float</span><span class="o">(</span><span class="nc">Double</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Image</span><span class="o">(</span><span class="nc">Any</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Sound</span><span class="o">(</span><span class="nc">Any</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Color</span><span class="o">(</span><span class="nc">Any</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">BezierPath</span><span class="o">(</span><span class="nc">Any</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">AttributedString</span><span class="o">(</span><span class="nc">Any</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Rectangle</span><span class="o">(</span><span class="nc">Double</span><span class="o">,</span> <span class="nc">Double</span><span class="o">,</span> <span class="nc">Double</span><span class="o">,</span> <span class="nc">Double</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Point</span><span class="o">(</span><span class="nc">Double</span><span class="o">,</span> <span class="nc">Double</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Size</span><span class="o">(</span><span class="nc">Double</span><span class="o">,</span> <span class="nc">Double</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Logical</span><span class="o">(</span><span class="nc">Bool</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Range</span><span class="o">(</span><span class="nc">UInt64</span><span class="o">,</span> <span class="nc">UInt64</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">View</span><span class="o">(</span><span class="nc">Any</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">Sprite</span><span class="o">(</span><span class="nc">Any</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">URL</span><span class="o">(</span><span class="nc">String</span><span class="o">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nc">_Raw</span><span class="o">(</span><span class="nc">UInt8</span><span class="o">[],</span> <span class="nc">String</span><span class="o">)</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Add Quick Look support to NSObject subclasses only
-Implement the debugQuickLookObject() method</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">func</span> <span class="n">debugQuickLookObject</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">AnyObject</span><span class="o">?</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="s">&quot;Some Quick Look type&quot;</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Swift Special Protocols]]></title>
-    <link href="http://andelf.github.io/blog/2014/06/13/swift-special-protocols/"/>
-    <updated>2014-06-13T12:43:07+08:00</updated>
-    <id>http://andelf.github.io/blog/2014/06/13/swift-special-protocols</id>
-    <content type="html"><![CDATA[<p>via WWDC 404</p>
-
-<p>Protocols are your hooks into the Swift core language
-Swift generics combine abstraction, safety, and performance in new ways
-Read, experiment, and have fun. There’s plenty to discover!</p>
-
-<h2><code>LogicValue</code> // 重载 if val</h2>
-
-<h2><code>Printable</code> // 重载 println</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Printable</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">var</span> <span class="n">description</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2><code>Sequence</code> // 重载 for-in</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Sequence</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">typealias</span> <span class="nc">GeneratorType</span> <span class="k">:</span> <span class="kt">Generator</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">generate</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">GeneratorType</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">protocol</span> <span class="nc">Generator</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">typealias</span> <span class="nc">Element</span>
-</span><span class='line'>  <span class="n">mutating</span> <span class="n">func</span> <span class="n">next</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Element</span><span class="o">?</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// for .. in { }</span>
-</span><span class='line'><span class="k">var</span> <span class="nc">__g</span> <span class="k">=</span> <span class="n">someSequence</span><span class="o">.</span><span class="n">generate</span><span class="o">()</span>
-</span><span class='line'><span class="k">while</span> <span class="n">let</span> <span class="n">x</span> <span class="k">=</span> <span class="nc">__g</span><span class="o">.</span><span class="n">next</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'><span class="o">}}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>*Convertible</h2>
-
-<ul>
-<li>IntegerLiteralConvertible</li>
-<li>FloatLiteralConvertible</li>
-<li>StringLiteralConvertible</li>
-<li>ArrayLiteralConvertible</li>
-<li>DictionaryLiteralConvertible</li>
-</ul>
-
-
-<h2>Equatable</h2>
-
-<p><code>==</code></p>
 ]]></content>
   </entry>
   

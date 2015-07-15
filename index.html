@@ -9,25 +9,8 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="本文提出了一种将第三方扩展引入到 Swift 标准库的方法。 以 Alamofire 为例， 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-cd Path-To-Alamofire-Src-Dir
-mkdir -p 32 64 # 创建动态链接库，及对应 &hellip;">
+  <meta name="description" content="简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。 Github: guangzhou-realtime-bus 生成 e=3 的 1024 位 RSA 密钥对
+公钥串用查表加密(byte 映射)，然后 base64 封装发送给服务器 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,6 +68,223 @@ mkdir -p 32 64 # 创建动态链接库，及对应 &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/18/guangzhou-realtime-bus/">广州实时工具App逆向</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-18T17:39:06+08:00" pubdate data-updated="true">Jun 18<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。</p>
+
+<p><a href="https://github.com/andelf/guangzhou-realtime-bus">Github: guangzhou-realtime-bus</a></p>
+
+<ul>
+<li>生成 e=3 的 1024 位 RSA 密钥对</li>
+<li>公钥串用查表加密(byte 映射)，然后 base64 封装发送给服务器</li>
+<li>服务器返回一串用公钥加密过的数据</li>
+<li>用本地私钥解密后，该数据包含未知96字节的一段数据和 DES Key</li>
+<li>从此通信用 DES 加密</li>
+</ul>
+
+
+<p>base64封装过程：先打包字符串长度，然后是原始字符串（JSON），然后是<code>0x10</code>(md5字符串长度)，
+然后是 md5 校验值。整个二进制字符串用 base64 转码，POST 给服务器。</p>
+
+<p>具体的登录注册过程还需要进一步抓包分析，不过暂时兴趣不在这里了。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/09/swift-2-dot-0-error-handling/">Swift 2.0 的错误处理(Swift 2.0 Error Handling)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-09T15:27:58+08:00" pubdate data-updated="true">Jun 9<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>protocol ErrorType {
+  var <em>domain: String { get }
+  var </em>code: Int { get }
+}</p>
+
+<p>@asmname(&ldquo;swift_bridgeErrorTypeToNSError&rdquo;) func _bridgeErrorTypeToNSError(e: ErrorType) &ndash;> AnyObject</p>
+
+<p>@asmname(&ldquo;swift_stdlib_getErrorCode&rdquo;) func _stdlib_getErrorCode<T : ErrorType>(x: UnsafePointer<T>) &ndash;> Int</p>
+
+<p>@asmname(&ldquo;swift_stdlib_getErrorDomainNSString&rdquo;) func _stdlib_getErrorDomainNSString<T : ErrorType>(x: UnsafePointer<T>) &ndash;> AnyObject</p>
+
+<h2>Foundation</h2>
+
+<p>protocol <em>ObjectiveCBridgeableErrorType : ErrorType {
+  init?(</em>bridgedNSError: NSError)
+}</p>
+
+<p>struct NSCocoaError : RawRepresentable, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, <em>_BridgedNSError, Hashable, Equatable {
+  let rawValue: Int
+  init(rawValue: Int)
+  static var </em>NSErrorDomain: String {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  typealias RawValue = Int
+}</p>
+
+<p>infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
+infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
+func ==<T : __BridgedNSError where T.RawValue : SignedIntegerType>(lhs: T, rhs: T) &ndash;> Bool</p>
+
+<p>@available(OSX 10.11, iOS 9.0, *)
+func resolveError(error: NSError?) throws</p>
+
+<p>enum _GenericObjCError : ErrorType {
+  case NilError
+  var hashValue: Int {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  var _domain: String {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  var _code: Int {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>@asmname(&ldquo;swift_stdlib_bridgeNSErrorToErrorType&rdquo;)
+func _stdlib_bridgeNSErrorToErrorType<T : _ObjectiveCBridgeableErrorType>(error: NSError, out: UnsafeMutablePointer<T>) &ndash;> Bool</p>
+
+<p>@asmname(&ldquo;swift_convertNSErrorToErrorType&rdquo;) func _convertNSErrorToErrorType(error: NSError?) &ndash;> ErrorType</p>
+
+<p>@objc enum NSURLError : Int, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { &hellip; }</p>
+
+<p>protocol <strong>BridgedNSError : RawRepresentable {
+  static var <em>NSErrorDomain: String { get }
+}
+@asmname(&ldquo;swift_convertErrorTypeToNSError&rdquo;) func </em>convertErrorTypeToNSError(error: ErrorType) &ndash;> NSError
+func ~=(match: NSCocoaError, error: ErrorType) &ndash;> Bool
+protocol _BridgedNSError : </strong>BridgedNSError, <em>ObjectiveCBridgeableErrorType, Hashable {
+  static var </em>NSErrorDomain: String { get }
+}</p>
+
+<p>ErrorType 在 Swift 中表示。</p>
+
+<p>extension NSError : ErrorType {
+  @objc dynamic var _domain: String {</p>
+
+<pre><code>@objc dynamic get {}
+</code></pre>
+
+<p>  }
+  @objc dynamic var _code: Int {</p>
+
+<pre><code>@objc dynamic get {}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>CFError</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/01/beijing-realtime-bus/">北京实时公交分析</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-01T13:17:50+08:00" pubdate data-updated="true">Jun 1<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>361 条线路，705条单向线路。 aibang 负责数据服务。</p>
+
+<p>每辆车，每15秒更新一次 GPS，</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1607,542 +1807,6 @@ segmentation algorithm.</p></blockquote>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T21:58:35+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
-
-<p>之前说那是最后一篇。可惜越来越发现有很多东西还没介绍到。事不过三。再坑一篇。</p>
-
-<h2>前言</h2>
-
-<p>本文解决如下问题</p>
-
-<ul>
-<li>ObjC/C 中定义的某个类型、结构体，通过 Bridge Header 或者 Module 对应到 Swift 到底是什么类型</li>
-<li>指针间的转换问题</li>
-</ul>
-
-
-<p>补充之前没解决的一些问题，比如提到 <code>CMutablePointer</code> 的 <code>sizeof</code> 是两个字长，那么在函数调用中是如何对应到 C 的指针的？</p>
-
-<p>预备内容：</p>
-
-<ul>
-<li><a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift 与 Objective-C 之间的交互</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">简析Swift和C的交互</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">Swift 的隐式类型转换</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/06/swift-attributes/">Swift Attributes</a></li>
-</ul>
-
-
-<h2>C/ObjC to Swift 对应规则</h2>
-
-<p>以下内容均适合 Objective-C 。第一部分适合 C 。</p>
-
-<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。</p>
-
-<h3>for C</h3>
-
-<h4>可导出的类型定义</h4>
-
-<p>函数、枚举、结构体、常量定义、宏定义。</p>
-
-<p>结构体定义支持：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">typedef</span> <span class="k">struct</span> <span class="n">Name</span> <span class="p">{...}</span> <span class="n">Name</span><span class="p">;</span>
-</span><span class='line'><span class="k">typedef</span> <span class="k">struct</span> <span class="n">Name_t</span> <span class="p">{...}</span> <span class="n">Name</span><span class="p">;</span>
-</span><span class='line'><span class="k">struct</span> <span class="n">Name</span> <span class="p">{</span> <span class="p">...</span> <span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>其中无法处理的结构体、函数类型、 varargs 定义不导出。预计以后版本会修复。带 bit field 的结构体也无法识别。</p>
-
-<h4>类型对应关系</h4>
-
-<p>仔细分析发现，诡异情况还很多。基础类型请参考上几篇。</p>
-
-<p>在函数定义参数中：</p>
-
-<table>
-<thead>
-<tr>
-<th align="center">类型 </th>
-<th align="center"> 对应为</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="center"><code>void *</code> </td>
-<td align="center"> <code>CMutableVoidPointer</code></td>
-</tr>
-<tr>
-<td align="center"><code>Type *</code>、<code>Type[]</code> </td>
-<td align="center"> <code>CMutablePointer&lt;Type&gt;</code></td>
-</tr>
-<tr>
-<td align="center"><code>const char *</code> </td>
-<td align="center"> <code>CString</code></td>
-</tr>
-<tr>
-<td align="center"><code>const Type *</code> </td>
-<td align="center"> <code>CConstPointer&lt;Type&gt;</code></td>
-</tr>
-<tr>
-<td align="center"><code>const void *</code> </td>
-<td align="center"> <code>CConstVoidPointer</code></td>
-</tr>
-</tbody>
-</table>
-
-
-<p>在函数返回、结构体字段中：</p>
-
-<table>
-<thead>
-<tr>
-<th align="center">类型 </th>
-<th align="center"> 对应为</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="center"><code>const char *</code> </td>
-<td align="center"> <code>CString</code></td>
-</tr>
-<tr>
-<td align="center"><code>Type *</code>、<code>const Type *</code> </td>
-<td align="center"> <code>UnsafePointer&lt;Type&gt;</code></td>
-</tr>
-<tr>
-<td align="center"><code>void *</code>、<code>const void *</code> </td>
-<td align="center"> <code>COpaquePointer</code></td>
-</tr>
-<tr>
-<td align="center">无法识别的结构指针  </td>
-<td align="center"> <code>COpaquePointer</code></td>
-</tr>
-</tbody>
-</table>
-
-
-<p>另外还有如下情况：</p>
-
-<p>全局变量、全局常量(<code>const</code>)、宏定义常量(<code>#define</code>) 均使用 <code>var</code>，常量不带 <code>set</code>。</p>
-
-<p>结构体中的数组，对应为元祖，例如 <code>int data[2]</code> 对应为 <code>(CInt, CInt)</code>，所以也许。。会很长。数组有多少元素就是几元祖。</p>
-
-<h3>for ObjC</h3>
-
-<p>ObjC 明显情况要好的多，官方文档也很详细。</p>
-
-<p>除了 <code>NSError **</code> 转为 <code>NSErrorPointer</code> 外，需要注意的就是：</p>
-
-<p>函数参数、返回中的 <code>NSString *</code> 被替换为 <code>String!</code>、<code>NSArray *</code> 被替换为 <code>AnyObject[]!</code>。</p>
-
-<p>而全局变量、常量的 <code>NSString *</code> 不变。</p>
-
-<h2>关于 <code>CMutablePointer</code> 的行为</h2>
-
-<p>上回说到 <code>CMutablePointer</code>、<code>CConstPointer</code>、<code>CMutableVoidPointer</code>、<code>CConstVoidPointer</code>
-四个指针类型的字长是 2，也就是说，不可以直接对应为 C 中的指针。但是前面说类型对应关系的时候， C 函数声明转为 Swift
-时候又用到了这些类型，所以看起来自相矛盾。仔细分析了 lldb 反汇编代码后发现，有如下隐藏行为:</p>
-
-<h3>in Swift</h3>
-
-<p>在纯 Swift 环境下，函数定义等等、这些类型字长都为 2，不会有任何意外情况出现。</p>
-
-<h3>in C/ObjC</h3>
-
-<p>当一个函数的声明是由 Bridge Header 或者 LLVM Module 隐式转换而来，且用到了这四个指针类型，那么代码编译过程中类型转换规则、隐式转换调用等规则依然有效。只不过在代码最生成一步，会插入以下私有函数调用之一：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@transparent</span> <span class="n">func</span> <span class="nc">_convertCMutablePointerToUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;(</span><span class="n">p</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;T&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">UnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nd">@transparent</span> <span class="n">func</span> <span class="nc">_convertCConstPointerToUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;(</span><span class="n">p</span><span class="k">:</span> <span class="kt">CConstPointer&lt;T&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">UnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nd">@transparent</span> <span class="n">func</span> <span class="nc">_convertCMutableVoidPointerToCOpaquePointer</span><span class="o">(</span><span class="n">p</span><span class="k">:</span> <span class="kt">CMutableVoidPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">COpaquePointer</span>
-</span><span class='line'><span class="nd">@transparent</span> <span class="n">func</span> <span class="nc">_convertCConstVoidPointerToCOpaquePointer</span><span class="o">(</span><span class="n">p</span><span class="k">:</span> <span class="kt">CConstVoidPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">COpaquePointer</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个过程是背后隐藏的。然后将转换的结果传参给对应的 C/ObjC 函数。实现了指针类型字长正确、一致。</p>
-
-<h3>结论</h3>
-
-<p>作为程序员，需要保证调用 C 函数的时候类型一致。如果有特殊需求重新声明了对应的 C 函数，那么以上规则不起作用，所以重声明 C 中的函数时表示指针不可以使用这四个指针类型。</p>
-
-<h2>再说指针</h2>
-
-<p><img class="left" src="/images/attachments/swift-pointers.png" title="'Swift Pointers'" ></p>
-
-<p>虚线表示直接隐式类型转换。其中 <code>UnsafePointer&lt;T&gt;</code> 可以通过用其他任何指针调用构造函数获得。</p>
-
-<p><code>CMutablePointer&lt;T&gt;</code> 和 <code>CMutableVoidPointer</code> 也可以通过 <code>Array&lt;T&gt;</code> 的引用隐式类型转换获得 （ <code>&amp;arr</code> ）。</p>
-
-<p>椭圆表示类型 <code>sizeof</code> 为字长，可以用于声明 C 函数。</p>
-
-<p>四大指针可以用 <code>withUnsafePointer</code> 操作。转换为 <code>UnsafePointer&lt;T&gt;</code>。上一节提到的私有转换函数请不要使用。</p>
-
-<h2>字符串</h2>
-
-<p>之前的文章已经介绍过怎么从 <code>CString</code> 获取 <code>String</code> （静态方法 <code>String.fromCString</code>）。</p>
-
-<p>从 <code>String</code> 获取 <code>CString</code> 也说过， 是用 <code>withCString</code>。</p>
-
-<p>也可以从 <code>CString(UnsafePointer.alloc(100))</code> 来分配空数组。</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-25T22:44:29+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本文瞎写，没实际内容。请不用看了。</p>
-
-<h2>摘要</h2>
-
-<p>本文挖掘 Swift 标准库中的诡异操作符 <code>~&gt;</code> 波浪箭头的作用。</p>
-
-<h2>正文</h2>
-
-<p>查看标准库定义的时候，发现了一个奇怪的运算符 <code>~&gt;</code>，看起来高大上，所以探索下它到底起什么作用。</p>
-
-<p>标准库对 <code>~&gt;</code> 用到的地方很多，我取最简单的一个来做说明。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>protocol SignedNumber : _SignedNumber {
-</span><span class='line'>  func -(x: Self) -&gt; Self
-</span><span class='line'>  func ~&gt;(_: Self, _: (_Abs, ())) -&gt; Self
-</span><span class='line'>}
-</span><span class='line'>func ~&gt;&lt;T : _SignedNumber&gt;(x: T, _: (_Abs, ())) -&gt; T
-</span><span class='line'>func abs(_: CInt) -&gt; CInt
-</span><span class='line'>func abs&lt;T : SignedNumber&gt;(x: T) -&gt; T</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这是对有符号整型的一个协议，我去掉了额外的属性。事实上 <code>_Abs</code> 类型是一个空结构， <code>sizeof</code> 为 0 。</p>
-
-<p>写个测试程序，计算下 <code>abs(-100)</code> 看看情况，发现 <code>top_level_code()</code> 调用了 <code>SignedNumber</code> 版本的 <code>abs()</code>：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>callq  0x100001410               ; Swift.abs &lt;A : Swift.SignedNumber&gt;(A) -&gt; A</span></code></pre></td></tr></table></div></figure>
-
-
-<p>反汇编这个库函数，发现一个有意思的调用：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>callq  0x10000302a               ; symbol stub for: Swift._abs &lt;A&gt;(A) -&gt; (Swift._Abs, A)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个 <code>_abs()</code> 函数是私有函数， Swift 中把很多私有的函数、成员变量、结构、协议都以下划线开头，意思就是不希望我们去调用或者访问的函数，在缺乏成员访问控制的语言中，其实这么做也不错。大家可以借鉴。</p>
-
-<p>而 <code>_abs()</code> 函数很简单，将任意类型 T 直接封装成 <code>(_Abs, T)</code> 元组，返回。</p>
-
-<p>然后代码的逻辑就是用这个元祖解开重新组装，调用 <code>~&gt;</code>。逻辑如下：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// logic of abs() funciton</span>
-</span><span class='line'><span class="n">let</span> <span class="o">(</span><span class="n">operation</span><span class="o">,</span> <span class="k">val</span><span class="o">)</span> <span class="k">=</span> <span class="nc">_abs</span><span class="o">(-</span><span class="mi">100</span><span class="o">)</span>
-</span><span class='line'><span class="k">val</span> <span class="o">~&gt;</span> <span class="o">(</span><span class="n">operation</span><span class="o">,</span> <span class="o">())</span> <span class="c1">// 返回 100</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>到这里就清楚了。实际上 <code>~&gt;</code> 将一个简单的操作复杂化。多调用了层，实际开销主要在元祖的解开和重组装（实际开销理论上在优化模式下应该可以忽略，因为包含 <code>_Abs</code>， size 为 0）。</p>
-
-<p>到这里很多朋友应该已经知道怎么回事了。 <code>SignedNumber</code> 中的 <code>~&gt;</code> 操作是为我们提供了一个方法可以 hook 到标准库的 <code>abs()</code> 函数。来自 Haskell 的同学应该会见过这种单纯地用类型签名来实现函数分发调用的方式。</p>
-
-<h3>优点？</h3>
-
-<p>暂时正在考虑。想明白会发出来。</p>
-
-<h3>延伸</h3>
-
-<p>其实很多标准库函数都用到了类似的方法实现。都用到了 <code>~&gt;</code> 运算符。包括：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">countElements</span><span class="o">()</span>
-</span><span class='line'><span class="c1">// _countElements() 工具函数  _CountElements 结构</span>
-</span><span class='line'><span class="n">underestimateCount</span><span class="o">()</span>
-</span><span class='line'><span class="c1">// _underestimateCount() 、 _UnderestimateCount</span>
-</span><span class='line'><span class="n">advance</span><span class="o">()</span>
-</span><span class='line'><span class="c1">// _advance() 、 _Advance</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>等。</p>
-
-<h2>附录</h2>
-
-<p>这里列出部分定义：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Sequence</span> <span class="k">:</span> <span class="k">_</span><span class="kt">Sequence_</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">type</span><span class="kt">alias</span> <span class="kt">GeneratorType</span> <span class="kt">:</span> <span class="kt">Generator</span>
-</span><span class='line'>  <span class="kt">func</span> <span class="kt">generate</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">GeneratorType</span>
-</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="k">_:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">UnderestimateCount</span><span class="o">,</span> <span class="o">()))</span> <span class="o">-&gt;</span> <span class="nc">Int</span>
-</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;&lt;</span><span class="n">R</span><span class="o">&gt;(</span><span class="k">_:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">PreprocessingPass</span><span class="o">,</span> <span class="o">((</span><span class="kt">Self</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">R</span><span class="o">)))</span> <span class="o">-&gt;</span> <span class="n">R</span><span class="o">?</span>
-</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="k">_:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">CopyToNativeArrayBuffer</span><span class="o">,</span> <span class="o">()))</span> <span class="o">-&gt;</span> <span class="nc">ContiguousArrayBuffer</span><span class="o">&lt;</span><span class="nc">Self</span><span class="o">.</span><span class="nc">GeneratorType</span><span class="o">.</span><span class="nc">Element</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="n">protocol</span> <span class="nc">Collection</span> <span class="k">:</span> <span class="k">_</span><span class="kt">Collection</span><span class="o">,</span> <span class="nc">Sequence</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">subscript</span> <span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Self.IndexType</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">.</span><span class="nc">GeneratorType</span><span class="o">.</span><span class="nc">Element</span> <span class="o">{</span> <span class="n">get</span> <span class="o">}</span>
-</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="k">_:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">CountElements</span><span class="o">,</span> <span class="o">()))</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">.</span><span class="nc">IndexType</span><span class="o">.</span><span class="nc">DistanceType</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">protocol</span> <span class="nc">ForwardIndex</span> <span class="k">:</span> <span class="k">_</span><span class="kt">ForwardIndex</span> <span class="o">{</span>
-</span><span class='line'>  <span class="kt">func</span> <span class="kt">~&gt;</span><span class="o">(</span><span class="kt">start:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_</span><span class="kt">:</span> <span class="o">(</span><span class="k">_</span><span class="kt">Distance</span><span class="o">,</span> <span class="kt">Self</span><span class="o">))</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">.</span><span class="nc">DistanceType</span>
-</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="n">start</span><span class="k">:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">Advance</span><span class="o">,</span> <span class="kt">Self.DistanceType</span><span class="o">))</span> <span class="o">-&gt;</span> <span class="nc">Self</span>
-</span><span class='line'>  <span class="n">func</span> <span class="o">~&gt;(</span><span class="n">start</span><span class="k">:</span> <span class="kt">Self</span><span class="o">,</span> <span class="k">_:</span> <span class="o">(</span><span class="k">_</span><span class="kt">Advance</span><span class="o">,</span> <span class="o">(</span><span class="kt">Self.DistanceType</span><span class="o">,</span> <span class="kt">Self</span><span class="o">)))</span> <span class="o">-&gt;</span> <span class="nc">Self</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>相关更多声明代码信息请参考 我的 Github : <a href="https://github.com/andelf/Defines-Swift">andelf/Defines-Swift</a> 。</p>
-
-<h2>总结</h2>
-
-<p>通过 <code>~&gt;</code> 和 <code>protocol</code> 可以自定义编译器的行为。相当于 hook 标准库函数。由于内部实现未知，还不能继续断言它还有什么作用。</p>
-
-<p>但是和直接用 extension 实现协议的方法相比，这个有什么好处呢？待考。</p>
-
-<h2>更新</h2>
-
-<p>可以避免 <code>protocol</code> 中的静态函数混淆空间，如果用全局函数，那么相当于全局函数去调用静态函数。</p>
-
-<p>还有就是在使用操作符的时候，如果定义多个，那么需要编译器去寻找可用的一个版本。</p>
-
-<p>仔细查看目前的 <code>protocol</code> 实现，发现还是有点 BUG ，类型限制还是不清楚，表述高阶类型的时候。</p>
-
-<p>为了描述 <code>~&gt;</code> 的用法，我写了个 <a href="https://gist.github.com/andelf/6a8432ef0820de9991f6">Monad.swift</a> 。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-25T21:20:55+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
-
-<p>本文的发现基于个人研究。请尊重原创。</p>
-
-<h2>摘要</h2>
-
-<p>本文提出了一种可以编译 Swift 静态链接模块的方法，通过对 swift 编译命令行参数的控制，生成可以自由分发的静态链接库和 swift module 描述文件。同时还提出了导出 objC 头文件供 Objective-C 调用的可能。</p>
-
-<p>关键词： Swift 模块 静态链接库</p>
-
-<p>上次一篇文章 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a> 中提到：</p>
-
-<blockquote><p>静态链接库 .a 目前还没有找到方法， -Xlinker -static 会报错。</p></blockquote>
-
-<p>最近摸索了下用 Swift 创建静态链接库的方法。有所收获，这里记录下。</p>
-
-<h2>废话</h2>
-
-<p>我们中的很多人都知道，编译器编译的最后一个步骤一般都是链接，一般都是调用 <code>ld</code>。经过仔细分析，之前为什么不能生成 <code>.a</code> 静态链接库的原因，发现有如下问题：</p>
-
-<ul>
-<li><code>-Xlinker -static</code> 参数传递的时候， swift 命令本身不能识别，讲 <code>-dylib</code> 与 <code>-static</code> 一起传递（这倒不是问题，参数优先级，静态盖掉了动态）</li>
-<li>链接到 <code>-lSystem</code> 时候，这个库没有静态链接。</li>
-</ul>
-
-
-<p>所以总会报错。</p>
-
-<h3>思考</h3>
-
-<p>实际上之前的方法是走了弯路，根本没有必要去调用 <code>ld</code>，作为一个合格的 <code>.a</code> 静态链接库，只要有对应的 <code>.o</code> 就可以了，没必要去链接 <code>-lSystem</code>，也许是 swift 本身没有编译为静态链接库的参数支持。</p>
-
-<p>检查 Swift 标准库中的静态链接库，果然只包含对应 <code>.swift</code> 代码编译后的 <code>.o</code> 文件。（检查方法是用 <code>ar -t libName.a</code>）</p>
-
-<p>说到底， Swift 静态链接库的目标很简单，就是包含对应 Swift 模块的所有代码，这样就避免了对应动态链接库的引入。和什么 <code>-lSystem</code> 没啥相干。</p>
-
-<h2>解决方法 HOWTO</h2>
-
-<p>以 lingoer 的 <a href="https://github.com/lingoer/SwiftyJSON">SwiftyJSON</a> 为例。</p>
-
-<p>我们的目标很简单，就是生成 <code>ModName.swiftmodule</code>、<code>ModName.swiftdoc</code>(可选)、<code>libswiftModName.a</code> 三个文件。</p>
-
-<h3>编译</h3>
-
-<h4>生成 <code>.swiftmodule</code> <code>.swiftdoc</code></h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) SwiftyJSON.swift -emit-library -emit-module -module-name SwiftyJSON -v -o libswiftSwiftyJSON.dylib -module-link-name swiftSwiftyJSON</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>生成 <code>.o</code></h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) -c SwiftyJSON.swift -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>生成 <code>.a</code></h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ar rvs libswiftSwiftyJSON.a SwiftyJSON.o</span></code></pre></td></tr></table></div></figure>
-
-
-<p>大功告成。</p>
-
-<p>同时应该也可以用 <code>lipo</code> 来合成不同平台下的 <code>.a</code> 链接库。</p>
-
-<h3>使用</h3>
-
-<p>和静态链接库类似，需要 <code>-I</code> 包含 <code>.swiftmodule</code> 所在目录， <code>-L</code> 包含 <code>.a</code> 所在目录。</p>
-
-<p>如果动态链接库和静态链接库两者同时存在，可以依靠不同目录来区分。</p>
-
-<h2>你丫闲的！</h2>
-
-<p>可能不少人要群嘲，你这意义是啥。你丫闲的。</p>
-
-<p>其实在分发 library 的时候，很多时候我们需要二进制分发，希望别人可以方便地使用。这种情况下，静态链接更佳（虽然新的 iOS 8 支持动态链接，但是看起来是基于 Framework 的，略复杂些。）</p>
-
-<p>甚至我们可以用 <code>lipo</code> 创建全平台可用的静态链接库。多赞。</p>
-
-<h2>补充</h2>
-
-<p>多个 Swift 文件可以分别编译为 <code>.o</code> 然后用 <code>ar</code> 合并。</p>
-
-<p>对于 CocoaPods ，也许可以按照这个逻辑将 Swift 模块暴露出去。需要多加一个参数 <code>-emit-objc-header</code> （以及 <code>-emit-objc-header-path</code>）即可。</p>
-
-<h2>参考文献</h2>
-
-<ul>
-<li>我的另一篇 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a></li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2156,6 +1820,18 @@ segmentation algorithm.</p></blockquote>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/06/18/guangzhou-realtime-bus/">广州实时工具App逆向</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/09/swift-2-dot-0-error-handling/">Swift 2.0 的错误处理(Swift 2.0 Error Handling)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/01/beijing-realtime-bus/">北京实时公交分析</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
@@ -2223,18 +1899,6 @@ segmentation algorithm.</p></blockquote>
     
       <li class="post">
         <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
       </li>
     
   </ul>

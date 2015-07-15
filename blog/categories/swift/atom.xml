@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Swift | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/swift/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2015-05-23T11:34:24+08:00</updated>
+  <updated>2015-07-15T23:34:54+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -12,6 +12,106 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Swift 2.0 的错误处理(Swift 2.0 Error Handling)]]></title>
+    <link href="http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling/"/>
+    <updated>2015-06-09T15:27:58+08:00</updated>
+    <id>http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling</id>
+    <content type="html"><![CDATA[<p>protocol ErrorType {
+  var <em>domain: String { get }
+  var </em>code: Int { get }
+}</p>
+
+<p>@asmname(&ldquo;swift_bridgeErrorTypeToNSError&rdquo;) func _bridgeErrorTypeToNSError(e: ErrorType) &ndash;> AnyObject</p>
+
+<p>@asmname(&ldquo;swift_stdlib_getErrorCode&rdquo;) func _stdlib_getErrorCode<T : ErrorType>(x: UnsafePointer<T>) &ndash;> Int</p>
+
+<p>@asmname(&ldquo;swift_stdlib_getErrorDomainNSString&rdquo;) func _stdlib_getErrorDomainNSString<T : ErrorType>(x: UnsafePointer<T>) &ndash;> AnyObject</p>
+
+<h2>Foundation</h2>
+
+<p>protocol <em>ObjectiveCBridgeableErrorType : ErrorType {
+  init?(</em>bridgedNSError: NSError)
+}</p>
+
+<p>struct NSCocoaError : RawRepresentable, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, <em>_BridgedNSError, Hashable, Equatable {
+  let rawValue: Int
+  init(rawValue: Int)
+  static var </em>NSErrorDomain: String {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  typealias RawValue = Int
+}</p>
+
+<p>infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
+infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
+func ==<T : __BridgedNSError where T.RawValue : SignedIntegerType>(lhs: T, rhs: T) &ndash;> Bool</p>
+
+<p>@available(OSX 10.11, iOS 9.0, *)
+func resolveError(error: NSError?) throws</p>
+
+<p>enum _GenericObjCError : ErrorType {
+  case NilError
+  var hashValue: Int {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  var _domain: String {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+  var _code: Int {</p>
+
+<pre><code>get {}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>@asmname(&ldquo;swift_stdlib_bridgeNSErrorToErrorType&rdquo;)
+func _stdlib_bridgeNSErrorToErrorType<T : _ObjectiveCBridgeableErrorType>(error: NSError, out: UnsafeMutablePointer<T>) &ndash;> Bool</p>
+
+<p>@asmname(&ldquo;swift_convertNSErrorToErrorType&rdquo;) func _convertNSErrorToErrorType(error: NSError?) &ndash;> ErrorType</p>
+
+<p>@objc enum NSURLError : Int, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { &hellip; }</p>
+
+<p>protocol <strong>BridgedNSError : RawRepresentable {
+  static var <em>NSErrorDomain: String { get }
+}
+@asmname(&ldquo;swift_convertErrorTypeToNSError&rdquo;) func </em>convertErrorTypeToNSError(error: ErrorType) &ndash;> NSError
+func ~=(match: NSCocoaError, error: ErrorType) &ndash;> Bool
+protocol _BridgedNSError : </strong>BridgedNSError, <em>ObjectiveCBridgeableErrorType, Hashable {
+  static var </em>NSErrorDomain: String { get }
+}</p>
+
+<p>ErrorType 在 Swift 中表示。</p>
+
+<p>extension NSError : ErrorType {
+  @objc dynamic var _domain: String {</p>
+
+<pre><code>@objc dynamic get {}
+</code></pre>
+
+<p>  }
+  @objc dynamic var _code: Int {</p>
+
+<pre><code>@objc dynamic get {}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>CFError</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[为第三方扩展创建 Swift 模块]]></title>
@@ -307,293 +407,6 @@ let an_array_with_100_zero = new(Int)[100]
 <h2>How I find it?</h2>
 
 <p>瞎试出来的。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）]]></title>
-    <link href="http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/"/>
-    <updated>2014-07-04T01:05:55+08:00</updated>
-    <id>http://andelf.github.io/blog/2014/07/04/cocoa-in-swift</id>
-    <content type="html"><![CDATA[<p>最近看到了 <a href="https://github.com/raywenderlich/swift-style-guide">Swift Style Guide</a> 个人觉得内容太少，
-Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。</p>
-
-<p>Swift 本身的特性，导致它在一些用法上和 Objective-C 上有所不同，比如 ObjC 的 struct 单纯和 C 的一样，但是在 Swift
-中的 struct 则要强大得多。</p>
-
-<p>个人认为比如 <code>CGPointMake</code> 这样的函数，理论上不应该出现在 Swift 代码中。而是应该用 <code>CGPoint(x:y:)</code>。</p>
-
-<p>本文可以作为参考手册使用。</p>
-
-<h2>标准库扩展</h2>
-
-<h3>ObjectiveC</h3>
-
-<p>值得注意的是 Selector 相关方法，实现了 <code>StringLiteralConvertible</code>。也可以从 <code>nil</code> 获得。</p>
-
-<h3>Foundation</h3>
-
-<p>这里忽略之前介绍过的 <code>_BridgedToObjectiveC</code> 相关内容。</p>
-
-<h4>协议附加</h4>
-
-<p>Sequence 协议</p>
-
-<p><code>
-NSMutableArray NSSet NSArray NSMutableDictionary NSMutableSet NSDictionary
-</code></p>
-
-<p>所有以上这些类型都可以通过 for-in 操作。</p>
-
-<p>*LiteralConvertible</p>
-
-<p><code>
-NSNumber NSString NSArray NSDictionary
-</code></p>
-
-<h4>隐式类型转换</h4>
-
-<p>CF 几乎都对应到了 NS 类型。这里略去</p>
-
-<ul>
-<li><code>NilType</code> &ndash;> <code>NSZone</code></li>
-<li><code>Dictionary&lt;KeyType: Hashable, ValueType&gt;</code> &ndash;> <code>NSDictionary</code></li>
-<li><code>NSDictionary</code> &ndash;> <code>Dictionary&lt;NSObject, AnyObject&gt;</code></li>
-<li><code>String</code> &lt;&ndash;> <code>NSString</code></li>
-<li><code>NSArray</code> &ndash;> <code>AnyObject[]</code></li>
-<li><code>A[]</code> &ndash;> <code>NSArray</code></li>
-<li><code>Float Double Int UInt Bool</code> &ndash;> <code>NSNumber</code></li>
-<li><code>NSRange</code> &ndash;> <code>Range&lt;Int&gt;</code> // 比较有意思的一个</li>
-</ul>
-
-
-<h4>方法扩展</h4>
-
-<p><code>scala
-// let s = NSSet(objects: 12, 32, 23, 12)
-extension NSSet {
-  convenience init(objects elements: AnyObject...)
-}
-extension NSOrderedSet {
-  convenience init(objects elements: AnyObject...)
-}
-// 这里注意，NSRange 和 Swift Range 对 range 结束的表述方法不同
-// NSRange 保存 range 元素个数
-// Swift Range 保存的是结束元素
-// let r = NSRange(0..20)
-extension NSRange {
-  init(_ x: Range&lt;Int&gt;)
-}
-// let prop = NSDictionary(objectsAndKeys: "Feather", "name", "Programming", "hobby")
-extension NSDictionary {
-  convenience init(objectsAndKeys objects: AnyObject...)
-}
-extension NSObject : CVarArg {
-  @objc func encode() -&gt; Word[]
-}
-</code></p>
-
-<p>字符串的扩展方法非常多。</p>
-
-<p><code>scala
-  static func availableStringEncodings() -&gt; NSStringEncoding[]
-  static func defaultCStringEncoding() -&gt; NSStringEncoding
-  static func localizedNameOfStringEncoding(encoding: NSStringEncoding) -&gt; String
-  static func localizedStringWithFormat(format: String, _ arguments: CVarArg...) -&gt; String
-  static func pathWithComponents(components: String[]) -&gt; String
-  static func stringWithContentsOfFile(path: String, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; String?
-  static func stringWithContentsOfFile(path: String, usedEncoding: CMutablePointer&lt;NSStringEncoding&gt; = default, error: NSErrorPointer = default) -&gt; String?
-  static func stringWithContentsOfURL(url: NSURL, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; String?
-  static func stringWithContentsOfURL(url: NSURL, usedEncoding enc: CMutablePointer&lt;NSStringEncoding&gt; = default, error: NSErrorPointer = default) -&gt; String?
-  static func stringWithCString(cString: CString, encoding enc: NSStringEncoding) -&gt; String?
-  static func stringWithUTF8String(bytes: CString) -&gt; String?
-  func canBeConvertedToEncoding(encoding: NSStringEncoding) -&gt; Bool
-  var capitalizedString: String { get }
-  func capitalizedStringWithLocale(locale: NSLocale) -&gt; String
-  func caseInsensitiveCompare(aString: String) -&gt; NSComparisonResult
-  func commonPrefixWithString(aString: String, options: NSStringCompareOptions) -&gt; String
-  func compare(aString: String, options mask: NSStringCompareOptions = default, range: Range&lt;String.Index&gt;? = default, locale: NSLocale? = default) -&gt; NSComparisonResult
-  func completePathIntoString(_ outputName: CMutablePointer&lt;String&gt; = default, caseSensitive: Bool, matchesIntoArray: CMutablePointer&lt;String[]&gt; = default, filterTypes: String[]? = default) -&gt; Int
-  func componentsSeparatedByCharactersInSet(separator: NSCharacterSet) -&gt; String[]
-  func componentsSeparatedByString(separator: String) -&gt; String[]
-  func cStringUsingEncoding(encoding: NSStringEncoding) -&gt; CChar[]?
-  func dataUsingEncoding(encoding: NSStringEncoding, allowLossyConversion: Bool = default) -&gt; NSData
-  var decomposedStringWithCanonicalMapping: String { get }
-  var decomposedStringWithCompatibilityMapping: String { get }
-  func enumerateLines(body: (line: String, inout stop: Bool) -&gt; ())
-  func enumerateLinguisticTagsInRange(range: Range&lt;String.Index&gt;, scheme tagScheme: String, options opts: NSLinguisticTaggerOptions, orthography: NSOrthography?, _ body: (String, Range&lt;String.Index&gt;, Range&lt;String.Index&gt;, inout Bool) -&gt; ())
-  func enumerateSubstringsInRange(range: Range&lt;String.Index&gt;, options opts: NSStringEnumerationOptions, _ body: (substring: String, substringRange: Range&lt;String.Index&gt;, enclosingRange: Range&lt;String.Index&gt;, inout Bool) -&gt; ())
-  var fastestEncoding: NSStringEncoding { get }
-  func fileSystemRepresentation() -&gt; CChar[]
-  func getBytes(inout buffer: UInt8[], maxLength: Int, usedLength: CMutablePointer&lt;Int&gt;, encoding: NSStringEncoding, options: NSStringEncodingConversionOptions, range: Range&lt;String.Index&gt;, remainingRange: CMutablePointer&lt;Range&lt;String.Index&gt;&gt;) -&gt; Bool
-  func getCString(inout buffer: CChar[], maxLength: Int, encoding: NSStringEncoding) -&gt; Bool
-  func getFileSystemRepresentation(inout buffer: CChar[], maxLength: Int) -&gt; Bool
-  func getLineStart(start: CMutablePointer&lt;String.Index&gt;, end: CMutablePointer&lt;String.Index&gt;, contentsEnd: CMutablePointer&lt;String.Index&gt;, forRange: Range&lt;String.Index&gt;)
-  func getParagraphStart(start: CMutablePointer&lt;String.Index&gt;, end: CMutablePointer&lt;String.Index&gt;, contentsEnd: CMutablePointer&lt;String.Index&gt;, forRange: Range&lt;String.Index&gt;)
-  var hash: Int { get }
-  static func stringWithBytes(bytes: UInt8[], length: Int, encoding: NSStringEncoding) -&gt; String?
-  static func stringWithBytesNoCopy(bytes: CMutableVoidPointer, length: Int, encoding: NSStringEncoding, freeWhenDone flag: Bool) -&gt; String?
-  init(utf16CodeUnits: CConstPointer&lt;unichar&gt;, count: Int)
-  init(utf16CodeUnitsNoCopy: CConstPointer&lt;unichar&gt;, count: Int, freeWhenDone flag: Bool)
-  init(format: String, _ _arguments: CVarArg...)
-  init(format: String, arguments: CVarArg[])
-  init(format: String, locale: NSLocale?, _ args: CVarArg...)
-  init(format: String, locale: NSLocale?, arguments: CVarArg[])
-  var lastPathComponent: String { get }
-  var utf16count: Int { get }
-  func lengthOfBytesUsingEncoding(encoding: NSStringEncoding) -&gt; Int
-  func lineRangeForRange(aRange: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
-  func linguisticTagsInRange(range: Range&lt;String.Index&gt;, scheme tagScheme: String, options opts: NSLinguisticTaggerOptions = default, orthography: NSOrthography? = default, tokenRanges: CMutablePointer&lt;Range&lt;String.Index&gt;[]&gt; = default) -&gt; String[]
-  func localizedCaseInsensitiveCompare(aString: String) -&gt; NSComparisonResult
-  func localizedCompare(aString: String) -&gt; NSComparisonResult
-  func localizedStandardCompare(string: String) -&gt; NSComparisonResult
-  func lowercaseStringWithLocale(locale: NSLocale) -&gt; String
-  func maximumLengthOfBytesUsingEncoding(encoding: NSStringEncoding) -&gt; Int
-  func paragraphRangeForRange(aRange: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
-  var pathComponents: String[] { get }
-  var pathExtension: String { get }
-  var precomposedStringWithCanonicalMapping: String { get }
-  var precomposedStringWithCompatibilityMapping: String { get }
-  func propertyList() -&gt; AnyObject
-  func propertyListFromStringsFileFormat() -&gt; Dictionary&lt;String, String&gt;
-  func rangeOfCharacterFromSet(aSet: NSCharacterSet, options mask: NSStringCompareOptions = default, range aRange: Range&lt;String.Index&gt;? = default) -&gt; Range&lt;String.Index&gt;
-  func rangeOfComposedCharacterSequenceAtIndex(anIndex: String.Index) -&gt; Range&lt;String.Index&gt;
-  func rangeOfComposedCharacterSequencesForRange(range: Range&lt;String.Index&gt;) -&gt; Range&lt;String.Index&gt;
-  func rangeOfString(aString: String, options mask: NSStringCompareOptions = default, range searchRange: Range&lt;String.Index&gt;? = default, locale: NSLocale? = default) -&gt; Range&lt;String.Index&gt;
-  var smallestEncoding: NSStringEncoding { get }
-  func stringByAbbreviatingWithTildeInPath() -&gt; String
-  func stringByAddingPercentEncodingWithAllowedCharacters(allowedCharacters: NSCharacterSet) -&gt; String
-  func stringByAddingPercentEscapesUsingEncoding(encoding: NSStringEncoding) -&gt; String
-  func stringByAppendingFormat(format: String, _ arguments: CVarArg...) -&gt; String
-  func stringByAppendingPathComponent(aString: String) -&gt; String
-  func stringByAppendingPathExtension(ext: String) -&gt; String
-  func stringByAppendingString(aString: String) -&gt; String
-  var stringByDeletingLastPathComponent: String { get }
-  var stringByDeletingPathExtension: String { get }
-  var stringByExpandingTildeInPath: String { get }
-  func stringByFoldingWithOptions(options: NSStringCompareOptions, locale: NSLocale) -&gt; String
-  func stringByPaddingToLength(newLength: Int, withString padString: String, startingAtIndex padIndex: Int) -&gt; String
-  var stringByRemovingPercentEncoding: String { get }
-  func stringByReplacingCharactersInRange(range: Range&lt;String.Index&gt;, withString replacement: String) -&gt; String
-  func stringByReplacingOccurrencesOfString(target: String, withString replacement: String, options: NSStringCompareOptions = default, range searchRange: Range&lt;String.Index&gt;? = default) -&gt; String
-  func stringByReplacingPercentEscapesUsingEncoding(encoding: NSStringEncoding) -&gt; String
-  var stringByResolvingSymlinksInPath: String { get }
-  var stringByStandardizingPath: String { get }
-  func stringByTrimmingCharactersInSet(set: NSCharacterSet) -&gt; String
-  func stringsByAppendingPaths(paths: String[]) -&gt; String[]
-  func substringFromIndex(index: Int) -&gt; String
-  func substringToIndex(index: Int) -&gt; String
-  func substringWithRange(aRange: Range&lt;String.Index&gt;) -&gt; String
-  func uppercaseStringWithLocale(locale: NSLocale) -&gt; String
-  func writeToFile(path: String, atomically useAuxiliaryFile: Bool, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; Bool
-  func writeToURL(url: NSURL, atomically useAuxiliaryFile: Bool, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; Bool
-</code></p>
-
-<h3>CoreGraphics</h3>
-
-<p>几个常用基本类型都有了 Swift-style 的构造函数。其中 <code>CGRect</code> 有很多的相关运算都被封装为方法，很不错。</p>
-
-<p><code>scala
-extension CGPoint : Equatable {
-  static var zeroPoint: CGPoint
-  init()
-  init(x: Int, y: Int)
-}
-extension CGSize {
-  static var zeroSize: CGSize
-  init()
-  init(width: Int, height: Int)
-}
-extension CGVector {
-  static var zeroVector: CGVector
-  init(_ dx: CGFloat, _ dy: CGFloat)
-  init(_ dx: Int, _ dy: Int)
-}
-extension CGRect : Equatable {
-  // 全为 0
-  static var zeroRect: CGRect
-  // 原点为无穷大，表示空
-  static var nullRect: CGRect
-  // 原点无穷小，宽高无穷大
-  static var infiniteRect: CGRect
-  init()
-  init(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat)
-  init(x: Int, y: Int, width: Int, height: Int)
-  var width: CGFloat
-  var height: CGFloat
-  var minX: CGFloat
-  var minY: CGFloat
-  // 中点
-  var midX: CGFloat
-  var midY: CGFloat
-  var maxX: CGFloat
-  var maxY: CGFloat
-  var isNull: Bool
-  var isEmpty: Bool
-  var isInfinite: Bool
-  var standardizedRect: CGRect
-  func standardize()
-  var integerRect: CGRect
-  func integerize()
-  func rectByInsetting(#dx: CGFloat, dy: CGFloat) -&gt; CGRect
-  func inset(#dx: CGFloat, dy: CGFloat)
-  func rectByOffsetting(#dx: CGFloat, dy: CGFloat) -&gt; CGRect
-  func offset(#dx: CGFloat, dy: CGFloat)
-  func rectByUnion(withRect: CGRect) -&gt; CGRect
-  func union(withRect: CGRect)
-  func rectByIntersecting(withRect: CGRect) -&gt; CGRect
-  func intersect(withRect: CGRect)
-  func rectsByDividing(atDistance: CGFloat, fromEdge: CGRectEdge) -&gt; (slice: CGRect, remainder: CGRect)
-  func contains(rect: CGRect) -&gt; Bool
-  func contains(point: CGPoint) -&gt; Bool
-  func intersects(rect: CGRect) -&gt; Bool
-}
-</code></p>
-
-<h3>AppKit</h3>
-
-<p><code>scala
-extension NSGradient {
-  convenience init(colorsAndLocations objects: (AnyObject, CGFloat)...)
-}
-</code></p>
-
-<h3>UIKit</h3>
-
-<p><code>scala
-extension UIDeviceOrientation {
-  var isPortrait: Bool
-  // also isLandscape isValidInterfaceOrientation isFlat
-}
-extension UIInterfaceOrientation {
-  var isPortrait: Bool
-  var isLandscape: Bool
-}
-</code></p>
-
-<p>这个模块是交叉编译的。。不太容易获得信息。不过好在扩展内容不多。</p>
-
-<h3>SpriteKit</h3>
-
-<p><code>scala
-extension SKNode {
-  @objc subscript (name: String) -&gt; SKNode[] { get }
-}
-</code></p>
-
-<h2>特殊 Mirror 实现</h2>
-
-<p><code>
-NSSet NSDate NSArray NSRange NSURL NSDictionary NSString
-CGPoint CGRect CGSize
-NSView
-UIView
-SKTextureAtlas SKTexture SKSpriteNode SKShapeNode
-</code></p>
-
-<p>单独添加了自己的 <code>Mirror</code> 类型，单独实现。</p>
-
-<p><code>Mirror</code> 类型其实是为 <code>QuickLookObject</code> 准备的，也就是在 Xcode Playground 中快速查看。</p>
 ]]></content>
   </entry>
   

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Crack | 猫·仁波切]]></title>
+  <link href="http://andelf.github.io/blog/categories/crack/atom.xml" rel="self"/>
+  <link href="http://andelf.github.io/"/>
+  <updated>2015-07-15T23:34:54+08:00</updated>
+  <id>http://andelf.github.io/</id>
+  <author>
+    <name><![CDATA[猫·仁波切 (Feather)]]></name>
+    <email><![CDATA[andelf@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[广州实时工具App逆向]]></title>
+    <link href="http://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus/"/>
+    <updated>2015-06-18T17:39:06+08:00</updated>
+    <id>http://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus</id>
+    <content type="html"><![CDATA[<p>简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。</p>
+
+<p><a href="https://github.com/andelf/guangzhou-realtime-bus">Github: guangzhou-realtime-bus</a></p>
+
+<ul>
+<li>生成 e=3 的 1024 位 RSA 密钥对</li>
+<li>公钥串用查表加密(byte 映射)，然后 base64 封装发送给服务器</li>
+<li>服务器返回一串用公钥加密过的数据</li>
+<li>用本地私钥解密后，该数据包含未知96字节的一段数据和 DES Key</li>
+<li>从此通信用 DES 加密</li>
+</ul>
+
+
+<p>base64封装过程：先打包字符串长度，然后是原始字符串（JSON），然后是<code>0x10</code>(md5字符串长度)，
+然后是 md5 校验值。整个二进制字符串用 base64 转码，POST 给服务器。</p>
+
+<p>具体的登录注册过程还需要进一步抓包分析，不过暂时兴趣不在这里了。</p>
+]]></content>
+  </entry>
+  
+</feed>

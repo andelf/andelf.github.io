@@ -9,23 +9,10 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="Run with rustdoc -L. --plugin-path . --plugins dummy rust-sdl2/src/sdl2/lib.rs 1
+  <meta name="description" content="所有默认函数在 Swift 名字空间，即 Swift.abs 这样。 所有的函数功能都是我猜的。猜错别找我。 第一部分 a to z abs 1
+abs(x: T) -&gt; T 绝对值， 所有数字类型均可。 abs(-20.3) advance 1
 2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-#![crate_id = &quot;dummy#0.1& &hellip;">
+advance(start: T, n &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,6 +70,1075 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/06/swift-standard-library/">Swift Standard Library (Swift 标准库)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-06T10:49:26+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>所有默认函数在 Swift 名字空间，即 Swift.abs 这样。</p>
+
+<p>所有的函数功能都是我猜的。猜错别找我。</p>
+
+<h2>第一部分 a to z</h2>
+
+<h3><code>abs</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>abs(x: T) -&gt; T</span></code></pre></td></tr></table></div></figure>
+
+
+<p>绝对值， 所有数字类型均可。</p>
+
+<pre><code>abs(-20.3)
+</code></pre>
+
+<h3><code>advance</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>advance(start: T, n: T.DistanceType) -&gt; T
+</span><span class='line'>advance(start: T, n: T.DistanceType, end: T) -&gt; T</span></code></pre></td></tr></table></div></figure>
+
+
+<p>计算步进和距离的函数貌似。</p>
+
+<pre><code>advance(0, 20) // 20
+advance(2, 20, 4) // 4
+</code></pre>
+
+<h3><code>alignof alignofValue</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>alignof(T.Type) -&gt; Int
+</span><span class='line'>alignofValue(T) -&gt; Int    </span></code></pre></td></tr></table></div></figure>
+
+
+<p>计算类型的 alignment。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>alignof(Int)
+</span><span class='line'>alignof(Uint8)
+</span><span class='line'>alignofValue(Float(3.2))    </span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>assert</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>assert(condition: @auto_closure () -&gt; Bool, message: StaticString, file: StaticString, line: UWord) -&gt; Void
+</span><span class='line'>assert(condition: @auto_closure () -&gt; T, message: StaticString, file: StaticString, line: UWord) -&gt; Void</span></code></pre></td></tr></table></div></figure>
+
+
+<p>断言语句。因为是 @auto_closure, 所以直接写语句就可以了，第二个 T 的限制是 LogicValue, 所以 Optional 也可以。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let age = 17
+</span><span class='line'>assert(age &gt; 0, "Alive Only")
+</span><span class='line'>assert(age &gt; 18, "Adult Only", file: __FILE__, line: __LINE__)
+</span><span class='line'>assert("342345".toInt())</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>bridge*</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>bridgeFromObjectiveC(x: AnyObject, T.Type) -&gt; T?
+</span><span class='line'>bridgeFromObjectiveCUnconditional(x: AnyObject, T.Type) -&gt; T
+</span><span class='line'>bridgeToObjectiveC(x: T) -&gt; AnyObject?
+</span><span class='line'>bridgeToObjectiveCUnconditional(x: T) -&gt; AnyObject</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>c_malloc_size</code></h3>
+
+<pre><code>c_malloc_size(heapMemory: UnsafePointer&lt;Void&gt;) -&gt; Int
+</code></pre>
+
+<h3><code>c_memcpy</code></h3>
+
+<pre><code>c_memcpy(dest: UnsafePointer&lt;Void&gt;, src: UnsafePointer&lt;Void&gt;, size: UInt) -&gt; Void
+</code></pre>
+
+<h3><code>c_putchar(value: Int32) -&gt; Void</code></h3>
+
+<pre><code>c_putchar(value: Int32) -&gt; Void
+</code></pre>
+
+<p>就是 putchar，最基础的 output 语句。</p>
+
+<pre><code>c_putchar(97) // ASCII 'a'
+</code></pre>
+
+<h3><code>contains</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>contains(seq: S, predicate: (S.GeneratorType.Element) -&gt; L) -&gt; Bool
+</span><span class='line'>contains(seq: S, x: S.GeneratorType.Element) -&gt; Bool</span></code></pre></td></tr></table></div></figure>
+
+
+<p>判断序列是否包含某元素、是否包含满足某条件的元素。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let a = [1,2,4,56,7]
+</span><span class='line'>contains(a, { $0 &gt; 50 }) // true
+</span><span class='line'>contains(a, 56)</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>count countElements</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>count(r: Range&lt;I&gt;) -&gt; I.DistanceType
+</span><span class='line'>countElements(x: T) -&gt; T.IndexType.DistanceType</span></code></pre></td></tr></table></div></figure>
+
+
+<p>数元素、Range 个数。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>count(1..20)
+</span><span class='line'>let a = [1,2,4,56,7]
+</span><span class='line'>countElements(a) // 5</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>countLeadingZeros</code></h3>
+
+<pre><code>countLeadingZeros(value: Int64) -&gt; Int64
+</code></pre>
+
+<p>Count Leading Zeros in Binary Format.
+二进制格式前面有多少个 0.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>countLeadingZeros(1) // 63
+</span><span class='line'>countLeadingZeros(-1) // 0</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>debugPrint debugPrintln</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>debugPrint(object: T) -&gt; Void
+</span><span class='line'>debugPrint(object: T, &target: TargetStream) -&gt; Void
+</span><span class='line'>debugPrintln(object: T) -&gt; Void
+</span><span class='line'>debugPrintln(object: T, &target: TargetStream) -&gt; Void</span></code></pre></td></tr></table></div></figure>
+
+
+<p>打印任意对象。<code>TargetStream</code> 暂时未知。</p>
+
+<h3><code>distance</code></h3>
+
+<pre><code>distance(start: T, end: T) -&gt; T.DistanceType
+</code></pre>
+
+<p>起止距离.</p>
+
+<pre><code>distance(1, 20) // 19
+</code></pre>
+
+<h3><code>dropFirst dropLast</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dropFirst(seq: Seq) -&gt; Seq.SliceType
+</span><span class='line'>dropLast(seq: Seq) -&gt; Seq.SliceType</span></code></pre></td></tr></table></div></figure>
+
+
+<p>序列操作函数。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let b = [1,2,3,4,5]
+</span><span class='line'>// b : Array&lt;Int&gt; = [1, 2, 3, 4, 5]
+</span><span class='line'>dropFirst(b)
+</span><span class='line'>// r16 : Slice&lt;Int&gt; = [2, 3, 4, 5]
+</span><span class='line'>dropLast(b)
+</span><span class='line'>// r17 : Slice&lt;Int&gt; = [1, 2, 3, 4]</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>dump</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dump(x: T, name: String?, indent: Int, maxDepth: Int, maxItems: Int) -&gt; T
+</span><span class='line'>dump(x: T, name: String?, indent: Int, maxDepth: Int, maxItems: Int, &targetStream: TargetStream) -&gt; T</span></code></pre></td></tr></table></div></figure>
+
+
+<p>打印变量的详情。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let b = [1,2,3,4,5]
+</span><span class='line'>dump(b) // detailed output at console
+</span><span class='line'>dump(b, name: "A Array B")
+</span><span class='line'>dump("Hello World")</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>encodeBitsAsWords</code></h3>
+
+<pre><code>encodeBitsAsWords(x: T) -&gt; Word[]
+</code></pre>
+
+<p>未知作用。尝试发现类型是 ASCII 码。</p>
+
+<pre><code>encodeBitsAsWords(97) // [97]: Word[]
+</code></pre>
+
+<h3><code>enumerate</code></h3>
+
+<pre><code>enumerate(seq: Seq) -&gt; EnumerateGenerator&lt;Seq.GeneratorType&gt;
+</code></pre>
+
+<p>同 Python enumerate.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let b = [1,2,3,4,5]
+</span><span class='line'>for (idx, val) in enumerate(b) { println("b \(idx) = \(val)") }</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>equal</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>equal(a1: S1, a2: S2) -&gt; Bool
+</span><span class='line'>equal(a1: S1, a2: S2, pred: (S1.GeneratorType.Element, S1.GeneratorType.Element) -&gt; Bool) -&gt; Bool</span></code></pre></td></tr></table></div></figure>
+
+
+<p>比较相等。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>equal(2, 1+1)
+</span><span class='line'>equal([1,2,3,4], [2,4,6,8], { $0 * 2 == $1 })</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>fatalError</code></h3>
+
+<pre><code>fatalError(message: StaticString, file: StaticString, line: UWord) -&gt; Void
+</code></pre>
+
+<p>Runtime fatal error. then quit.</p>
+
+<pre><code>fatalError("Taylor Swift Sucks")
+</code></pre>
+
+<h3><code>filter</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>filter(source: C, includeElement: (C.GeneratorType.Element) -&gt; Bool) -&gt; FilterCollectionView&lt;C&gt;
+</span><span class='line'>filter(source: S, includeElement: (S.GeneratorType.Element) -&gt; Bool) -&gt; FilterSequenceView&lt;S&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同 Python filter。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let b = [1,2,3,4,5]
+</span><span class='line'>for i in filter(b, { $0 &gt; 3 }) { println("got \(i)") }
+</span><span class='line'>for i in filter(1...100, { $0 % 17 == 0 }) { println("got \(i)") }</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>find</code></h3>
+
+<pre><code>find(domain: C, value: C.GeneratorType.Element) -&gt; C.IndexType?
+</code></pre>
+
+<p>查找某一元素的索引值。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let b = [1,2,3,4,5]
+</span><span class='line'>find(b, 20) // nil
+</span><span class='line'>find(b, 2)  // 1</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>getBridgedObjectiveCType</code></h3>
+
+<pre><code>getBridgedObjectiveCType(T.Type) -&gt; Any.Type?
+</code></pre>
+
+<h3><code>getVaList</code></h3>
+
+<pre><code>getVaList(args: CVarArg[]) -&gt; CVaListPointer
+</code></pre>
+
+<h3><code>indices</code></h3>
+
+<pre><code>indices(seq: Seq) -&gt; Range&lt;Seq.IndexType&gt;
+</code></pre>
+
+<p>索引的迭代器。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let b = [1,2,3,4,5]
+</span><span class='line'>for i in indices(b) { println(i) }
+</span><span class='line'>// 0 1 2 3 4</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>insertionSort</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>insertionSort(&elements: C, range: Range&lt;C.IndexType&gt;) -&gt; Void
+</span><span class='line'>insertionSort(&elements: C, range: Range&lt;C.IndexType&gt;, &less: (C.GeneratorType.Element, C.GeneratorType.Element) -&gt; Bool) -&gt; Void</span></code></pre></td></tr></table></div></figure>
+
+
+<p>插入排序。range 表示排序范围。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var tt = [23, 34, 56, 45, 67, 12, 78, 89, 90]
+</span><span class='line'>insertionSort(&tt, 0..5)
+</span><span class='line'>println(tt)</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>isBridgedToObjectiveC isBridgedVerbatimToObjectiveC</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>isBridgedToObjectiveC(T.Type) -&gt; Bool
+</span><span class='line'>isBridgedVerbatimToObjectiveC(T.Type) -&gt; Bool</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>isUniquelyReferenced</code></h3>
+
+<pre><code>isUniquelyReferenced(&amp;x: T) -&gt; Bool    
+</code></pre>
+
+<h3><code>join</code></h3>
+
+<pre><code>func join&lt;C : ExtensibleCollection, S : Sequence where C == C&gt;(separator: C, elements: S) -&gt; C
+</code></pre>
+
+<p>序列的 join 操作</p>
+
+<pre><code>join("!!", ["Hello", "World"])
+</code></pre>
+
+<h3><code>lexicographicalCompare</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>lexicographicalCompare(a1: S1, a2: S2) -&gt; Bool
+</span><span class='line'>lexicographicalCompare(a1: S1, a2: S2, less: (S1.GeneratorType.Element, S1.GeneratorType.Element) -&gt; Bool) -&gt; Bool</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>map</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>map(source: C, transform: (C.GeneratorType.Element) -&gt; T) -&gt; MapCollectionView&lt;C, T&gt;
+</span><span class='line'>map(source: S, transform: (S.GeneratorType.Element) -&gt; T) -&gt; MapSequenceView&lt;S, T&gt;
+</span><span class='line'>map(x: T?, f: (T) -&gt; U) -&gt; U?</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同 Python map 操作。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>for i in map([1,2,3,4], { $0 * 10 }) { println(i) }
+</span><span class='line'>let optVal: Int? = 250
+</span><span class='line'>let v: Int? =  map(optVal, { $0 + 1 }) // 251</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>max maxElement</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>max(x: T, y: T, rest: T[]) -&gt; T
+</span><span class='line'>maxElement(range: R) -&gt; R.GeneratorType.Element</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最大值。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>max(2, 4)
+</span><span class='line'>max(1,2,4,5,6,100,4,5,6,7) // 100
+</span><span class='line'>maxElement([1,2,4,5,6,100,4,5,6,7])</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>min minElement</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>min(x: T, y: T, rest: T[]) -&gt; T
+</span><span class='line'>minElement(range: R) -&gt; R.GeneratorType.Element</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最小值。Same usage as <code>max</code></p>
+
+<h3><code>numericCast</code></h3>
+
+<pre><code>numericCast(x: T) -&gt; U
+</code></pre>
+
+<p>Cast between unsigned and signed integers.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let bb: UInt8 = 20
+</span><span class='line'>let cc: Int = numericCast(bb)</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>partition</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>partition(&elements: C, range: Range&lt;C.IndexType&gt;) -&gt; C.IndexType
+</span><span class='line'>partition(&elements: C, range: Range&lt;C.IndexType&gt;, &less: (C.GeneratorType.Element, C.GeneratorType.Element) -&gt; Bool) -&gt; C.IndexType</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Unknown usage.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var tt = [12, 23, 34, 45, 56, 67, 78, 89, 90]
+</span><span class='line'>println(partition(&tt, 3..4))</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>posix_read posix_write</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>posix_read(fd: Int32, buf: RawPointer, sz: Int) -&gt; Int
+</span><span class='line'>posix_write(fd: Int32, buf: RawPointer, sz: Int) -&gt; Int</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>print println</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>print(object: T) -&gt; Void
+</span><span class='line'>print(object: T, &target: TargetStream) -&gt; Void
+</span><span class='line'>println() -&gt; Void
+</span><span class='line'>println(object: T) -&gt; Void
+</span><span class='line'>println(object: T, &target: TargetStream) -&gt; Void</span></code></pre></td></tr></table></div></figure>
+
+
+<p>打印语句，们。</p>
+
+<h3><code>quickSort</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>quickSort(&elements: C, range: Range&lt;C.IndexType&gt;) -&gt; Void
+</span><span class='line'>quickSort(&elements: C, range: Range&lt;C.IndexType&gt;, less: (C.GeneratorType.Element, C.GeneratorType.Element) -&gt; Bool) -&gt; Void</span></code></pre></td></tr></table></div></figure>
+
+
+<p>快排序, range表示需要排序的范围。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var tt = [23, 34, 56, 45, 67, 12, 78, 89, 90]
+</span><span class='line'>quickSort(&tt, 0..5)
+</span><span class='line'>quickSort(&tt, 0..5, { $1 &lt; $0 }) // 逆序</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h3><code>reduce</code></h3>
+
+<pre><code>reduce(sequence: S, initial: U, combine: (U, S.GeneratorType.Element) -&gt; U) -&gt; U
+</code></pre>
+
+<p>同 Python 中 reduce, 类似 Haskell fold 系列函数。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// reduce 应用之 求和
+</span><span class='line'>let tt = [23, 34, 56, 45, 67, 12, 78, 89, 90]
+</span><span class='line'>reduce(tt, 0, { $0 + $1 })</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>reflect</code></h3>
+
+<pre><code>reflect(x: T) -&gt; Mirror
+</code></pre>
+
+<p>暂时未知</p>
+
+<h3><code>reinterpretCast</code></h3>
+
+<pre><code>reinterpretCast(x: T) -&gt; U
+</code></pre>
+
+<p>相同 size 的类型，之间的直接 cast.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let a: Int = -1
+</span><span class='line'>let c: UInt = reinterpretCast(a)
+</span><span class='line'>println(c)
+</span><span class='line'>println(UInt.max) // 一定等于 c 。别问我为什么。</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>reverse</code></h3>
+
+<pre><code>reverse(source: C) -&gt; ReverseView&lt;C&gt;
+</code></pre>
+
+<p>同 Python reversed()，逆序的迭代器。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let tt = [23, 34, 56, 45, 67, 12, 78, 89, 90]
+</span><span class='line'>for i in reverse(tt) { println(i) }</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>roundUpToAlignment</code></h3>
+
+<pre><code>roundUpToAlignment(offset: Int, alignment: Int) -&gt; Int
+</code></pre>
+
+<p>内存 alignment 计算函数。比如 alignment 为 4 字节，offset 为 5, 那么将在下个 4 字节， 即 8 的位置上对齐。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>roundUpToAlignment(2, 4) // 4
+</span><span class='line'>roundUpToAlignment(5, 4) // 8</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>sizeof sizeofValue</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sizeof(T.Type) -&gt; Int
+</span><span class='line'>sizeofValue(T) -&gt; Int</span></code></pre></td></tr></table></div></figure>
+
+
+<p>计算类型或者值的 size。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sizeof(Int)
+</span><span class='line'>sizeofValue(2.4)  // a Double</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>sort</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sort(array: T[]) -&gt; T[]
+</span><span class='line'>sort(array: T[], pred: (T, T) -&gt; Bool) -&gt; T[]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>排序函数。类似 Python sorted()。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let foo = [18, 14, 21, 8, 45, 12, 9]
+</span><span class='line'>sort(foo)
+</span><span class='line'>sort(foo, { String($0) &lt; String($1) }) // 按照 ASCII 顺序排序</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>split</code></h3>
+
+<pre><code>split(seq: Seq, isSeparator: (Seq.GeneratorType.Element) -&gt; R, maxSplit: Int, allowEmptySlices: Bool) -&gt; Seq.SliceType[]
+</code></pre>
+
+<p>分割序列函数。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>split("Hello World", { $0 == " " })
+</span><span class='line'>// : String[] = ["Hello", "World"]</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>startsWith</code></h3>
+
+<pre><code>startsWith(s0: S0, s1: S1) -&gt; Bool
+</code></pre>
+
+<p>判断序列开头子序列。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>startsWith(1..100, 1..2)
+</span><span class='line'>startsWith("Hello World", "Hel")</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>strideof strideofValue</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>strideof(T.Type) -&gt; Int
+</span><span class='line'>strideofValue(T) -&gt; Int</span></code></pre></td></tr></table></div></figure>
+
+
+<p>计算内存 stride 。用法同 sizeof sizeofValue。</p>
+
+<h3><code>swap</code></h3>
+
+<pre><code>swap(&amp;a: T, &amp;b: T) -&gt; Void
+</code></pre>
+
+<p>交换值。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var a = 1, b = 2
+</span><span class='line'>swap(&a, &b)</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>swift_*</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>swift_bufferAllocate(bufferType: HeapBufferStorageBase.Type, size: Int, alignMask: Int) -&gt; AnyObject
+</span><span class='line'>swift_keepAlive(&T) -&gt; Void
+</span><span class='line'>swift_MagicMirrorData_summaryImpl(metadata: Any.Type, result: UnsafePointer&lt;String&gt;) -&gt; Void</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>toString</code></h3>
+
+<pre><code>toString(object: T) -&gt; String
+</code></pre>
+
+<p>这个没啥好说的。就是 toString。例子我都懒得举。</p>
+
+<h3><code>transcode</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>transcode(inputEncoding: Encoding.Type, outputEncoding: Encoding.Type, input: Input, output: Output) -&gt; Void
+</span><span class='line'>transcode(inputEncoding: InputEncoding.Type, outputEncoding: OutputEncoding.Type, input: Input, output: Output) -&gt; Void</span></code></pre></td></tr></table></div></figure>
+
+
+<p>未知。</p>
+
+<h3><code>underestimateCount</code></h3>
+
+<pre><code>underestimateCount(x: T) -&gt; Int
+</code></pre>
+
+<p>预估 Sequence 的成员个数。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>underestimateCount(1..1000)</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>unsafeReflect   </code></h3>
+
+<pre><code>unsafeReflect(owner: NativeObject, ptr: UnsafePointer&lt;T&gt;) -&gt; Mirror
+</code></pre>
+
+<p>未知。</p>
+
+<h3><code>withExtendedLifetime</code></h3>
+
+<pre><code>withExtendedLifetime(x: T, f: (T) -&gt; Result) -&gt; Result
+</code></pre>
+
+<h3><code>withObjectAtPlusZero</code></h3>
+
+<pre><code>withObjectAtPlusZero(x: AnyObject, f: (COpaquePointer) -&gt; Result) -&gt; Result
+</code></pre>
+
+<h3><code>withUnsafePointer withUnsafePointers withUnsafePointerToObject</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>withUnsafePointer(&arg: T, body: (UnsafePointer&lt;T&gt;) -&gt; Result) -&gt; Result
+</span><span class='line'>withUnsafePointers(&arg0: A0, &arg1: A1, &arg2: A2, body: (UnsafePointer&lt;A0&gt;, UnsafePointer&lt;A1&gt;, UnsafePointer&lt;A2&gt;) -&gt; Result) -&gt; Result
+</span><span class='line'>withUnsafePointers(&arg0: A0, &arg1: A1, body: (UnsafePointer&lt;A0&gt;, UnsafePointer&lt;A1&gt;) -&gt; Result) -&gt; Result
+</span><span class='line'>withUnsafePointerToObject(&arg: T?, body: (UnsafePointer&lt;ImplicitlyUnwrappedOptional&lt;T&gt;&gt;) -&gt; Result) -&gt; Result</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>来自 Rust 的同学对这里一定不会太陌生。不过作用和使用场合未知。</p>
+
+<h3><code>withVaList</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>withVaList(args: CVarArg[], f: (CVaListPointer) -&gt; R) -&gt; R
+</span><span class='line'>withVaList(builder: VaListBuilder, f: (CVaListPointer) -&gt; R) -&gt; R</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/06/swift-operator-overload/">Swift 运算符重载、自定义运算符</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-06T10:28:02+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>挖坑先。其实是ibooks书最后的参考手册部分。
+这里将手册相关内容都搬运了过来。:)</p>
+
+<p>Swift 对运算符重载的控制很类似 Haskell，而不是 C 系列。如下：</p>
+
+<ul>
+<li>支持自定义运算符 <code>/ = - + * % &lt; &gt; ! &amp; | ^ . ~</code> 的任意组合。可以脑洞大开创造颜文字。</li>
+<li>支持前缀（例如默认的 <code>~，！，++, --</code> )，后缀（后置的 <code>++, --</code>)，中缀（<code>* /</code> 等等）运算符。</li>
+<li>支持自定义优先级。</li>
+</ul>
+
+
+<p>运算符重载通过函数定义来完成，其实运算符就是一个一元函数，或者是二元函数。</p>
+
+<p>所以那个传的很神的例子 numbers.sort(&lt;) 不算什么，说到底就是个比较函数而已。（来自Haskell的同学基本可以忽略这些内容了，这些太熟悉了）</p>
+
+<h2>关键字</h2>
+
+<p>首先介绍用到的关键字，不得不说，Swift的关键字和Swift前男友一样多。</p>
+
+<ul>
+<li>operator</li>
+<li>prefix 前缀运算符，比如 （取正+、取负- 、自增++、自减&mdash;）</li>
+<li>postfix 后缀运算符，比如（自增++、自减&mdash;），这两可以前缀也可以后缀</li>
+<li>infix 中缀，最常见二元运算</li>
+<li>precedence 优先级的意思，取值 0~255 ，纯数字，不可以带符号，下划线，指数e/p 表示</li>
+<li>associativity 结合性，可以是 left, right, 或者 none</li>
+</ul>
+
+
+<p>还有用到的属性，就是以 @ 开头的，这个理论上不算是关键字啊。别叫错了。（不过其实无所谓怎么叫，圈里有太多太多的人纠结于简单的定义为一个定义的名字争面红耳赤其实都说的一个意思。名字真的是很次要的东西，用英语吧）</p>
+
+<ul>
+<li>@prefix</li>
+<li>@postfix</li>
+<li>@infix</li>
+<li>@assignment 表示运算符具有“赋值”副作用，比如 <code>++, +=</code> 这样。</li>
+</ul>
+
+
+<p>先来个最简单的，假设我们有</p>
+
+<pre><code>struct Point {
+    var x: Int
+    var y: Int
+}
+let p = Point(x: 100, y: 200)
+</code></pre>
+
+<h2>前缀运算符</h2>
+
+<p>来个不靠谱的，假设我要执行 -p 这个操作。由于 &ldquo;&ndash;&rdquo; 已经是定义好了的运算符（减法），直接实现运算即可：</p>
+
+<pre><code>@prefix func - (pt: Point) -&gt; Point {
+    return Point(x: -pt.x, y: -pt.y)
+}
+println(-p) // 看起来高大上
+</code></pre>
+
+<p>@prefix  属性表示这个 &ndash; 运算作为前缀运算符处理，相当于取负。</p>
+
+<h2>中缀运算符</h2>
+
+<p>这么一来，接下来的需求就是两个点之和，“+“ 加法。同理 “+“已经定义，不需要再次定义。直接实现它</p>
+
+<pre><code>@infix func + (pt0: Point, pt1: Point) -&gt; Point {
+    return Point(x: pt0.x + pt1.x, y: pt0.y + pt1.y)
+}
+</code></pre>
+
+<p>可以在 Playground 里输入 p + p 看看结果。</p>
+
+<p>有了 p + p，直接实现乘法是不是更好呢？乘以一个 Int。这里 &ldquo;*&rdquo; 操作的两边就不是同个类型了。需要注意。</p>
+
+<pre><code>@infix func * (pt: Point, scale: Int) -&gt; Point {
+    return Point(x: pt.x * scale, y: pt.y * scale )
+}
+</code></pre>
+
+<p>输入 p * 3 查看效果，然后输入 3 * p 发现出错，所以运算符左右两边的顺序是很重要的。（来自Python的同学可能会知道 Py 的运算符重载的左右类型是有一个尝试顺序的， <code>__mul__, __rmul__</code> 等等）</p>
+
+<h2>后缀运算符</h2>
+
+<p>假设，我们的应用里，需要经常计算点到原点(0,0) 的距离，我们“发明”个新运算好了，我们就选一个 &ldquo;~!&#8221;， 来个后缀的，期望 &#8220;p~!&rdquo; 取得点到原点的距离。</p>
+
+<pre><code>operator postfix ~! {} // 定义新运算符
+@postfix func ~! (pt: Point) -&gt; Double {
+    return sqrt(NSNumber.convertFromIntegerLiteral(pt.x * pt.x + pt.y * pt.y).doubleValue)
+}
+</code></pre>
+
+<p>平方根算得略纠结。。。忽略好了。反正暂时这么可以调用。 然后输入 <code>p~!</code> 获得距离。</p>
+
+<h2>自定义中缀运算符</h2>
+
+<p>前面基本已经介绍了怎么重载运算符，怎么实现。以及简单介绍了后缀运算符的自定义。</p>
+
+<p>实际上中缀运算符（二元运算）牵扯到的优先级和结合性问题还是挺纠结的。要比前缀后缀复杂得多，当然重载就不涉及，因为是系统默认的优先级。</p>
+
+<p>默认的系统自带的我搬运到后面。</p>
+
+<p>定义中缀运算符首先要制定结合型和优先级。</p>
+
+<p>假设计算两个点之间的距离</p>
+
+<pre><code>operator infix &lt;~&gt; {
+    precedence 250 // 0~255 的一个值，具体多少请参考附录的列表
+    associativity left // 或者right, none
+}
+@infix func &lt;~&gt; (pt0: Point, pt1: Point) -&gt; Double {
+    return .... // x 之差平方 +  y 之差平方，然后开放
+}
+</code></pre>
+
+<h2>带赋值的运算符</h2>
+
+<p>前面说了一堆，其实忽略了一些特殊的情况，比如 &ldquo;+=&rdquo;, &ldquo;++&rdquo;, 它们的特点是，会修改原有的操作数，有赋值副作用。实际上实现起来大同小异。</p>
+
+<pre><code>@prefix @assignment func ++ (inout pt: Point) -&gt; Point {
+    pt.x += 1
+    pt.y += 1
+    return pt
+}
+</code></pre>
+
+<p>这里起作用的是 @assignment 属性，和 inout 关键字。</p>
+
+<p>对于 &ldquo;+=&rdquo; 二元操作，第一个操作数需要标记为 inout。类似。大家自己研究好了。</p>
+
+<h2>附录</h2>
+
+<p>从手册里搬运下优先级和结合性：</p>
+
+<p>级别 0~255</p>
+
+<ul>
+<li>Exponentiative (No associativity, precedence level 160)
+
+<ul>
+<li><code>&lt;&lt; Bitwise left shift</code></li>
+<li><code>&gt;&gt; Bitwise right shift</code></li>
+</ul>
+</li>
+<li>Multiplicative (Left associative, precedence level 150)
+
+<ul>
+<li><code>* Multiply</code></li>
+<li><code>/ Divide</code></li>
+<li><code>% Remainder</code></li>
+<li><code>&amp;* Multiply, ignoring overflow</code></li>
+<li><code>&amp;/ Divide, ignoring overflow</code></li>
+<li><code>&amp;% Remainder, ignoring overflow</code></li>
+<li><code>&amp; Bitwise AND</code></li>
+</ul>
+</li>
+<li>Additive (Left associative, precedence level 140)
+
+<ul>
+<li><code>+ Add</code></li>
+<li><code>- Subtract</code></li>
+<li><code>&amp;+ Add with overflow</code></li>
+<li><code>&amp;- Subtract with overflow</code></li>
+<li><code>| Bitwise OR</code></li>
+<li><code>^ Bitwise XOR</code></li>
+</ul>
+</li>
+<li>Range (No associativity, precedence level 135)
+
+<ul>
+<li><code>.. Half-closed range</code></li>
+<li><code>... Closed range</code></li>
+</ul>
+</li>
+<li>Cast (No associativity, precedence level 132)
+
+<ul>
+<li><code>is Type check</code></li>
+<li><code>as Type cast</code></li>
+</ul>
+</li>
+<li>Comparative (No associativity, precedence level 130)
+
+<ul>
+<li><code>&lt; Less than</code></li>
+<li><code>&lt;= Less than or equal</code></li>
+<li><code>&gt; Greater than</code></li>
+<li><code>&gt;= Greater than or equal</code></li>
+<li><code>== Equal</code></li>
+<li><code>!= Not equal</code></li>
+<li><code>=== Identical</code></li>
+<li><code>!== Not identical</code></li>
+<li><code>~= Pattern match</code></li>
+</ul>
+</li>
+<li>Conjunctive (Left associative, precedence level 120)
+
+<ul>
+<li><code>&amp;&amp; Logical AND</code></li>
+</ul>
+</li>
+<li>Disjunctive (Left associative, precedence level 110)
+
+<ul>
+<li><code>|| Logical OR</code></li>
+</ul>
+</li>
+<li>Ternary Conditional (Right associative, precedence level 100)
+
+<ul>
+<li><code>?: Ternary conditional</code></li>
+</ul>
+</li>
+<li>Assignment (Right associative, precedence level 90)
+
+<ul>
+<li><code>= Assign</code></li>
+<li><code>*= Multiply and assign</code></li>
+<li><code>/= Divide and assign</code></li>
+<li><code>%= Remainder and assign</code></li>
+<li><code>+= Add and assign</code></li>
+<li><code>-= Subtract and assign</code></li>
+<li><code>&lt;&lt;= Left bit shift and assign</code></li>
+<li><code>&gt;&gt;= Right bit shift and assign</code></li>
+<li><code>&amp;= Bitwise AND and assign</code></li>
+<li><code>^= Bitwise XOR and assign</code></li>
+<li><code>|= Bitwise OR and assign</code></li>
+<li><code>&amp;&amp;= Logical AND and assign</code></li>
+<li><code>||= Logical OR and assign</code></li>
+</ul>
+</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/15/rust-tips/">Rust Tips</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-15T11:08:59+08:00" pubdate data-updated="true">May 15<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>extern crate</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="n">extern</span> <span class="n">crate</span> <span class="n">sdl2</span> <span class="o">=</span> <span class="s">&quot;github.com/andelf/rust-sdl2&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -637,6 +1693,18 @@ and generates corresponding ast type.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/06/18/guangzhou-realtime-bus/">广州实时工具App逆向</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/09/swift-2-dot-0-error-handling/">Swift 2.0 的错误处理(Swift 2.0 Error Handling)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/01/beijing-realtime-bus/">北京实时公交分析</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
       </li>
     
@@ -702,18 +1770,6 @@ and generates corresponding ast type.</p>
     
       <li class="post">
         <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop(简析Swift和C的交互)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/13/swift-misc/">Swift Misc</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/13/swift-special-protocols/">Swift Special Protocols</a>
       </li>
     
   </ul>
