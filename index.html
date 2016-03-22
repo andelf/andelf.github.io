@@ -252,6 +252,7 @@
 <span class='line-number'>52</span>
 <span class='line-number'>53</span>
 <span class='line-number'>54</span>
+<span class='line-number'>55</span>
 </pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">pub</span> <span class="k">struct</span> <span class="n">Pat</span> <span class="p">{</span>
 </span><span class='line'>    <span class="k">pub</span> <span class="n">id</span><span class="o">:</span> <span class="n">NodeId</span><span class="p">,</span>
 </span><span class='line'>    <span class="k">pub</span> <span class="n">node</span><span class="o">:</span> <span class="n">PatKind</span><span class="p">,</span>
@@ -260,6 +261,7 @@
 </span><span class='line'>
 </span><span class='line'><span class="k">pub</span> <span class="k">enum</span> <span class="n">PatKind</span> <span class="p">{</span>
 </span><span class='line'>    <span class="c-Doc">/// Represents a wildcard pattern (`_`)</span>
+</span><span class='line'>    <span class="c-Doc">/// 表示通配，下划线</span>
 </span><span class='line'>    <span class="n">Wild</span><span class="p">,</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="c-Doc">/// A `PatKind::Ident` may either be a new bound variable,</span>
@@ -343,37 +345,35 @@
 
 <h3>ast::Expr</h3>
 
-<p>多种表达式都支持模式匹配。</p>
+<p>除<code>match</code>外，<code>if let</code>、<code>while let</code>、<code>for</code>控制语句支持同时进行模式匹配。具体实现是一种<code>desugared</code>过程，即，去语法糖化。</p>
+
+<p>同时类似于函数定义，闭包参数也支持模式匹配。</p>
 
 <h4>if let</h4>
 
 <p><code>IfLet(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;P&lt;Expr&gt;&gt;)</code></p>
 
-<p>An if let expression with an optional else block
-if let pat = expr { block } else { expr }
-This is desugared to a match expression.</p>
+<p><code>if let pat = expr { block } else { expr }</code></p>
+
+<p>This is desugared to a match expression.</p>
 
 <h4>while let</h4>
 
 <p><code>WhileLet(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;Ident&gt;)</code></p>
 
-<p>A while-let loop, with an optional label
-<code>'label: while let pat = expr { block }</code>
-This is desugared to a combination of loop and match expressions.</p>
+<p><code>'label: while let pat = expr { block }</code></p>
 
 <h4>for</h4>
 
 <p><code>ForLoop(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;Ident&gt;)</code></p>
 
-<p>A for loop, with an optional label
-&lsquo;label: for pat in expr { block }
-This is desugared to a combination of loop and match expressions.</p>
+<p><code>'label: for pat in expr { block }</code></p>
 
 <h4>match</h4>
 
 <p><code>Match(P&lt;Expr&gt;, Vec&lt;Arm&gt;)</code></p>
 
-<p>match 语句，在 Arm 中出现，其中 Arm 定义为</p>
+<p><code>match</code> 语句，在 <code>Arm</code> 中出现，其中 <code>Arm</code> 定义为</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
