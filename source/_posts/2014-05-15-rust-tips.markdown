@@ -1,0 +1,12 @@
+---
+layout: post
+title: "Rust Tips"
+date: 2014-05-15 11:08:59 +0800
+comments: true
+categories: rust
+---
+## extern crate
+
+```rust
+extern crate sdl2 = "github.com/andelf/rust-sdl2";
+```
