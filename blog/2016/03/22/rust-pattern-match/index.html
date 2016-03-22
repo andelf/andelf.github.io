@@ -1,0 +1,670 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Rust Pattern Match(Rust中的模式匹配) - 猫·仁波切</title>
+  <meta name="author" content="猫·仁波切 (Feather)">
+
+  
+  <meta name="description" content="模式匹配 汉语字典中对“模式”的解释是：事物的标准样式。在计算机科学中，它指特定类型的数据（往往是序列或是树形结构）满足某一特定结构或格式。“匹配”本身是指一个判断寻找过程。最早的模式匹配用于文本编辑器中的正则字符串搜索，之后才作为编程语言特性。 模式匹配基础 模式匹配在计算机科学领域有两层意思。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://andelf.github.io/blog/2016/03/22/rust-pattern-match">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">猫·仁波切</a></h1>
+  
+    <h2>会研发的PM才是好OP.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:andelf.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Rust Pattern Match(Rust中的模式匹配)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-22T23:35:19+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>模式匹配</h1>
+
+<p>汉语字典中对“模式”的解释是：事物的标准样式。在计算机科学中，它指特定类型的数据（往往是序列或是树形结构）满足某一特定结构或格式。“匹配”本身是指一个判断寻找过程。最早的模式匹配用于文本编辑器中的正则字符串搜索，之后才作为编程语言特性。</p>
+
+<h2>模式匹配基础</h2>
+
+<p>模式匹配在计算机科学领域有两层意思。其一，可以特指字符串匹配算法，例如为人熟知的 KMP 字符串匹配算法、命令行工具 grep 等。
+其二，特指在一些语言中作为一种以结构的方式处理数据的工具，此时的匹配过程往往是树形匹配，与此相伴的往往还有一个特性叫 guard（守卫）。</p>
+
+<p>Rust 中模式匹配随处可见，例如在<code>let</code>变量绑定语句、<code>match</code>匹配语句中等。利用好模式匹配这一特性可以使代码更简洁易懂。<code>Rust</code>支持模式匹配中的变量绑定、结构体/元组解构、守卫条件判断、数值范围匹配等特性。</p>
+
+<h3>原始匹配</h3>
+
+<p><code>match</code> 语句中可以直接匹配字面常量，下划线<code>_</code>匹配任意情形。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
+</span><span class='line'>    <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;one&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="mi">2</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;two&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="mi">3</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;three&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">_</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;anything&quot;</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上代码会打印出<code>one</code>。</p>
+
+<h3>结构匹配</h3>
+
+<p><code>match</code> 用于匹配一个表达式的值，寻找满足条件的子分支(<code>arm</code>)并执行。每个子分支包含三部分：一系列模式、可选的守卫条件以及主体代码块。</p>
+
+<h3>多个模式</h3>
+
+<p>每个子分支可以是多个模式，通过 <code>|</code> 符号分割：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
+</span><span class='line'>    <span class="mi">1</span> <span class="o">|</span> <span class="mi">2</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;one or two&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="mi">3</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;three&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">_</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;anything&quot;</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上代码打印出<code>one or two</code>。</p>
+
+<h3>守卫条件</h3>
+
+<p>通过<code>if</code>引入子分支的守卫条件：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">enum</span> <span class="n">OptionalInt</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">Value</span><span class="p">(</span><span class="kt">i32</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">Missing</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Got an int bigger than five!&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(..)</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Got an int!&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Missing</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;No such luck.&quot;</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>模式匹配进阶</h2>
+
+<p>其实进阶，不如直接从<code>libsyntax</code>源码看看到底模式匹配是如何实现。<code>syntax::ast::Pat</code>。</p>
+
+<p>从AST源码中寻找语法要素屋外户两个要点，其一，语法要素是如何表达为对应AST的；其二，对应AST在哪些父AST中出现。</p>
+
+<p>Rust中使用<code>syntax::ast::Pat</code>枚举来表示一个模式匹配。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">pub</span> <span class="k">struct</span> <span class="n">Pat</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">id</span><span class="o">:</span> <span class="n">NodeId</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">node</span><span class="o">:</span> <span class="n">PatKind</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">span</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">pub</span> <span class="k">enum</span> <span class="n">PatKind</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c-Doc">/// Represents a wildcard pattern (`_`)</span>
+</span><span class='line'>    <span class="n">Wild</span><span class="p">,</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A `PatKind::Ident` may either be a new bound variable,</span>
+</span><span class='line'>    <span class="c-Doc">/// or a unit struct/variant pattern, or a const pattern (in the last two cases</span>
+</span><span class='line'>    <span class="c-Doc">/// the third field must be `None`).</span>
+</span><span class='line'>    <span class="c-Doc">///</span>
+</span><span class='line'>    <span class="c-Doc">/// In the unit or const pattern case, the parser can&#39;t determine</span>
+</span><span class='line'>    <span class="c-Doc">/// which it is. The resolver determines this, and</span>
+</span><span class='line'>    <span class="c-Doc">/// records this pattern&#39;s `NodeId` in an auxiliary</span>
+</span><span class='line'>    <span class="c-Doc">/// set (of &quot;PatIdents that refer to unit patterns or constants&quot;).</span>
+</span><span class='line'>    <span class="n">Ident</span><span class="p">(</span><span class="n">BindingMode</span><span class="p">,</span> <span class="n">SpannedIdent</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.</span>
+</span><span class='line'>    <span class="c-Doc">/// The `bool` is `true` in the presence of a `..`.</span>
+</span><span class='line'>    <span class="n">Struct</span><span class="p">(</span><span class="nb">Path</span><span class="p">,</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Spanned</span><span class="o">&lt;</span><span class="n">FieldPat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="kt">bool</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A tuple struct/variant pattern `Variant(x, y, z)`.</span>
+</span><span class='line'>    <span class="c-Doc">/// &quot;None&quot; means a `Variant(..)` pattern where we don&#39;t bind the fields to names.</span>
+</span><span class='line'>    <span class="n">TupleStruct</span><span class="p">(</span><span class="nb">Path</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;&gt;</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A path pattern.</span>
+</span><span class='line'>    <span class="c-Doc">/// Such pattern can be resolved to a unit struct/variant or a constant.</span>
+</span><span class='line'>    <span class="nb">Path</span><span class="p">(</span><span class="nb">Path</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// An associated const named using the qualified path `&lt;T&gt;::CONST` or</span>
+</span><span class='line'>    <span class="c-Doc">/// `&lt;T as Trait&gt;::CONST`. Associated consts from inherent impls can be</span>
+</span><span class='line'>    <span class="c-Doc">/// referred to as simply `T::CONST`, in which case they will end up as</span>
+</span><span class='line'>    <span class="c-Doc">/// PatKind::Path, and the resolver will have to sort that out.</span>
+</span><span class='line'>    <span class="n">QPath</span><span class="p">(</span><span class="n">QSelf</span><span class="p">,</span> <span class="nb">Path</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A tuple pattern `(a, b)`</span>
+</span><span class='line'>    <span class="n">Tup</span><span class="p">(</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A `box` pattern</span>
+</span><span class='line'>    <span class="n">Box</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A reference pattern, e.g. `&amp;mut (a, b)`</span>
+</span><span class='line'>    <span class="n">Ref</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Mutability</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A literal</span>
+</span><span class='line'>    <span class="n">Lit</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A range pattern, e.g. `1...2`</span>
+</span><span class='line'>    <span class="n">Range</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// `[a, b, ..i, y, z]` is represented as:</span>
+</span><span class='line'>    <span class="c-Doc">///     `PatKind::Vec(box [a, b], Some(i), box [y, z])`</span>
+</span><span class='line'>    <span class="n">Vec</span><span class="p">(</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A macro pattern; pre-expansion</span>
+</span><span class='line'>    <span class="n">Mac</span><span class="p">(</span><span class="n">Mac</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上AST定义，即说明，到底什么被认为是一个“模式”。</p>
+
+<p>以下介绍<code>Pat</code>在哪些AST中出现。</p>
+
+<h3>全局 Item</h3>
+
+<p>全局 Item 中，使用模式匹配的均为函数参数。</p>
+
+<h4>ItemKind::Fn</h4>
+
+<p><code>Fn</code> 全局函数 -> <code>FnDecl</code> 函数声明 -> <code>[Arg]</code> 函数头参数声明。</p>
+
+<h4>ItemKind::Trait</h4>
+
+<p><code>Trait</code> -> <code>[TraitItem]</code> -> <code>TraitItemKind::Method</code> -> <code>MethodSig</code> -> <code>FnDecl</code> 方法声明，同上。</p>
+
+<h4>ItemKind::Impl</h4>
+
+<p><code>Impl</code> -> <code>[ImplItem]</code> -> <code>ImplItemKind::Method</code> -> <code>MethodSig</code> -> <code>FnDecl</code>。</p>
+
+<h3>ast::Stmt 语句</h3>
+
+<h4>StmtKind::Decl</h4>
+
+<p><code>Decl</code> -> <code>DeclKind::Local</code>。</p>
+
+<p>即 <code>let</code> 语句 <code>let &lt;pat&gt;:&lt;ty&gt; = &lt;expr&gt;;</code>。</p>
+
+<h4>StmtKind::Expr 表达式</h4>
+
+<p>见下。</p>
+
+<h3>ast::Expr</h3>
+
+<p>多种表达式都支持模式匹配。</p>
+
+<h4>if let</h4>
+
+<p><code>IfLet(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;P&lt;Expr&gt;&gt;)</code></p>
+
+<p>An if let expression with an optional else block
+if let pat = expr { block } else { expr }
+This is desugared to a match expression.</p>
+
+<h4>while let</h4>
+
+<p><code>WhileLet(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;Ident&gt;)</code></p>
+
+<p>A while-let loop, with an optional label
+<code>'label: while let pat = expr { block }</code>
+This is desugared to a combination of loop and match expressions.</p>
+
+<h4>for</h4>
+
+<p><code>ForLoop(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;Ident&gt;)</code></p>
+
+<p>A for loop, with an optional label
+&lsquo;label: for pat in expr { block }
+This is desugared to a combination of loop and match expressions.</p>
+
+<h4>match</h4>
+
+<p><code>Match(P&lt;Expr&gt;, Vec&lt;Arm&gt;)</code></p>
+
+<p>match 语句，在 Arm 中出现，其中 Arm 定义为</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">pub</span> <span class="k">struct</span> <span class="n">Arm</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">attrs</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Attribute</span><span class="o">&gt;</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">pats</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">guard</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">body</span><span class="o">:</span> <span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>闭包</h4>
+
+<p><code>Closure(CaptureBy, P&lt;FnDecl&gt;, P&lt;Block&gt;)</code></p>
+
+<p>闭包，例如 <code>move |a, b, c| {a + b + c}</code>。</p>
+
+<h2>相关 feature gate</h2>
+
+<p><code>advanced_slice_patterns</code> - See the match expressions section for discussion; the exact semantics of slice patterns are subject to change, so some types are still unstable.</p>
+
+<p><code>slice_patterns</code> - OK, actually, slice patterns are just scary and completely unstable.</p>
+
+<p><code>box_patterns</code> - Allows box patterns, the exact semantics of which is subject to change.</p>
+
+<h2>参考</h2>
+
+<p><a href="https://doc.rust-lang.org/book/patterns.html">https://doc.rust-lang.org/book/patterns.html</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-22T23:35:19+08:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rust/'>rust</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2016/03/22/rust-pattern-match/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2016/03/22/rust-pattern-match/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/06/18/guangzhou-realtime-bus/" title="Previous Post: 广州实时工具App逆向">&laquo; 广州实时工具App逆向</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/03/22/rust-pattern-match/">Rust Pattern Match(Rust中的模式匹配)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/18/guangzhou-realtime-bus/">广州实时工具App逆向</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/09/swift-2-dot-0-error-handling/">Swift 2.0 的错误处理(Swift 2.0 Error Handling)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/01/beijing-realtime-bus/">北京实时公交分析</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+WangMaomao?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'andelf';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://andelf.github.io/blog/2016/03/22/rust-pattern-match/';
+        var disqus_url = 'http://andelf.github.io/blog/2016/03/22/rust-pattern-match/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -9,8 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。 Github: guangzhou-realtime-bus 生成 e=3 的 1024 位 RSA 密钥对
-公钥串用查表加密(byte 映射)，然后 base64 封装发送给服务器 &hellip;">
+  <meta name="description" content="模式匹配 汉语字典中对“模式”的解释是：事物的标准样式。在计算机科学中，它指特定类型的数据（往往是序列或是树形结构）满足某一特定结构或格式。“匹配”本身是指一个判断寻找过程。最早的模式匹配用于文本编辑器中的正则字符串搜索，之后才作为编程语言特性。 模式匹配基础 模式匹配在计算机科学领域有两层意思。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -40,7 +39,7 @@
   <header role="banner"><hgroup>
   <h1><a href="/">猫·仁波切</a></h1>
   
-    <h2>我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上</h2>
+    <h2>会研发的PM才是好OP.</h2>
   
 </hgroup>
 
@@ -68,6 +67,352 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/03/22/rust-pattern-match/">Rust Pattern Match(Rust中的模式匹配)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-22T23:35:19+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>模式匹配</h1>
+
+<p>汉语字典中对“模式”的解释是：事物的标准样式。在计算机科学中，它指特定类型的数据（往往是序列或是树形结构）满足某一特定结构或格式。“匹配”本身是指一个判断寻找过程。最早的模式匹配用于文本编辑器中的正则字符串搜索，之后才作为编程语言特性。</p>
+
+<h2>模式匹配基础</h2>
+
+<p>模式匹配在计算机科学领域有两层意思。其一，可以特指字符串匹配算法，例如为人熟知的 KMP 字符串匹配算法、命令行工具 grep 等。
+其二，特指在一些语言中作为一种以结构的方式处理数据的工具，此时的匹配过程往往是树形匹配，与此相伴的往往还有一个特性叫 guard（守卫）。</p>
+
+<p>Rust 中模式匹配随处可见，例如在<code>let</code>变量绑定语句、<code>match</code>匹配语句中等。利用好模式匹配这一特性可以使代码更简洁易懂。<code>Rust</code>支持模式匹配中的变量绑定、结构体/元组解构、守卫条件判断、数值范围匹配等特性。</p>
+
+<h3>原始匹配</h3>
+
+<p><code>match</code> 语句中可以直接匹配字面常量，下划线<code>_</code>匹配任意情形。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
+</span><span class='line'>    <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;one&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="mi">2</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;two&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="mi">3</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;three&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">_</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;anything&quot;</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上代码会打印出<code>one</code>。</p>
+
+<h3>结构匹配</h3>
+
+<p><code>match</code> 用于匹配一个表达式的值，寻找满足条件的子分支(<code>arm</code>)并执行。每个子分支包含三部分：一系列模式、可选的守卫条件以及主体代码块。</p>
+
+<h3>多个模式</h3>
+
+<p>每个子分支可以是多个模式，通过 <code>|</code> 符号分割：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
+</span><span class='line'>    <span class="mi">1</span> <span class="o">|</span> <span class="mi">2</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;one or two&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="mi">3</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;three&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">_</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;anything&quot;</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上代码打印出<code>one or two</code>。</p>
+
+<h3>守卫条件</h3>
+
+<p>通过<code>if</code>引入子分支的守卫条件：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">enum</span> <span class="n">OptionalInt</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">Value</span><span class="p">(</span><span class="kt">i32</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">Missing</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Got an int bigger than five!&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(..)</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Got an int!&quot;</span><span class="p">),</span>
+</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Missing</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;No such luck.&quot;</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>模式匹配进阶</h2>
+
+<p>其实进阶，不如直接从<code>libsyntax</code>源码看看到底模式匹配是如何实现。<code>syntax::ast::Pat</code>。</p>
+
+<p>从AST源码中寻找语法要素屋外户两个要点，其一，语法要素是如何表达为对应AST的；其二，对应AST在哪些父AST中出现。</p>
+
+<p>Rust中使用<code>syntax::ast::Pat</code>枚举来表示一个模式匹配。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">pub</span> <span class="k">struct</span> <span class="n">Pat</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">id</span><span class="o">:</span> <span class="n">NodeId</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">node</span><span class="o">:</span> <span class="n">PatKind</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">span</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">pub</span> <span class="k">enum</span> <span class="n">PatKind</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c-Doc">/// Represents a wildcard pattern (`_`)</span>
+</span><span class='line'>    <span class="n">Wild</span><span class="p">,</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A `PatKind::Ident` may either be a new bound variable,</span>
+</span><span class='line'>    <span class="c-Doc">/// or a unit struct/variant pattern, or a const pattern (in the last two cases</span>
+</span><span class='line'>    <span class="c-Doc">/// the third field must be `None`).</span>
+</span><span class='line'>    <span class="c-Doc">///</span>
+</span><span class='line'>    <span class="c-Doc">/// In the unit or const pattern case, the parser can&#39;t determine</span>
+</span><span class='line'>    <span class="c-Doc">/// which it is. The resolver determines this, and</span>
+</span><span class='line'>    <span class="c-Doc">/// records this pattern&#39;s `NodeId` in an auxiliary</span>
+</span><span class='line'>    <span class="c-Doc">/// set (of &quot;PatIdents that refer to unit patterns or constants&quot;).</span>
+</span><span class='line'>    <span class="n">Ident</span><span class="p">(</span><span class="n">BindingMode</span><span class="p">,</span> <span class="n">SpannedIdent</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.</span>
+</span><span class='line'>    <span class="c-Doc">/// The `bool` is `true` in the presence of a `..`.</span>
+</span><span class='line'>    <span class="n">Struct</span><span class="p">(</span><span class="nb">Path</span><span class="p">,</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Spanned</span><span class="o">&lt;</span><span class="n">FieldPat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="kt">bool</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A tuple struct/variant pattern `Variant(x, y, z)`.</span>
+</span><span class='line'>    <span class="c-Doc">/// &quot;None&quot; means a `Variant(..)` pattern where we don&#39;t bind the fields to names.</span>
+</span><span class='line'>    <span class="n">TupleStruct</span><span class="p">(</span><span class="nb">Path</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;&gt;</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A path pattern.</span>
+</span><span class='line'>    <span class="c-Doc">/// Such pattern can be resolved to a unit struct/variant or a constant.</span>
+</span><span class='line'>    <span class="nb">Path</span><span class="p">(</span><span class="nb">Path</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// An associated const named using the qualified path `&lt;T&gt;::CONST` or</span>
+</span><span class='line'>    <span class="c-Doc">/// `&lt;T as Trait&gt;::CONST`. Associated consts from inherent impls can be</span>
+</span><span class='line'>    <span class="c-Doc">/// referred to as simply `T::CONST`, in which case they will end up as</span>
+</span><span class='line'>    <span class="c-Doc">/// PatKind::Path, and the resolver will have to sort that out.</span>
+</span><span class='line'>    <span class="n">QPath</span><span class="p">(</span><span class="n">QSelf</span><span class="p">,</span> <span class="nb">Path</span><span class="p">),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c-Doc">/// A tuple pattern `(a, b)`</span>
+</span><span class='line'>    <span class="n">Tup</span><span class="p">(</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A `box` pattern</span>
+</span><span class='line'>    <span class="n">Box</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A reference pattern, e.g. `&amp;mut (a, b)`</span>
+</span><span class='line'>    <span class="n">Ref</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Mutability</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A literal</span>
+</span><span class='line'>    <span class="n">Lit</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A range pattern, e.g. `1...2`</span>
+</span><span class='line'>    <span class="n">Range</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// `[a, b, ..i, y, z]` is represented as:</span>
+</span><span class='line'>    <span class="c-Doc">///     `PatKind::Vec(box [a, b], Some(i), box [y, z])`</span>
+</span><span class='line'>    <span class="n">Vec</span><span class="p">(</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A macro pattern; pre-expansion</span>
+</span><span class='line'>    <span class="n">Mac</span><span class="p">(</span><span class="n">Mac</span><span class="p">),</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上AST定义，即说明，到底什么被认为是一个“模式”。</p>
+
+<p>以下介绍<code>Pat</code>在哪些AST中出现。</p>
+
+<h3>全局 Item</h3>
+
+<p>全局 Item 中，使用模式匹配的均为函数参数。</p>
+
+<h4>ItemKind::Fn</h4>
+
+<p><code>Fn</code> 全局函数 -> <code>FnDecl</code> 函数声明 -> <code>[Arg]</code> 函数头参数声明。</p>
+
+<h4>ItemKind::Trait</h4>
+
+<p><code>Trait</code> -> <code>[TraitItem]</code> -> <code>TraitItemKind::Method</code> -> <code>MethodSig</code> -> <code>FnDecl</code> 方法声明，同上。</p>
+
+<h4>ItemKind::Impl</h4>
+
+<p><code>Impl</code> -> <code>[ImplItem]</code> -> <code>ImplItemKind::Method</code> -> <code>MethodSig</code> -> <code>FnDecl</code>。</p>
+
+<h3>ast::Stmt 语句</h3>
+
+<h4>StmtKind::Decl</h4>
+
+<p><code>Decl</code> -> <code>DeclKind::Local</code>。</p>
+
+<p>即 <code>let</code> 语句 <code>let &lt;pat&gt;:&lt;ty&gt; = &lt;expr&gt;;</code>。</p>
+
+<h4>StmtKind::Expr 表达式</h4>
+
+<p>见下。</p>
+
+<h3>ast::Expr</h3>
+
+<p>多种表达式都支持模式匹配。</p>
+
+<h4>if let</h4>
+
+<p><code>IfLet(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;P&lt;Expr&gt;&gt;)</code></p>
+
+<p>An if let expression with an optional else block
+if let pat = expr { block } else { expr }
+This is desugared to a match expression.</p>
+
+<h4>while let</h4>
+
+<p><code>WhileLet(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;Ident&gt;)</code></p>
+
+<p>A while-let loop, with an optional label
+<code>'label: while let pat = expr { block }</code>
+This is desugared to a combination of loop and match expressions.</p>
+
+<h4>for</h4>
+
+<p><code>ForLoop(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;Ident&gt;)</code></p>
+
+<p>A for loop, with an optional label
+&lsquo;label: for pat in expr { block }
+This is desugared to a combination of loop and match expressions.</p>
+
+<h4>match</h4>
+
+<p><code>Match(P&lt;Expr&gt;, Vec&lt;Arm&gt;)</code></p>
+
+<p>match 语句，在 Arm 中出现，其中 Arm 定义为</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">pub</span> <span class="k">struct</span> <span class="n">Arm</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">attrs</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Attribute</span><span class="o">&gt;</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">pats</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">guard</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">pub</span> <span class="n">body</span><span class="o">:</span> <span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>闭包</h4>
+
+<p><code>Closure(CaptureBy, P&lt;FnDecl&gt;, P&lt;Block&gt;)</code></p>
+
+<p>闭包，例如 <code>move |a, b, c| {a + b + c}</code>。</p>
+
+<h2>相关 feature gate</h2>
+
+<p><code>advanced_slice_patterns</code> - See the match expressions section for discussion; the exact semantics of slice patterns are subject to change, so some types are still unstable.</p>
+
+<p><code>slice_patterns</code> - OK, actually, slice patterns are just scary and completely unstable.</p>
+
+<p><code>box_patterns</code> - Allows box patterns, the exact semantics of which is subject to change.</p>
+
+<h2>参考</h2>
+
+<p><a href="https://doc.rust-lang.org/book/patterns.html">https://doc.rust-lang.org/book/patterns.html</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1769,97 +2114,6 @@ segmentation algorithm.</p></blockquote>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-30T11:05:13+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>其实这是很早就像要说的了，大概当时信誓旦旦说要看完那本 epub 写个读后感谈谈对 Swift 看法什么的。后来不了了之。
-现在觉得这个时机或许差不多，对 Swift 的了解也算凑合了。</p>
-
-<p>纯个人观点。</p>
-
-<h3>Swift 是系统编程语言</h3>
-
-<p>一开始大家还不太了解的时候，可能会有很多误解。现在好歹一个月了。误解终于少了。</p>
-
-<p>是的， Swift 是系统编程语言，原因是因为它 ABI 兼容 C （不包括 name mangling 部分）。基于强大的 llvm 生成具体平台代码。不是翻译为 Objective-C 的。</p>
-
-<p>编译器参数还显示， Swift 文件的中间编译结果（介于 Swift 代码和 llvm ir ）是 SIL ，猜测是 Swift Intermediate Language 。好像和 llvm ir 有所联系。而且至少有两个 stage 。</p>
-
-<p>不是脚本语言，也不是胶水语言。但是它的标准库 (import Swift 库) 几乎不含任何 IO 网络 等内容，随便做个功能强依赖 Cocoa 框架。也可以 <code>import Darwin</code> 用 C 语言的标准库来写。</p>
-
-<p>猜测写个 Python C 模块这种任务是可以轻易胜任的。</p>
-
-<p>而 Golang 、 Rust 本身 ABI 是和 C 不兼容的。虽然 Rust 通过 <code>extern "C"</code> 可以修改单个函数为兼容。</p>
-
-<h3>Swift 是现代语言</h3>
-
-<p>自动类型推导、泛型、 LLVM 。当然语言研究党都知道这些都是几十年前的“新东西”。</p>
-
-<h3>Swift 是半完成品</h3>
-
-<p>这么说主要是指 Swift 对 Cocoa 的库实在是太半吊子了。只是 Foundation 有 Bridge 支持，其他库中，明显的列表都无法支持 subscript 、 for-in 这样简单的操作。原因很简单，这些库都是自动转换 ObjC 头文件而来（参考模块那篇文章）。没有额外的封装代码。</p>
-
-<p>所以其实真要用起来，可能会很纠结。或者可以预计很快就有第三方的 Bridge 库给这些类型加上舒服的 Swift 支持。</p>
-
-<p>另外命令行没有静态链接库支持。只能用其他命令拼装。也侧面说明， Apple 希望开发者更多用动态链接库， Framework 。</p>
-
-<p>另外目前的编译器 coredump 、 stackoverflow 太多太多。错哪都不知道。</p>
-
-<h3>Swift 隐藏细节太多</h3>
-
-<p>就对应到 Foundation 类型这个特性太说，太多黑魔法，隐式类型转换、 BridgeToObjectiveC 协议、指针类型转换。</p>
-
-<p>这些隐藏的特性多少都会成为 Swift 的坑。</p>
-
-<p>要知道定义在 ObjC 库的 <code>NSString</code> 参数某些情况下在 Swift 中被转换为 <code>String</code>。 <code>NSArray</code> 都被转换为 <code>AnyObject[]</code>。即使有隐式类型转换，某些极端情况下，还是会有编译时错误。</p>
-
-<h3>Swfit 的性能</h3>
-
-<p>我没做过测试，但就语言特性来说， Swift 是比 ObjC 快的，因为静态类型使得他在编译时就已经知道调用函数的具体位置。而不是 Objective-C 的消息发送、 Selector 机制。</p>
-
-<p>目前来看， Swift 性能略差原因主要是编译器还没足够优化、还有就是 Cocoa 拖了后腿， Cocoa 本身有大量的 <code>AnyObject</code> 返回值。所以实际写 Swift 代码时，多用 <code>as</code> 一定是好习惯。明确类型。</p>
-
-<h3>Swift 的未来</h3>
-
-<p>我不知道。至少好像感觉很多培训机构都看到了前途开始疯狂的做视频。</p>
-
-<p>倒是觉得什么时候 Cocoa for Swift 出了才算它完全完成任务。</p>
-
-<p>总觉得 Cocoa 拖后腿，不然放到其他平台也不错。</p>
-
-<p>对了，之前不是在 App 开发领域，这才知道原来这个地盘水很深，太多唯利的培训机构，太多嗷嗷待哺等视频教程的新人。觉得挺有意思。就拿 ? ! 这个 Optional 为例，太多介绍的文章。可惜能说明白的太少太少。糊里糊涂做开发就是当前现状吧。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -1873,6 +2127,10 @@ segmentation algorithm.</p></blockquote>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/03/22/rust-pattern-match/">Rust Pattern Match(Rust中的模式匹配)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/06/18/guangzhou-realtime-bus/">广州实时工具App逆向</a>
@@ -1950,10 +2208,6 @@ segmentation algorithm.</p></blockquote>
         <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2014/06/16/swift-runtime/">Swift Runtime</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -2026,6 +2280,15 @@ segmentation algorithm.</p></blockquote>
 </script>
 
 
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
 
 
 
