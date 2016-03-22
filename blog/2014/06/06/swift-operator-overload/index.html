@@ -87,7 +87,7 @@
   
 
 
-<time datetime="2014-06-06T10:28:02+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2014</time>
+<time datetime="2014-06-06T10:28:02+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -116,8 +116,8 @@
 
 <ul>
 <li>operator</li>
-<li>prefix 前缀运算符，比如 （取正+、取负- 、自增++、自减&mdash;）</li>
-<li>postfix 后缀运算符，比如（自增++、自减&mdash;），这两可以前缀也可以后缀</li>
+<li>prefix 前缀运算符，比如 （取正+、取负- 、自增++、自减&ndash;）</li>
+<li>postfix 后缀运算符，比如（自增++、自减&ndash;），这两可以前缀也可以后缀</li>
 <li>infix 中缀，最常见二元运算</li>
 <li>precedence 优先级的意思，取值 0~255 ，纯数字，不可以带符号，下划线，指数e/p 表示</li>
 <li>associativity 结合性，可以是 left, right, 或者 none</li>
@@ -145,7 +145,7 @@ let p = Point(x: 100, y: 200)
 
 <h2>前缀运算符</h2>
 
-<p>来个不靠谱的，假设我要执行 -p 这个操作。由于 &ldquo;&ndash;&rdquo; 已经是定义好了的运算符（减法），直接实现运算即可：</p>
+<p>来个不靠谱的，假设我要执行 -p 这个操作。由于 &ldquo;-&rdquo; 已经是定义好了的运算符（减法），直接实现运算即可：</p>
 
 <pre><code>@prefix func - (pt: Point) -&gt; Point {
     return Point(x: -pt.x, y: -pt.y)
@@ -153,7 +153,7 @@ let p = Point(x: 100, y: 200)
 println(-p) // 看起来高大上
 </code></pre>
 
-<p>@prefix  属性表示这个 &ndash; 运算作为前缀运算符处理，相当于取负。</p>
+<p>@prefix  属性表示这个 - 运算作为前缀运算符处理，相当于取负。</p>
 
 <h2>中缀运算符</h2>
 
@@ -177,7 +177,7 @@ println(-p) // 看起来高大上
 
 <h2>后缀运算符</h2>
 
-<p>假设，我们的应用里，需要经常计算点到原点(0,0) 的距离，我们“发明”个新运算好了，我们就选一个 &ldquo;~!&#8221;， 来个后缀的，期望 &#8220;p~!&rdquo; 取得点到原点的距离。</p>
+<p>假设，我们的应用里，需要经常计算点到原点(0,0) 的距离，我们“发明”个新运算好了，我们就选一个 &ldquo;~!"， 来个后缀的，期望 "p~!&rdquo; 取得点到原点的距离。</p>
 
 <pre><code>operator postfix ~! {} // 定义新运算符
 @postfix func ~! (pt: Point) -&gt; Double {
@@ -348,7 +348,7 @@ println(-p) // 看起来高大上
   
 
 
-<time datetime="2014-06-06T10:28:02+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2014</time>
+<time datetime="2014-06-06T10:28:02+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -479,6 +479,35 @@ println(-p) // 看起来高大上
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -499,7 +528,7 @@ println(-p) // 看起来高大上
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

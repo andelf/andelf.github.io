@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Swift-internals | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/swift-internals/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2015-07-15T23:37:50+08:00</updated>
+  <updated>2016-03-22T23:28:16+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -62,11 +62,10 @@
 
 <p>去掉了 <code>NilType</code>，增加了 <code>NilLiteralConvertible</code>， <code>nil</code> 成为关键字。可以认为是 nil 常量。</p>
 
-<p><code>
-protocol NilLiteralConvertible {
+<pre><code>protocol NilLiteralConvertible {
   class func convertFromNilLiteral() -&gt; Self
 }
-</code></p>
+</code></pre>
 
 <p>除了 Optional 、上面所提到的指针类型外，<code>RawOptionSet</code> 也实现了该协议。</p>
 
@@ -76,10 +75,9 @@ protocol NilLiteralConvertible {
 
 <p>增加了以下方法：</p>
 
-<p><code>
-func makeUnique(inout buffer: ArrayBuffer&lt;T&gt;, e: T, index: Int)
+<pre><code>func makeUnique(inout buffer: ArrayBuffer&lt;T&gt;, e: T, index: Int)
 func sorted(isOrderedBefore: (T, T) -&gt; Bool) -&gt; Array&lt;T&gt;
-</code></p>
+</code></pre>
 
 <p>看起来 <code>Array</code> 对底层容器的引用有了更好的控制 <code>ArrayBufferType</code> 增加了判断方法 <code>func isMutableAndUniquelyReferenced() -&gt; Bool</code>。</p>
 
@@ -89,12 +87,11 @@ func sorted(isOrderedBefore: (T, T) -&gt; Bool) -&gt; Array&lt;T&gt;
 
 <h4>增加了 <code>_Pointer</code> protocol</h4>
 
-<p><code>scala
-protocol _Pointer {
+<pre><code class="scala">protocol _Pointer {
   var value: RawPointer { get }
   init(_ value: RawPointer)
 }
-</code></p>
+</code></pre>
 
 <p>表示一个类型可以对应到原生指针。</p>
 
@@ -121,11 +118,10 @@ protocol _Pointer {
 
 <p>Keywards as variable name.</p>
 
-<p><code>scala
-// escaped variable name
+<pre><code class="scala">// escaped variable name
 let `let` = 1000
 dump(`let`, name: "variable named let")
-</code></p>
+</code></pre>
 
 <h2><code>new</code> 关键字</h2>
 
@@ -133,9 +129,8 @@ dump(`let`, name: "variable named let")
 
 <p>快速初始化数组。</p>
 
-<p><code>scala
-let an_array_with_100_zero = new(Int)[100]
-</code></p>
+<pre><code class="scala">let an_array_with_100_zero = new(Int)[100]
+</code></pre>
 
 <h2>protocol type</h2>
 
@@ -176,38 +171,35 @@ Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身�
 
 <p>Sequence 协议</p>
 
-<p><code>
-NSMutableArray NSSet NSArray NSMutableDictionary NSMutableSet NSDictionary
-</code></p>
+<pre><code>NSMutableArray NSSet NSArray NSMutableDictionary NSMutableSet NSDictionary
+</code></pre>
 
 <p>所有以上这些类型都可以通过 for-in 操作。</p>
 
 <p>*LiteralConvertible</p>
 
-<p><code>
-NSNumber NSString NSArray NSDictionary
-</code></p>
+<pre><code>NSNumber NSString NSArray NSDictionary
+</code></pre>
 
 <h4>隐式类型转换</h4>
 
 <p>CF 几乎都对应到了 NS 类型。这里略去</p>
 
 <ul>
-<li><code>NilType</code> &ndash;> <code>NSZone</code></li>
-<li><code>Dictionary&lt;KeyType: Hashable, ValueType&gt;</code> &ndash;> <code>NSDictionary</code></li>
-<li><code>NSDictionary</code> &ndash;> <code>Dictionary&lt;NSObject, AnyObject&gt;</code></li>
-<li><code>String</code> &lt;&ndash;> <code>NSString</code></li>
-<li><code>NSArray</code> &ndash;> <code>AnyObject[]</code></li>
-<li><code>A[]</code> &ndash;> <code>NSArray</code></li>
-<li><code>Float Double Int UInt Bool</code> &ndash;> <code>NSNumber</code></li>
-<li><code>NSRange</code> &ndash;> <code>Range&lt;Int&gt;</code> // 比较有意思的一个</li>
+<li><code>NilType</code> -> <code>NSZone</code></li>
+<li><code>Dictionary&lt;KeyType: Hashable, ValueType&gt;</code> -> <code>NSDictionary</code></li>
+<li><code>NSDictionary</code> -> <code>Dictionary&lt;NSObject, AnyObject&gt;</code></li>
+<li><code>String</code> <-> <code>NSString</code></li>
+<li><code>NSArray</code> -> <code>AnyObject[]</code></li>
+<li><code>A[]</code> -> <code>NSArray</code></li>
+<li><code>Float Double Int UInt Bool</code> -> <code>NSNumber</code></li>
+<li><code>NSRange</code> -> <code>Range&lt;Int&gt;</code> // 比较有意思的一个</li>
 </ul>
 
 
 <h4>方法扩展</h4>
 
-<p><code>scala
-// let s = NSSet(objects: 12, 32, 23, 12)
+<pre><code class="scala">// let s = NSSet(objects: 12, 32, 23, 12)
 extension NSSet {
   convenience init(objects elements: AnyObject...)
 }
@@ -228,12 +220,11 @@ extension NSDictionary {
 extension NSObject : CVarArg {
   @objc func encode() -&gt; Word[]
 }
-</code></p>
+</code></pre>
 
 <p>字符串的扩展方法非常多。</p>
 
-<p><code>scala
-  static func availableStringEncodings() -&gt; NSStringEncoding[]
+<pre><code class="scala">  static func availableStringEncodings() -&gt; NSStringEncoding[]
   static func defaultCStringEncoding() -&gt; NSStringEncoding
   static func localizedNameOfStringEncoding(encoding: NSStringEncoding) -&gt; String
   static func localizedStringWithFormat(format: String, _ arguments: CVarArg...) -&gt; String
@@ -324,14 +315,13 @@ extension NSObject : CVarArg {
   func uppercaseStringWithLocale(locale: NSLocale) -&gt; String
   func writeToFile(path: String, atomically useAuxiliaryFile: Bool, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; Bool
   func writeToURL(url: NSURL, atomically useAuxiliaryFile: Bool, encoding enc: NSStringEncoding, error: NSErrorPointer = default) -&gt; Bool
-</code></p>
+</code></pre>
 
 <h3>CoreGraphics</h3>
 
 <p>几个常用基本类型都有了 Swift-style 的构造函数。其中 <code>CGRect</code> 有很多的相关运算都被封装为方法，很不错。</p>
 
-<p><code>scala
-extension CGPoint : Equatable {
+<pre><code class="scala">extension CGPoint : Equatable {
   static var zeroPoint: CGPoint
   init()
   init(x: Int, y: Int)
@@ -385,48 +375,44 @@ extension CGRect : Equatable {
   func contains(point: CGPoint) -&gt; Bool
   func intersects(rect: CGRect) -&gt; Bool
 }
-</code></p>
+</code></pre>
 
 <h3>AppKit</h3>
 
-<p><code>scala
-extension NSGradient {
+<pre><code class="scala">extension NSGradient {
   convenience init(colorsAndLocations objects: (AnyObject, CGFloat)...)
 }
-</code></p>
+</code></pre>
 
 <h3>UIKit</h3>
 
-<p><code>scala
-extension UIDeviceOrientation {
+<pre><code class="scala">extension UIDeviceOrientation {
   var isPortrait: Bool
-  // also isLandscape isValidInterfaceOrientation isFlat
+  // also isLandscape isValidInterfaceOrientation isFlat 
 }
 extension UIInterfaceOrientation {
   var isPortrait: Bool
   var isLandscape: Bool
 }
-</code></p>
+</code></pre>
 
 <p>这个模块是交叉编译的。。不太容易获得信息。不过好在扩展内容不多。</p>
 
 <h3>SpriteKit</h3>
 
-<p><code>scala
-extension SKNode {
+<pre><code class="scala">extension SKNode {
   @objc subscript (name: String) -&gt; SKNode[] { get }
 }
-</code></p>
+</code></pre>
 
 <h2>特殊 Mirror 实现</h2>
 
-<p><code>
-NSSet NSDate NSArray NSRange NSURL NSDictionary NSString
+<pre><code>NSSet NSDate NSArray NSRange NSURL NSDictionary NSString
 CGPoint CGRect CGSize
 NSView
 UIView
 SKTextureAtlas SKTexture SKSpriteNode SKShapeNode
-</code></p>
+</code></pre>
 
 <p>单独添加了自己的 <code>Mirror</code> 类型，单独实现。</p>
 
@@ -479,26 +465,23 @@ UInt UInt8 UInt16 UInt32 UInt64
 
 <p>别名:</p>
 
-<p><code>
-IntMax = Int64
+<pre><code>IntMax = Int64
 UIntMax = UInt64
 IntegerLiteralType = Int
 Word = Int // 字长
 UWord = UInt
-</code></p>
+</code></pre>
 
 <h4>浮点型</h4>
 
-<p><code>
-Float Double Float80
-</code></p>
+<pre><code>Float Double Float80
+</code></pre>
 
 <p>别名：</p>
 
-<p><code>
-FloatLiteralType = Double
+<pre><code>FloatLiteralType = Double
 Float64 = Double
-</code></p>
+</code></pre>
 
 <p>协议：<code>FloatingPointNumber</code>。</p>
 
@@ -529,10 +512,9 @@ Float64 = Double
 
 <p>别名：</p>
 
-<p><code>
-StringLiteralType = String
+<pre><code>StringLiteralType = String
 ExtendedGraphemeClusterType = String
-</code></p>
+</code></pre>
 
 <p>官方文档</p>
 
@@ -592,8 +574,7 @@ segmentation algorithm.</p></blockquote>
 
 <h3>C/ObjC 兼容类型</h3>
 
-<p><code>
-CBool = Bool
+<pre><code>CBool = Bool
 CFloat = Float
 CDouble = Double
 CChar = Int8
@@ -610,18 +591,17 @@ CLong = Int
 CUnsignedLong = UInt
 CLongLong = Int64
 CUnsignedLongLong = UInt64
-</code></p>
+</code></pre>
 
 <p>具体使用参考 C 交互的几篇文章，基本没区别。</p>
 
 <h3>Any 类型</h3>
 
-<p><code>
-AnyObject
+<pre><code>AnyObject
 // 别名
 Any = protocol&lt;&gt;
 AnyClass = AnyObject.Type
-</code></p>
+</code></pre>
 
 <p>还有个用在函数定义的类型签名上， <code>Any.Type</code>。</p>
 
@@ -629,8 +609,7 @@ AnyClass = AnyObject.Type
 
 <h3>指针类型</h3>
 
-<p><code>
-UnsafePointer&lt;T&gt;
+<pre><code>UnsafePointer&lt;T&gt;
 CMutableVoidPointer
 CConstVoidPointer
 COpaquePointer
@@ -638,7 +617,7 @@ CConstPointer&lt;T&gt;
 AutoreleasingUnsafePointer&lt;T&gt;
 CVaListPointer
 CMutablePointer&lt;T&gt;
-</code></p>
+</code></pre>
 
 <p>参考 C 交互文章。</p>
 
@@ -659,14 +638,13 @@ CMutablePointer&lt;T&gt;
 
 <h3>打印相关 <code>Printable DebugPrintable</code></h3>
 
-<p><code>scala
-protocol Printable {
+<pre><code class="scala">protocol Printable {
   var description: String { get }
 }
 protocol DebugPrintable {
   var debugDescription: String { get }
 }
-</code></p>
+</code></pre>
 
 <p>用于打印和字符串的 Interpolation 。</p>
 
@@ -674,15 +652,14 @@ protocol DebugPrintable {
 
 <p>从字面常量获取。</p>
 
-<p><code>
-ArrayLiteralConvertible
+<pre><code>ArrayLiteralConvertible
 IntegerLiteralConvertible
 DictionaryLiteralConvertible
 CharacterLiteralConvertible
 FloatLiteralConvertible
 ExtendedGraphemeClusterLiteralConvertible
 StringLiteralConvertible
-</code></p>
+</code></pre>
 
 <p>其中字符串和字符的字面常量表示有所重合，也就是说 <code>"a"</code> 可以是字符串也可以是字符。<a href="http://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/">简析 Swift 中的 Pattern Match</a> 一文中就是遇到了类似的情况。</p>
 
@@ -690,38 +667,32 @@ StringLiteralConvertible
 
 <p>相当于重载 <code>if</code>、<code>while</code> 的行为。</p>
 
-<p><code>scala
-protocol LogicValue {
+<pre><code class="scala">protocol LogicValue {
   func getLogicValue() -&gt; Bool
 }
-</code></p>
+</code></pre>
 
 <h3><code>Sequence</code></h3>
 
 <p>相当于重载 for-in 。和 <code>Generator</code> 联用。</p>
 
-<p>```scala
-protocol Sequence {
+<pre><code class="scala">protocol Sequence {
   typealias GeneratorType : Generator
-  func generate() &ndash;> GeneratorType
-}</p>
-
-<p>protocol Generator {
-  typealias Element
-  mutating func next() &ndash;> Element?
+  func generate() -&gt; GeneratorType
 }
-```</p>
 
-<p>```scala
-// for .. in { }
-var <strong>g = someSequence.generate()
-while let x = </strong>g.next() {</p>
-
-<pre><code>...
+protocol Generator {
+  typealias Element
+  mutating func next() -&gt; Element?
+}
 </code></pre>
 
-<p>}}
-```</p>
+<pre><code class="scala">// for .. in { }
+var __g = someSequence.generate()
+while let x = __g.next() {
+    ...
+}}
+</code></pre>
 
 <h3>整型、 Index 相关协议</h3>
 
@@ -761,19 +732,17 @@ while let x = </strong>g.next() {</p>
 
 <h3>IO 输出，伪输出相关</h3>
 
-<p><code>
-protocol Streamable {
+<pre><code>protocol Streamable {
   func writeTo&lt;Target : OutputStream&gt;(inout target: Target)
 }
-</code></p>
+</code></pre>
 
 <p><code>Streamable</code> 表示可以被写入到输出流中，比如字符串、字符等。</p>
 
-<p><code>
-protocol OutputStream {
+<pre><code>protocol OutputStream {
   func write(string: String)
 }
-</code></p>
+</code></pre>
 
 <p><code>OutputStream</code> 表示一个输出流，比如标准输出（<code>stdout</code>），也可以表示一个伪输出流，例如字符串 <code>String</code>。</p>
 
@@ -786,11 +755,10 @@ protocol OutputStream {
 
 <h3>CVarArg 处理</h3>
 
-<p><code>
-protocol CVarArg {
+<pre><code>protocol CVarArg {
   func encode() -&gt; Word[]
 }
-</code></p>
+</code></pre>
 
 <p>用于处理 C 函数的可变参数，参考 <a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a>。</p>
 

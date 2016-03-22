@@ -86,7 +86,7 @@
   
 
 
-<time datetime="2014-06-28T21:58:35+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
+<time datetime="2014-06-28T21:58:35+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -155,30 +155,30 @@
 <table>
 <thead>
 <tr>
-<th align="center">类型 </th>
-<th align="center"> 对应为</th>
+<th style="text-align:center;">类型 </th>
+<th style="text-align:center;"> 对应为</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center"><code>void *</code> </td>
-<td align="center"> <code>CMutableVoidPointer</code></td>
+<td style="text-align:center;"><code>void *</code> </td>
+<td style="text-align:center;"> <code>CMutableVoidPointer</code></td>
 </tr>
 <tr>
-<td align="center"><code>Type *</code>、<code>Type[]</code> </td>
-<td align="center"> <code>CMutablePointer&lt;Type&gt;</code></td>
+<td style="text-align:center;"><code>Type *</code>、<code>Type[]</code> </td>
+<td style="text-align:center;"> <code>CMutablePointer&lt;Type&gt;</code></td>
 </tr>
 <tr>
-<td align="center"><code>const char *</code> </td>
-<td align="center"> <code>CString</code></td>
+<td style="text-align:center;"><code>const char *</code> </td>
+<td style="text-align:center;"> <code>CString</code></td>
 </tr>
 <tr>
-<td align="center"><code>const Type *</code> </td>
-<td align="center"> <code>CConstPointer&lt;Type&gt;</code></td>
+<td style="text-align:center;"><code>const Type *</code> </td>
+<td style="text-align:center;"> <code>CConstPointer&lt;Type&gt;</code></td>
 </tr>
 <tr>
-<td align="center"><code>const void *</code> </td>
-<td align="center"> <code>CConstVoidPointer</code></td>
+<td style="text-align:center;"><code>const void *</code> </td>
+<td style="text-align:center;"> <code>CConstVoidPointer</code></td>
 </tr>
 </tbody>
 </table>
@@ -189,26 +189,26 @@
 <table>
 <thead>
 <tr>
-<th align="center">类型 </th>
-<th align="center"> 对应为</th>
+<th style="text-align:center;">类型 </th>
+<th style="text-align:center;"> 对应为</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center"><code>const char *</code> </td>
-<td align="center"> <code>CString</code></td>
+<td style="text-align:center;"><code>const char *</code> </td>
+<td style="text-align:center;"> <code>CString</code></td>
 </tr>
 <tr>
-<td align="center"><code>Type *</code>、<code>const Type *</code> </td>
-<td align="center"> <code>UnsafePointer&lt;Type&gt;</code></td>
+<td style="text-align:center;"><code>Type *</code>、<code>const Type *</code> </td>
+<td style="text-align:center;"> <code>UnsafePointer&lt;Type&gt;</code></td>
 </tr>
 <tr>
-<td align="center"><code>void *</code>、<code>const void *</code> </td>
-<td align="center"> <code>COpaquePointer</code></td>
+<td style="text-align:center;"><code>void *</code>、<code>const void *</code> </td>
+<td style="text-align:center;"> <code>COpaquePointer</code></td>
 </tr>
 <tr>
-<td align="center">无法识别的结构指针  </td>
-<td align="center"> <code>COpaquePointer</code></td>
+<td style="text-align:center;">无法识别的结构指针  </td>
+<td style="text-align:center;"> <code>COpaquePointer</code></td>
 </tr>
 </tbody>
 </table>
@@ -309,7 +309,7 @@
   
 
 
-<time datetime="2014-06-28T21:58:35+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
+<time datetime="2014-06-28T21:58:35+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -440,6 +440,35 @@
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -460,7 +489,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

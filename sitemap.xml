@@ -1,173 +1,197 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
-    <url>
-        <loc>http://andelf.github.io/blog/2013/11/20/hello-world/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2013/11/21/erlang-tips/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/04/29/rust-tokenizer/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/04/29/a-rustdoc-plugin/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/05/15/rust-tips/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/06/swift-operator-overload/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/06/swift-standard-library/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/06/swift-standard-library-cont/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/06/swift-attributes/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/09/swift-any-star/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/12/swift-string-extension-for-int-index/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/12/swift-and-objectivec-interop-cont/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/13/swift-special-protocols/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/13/swift-misc/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/16/swift-runtime/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/19/modules-for-swift/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/20/swift-reflection/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/30/my-view-of-swift/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/06/30/swift-type-hierarchy/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/
-        </loc>
-        <lastmod>2015-05-23T11:12:33+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2015/06/01/beijing-realtime-bus/</loc>
-        <lastmod>2015-06-09T12:29:27+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling/</loc>
-        <lastmod>2015-07-15T23:37:46+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus/</loc>
-        <lastmod>2015-07-15T23:33:16+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/about/</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/blog/archives/</loc>
-        <lastmod>2015-07-15T23:37:46+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/</loc>
-        <lastmod>2015-07-15T23:37:46+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://andelf.github.io/robots.txt</loc>
-        <lastmod>2015-05-23T11:01:24+08:00</lastmod>
-    </url>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>http://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus/</loc>
+<lastmod>2015-06-18T17:39:06+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling/</loc>
+<lastmod>2015-06-09T15:27:58+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2015/06/01/beijing-realtime-bus/</loc>
+<lastmod>2015-06-01T13:17:50+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/</loc>
+<lastmod>2015-01-23T23:21:00+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/</loc>
+<lastmod>2014-07-08T17:22:11+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library/</loc>
+<lastmod>2014-07-07T12:09:54+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/</loc>
+<lastmod>2014-07-04T03:05:11+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/07/04/cocoa-in-swift/</loc>
+<lastmod>2014-07-04T01:05:55+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/30/swift-type-hierarchy/</loc>
+<lastmod>2014-06-30T15:10:41+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/30/my-view-of-swift/</loc>
+<lastmod>2014-06-30T11:05:13+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/</loc>
+<lastmod>2014-06-28T21:58:35+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/</loc>
+<lastmod>2014-06-25T22:44:29+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/</loc>
+<lastmod>2014-06-25T21:20:55+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/</loc>
+<lastmod>2014-06-23T20:15:39+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/20/swift-reflection/</loc>
+<lastmod>2014-06-20T23:48:51+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/19/modules-for-swift/</loc>
+<lastmod>2014-06-19T15:14:31+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/</loc>
+<lastmod>2014-06-18T23:38:01+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/</loc>
+<lastmod>2014-06-17T09:29:48+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/</loc>
+<lastmod>2014-06-16T14:45:15+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/16/swift-runtime/</loc>
+<lastmod>2014-06-16T10:38:45+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/</loc>
+<lastmod>2014-06-15T00:11:44+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/13/swift-misc/</loc>
+<lastmod>2014-06-13T13:53:13+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/13/swift-special-protocols/</loc>
+<lastmod>2014-06-13T12:43:07+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/12/swift-and-objectivec-interop-cont/</loc>
+<lastmod>2014-06-12T17:10:28+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/12/swift-string-extension-for-int-index/</loc>
+<lastmod>2014-06-12T11:17:28+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/</loc>
+<lastmod>2014-06-11T20:01:11+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/09/swift-any-star/</loc>
+<lastmod>2014-06-09T00:40:52+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/</loc>
+<lastmod>2014-06-08T00:25:43+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/06/swift-attributes/</loc>
+<lastmod>2014-06-06T17:12:53+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/06/swift-standard-library-cont/</loc>
+<lastmod>2014-06-06T13:33:52+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/06/swift-standard-library/</loc>
+<lastmod>2014-06-06T10:49:26+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/06/06/swift-operator-overload/</loc>
+<lastmod>2014-06-06T10:28:02+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/05/15/rust-tips/</loc>
+<lastmod>2014-05-15T11:08:59+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/04/29/a-rustdoc-plugin/</loc>
+<lastmod>2014-04-29T02:26:48+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/04/29/rust-tokenizer/</loc>
+<lastmod>2014-04-29T01:06:38+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/</loc>
+<lastmod>2014-04-23T23:44:43+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2013/11/21/erlang-tips/</loc>
+<lastmod>2013-11-21T11:36:18+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/2013/11/20/hello-world/</loc>
+<lastmod>2013-11-20T17:26:26+08:00</lastmod>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/archives/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/about/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/misc/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/erlang/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/rust/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/swift/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/swift-interop/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/swift-module/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/swift-internals/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/crack/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/posts/2/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/posts/3/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/posts/4/</loc>
+</url>
 </urlset>

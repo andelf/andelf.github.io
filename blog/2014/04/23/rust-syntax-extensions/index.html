@@ -97,7 +97,7 @@ syntax::ext. 1
   
 
 
-<time datetime="2014-04-23T23:44:43+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2014</time>
+<time datetime="2014-04-23T23:44:43+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -119,14 +119,14 @@ syntax::ext. 1
 <span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">macro_registrar</span><span class="p">,</span> <span class="n">managed_boxes</span><span class="p">)];</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">extern</span> <span class="n">crate</span> <span class="k">syntax</span><span class="p">;</span>
+</span><span class='line'><span class="k">extern</span> <span class="n">crate</span> <span class="n">syntax</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">ast</span><span class="p">;</span>
-</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">ast</span><span class="o">::</span><span class="n">Name</span><span class="p">;</span>
-</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">ext</span><span class="o">::</span><span class="n">base</span><span class="o">::</span><span class="n">SyntaxExtension</span><span class="p">;</span>
+</span><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">ast</span><span class="p">;</span>
+</span><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">ast</span><span class="o">::</span><span class="n">Name</span><span class="p">;</span>
+</span><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">ext</span><span class="o">::</span><span class="n">base</span><span class="o">::</span><span class="n">SyntaxExtension</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'><span class="cp">#[macro_registrar]</span>
-</span><span class='line'><span class="n">pub</span> <span class="k">fn</span> <span class="n">macro_registrar</span><span class="p">(</span><span class="n">register</span><span class="o">:</span> <span class="o">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="o">|</span><span class="p">);</span>
+</span><span class='line'><span class="k">pub</span> <span class="k">fn</span> <span class="n">macro_registrar</span><span class="p">(</span><span class="n">register</span><span class="o">:</span> <span class="o">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="o">|</span><span class="p">);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -201,69 +201,69 @@ is essential to enable this feature.</p>
 <span class='line-number'>64</span>
 <span class='line-number'>65</span>
 <span class='line-number'>66</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="c1">/// A name is a part of an identifier, representing a string or</span>
-</span><span class='line'><span class="n">gensym</span><span class="p">.</span> <span class="n">It</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">the</span> <span class="n">result</span> <span class="n">of</span> <span class="n">interning</span><span class="p">.</span>
-</span><span class='line'><span class="c1">/// created by token::intern()</span>
-</span><span class='line'><span class="k">type</span> <span class="n">Name</span> <span class="o">=</span> <span class="k">u32</span><span class="p">;</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="c-Doc">/// A name is a part of an identifier, representing a string or</span>
+</span><span class='line'><span class="n">gensym</span><span class="p">.</span> <span class="n">It</span><span class="nl">&#39;s</span> <span class="n">the</span> <span class="n">result</span> <span class="n">of</span> <span class="n">interning</span><span class="p">.</span>
+</span><span class='line'><span class="c-Doc">/// created by token::intern()</span>
+</span><span class='line'><span class="k">type</span> <span class="n">Name</span> <span class="o">=</span> <span class="kt">u32</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">/// An enum representing the different kinds of syntax extensions.</span>
-</span><span class='line'><span class="n">pub</span> <span class="k">enum</span> <span class="n">SyntaxExtension</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">/// A syntax extension that is attached to an item and creates new items</span>
-</span><span class='line'>    <span class="c1">/// based upon it.</span>
-</span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// `#[deriving(...)]` is an `ItemDecorator`.</span>
+</span><span class='line'><span class="c-Doc">/// An enum representing the different kinds of syntax extensions.</span>
+</span><span class='line'><span class="k">pub</span> <span class="k">enum</span> <span class="n">SyntaxExtension</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c-Doc">/// A syntax extension that is attached to an item and creates new items</span>
+</span><span class='line'>    <span class="c-Doc">/// based upon it.</span>
+</span><span class='line'>    <span class="c-Doc">///</span>
+</span><span class='line'>    <span class="c-Doc">/// `#[deriving(...)]` is an `ItemDecorator`.</span>
 </span><span class='line'>    <span class="n">ItemDecorator</span><span class="p">(</span><span class="n">ItemDecorator</span><span class="p">),</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="c1">/// A syntax extension that is attached to an item and modifies it</span>
-</span><span class='line'>    <span class="c1">/// in-place.</span>
+</span><span class='line'>    <span class="c-Doc">/// A syntax extension that is attached to an item and modifies it</span>
+</span><span class='line'>    <span class="c-Doc">/// in-place.</span>
 </span><span class='line'>    <span class="n">ItemModifier</span><span class="p">(</span><span class="n">ItemModifier</span><span class="p">),</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="c1">/// A normal, function-like syntax extension.</span>
-</span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// `bytes!` is a `NormalTT`.</span>
-</span><span class='line'>    <span class="n">NormalTT</span><span class="p">(</span><span class="o">~</span><span class="n">MacroExpander</span><span class="o">:</span><span class="err">&#39;</span><span class="n">static</span><span class="p">,</span> <span class="n">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A normal, function-like syntax extension.</span>
+</span><span class='line'>    <span class="c-Doc">///</span>
+</span><span class='line'>    <span class="c-Doc">/// `bytes!` is a `NormalTT`.</span>
+</span><span class='line'>    <span class="n">NormalTT</span><span class="p">(</span><span class="o">~</span><span class="n">MacroExpander</span><span class="o">:</span><span class="k">&#39;static</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="c1">/// A function-like syntax extension that has an extra ident before</span>
-</span><span class='line'>    <span class="c1">/// the block.</span>
-</span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// `macro_rules!` is an `IdentTT`.</span>
-</span><span class='line'>    <span class="n">IdentTT</span><span class="p">(</span><span class="o">~</span><span class="n">IdentMacroExpander</span><span class="o">:</span><span class="err">&#39;</span><span class="n">static</span><span class="p">,</span> <span class="n">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
+</span><span class='line'>    <span class="c-Doc">/// A function-like syntax extension that has an extra ident before</span>
+</span><span class='line'>    <span class="c-Doc">/// the block.</span>
+</span><span class='line'>    <span class="c-Doc">///</span>
+</span><span class='line'>    <span class="c-Doc">/// `macro_rules!` is an `IdentTT`.</span>
+</span><span class='line'>    <span class="n">IdentTT</span><span class="p">(</span><span class="o">~</span><span class="n">IdentMacroExpander</span><span class="o">:</span><span class="k">&#39;static</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">type</span> <span class="n">ItemDecorator</span> <span class="o">=</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">Span</span><span class="p">,</span> <span class="o">@</span><span class="n">MetaItem</span><span class="p">,</span> <span class="o">@</span><span class="n">Item</span><span class="p">,</span> <span class="o">|@</span><span class="n">Item</span><span class="o">|</span><span class="p">);</span>
 </span><span class='line'><span class="k">type</span> <span class="n">ItemModifier</span> <span class="o">=</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">Span</span><span class="p">,</span> <span class="o">@</span><span class="n">MetaItem</span><span class="p">,</span> <span class="o">@</span><span class="n">Item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">@</span><span class="n">Item</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">pub</span> <span class="n">trait</span> <span class="n">MacroExpander</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">,</span> <span class="n">ecx</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">span</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">token_tree</span><span class="o">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">TokenTree</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
+</span><span class='line'><span class="k">pub</span> <span class="k">trait</span> <span class="n">MacroExpander</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span> <span class="n">ecx</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">span</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">token_tree</span><span class="o">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">TokenTree</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">pub</span> <span class="n">trait</span> <span class="n">IdentMacroExpander</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">,</span> <span class="n">cx</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">sp</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">ident</span><span class="o">:</span> <span class="n">Ident</span><span class="p">,</span> <span class="n">token_tree</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">TokenTree</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
+</span><span class='line'><span class="k">pub</span> <span class="k">trait</span> <span class="n">IdentMacroExpander</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">sp</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">ident</span><span class="o">:</span> <span class="n">Ident</span><span class="p">,</span> <span class="n">token_tree</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">TokenTree</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">/// The result of a macro expansion. The return values of the various</span>
-</span><span class='line'><span class="c1">/// methods are spliced into the AST at the callsite of the macro (or</span>
-</span><span class='line'><span class="c1">/// just into the compiler&#39;s internal macro table, for `make_def`).</span>
-</span><span class='line'><span class="n">pub</span> <span class="n">trait</span> <span class="n">MacResult</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">/// Define a new macro.</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">make_def</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Option</span><span class="o">&lt;</span><span class="n">MacroDef</span><span class="o">&gt;</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">None</span>
+</span><span class='line'><span class="c-Doc">/// The result of a macro expansion. The return values of the various</span>
+</span><span class='line'><span class="c-Doc">/// methods are spliced into the AST at the callsite of the macro (or</span>
+</span><span class='line'><span class="c-Doc">/// just into the compiler&#39;s internal macro table, for `make_def`).</span>
+</span><span class='line'><span class="k">pub</span> <span class="k">trait</span> <span class="n">MacResult</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c-Doc">/// Define a new macro.</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">make_def</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">MacroDef</span><span class="o">&gt;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nb">None</span>
 </span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="c1">/// Create an expression.</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">make_expr</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Option</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Expr</span><span class="o">&gt;</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">None</span>
+</span><span class='line'>    <span class="c-Doc">/// Create an expression.</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">make_expr</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Expr</span><span class="o">&gt;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nb">None</span>
 </span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="c1">/// Create zero or more items.</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">make_items</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Option</span><span class="o">&lt;</span><span class="n">SmallVector</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Item</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">None</span>
+</span><span class='line'>    <span class="c-Doc">/// Create zero or more items.</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">make_items</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">SmallVector</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Item</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nb">None</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="c1">/// Create a statement.</span>
-</span><span class='line'>    <span class="c1">///</span>
-</span><span class='line'>    <span class="c1">/// By default this attempts to create an expression statement,</span>
-</span><span class='line'>    <span class="c1">/// returning None if that fails.</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">make_stmt</span><span class="p">(</span><span class="o">&amp;</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Option</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Stmt</span><span class="o">&gt;</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">self</span><span class="p">.</span><span class="n">make_expr</span><span class="p">()</span>
+</span><span class='line'>    <span class="c-Doc">/// Create a statement.</span>
+</span><span class='line'>    <span class="c-Doc">///</span>
+</span><span class='line'>    <span class="c-Doc">/// By default this attempts to create an expression statement,</span>
+</span><span class='line'>    <span class="c-Doc">/// returning None if that fails.</span>
+</span><span class='line'>    <span class="k">fn</span> <span class="n">make_stmt</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Stmt</span><span class="o">&gt;</span> <span class="p">{</span>
+</span><span class='line'>        <span class="bp">self</span><span class="p">.</span><span class="n">make_expr</span><span class="p">()</span>
 </span><span class='line'>            <span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">e</span><span class="o">|</span> <span class="o">@</span><span class="n">codemap</span><span class="o">::</span><span class="n">respan</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">span</span><span class="p">,</span> <span class="n">ast</span><span class="o">::</span><span class="n">StmtExpr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ast</span><span class="o">::</span><span class="n">DUMMY_NODE_ID</span><span class="p">)))</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'><span class="p">}</span>
@@ -278,10 +278,10 @@ is essential to enable this feature.</p>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="p">;</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'><span class="cp">#[macro_registrar]</span>
-</span><span class='line'><span class="n">pub</span> <span class="k">fn</span> <span class="n">registrar</span><span class="p">(</span><span class="n">register</span><span class="o">:</span> <span class="o">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="o">|</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="k">pub</span> <span class="k">fn</span> <span class="n">registrar</span><span class="p">(</span><span class="n">register</span><span class="o">:</span> <span class="o">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="o">|</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>    <span class="n">register</span><span class="p">(</span><span class="n">token</span><span class="o">::</span><span class="n">intern</span><span class="p">(</span><span class="s">&quot;your_ext_name&quot;</span><span class="p">),</span> <span class="n">your_extension</span><span class="p">);</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -361,7 +361,7 @@ and generates corresponding ast type.</p>
   
 
 
-<time datetime="2014-04-23T23:44:43+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2014</time>
+<time datetime="2014-04-23T23:44:43+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -492,6 +492,35 @@ and generates corresponding ast type.</p>
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -512,7 +541,7 @@ and generates corresponding ast type.</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

@@ -89,7 +89,7 @@ dump(`let`, name: "variable named let") Optimise Parameter -Onone // &hellip;">
   
 
 
-<time datetime="2014-06-13T13:53:13+08:00" pubdate data-updated="true">Jun 13<span>th</span>, 2014</time>
+<time datetime="2014-06-13T13:53:13+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -212,10 +212,10 @@ f 1 // frame select 1</p>
 <p>b filename.swift:8
 b func_name</p>
 
-<p>br s -r timestwo.<em>String // breakpoint set &mdash;func-regex timestwo.</em>String</p>
+<p>br s -r timestwo.<em>String // breakpoint set &ndash;func-regex timestwo.</em>String</p>
 
 <p>b *
-br m -c “valueInCents &lt; Int(amountInCents)”  // breakpoint modify &mdash;condition “&hellip;”
+br m -c “valueInCents &lt; Int(amountInCents)”  // breakpoint modify &ndash;condition “&hellip;”
 br m -c &ldquo;&hellip;.&rdquo; 3.1</p>
 
 <p>b *
@@ -418,7 +418,7 @@ Implement the debugQuickLookObject() method</p>
   
 
 
-<time datetime="2014-06-13T13:53:13+08:00" pubdate data-updated="true">Jun 13<span>th</span>, 2014</time>
+<time datetime="2014-06-13T13:53:13+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -549,6 +549,35 @@ Implement the debugQuickLookObject() method</p>
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -569,7 +598,7 @@ Implement the debugQuickLookObject() method</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

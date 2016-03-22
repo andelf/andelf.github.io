@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://andelf.github.io/blog/page/3">
+  <link rel="canonical" href="http://andelf.github.io/posts/3">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
@@ -89,7 +89,7 @@
   
 
 
-<time datetime="2014-06-15T00:11:44+08:00" pubdate data-updated="true">Jun 15<span>th</span>, 2014</time>
+<time datetime="2014-06-15T00:11:44+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -152,7 +152,7 @@
 
 <p>我们直接创建一个 Swift 项目，然后 New File，添加一个 <code>.c</code> 文件。</p>
 
-<p>这时候 Xcode 会弹出对话框询问是否配置 Bridge Header，确认就可以了。也可以手动添加 Bridge Header，位置在项目的 Build Settings 中的 Swift Compiler &ndash; Code Generation 子项里。指向你的 Bridge Header 文件名就可以了。</p>
+<p>这时候 Xcode 会弹出对话框询问是否配置 Bridge Header，确认就可以了。也可以手动添加 Bridge Header，位置在项目的 Build Settings 中的 Swift Compiler - Code Generation 子项里。指向你的 Bridge Header 文件名就可以了。</p>
 
 <p>一般这个文件是 <code>ProjectName-Bridging-Header.h</code>。情况基本和与 Objective-C 混编没区别。</p>
 
@@ -420,7 +420,7 @@
   
 
 
-<time datetime="2014-06-13T13:53:13+08:00" pubdate data-updated="true">Jun 13<span>th</span>, 2014</time>
+<time datetime="2014-06-13T13:53:13+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -543,10 +543,10 @@ f 1 // frame select 1</p>
 <p>b filename.swift:8
 b func_name</p>
 
-<p>br s -r timestwo.<em>String // breakpoint set &mdash;func-regex timestwo.</em>String</p>
+<p>br s -r timestwo.<em>String // breakpoint set &ndash;func-regex timestwo.</em>String</p>
 
 <p>b *
-br m -c “valueInCents &lt; Int(amountInCents)”  // breakpoint modify &mdash;condition “&hellip;”
+br m -c “valueInCents &lt; Int(amountInCents)”  // breakpoint modify &ndash;condition “&hellip;”
 br m -c &ldquo;&hellip;.&rdquo; 3.1</p>
 
 <p>b *
@@ -755,7 +755,7 @@ Implement the debugQuickLookObject() method</p>
   
 
 
-<time datetime="2014-06-13T12:43:07+08:00" pubdate data-updated="true">Jun 13<span>th</span>, 2014</time>
+<time datetime="2014-06-13T12:43:07+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -861,7 +861,7 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
   
 
 
-<time datetime="2014-06-12T17:10:28+08:00" pubdate data-updated="true">Jun 12<span>th</span>, 2014</time>
+<time datetime="2014-06-12T17:10:28+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -905,7 +905,7 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
   
 
 
-<time datetime="2014-06-12T11:17:28+08:00" pubdate data-updated="true">Jun 12<span>th</span>, 2014</time>
+<time datetime="2014-06-12T11:17:28+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -1021,7 +1021,7 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
   
 
 
-<time datetime="2014-06-11T20:01:11+08:00" pubdate data-updated="true">Jun 11<span>th</span>, 2014</time>
+<time datetime="2014-06-11T20:01:11+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -1203,7 +1203,7 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
 
 <p>一般说来，你在 Swift 项目新建 Objective-C 类的时候，直接弹出是否创建 Bridge Header 的窗口，点 YES 就是了，这时候一般多出来个 <code>ProjectName-Bridging-Header.h</code> 。</p>
 
-<p>如果没有自动的话，这个配置在项目的 Build Settings 中的 Swift Compiler &ndash; Code Generation 子项里。</p>
+<p>如果没有自动的话，这个配置在项目的 Build Settings 中的 Swift Compiler - Code Generation 子项里。</p>
 
 <p>说到底，其实是调用编译命令的 <code>-import-objc-header</code> 参数，后面加上这个 Header 文件。</p>
 
@@ -1289,7 +1289,7 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
   
 
 
-<time datetime="2014-06-09T00:40:52+08:00" pubdate data-updated="true">Jun 9<span>th</span>, 2014</time>
+<time datetime="2014-06-09T00:40:52+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -1354,7 +1354,7 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
   
 
 
-<time datetime="2014-06-08T00:25:43+08:00" pubdate data-updated="true">Jun 8<span>th</span>, 2014</time>
+<time datetime="2014-06-08T00:25:43+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -1400,7 +1400,7 @@ Must we refacotr the code and add type conversion function calls?</p>
 
 <p>复习下 extension 语法, 加上这里要介绍的“隐式类型转换”</p>
 
-<p>We can use the Swift&rsquo;s hiding feature &mdash; Implicit Type Convertion(or to say Cast?).</p>
+<p>We can use the Swift&rsquo;s hiding feature &ndash; Implicit Type Convertion(or to say Cast?).</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1434,7 +1434,7 @@ Must we refacotr the code and add type conversion function calls?</p>
 
 <p>假设，我们有个库函数，接受 Color struct (r, g, b 三原色表示) 作为参数。
 比如调用  <code>setColor(Color(r:23, g:34, b:34))</code>
-然后实际上颜色我们用字符串表示，比如&#8221;white&#8221;, &ldquo;black&rdquo; 或者 UInt32 表示比如 #ffeeff 。。。</p>
+然后实际上颜色我们用字符串表示，比如"white", &ldquo;black&rdquo; 或者 UInt32 表示比如 #ffeeff 。。。</p>
 
 <p>然后为了方便，我们本来需要写一些转换函数，然后调用。</p>
 
@@ -1538,7 +1538,7 @@ shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
   
 
 
-<time datetime="2014-06-06T17:12:53+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2014</time>
+<time datetime="2014-06-06T17:12:53+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -1730,7 +1730,7 @@ shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
 <li>@unchecked
 
 <ul>
-<li>&lsquo;@unchecked T?&rsquo; syntax is going away, use &rsquo;T!&#8217;</li>
+<li>&lsquo;@unchecked T?&rsquo; syntax is going away, use &rsquo;T!'</li>
 </ul>
 </li>
 <li>@inout
@@ -1775,7 +1775,7 @@ shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
   
 
 
-<time datetime="2014-06-06T13:33:52+08:00" pubdate data-updated="true">Jun 6<span>th</span>, 2014</time>
+<time datetime="2014-06-06T13:33:52+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -8386,11 +8386,11 @@ shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
   
   <div class="pagination">
     
-      <a class="prev" href="/blog/page/4/">&larr; Older</a>
+      <a class="prev" href="4">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
-    <a class="next" href="/blog/page/2/">Newer &rarr;</a>
+    <a class="next" href="2">Newer &rarr;</a>
     
   </div>
 </div>
@@ -8483,6 +8483,35 @@ shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -8502,7 +8531,7 @@ shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

@@ -86,7 +86,7 @@
   
 
 
-<time datetime="2014-06-20T23:48:51+08:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time>
+<time datetime="2014-06-20T23:48:51+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -102,8 +102,8 @@
 <p>You can use the postfix self expression to access a type as a value. For example, SomeClass.self returns SomeClass itself, not an instance of SomeClass. And SomeProtocol.self returns SomeProtocol itself, not an instance of a type that conforms to SomeProtocol at runtime.</p></blockquote>
 
 <ul>
-<li>metatype-type &ndash;> <code>type</code>.<strong>Type</strong> | <code>type</code>.<strong>Protocol</strong></li>
-<li>type-as-value &ndash;> <code>type</code>.self</li>
+<li>metatype-type -> <code>type</code>.<strong>Type</strong> | <code>type</code>.<strong>Protocol</strong></li>
+<li>type-as-value -> <code>type</code>.self</li>
 </ul>
 
 
@@ -349,7 +349,7 @@
   
 
 
-<time datetime="2014-06-20T23:48:51+08:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time>
+<time datetime="2014-06-20T23:48:51+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -480,6 +480,35 @@
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -500,7 +529,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

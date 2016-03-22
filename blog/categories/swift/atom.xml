@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Swift | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/swift/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2015-07-15T23:37:50+08:00</updated>
+  <updated>2016-03-22T23:28:16+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -18,102 +18,83 @@
     <link href="http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling/"/>
     <updated>2015-06-09T15:27:58+08:00</updated>
     <id>http://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling</id>
-    <content type="html"><![CDATA[<p>```
-protocol ErrorType {
-  var <em>domain: String { get }
-  var </em>code: Int { get }
-}</p>
+    <content type="html"><![CDATA[<pre><code>protocol ErrorType {
+  var _domain: String { get }
+  var _code: Int { get }
+}
 
-<p>@asmname(&ldquo;swift_bridgeErrorTypeToNSError&rdquo;) func _bridgeErrorTypeToNSError(e: ErrorType) &ndash;> AnyObject</p>
+@asmname("swift_bridgeErrorTypeToNSError") func _bridgeErrorTypeToNSError(e: ErrorType) -&gt; AnyObject
 
-<p>@asmname(&ldquo;swift_stdlib_getErrorCode&rdquo;) func _stdlib_getErrorCode<T : ErrorType>(x: UnsafePointer<T>) &ndash;> Int</p>
+@asmname("swift_stdlib_getErrorCode") func _stdlib_getErrorCode&lt;T : ErrorType&gt;(x: UnsafePointer&lt;T&gt;) -&gt; Int
 
-<p>@asmname(&ldquo;swift_stdlib_getErrorDomainNSString&rdquo;) func _stdlib_getErrorDomainNSString<T : ErrorType>(x: UnsafePointer<T>) &ndash;> AnyObject
-```</p>
+@asmname("swift_stdlib_getErrorDomainNSString") func _stdlib_getErrorDomainNSString&lt;T : ErrorType&gt;(x: UnsafePointer&lt;T&gt;) -&gt; AnyObject
+</code></pre>
 
 <h2>Foundation</h2>
 
-<p>```
-protocol <em>ObjectiveCBridgeableErrorType : ErrorType {
-  init?(</em>bridgedNSError: NSError)
-}</p>
+<pre><code>protocol _ObjectiveCBridgeableErrorType : ErrorType {
+  init?(_bridgedNSError: NSError)
+}
 
-<p>struct NSCocoaError : RawRepresentable, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, <em>_BridgedNSError, Hashable, Equatable {
+struct NSCocoaError : RawRepresentable, _BridgedNSError, _ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError, Hashable, Equatable {
   let rawValue: Int
   init(rawValue: Int)
-  static var </em>NSErrorDomain: String {</p>
-
-<pre><code>get {}
-</code></pre>
-
-<p>  }
+  static var _NSErrorDomain: String {
+    get {}
+  }
   typealias RawValue = Int
-}</p>
+}
 
-<p>infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
-infix func ==(a: <em>GenericObjCError, b: </em>GenericObjCError) &ndash;> Bool
-func ==<T : __BridgedNSError where T.RawValue : SignedIntegerType>(lhs: T, rhs: T) &ndash;> Bool</p>
 
-<p>@available(OSX 10.11, iOS 9.0, *)
-func resolveError(error: NSError?) throws</p>
+infix func ==(a: _GenericObjCError, b: _GenericObjCError) -&gt; Bool
+infix func ==(a: _GenericObjCError, b: _GenericObjCError) -&gt; Bool
+func ==&lt;T : __BridgedNSError where T.RawValue : SignedIntegerType&gt;(lhs: T, rhs: T) -&gt; Bool
 
-<p>enum _GenericObjCError : ErrorType {
+@available(OSX 10.11, iOS 9.0, *)
+func resolveError(error: NSError?) throws
+
+enum _GenericObjCError : ErrorType {
   case NilError
-  var hashValue: Int {</p>
-
-<pre><code>get {}
-</code></pre>
-
-<p>  }
-  var _domain: String {</p>
-
-<pre><code>get {}
-</code></pre>
-
-<p>  }
-  var _code: Int {</p>
-
-<pre><code>get {}
-</code></pre>
-
-<p>  }
-}</p>
-
-<p>@asmname(&ldquo;swift_stdlib_bridgeNSErrorToErrorType&rdquo;)
-func _stdlib_bridgeNSErrorToErrorType<T : _ObjectiveCBridgeableErrorType>(error: NSError, out: UnsafeMutablePointer<T>) &ndash;> Bool</p>
-
-<p>@asmname(&ldquo;swift_convertNSErrorToErrorType&rdquo;) func _convertNSErrorToErrorType(error: NSError?) &ndash;> ErrorType</p>
-
-<p>@objc enum NSURLError : Int, <em>BridgedNSError, </em>ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { &hellip; }</p>
-
-<p>protocol <strong>BridgedNSError : RawRepresentable {
-  static var <em>NSErrorDomain: String { get }
+  var hashValue: Int {
+    get {}
+  }
+  var _domain: String {
+    get {}
+  }
+  var _code: Int {
+    get {}
+  }
 }
-@asmname(&ldquo;swift_convertErrorTypeToNSError&rdquo;) func </em>convertErrorTypeToNSError(error: ErrorType) &ndash;> NSError
-func ~=(match: NSCocoaError, error: ErrorType) &ndash;> Bool
-protocol _BridgedNSError : </strong>BridgedNSError, <em>ObjectiveCBridgeableErrorType, Hashable {
-  static var </em>NSErrorDomain: String { get }
+
+@asmname("swift_stdlib_bridgeNSErrorToErrorType")
+func _stdlib_bridgeNSErrorToErrorType&lt;T : _ObjectiveCBridgeableErrorType&gt;(error: NSError, out: UnsafeMutablePointer&lt;T&gt;) -&gt; Bool
+
+@asmname("swift_convertNSErrorToErrorType") func _convertNSErrorToErrorType(error: NSError?) -&gt; ErrorType
+
+@objc enum NSURLError : Int, _BridgedNSError, _ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { ... }
+
+
+protocol __BridgedNSError : RawRepresentable {
+  static var _NSErrorDomain: String { get }
 }
-```</p>
+@asmname("swift_convertErrorTypeToNSError") func _convertErrorTypeToNSError(error: ErrorType) -&gt; NSError
+func ~=(match: NSCocoaError, error: ErrorType) -&gt; Bool
+protocol _BridgedNSError : __BridgedNSError, _ObjectiveCBridgeableErrorType, Hashable {
+  static var _NSErrorDomain: String { get }
+}
+</code></pre>
 
 <p>ErrorType 在 Swift 中表示。</p>
 
-<p>```
-extension NSError : ErrorType {
-  @objc dynamic var _domain: String {</p>
-
-<pre><code>@objc dynamic get {}
-</code></pre>
-
-<p>  }
-  @objc dynamic var _code: Int {</p>
-
-<pre><code>@objc dynamic get {}
-</code></pre>
-
-<p>  }
+<pre><code>extension NSError : ErrorType {
+  @objc dynamic var _domain: String {
+    @objc dynamic get {}
+  }
+  @objc dynamic var _code: Int {
+    @objc dynamic get {}
+  }
 }
-```</p>
+</code></pre>
 ]]></content>
   </entry>
   
@@ -126,28 +107,24 @@ extension NSError : ErrorType {
 
 <p>以 Alamofire 为例，</p>
 
-<p>```
-cd Path-To-Alamofire-Src-Dir
-mkdir -p 32 64</p>
+<pre><code>cd Path-To-Alamofire-Src-Dir
+mkdir -p 32 64
 
-<h1>创建动态链接库，及对应 Swift 模块，32/64版本</h1>
+# 创建动态链接库，及对应 Swift 模块，32/64版本
+xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphoneos) Alamofire.swift -target arm64-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
 
-<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphoneos) Alamofire.swift -target arm64-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib</p>
+mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64
 
-<p>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64</p>
+xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphoneos) Alamofire.swift -target armv7-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
 
-<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphoneos) Alamofire.swift -target armv7-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib</p>
+mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64
 
-<p>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64</p>
+# 创建 universal lib
+lipo -create ./{32,64}/libswiftAlamofire.dylib  -output ./libswiftAlamofire.dylib
 
-<h1>创建 universal lib</h1>
-
-<p>lipo -create ./{32,64}/libswiftAlamofire.dylib  -output ./libswiftAlamofire.dylib</p>
-
-<h1>创建模拟器用 lib</h1>
-
-<p>xcrun swiftc -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk iphonesimulator) Alamofire.swift -target i386-apple-ios7.1 -target-cpu yonah -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
-```</p>
+# 创建模拟器用 lib
+xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphonesimulator) Alamofire.swift -target i386-apple-ios7.1 -target-cpu yonah -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
+</code></pre>
 
 <p>其他相关 target
 <code>
@@ -165,20 +142,18 @@ mkdir -p 32 64</p>
 
 <p>以下是静态编译所需命令：</p>
 
-<p>```
-xcrun swift -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk macosx) SwiftyJSON.swift -c -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o</p>
+<pre><code>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) SwiftyJSON.swift -c -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o
 
-<p>ar rvs libswiftSwiftyJSON.a SwiftyJSON.o
-```</p>
+ar rvs libswiftSwiftyJSON.a SwiftyJSON.o
+</code></pre>
 
 <p>如何使用？</p>
 
 <p>将编译结果扔到：</p>
 
-<p><code>
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift
+<pre><code>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static
-</code></p>
+</code></pre>
 
 <p>下对应目录。</p>
 
@@ -235,11 +210,10 @@ xcrun swift -sdk $(xcrun &mdash;show-sdk-path &mdash;sdk macosx) SwiftyJSON.swif
 
 <p>去掉了 <code>NilType</code>，增加了 <code>NilLiteralConvertible</code>， <code>nil</code> 成为关键字。可以认为是 nil 常量。</p>
 
-<p><code>
-protocol NilLiteralConvertible {
+<pre><code>protocol NilLiteralConvertible {
   class func convertFromNilLiteral() -&gt; Self
 }
-</code></p>
+</code></pre>
 
 <p>除了 Optional 、上面所提到的指针类型外，<code>RawOptionSet</code> 也实现了该协议。</p>
 
@@ -249,10 +223,9 @@ protocol NilLiteralConvertible {
 
 <p>增加了以下方法：</p>
 
-<p><code>
-func makeUnique(inout buffer: ArrayBuffer&lt;T&gt;, e: T, index: Int)
+<pre><code>func makeUnique(inout buffer: ArrayBuffer&lt;T&gt;, e: T, index: Int)
 func sorted(isOrderedBefore: (T, T) -&gt; Bool) -&gt; Array&lt;T&gt;
-</code></p>
+</code></pre>
 
 <p>看起来 <code>Array</code> 对底层容器的引用有了更好的控制 <code>ArrayBufferType</code> 增加了判断方法 <code>func isMutableAndUniquelyReferenced() -&gt; Bool</code>。</p>
 
@@ -262,12 +235,11 @@ func sorted(isOrderedBefore: (T, T) -&gt; Bool) -&gt; Array&lt;T&gt;
 
 <h4>增加了 <code>_Pointer</code> protocol</h4>
 
-<p><code>scala
-protocol _Pointer {
+<pre><code class="scala">protocol _Pointer {
   var value: RawPointer { get }
   init(_ value: RawPointer)
 }
-</code></p>
+</code></pre>
 
 <p>表示一个类型可以对应到原生指针。</p>
 
@@ -367,7 +339,7 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
 
 <ul>
 <li><a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 &ndash; 静态链接库）</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a></li>
 </ul>
 
 ]]></content>
@@ -388,11 +360,10 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
 
 <p>Keywards as variable name.</p>
 
-<p><code>scala
-// escaped variable name
+<pre><code class="scala">// escaped variable name
 let `let` = 1000
 dump(`let`, name: "variable named let")
-</code></p>
+</code></pre>
 
 <h2><code>new</code> 关键字</h2>
 
@@ -400,9 +371,8 @@ dump(`let`, name: "variable named let")
 
 <p>快速初始化数组。</p>
 
-<p><code>scala
-let an_array_with_100_zero = new(Int)[100]
-</code></p>
+<pre><code class="scala">let an_array_with_100_zero = new(Int)[100]
+</code></pre>
 
 <h2>protocol type</h2>
 

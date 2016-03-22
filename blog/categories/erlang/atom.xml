@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Erlang | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/erlang/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2015-07-15T23:37:50+08:00</updated>
+  <updated>2016-03-22T23:28:16+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -25,18 +25,16 @@
 
 <p>反编译 beam, 对加密过或者 hipe 的似乎无效.</p>
 
-<p><code>erlang
-{ok,{_,[{abstract_code,{_,AC}}]}} = beam_lib:chunks(Beam,[abstract_code]).
+<pre><code class="erlang">{ok,{_,[{abstract_code,{_,AC}}]}} = beam_lib:chunks(Beam,[abstract_code]).
 io:fwrite("~s~n", [erl_prettypr:format(erl_syntax:form_list(AC))]).
-</code></p>
+</code></pre>
 
 <p>语句块, 比较少用到.</p>
 
-<p><code>erlang
-begin
+<pre><code class="erlang">begin
    ...
 end
-</code></p>
+</code></pre>
 
 <p>Parameterised Modules 参数化模块, 也是模拟 OO 的.
 很多 web 框架都这么用, 不过这货在 R16 被去掉了, 也是&hellip; 其实挺恶心.</p>
@@ -47,12 +45,11 @@ end
 <p>Stateful Modules, 用于替换 Parameterised Modules. 将模块和对应状态保存在 tuple 里,
 看起来像是调用某一对象的方法一样.</p>
 
-<p><code>
-X = {Mod, P1, P2, ..., Pn},
+<pre><code>X = {Mod, P1, P2, ..., Pn},
 X:Func(A1, A2, ..., An).
 %% 等价于
 Mod:Func(A1, A2, ..., An, X).
-</code></p>
+</code></pre>
 
 <p>所以 web 框架就转为使用这个特性了, 看起来很无害而且不反 FP.</p>
 ]]></content>

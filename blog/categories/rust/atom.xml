@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rust | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/rust/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2015-07-15T23:37:50+08:00</updated>
+  <updated>2016-03-22T23:28:16+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -20,9 +20,8 @@
     <id>http://andelf.github.io/blog/2014/05/15/rust-tips</id>
     <content type="html"><![CDATA[<h2>extern crate</h2>
 
-<p><code>rust
-extern crate sdl2 = "github.com/andelf/rust-sdl2";
-</code></p>
+<pre><code class="rust">extern crate sdl2 = "github.com/andelf/rust-sdl2";
+</code></pre>
 ]]></content>
   </entry>
   
@@ -36,29 +35,23 @@ extern crate sdl2 = "github.com/andelf/rust-sdl2";
 <pre><code>rustdoc -L. --plugin-path . --plugins dummy rust-sdl2/src/sdl2/lib.rs
 </code></pre>
 
-<p>```rust</p>
+<pre><code class="rust">#![crate_id = "dummy#0.1"]
+#![crate_type = "dylib"]
 
-<h1>![crate_id = &ldquo;dummy#0.1&rdquo;]</h1>
 
-<h1>![crate_type = &ldquo;dylib&rdquo;]</h1>
+extern crate rustdoc;
 
-<p>extern crate rustdoc;</p>
+use rustdoc::clean;
 
-<p>use rustdoc::clean;</p>
+use rustdoc::plugins::{PluginCallback, PluginResult, PluginJson};
 
-<p>use rustdoc::plugins::{PluginCallback, PluginResult, PluginJson};</p>
-
-<h1>[no_mangle]</h1>
-
-<p>pub fn rustdoc_plugin_entrypoint(c: clean::Crate) &ndash;> PluginResult {</p>
-
-<pre><code>println!("loading extension ok!");
-println!("crate =&gt; {}", c.name);
-(c, None)
+#[no_mangle]
+pub fn rustdoc_plugin_entrypoint(c: clean::Crate) -&gt; PluginResult {
+    println!("loading extension ok!");
+    println!("crate =&gt; {}", c.name);
+    (c, None)
+}
 </code></pre>
-
-<p>}
-```</p>
 ]]></content>
   </entry>
   
@@ -69,25 +62,21 @@ println!("crate =&gt; {}", c.name);
     <id>http://andelf.github.io/blog/2014/04/29/rust-tokenizer</id>
     <content type="html"><![CDATA[<p>A rust tokenizer from rust standard library.</p>
 
-<p>```rust
-extern crate syntax;</p>
+<pre><code class="rust">extern crate syntax;
 
-<p>use syntax::parse;
-use syntax::ast;</p>
+use syntax::parse;
+use syntax::ast;
 
-<p>fn main() {</p>
-
-<pre><code>let sess = parse::new_parse_sess();
-let cfg = Vec::new();
-let mut p = parse::new_parser_from_file(&amp;sess, cfg, &amp;Path::new("./mytest.rs"));
-while p.token != parse::token::EOF {
-    p.bump();
-    println!("debug =&gt; {}", parse::token::to_str(&amp;p.token));
+fn main() {
+    let sess = parse::new_parse_sess();
+    let cfg = Vec::new();
+    let mut p = parse::new_parser_from_file(&amp;sess, cfg, &amp;Path::new("./mytest.rs"));
+    while p.token != parse::token::EOF {
+        p.bump();
+        println!("debug =&gt; {}", parse::token::to_str(&amp;p.token));
+    }
 }
 </code></pre>
-
-<p>}
-```</p>
 
 <p>DONE!</p>
 
@@ -104,121 +93,100 @@ token list.</p>
     <content type="html"><![CDATA[<p>All rust ASTs are in <code>syntax::ast</code>. And extensions are in
 <code>syntax::ext</code>.</p>
 
-<p>```rust</p>
+<pre><code class="rust">#![feature(macro_registrar, managed_boxes)];
 
-<h1>![feature(macro_registrar, managed_boxes)];</h1>
+extern crate syntax;
 
-<p>extern crate syntax;</p>
-
-<p>use syntax::ast;
+use syntax::ast;
 use syntax::ast::Name;
-use syntax::ext::base::SyntaxExtension;</p>
+use syntax::ext::base::SyntaxExtension;
 
-<h1>[macro_registrar]</h1>
-
-<p>pub fn macro_registrar(register: |Name, SyntaxExtension|);
-```</p>
+#[macro_registrar]
+pub fn macro_registrar(register: |Name, SyntaxExtension|);
+</code></pre>
 
 <p>Managed boxes, the <code>@-pointer</code> is still used in rust compiler, so it
 is essential to enable this feature.</p>
 
 <p>where the doc says:</p>
 
-<p>```rust
-/// A name is a part of an identifier, representing a string or
-gensym. It&rsquo;s the result of interning.
+<pre><code class="rust">/// A name is a part of an identifier, representing a string or
+gensym. It's the result of interning.
 /// created by token::intern()
-type Name = u32;</p>
+type Name = u32;
 
-<p>/// An enum representing the different kinds of syntax extensions.
-pub enum SyntaxExtension {</p>
+/// An enum representing the different kinds of syntax extensions.
+pub enum SyntaxExtension {
+    /// A syntax extension that is attached to an item and creates new items
+    /// based upon it.
+    ///
+    /// `#[deriving(...)]` is an `ItemDecorator`.
+    ItemDecorator(ItemDecorator),
 
-<pre><code>/// A syntax extension that is attached to an item and creates new items
-/// based upon it.
-///
-/// `#[deriving(...)]` is an `ItemDecorator`.
-ItemDecorator(ItemDecorator),
+    /// A syntax extension that is attached to an item and modifies it
+    /// in-place.
+    ItemModifier(ItemModifier),
 
-/// A syntax extension that is attached to an item and modifies it
-/// in-place.
-ItemModifier(ItemModifier),
+    /// A normal, function-like syntax extension.
+    ///
+    /// `bytes!` is a `NormalTT`.
+    NormalTT(~MacroExpander:'static, Option&lt;Span&gt;),
 
-/// A normal, function-like syntax extension.
-///
-/// `bytes!` is a `NormalTT`.
-NormalTT(~MacroExpander:'static, Option&lt;Span&gt;),
+    /// A function-like syntax extension that has an extra ident before
+    /// the block.
+    ///
+    /// `macro_rules!` is an `IdentTT`.
+    IdentTT(~IdentMacroExpander:'static, Option&lt;Span&gt;),
+}
 
-/// A function-like syntax extension that has an extra ident before
-/// the block.
-///
-/// `macro_rules!` is an `IdentTT`.
-IdentTT(~IdentMacroExpander:'static, Option&lt;Span&gt;),
-</code></pre>
+type ItemDecorator = fn(&amp;mut ExtCtxt, Span, @MetaItem, @Item, |@Item|);
+type ItemModifier = fn(&amp;mut ExtCtxt, Span, @MetaItem, @Item) -&gt; @Item;
 
-<p>}</p>
+pub trait MacroExpander {
+    fn expand(&amp;self, ecx: &amp;mut ExtCtxt, span: Span, token_tree: &amp;[TokenTree]) -&gt; ~MacResult;
+}
 
-<p>type ItemDecorator = fn(&amp;mut ExtCtxt, Span, @MetaItem, @Item, |@Item|);
-type ItemModifier = fn(&amp;mut ExtCtxt, Span, @MetaItem, @Item) &ndash;> @Item;</p>
+pub trait IdentMacroExpander {
+    fn expand(&amp;self, cx: &amp;mut ExtCtxt, sp: Span, ident: Ident, token_tree: Vec&lt;TokenTree&gt;) -&gt; ~MacResult;
+}
 
-<p>pub trait MacroExpander {</p>
-
-<pre><code>fn expand(&amp;self, ecx: &amp;mut ExtCtxt, span: Span, token_tree: &amp;[TokenTree]) -&gt; ~MacResult;
-</code></pre>
-
-<p>}</p>
-
-<p>pub trait IdentMacroExpander {</p>
-
-<pre><code>fn expand(&amp;self, cx: &amp;mut ExtCtxt, sp: Span, ident: Ident, token_tree: Vec&lt;TokenTree&gt;) -&gt; ~MacResult;
-</code></pre>
-
-<p>}</p>
-
-<p>/// The result of a macro expansion. The return values of the various
+/// The result of a macro expansion. The return values of the various
 /// methods are spliced into the AST at the callsite of the macro (or
-/// just into the compiler&rsquo;s internal macro table, for <code>make_def</code>).
-pub trait MacResult {</p>
+/// just into the compiler's internal macro table, for `make_def`).
+pub trait MacResult {
+    /// Define a new macro.
+    fn make_def(&amp;self) -&gt; Option&lt;MacroDef&gt; {
+        None
+    }
+    /// Create an expression.
+    fn make_expr(&amp;self) -&gt; Option&lt;@ast::Expr&gt; {
+        None
+    }
+    /// Create zero or more items.
+    fn make_items(&amp;self) -&gt; Option&lt;SmallVector&lt;@ast::Item&gt;&gt; {
+        None
+    }
 
-<pre><code>/// Define a new macro.
-fn make_def(&amp;self) -&gt; Option&lt;MacroDef&gt; {
-    None
-}
-/// Create an expression.
-fn make_expr(&amp;self) -&gt; Option&lt;@ast::Expr&gt; {
-    None
-}
-/// Create zero or more items.
-fn make_items(&amp;self) -&gt; Option&lt;SmallVector&lt;@ast::Item&gt;&gt; {
-    None
-}
-
-/// Create a statement.
-///
-/// By default this attempts to create an expression statement,
-/// returning None if that fails.
-fn make_stmt(&amp;self) -&gt; Option&lt;@ast::Stmt&gt; {
-    self.make_expr()
-        .map(|e| @codemap::respan(e.span, ast::StmtExpr(e, ast::DUMMY_NODE_ID)))
+    /// Create a statement.
+    ///
+    /// By default this attempts to create an expression statement,
+    /// returning None if that fails.
+    fn make_stmt(&amp;self) -&gt; Option&lt;@ast::Stmt&gt; {
+        self.make_expr()
+            .map(|e| @codemap::respan(e.span, ast::StmtExpr(e, ast::DUMMY_NODE_ID)))
+    }
 }
 </code></pre>
-
-<p>}
-```</p>
 
 <h2>How to call</h2>
 
-<p>```rust
-use syntax::parse::token;</p>
+<pre><code class="rust">use syntax::parse::token;
 
-<h1>[macro_registrar]</h1>
-
-<p>pub fn registrar(register: |Name, SyntaxExtension|) {</p>
-
-<pre><code>register(token::intern("your_ext_name"), your_extension);
+#[macro_registrar]
+pub fn registrar(register: |Name, SyntaxExtension|) {
+    register(token::intern("your_ext_name"), your_extension);
+}
 </code></pre>
-
-<p>}
-```</p>
 
 <p>Note: <code>registrar</code> is not <code>register</code>.</p>
 
@@ -251,24 +219,17 @@ Normal <code>macro_name!(...)</code> call.</p>
 
 <p>Builtin sample in: <code>src/libsyntax/ext/tt/macro_rules.rs</code>, <code>pub fn add_new_extension</code>.</p>
 
-<p>```
-macro_name! ident(</p>
-
-<pre><code>whatever here...
+<pre><code>macro_name! ident(
+    whatever here...
+)
 </code></pre>
-
-<p>)
-```</p>
 
 <h2>Aux</h2>
 
 <p>The <code>quote</code> feature.</p>
 
-<p>```</p>
-
-<h1>![feature(quote, phase)]</h1>
-
-<p>```</p>
+<pre><code>#![feature(quote, phase)]
+</code></pre>
 
 <p>This enables <code>quote_expr!(ExtCtxt, [Code])</code>, <code>quote_tokens!</code>,
 <code>quote_item!</code>, <code>quote_pat!</code>, <code>quote_stmt!</code>, <code>quote_ty!</code> macros,

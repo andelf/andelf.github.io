@@ -102,7 +102,7 @@
   
 
 
-<time datetime="2014-04-29T02:26:48+08:00" pubdate data-updated="true">Apr 29<span>th</span>, 2014</time>
+<time datetime="2014-04-29T02:26:48+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -134,17 +134,17 @@
 </span><span class='line'><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">crate_type</span> <span class="o">=</span> <span class="s">&quot;dylib&quot;</span><span class="p">]</span>
 </span><span class='line'>
 </span><span class='line'>
-</span><span class='line'><span class="n">extern</span> <span class="n">crate</span> <span class="n">rustdoc</span><span class="p">;</span>
+</span><span class='line'><span class="k">extern</span> <span class="n">crate</span> <span class="n">rustdoc</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">use</span> <span class="n">rustdoc</span><span class="o">::</span><span class="n">clean</span><span class="p">;</span>
+</span><span class='line'><span class="kn">use</span> <span class="n">rustdoc</span><span class="o">::</span><span class="n">clean</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">use</span> <span class="n">rustdoc</span><span class="o">::</span><span class="n">plugins</span><span class="o">::</span><span class="p">{</span><span class="n">PluginCallback</span><span class="p">,</span> <span class="n">PluginResult</span><span class="p">,</span> <span class="n">PluginJson</span><span class="p">};</span>
+</span><span class='line'><span class="kn">use</span> <span class="n">rustdoc</span><span class="o">::</span><span class="n">plugins</span><span class="o">::</span><span class="p">{</span><span class="n">PluginCallback</span><span class="p">,</span> <span class="n">PluginResult</span><span class="p">,</span> <span class="n">PluginJson</span><span class="p">};</span>
 </span><span class='line'>
 </span><span class='line'><span class="cp">#[no_mangle]</span>
-</span><span class='line'><span class="n">pub</span> <span class="k">fn</span> <span class="n">rustdoc_plugin_entrypoint</span><span class="p">(</span><span class="n">c</span><span class="o">:</span> <span class="n">clean</span><span class="o">::</span><span class="n">Crate</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PluginResult</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;loading extension ok!&quot;</span><span class="p">);</span>
-</span><span class='line'>    <span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;crate =&gt; {}&quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">None</span><span class="p">)</span>
+</span><span class='line'><span class="k">pub</span> <span class="k">fn</span> <span class="n">rustdoc_plugin_entrypoint</span><span class="p">(</span><span class="n">c</span><span class="o">:</span> <span class="n">clean</span><span class="o">::</span><span class="n">Crate</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PluginResult</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;loading extension ok!&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;crate =&gt; {}&quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">None</span><span class="p">)</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -172,7 +172,7 @@
   
 
 
-<time datetime="2014-04-29T02:26:48+08:00" pubdate data-updated="true">Apr 29<span>th</span>, 2014</time>
+<time datetime="2014-04-29T02:26:48+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -303,6 +303,35 @@
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -323,7 +352,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

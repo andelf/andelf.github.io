@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Swift-interop | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/swift-interop/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2015-07-15T23:37:50+08:00</updated>
+  <updated>2016-03-22T23:28:16+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -60,11 +60,10 @@
 
 <p>结构体定义支持：</p>
 
-<p><code>c
-typedef struct Name {...} Name;
+<pre><code class="c">typedef struct Name {...} Name;
 typedef struct Name_t {...} Name;
 struct Name { ... };
-</code></p>
+</code></pre>
 
 <p>其中无法处理的结构体、函数类型、 varargs 定义不导出。预计以后版本会修复。带 bit field 的结构体也无法识别。</p>
 
@@ -77,30 +76,30 @@ struct Name { ... };
 <table>
 <thead>
 <tr>
-<th align="center">类型 </th>
-<th align="center"> 对应为</th>
+<th style="text-align:center;">类型 </th>
+<th style="text-align:center;"> 对应为</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center"><code>void *</code> </td>
-<td align="center"> <code>CMutableVoidPointer</code></td>
+<td style="text-align:center;"><code>void *</code> </td>
+<td style="text-align:center;"> <code>CMutableVoidPointer</code></td>
 </tr>
 <tr>
-<td align="center"><code>Type *</code>、<code>Type[]</code> </td>
-<td align="center"> <code>CMutablePointer&lt;Type&gt;</code></td>
+<td style="text-align:center;"><code>Type *</code>、<code>Type[]</code> </td>
+<td style="text-align:center;"> <code>CMutablePointer&lt;Type&gt;</code></td>
 </tr>
 <tr>
-<td align="center"><code>const char *</code> </td>
-<td align="center"> <code>CString</code></td>
+<td style="text-align:center;"><code>const char *</code> </td>
+<td style="text-align:center;"> <code>CString</code></td>
 </tr>
 <tr>
-<td align="center"><code>const Type *</code> </td>
-<td align="center"> <code>CConstPointer&lt;Type&gt;</code></td>
+<td style="text-align:center;"><code>const Type *</code> </td>
+<td style="text-align:center;"> <code>CConstPointer&lt;Type&gt;</code></td>
 </tr>
 <tr>
-<td align="center"><code>const void *</code> </td>
-<td align="center"> <code>CConstVoidPointer</code></td>
+<td style="text-align:center;"><code>const void *</code> </td>
+<td style="text-align:center;"> <code>CConstVoidPointer</code></td>
 </tr>
 </tbody>
 </table>
@@ -111,26 +110,26 @@ struct Name { ... };
 <table>
 <thead>
 <tr>
-<th align="center">类型 </th>
-<th align="center"> 对应为</th>
+<th style="text-align:center;">类型 </th>
+<th style="text-align:center;"> 对应为</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center"><code>const char *</code> </td>
-<td align="center"> <code>CString</code></td>
+<td style="text-align:center;"><code>const char *</code> </td>
+<td style="text-align:center;"> <code>CString</code></td>
 </tr>
 <tr>
-<td align="center"><code>Type *</code>、<code>const Type *</code> </td>
-<td align="center"> <code>UnsafePointer&lt;Type&gt;</code></td>
+<td style="text-align:center;"><code>Type *</code>、<code>const Type *</code> </td>
+<td style="text-align:center;"> <code>UnsafePointer&lt;Type&gt;</code></td>
 </tr>
 <tr>
-<td align="center"><code>void *</code>、<code>const void *</code> </td>
-<td align="center"> <code>COpaquePointer</code></td>
+<td style="text-align:center;"><code>void *</code>、<code>const void *</code> </td>
+<td style="text-align:center;"> <code>COpaquePointer</code></td>
 </tr>
 <tr>
-<td align="center">无法识别的结构指针  </td>
-<td align="center"> <code>COpaquePointer</code></td>
+<td style="text-align:center;">无法识别的结构指针  </td>
+<td style="text-align:center;"> <code>COpaquePointer</code></td>
 </tr>
 </tbody>
 </table>
@@ -166,12 +165,11 @@ struct Name { ... };
 
 <p>当一个函数的声明是由 Bridge Header 或者 LLVM Module 隐式转换而来，且用到了这四个指针类型，那么代码编译过程中类型转换规则、隐式转换调用等规则依然有效。只不过在代码最生成一步，会插入以下私有函数调用之一：</p>
 
-<p><code>scala
-@transparent func _convertCMutablePointerToUnsafePointer&lt;T&gt;(p: CMutablePointer&lt;T&gt;) -&gt; UnsafePointer&lt;T&gt;
+<pre><code class="scala">@transparent func _convertCMutablePointerToUnsafePointer&lt;T&gt;(p: CMutablePointer&lt;T&gt;) -&gt; UnsafePointer&lt;T&gt;
 @transparent func _convertCConstPointerToUnsafePointer&lt;T&gt;(p: CConstPointer&lt;T&gt;) -&gt; UnsafePointer&lt;T&gt;
 @transparent func _convertCMutableVoidPointerToCOpaquePointer(p: CMutableVoidPointer) -&gt; COpaquePointer
 @transparent func _convertCConstVoidPointerToCOpaquePointer(p: CConstVoidPointer) -&gt; COpaquePointer
-</code></p>
+</code></pre>
 
 <p>这个过程是背后隐藏的。然后将转换的结果传参给对应的 C/ObjC 函数。实现了指针类型字长正确、一致。</p>
 
@@ -237,7 +235,7 @@ struct Name { ... };
 
 <p>不透明指针。之前我以为它很少会用到，不过现在看来想错了，虽然类型不安全，但是很多场合只能用它。它是直接对应 <code>RawPointer</code> 的。字长相等。</p>
 
-<blockquote><p>In computer programming, an opaque pointer is a special case of an opaque data type, a datatype declared to be a pointer to a record or data structure of some unspecified type. &ndash; 来自 Wikipedia</p></blockquote>
+<blockquote><p>In computer programming, an opaque pointer is a special case of an opaque data type, a datatype declared to be a pointer to a record or data structure of some unspecified type. - 来自 Wikipedia</p></blockquote>
 
 <p>几乎没有任何操作方法，不带类型，主要用于 Bridging Header 中表示 C 中的复杂结构指针</p>
 
@@ -328,54 +326,43 @@ struct Name { ... };
 
 <p>用于处理 C 语言中的可变参数 valist 函数。</p>
 
-<p><code>scala
-protocol CVarArg {
+<pre><code class="scala">protocol CVarArg {
   func encode() -&gt; Word[]
 }
-</code></p>
+</code></pre>
 
 <p>表示该类型可以作为可变参数，相当多的类型都实现了这个。</p>
 
-<p>```scala
-struct CVaListPointer {</p>
-
-<pre><code>var value: UnsafePointer&lt;Void&gt;
-init(fromUnsafePointer from: UnsafePointer&lt;Void&gt;)
-@conversion func __conversion() -&gt; CMutableVoidPointer
+<pre><code class="scala">struct CVaListPointer {
+    var value: UnsafePointer&lt;Void&gt;
+    init(fromUnsafePointer from: UnsafePointer&lt;Void&gt;)
+    @conversion func __conversion() -&gt; CMutableVoidPointer
+}
 </code></pre>
-
-<p>}
-```</p>
 
 <p>对应于 C，直接给 C 函数传递，声明、定义时使用。</p>
 
-<p>```scala
-class VaListBuilder {</p>
-
-<pre><code>init()
-func append(arg: CVarArg)
-func va_list() -&gt; CVaListPointer
+<pre><code class="scala">class VaListBuilder {
+    init()
+    func append(arg: CVarArg)
+    func va_list() -&gt; CVaListPointer
+}
 </code></pre>
-
-<p>}
-```</p>
 
 <p>工具类，方便地创建 <code>CVaListPointer</code>。</p>
 
 <p>还有一些工具函数：</p>
 
-<p><code>scala
-func getVaList(args: CVarArg[]) -&gt; CVaListPointer
+<pre><code class="scala">func getVaList(args: CVarArg[]) -&gt; CVaListPointer
 func withVaList&lt;R&gt;(args: CVarArg[], f: (CVaListPointer) -&gt; R) -&gt; R
 func withVaList&lt;R&gt;(builder: VaListBuilder, f: (CVaListPointer) -&gt; R) -&gt; R
-</code></p>
+</code></pre>
 
 <p>非常方便。</p>
 
 <h3>UnsafeArray<T></h3>
 
-<p><code>scala
-struct UnsafeArray&lt;T&gt; : Collection, Generator {
+<pre><code class="scala">struct UnsafeArray&lt;T&gt; : Collection, Generator {
   var startIndex: Int { get }
   var endIndex: Int { get }
   subscript (i: Int) -&gt; T { get }
@@ -383,14 +370,13 @@ struct UnsafeArray&lt;T&gt; : Collection, Generator {
   func next() -&gt; T?
   func generate() -&gt; UnsafeArray&lt;T&gt;
 }
-</code></p>
+</code></pre>
 
 <p>处理 C 数组的工具类型，可以直接 for-in 处理。当然，只读的，略可惜。</p>
 
 <h3>Unmanaged<T></h3>
 
-<p><code>scala
-struct Unmanaged&lt;T&gt; {
+<pre><code class="scala">struct Unmanaged&lt;T&gt; {
   var _value: T
   init(_private: T)
   func fromOpaque(value: COpaquePointer) -&gt; Unmanaged&lt;T&gt;
@@ -403,7 +389,7 @@ struct Unmanaged&lt;T&gt; {
   func release()
   func autorelease() -&gt; Unmanaged&lt;T&gt;
 }
-</code></p>
+</code></pre>
 
 <p>顾名思义，手动管理 RC 的。避免 Swift 插入的 ARC 代码影响程序逻辑。</p>
 
@@ -429,9 +415,8 @@ struct Unmanaged&lt;T&gt; {
 
 <p>转为 <code>CVaListPointer</code>。手动重声明更好。这里举 <code>Darwin</code> 模块的例子说。</p>
 
-<p><code>
-func vprintf(_: CString, _: CVaListPointer) -&gt; CInt
-</code></p>
+<pre><code>func vprintf(_: CString, _: CVaListPointer) -&gt; CInt
+</code></pre>
 
 <h2>从 C 调用 Swift</h2>
 
@@ -453,22 +438,21 @@ func vprintf(_: CString, _: CVaListPointer) -&gt; CInt
 
 <p>Bridging Header 只写入 <code>#include&lt;curl/curl.h&gt;</code> 即可。</p>
 
-<p>```scala
-@asmname(&ldquo;curl_easy_setopt&rdquo;) func curl_easy_setopt(curl: COpaquePointer, option: CURLoption, param: CString) &ndash;> CURLcode
-@asmname(&ldquo;curl_easy_setopt&rdquo;) func curl_easy_setopt(curl: COpaquePointer, option: CURLoption, param: CBool) &ndash;> CURLcode</p>
+<pre><code class="scala">@asmname("curl_easy_setopt") func curl_easy_setopt(curl: COpaquePointer, option: CURLoption, param: CString) -&gt; CURLcode
+@asmname("curl_easy_setopt") func curl_easy_setopt(curl: COpaquePointer, option: CURLoption, param: CBool) -&gt; CURLcode
 
-<p>let handle = curl_easy_init()</p>
+let handle = curl_easy_init()
 
-<p>// this should be a const c string. curl_easy_perform() will use this.
-let url: CString = &ldquo;<a href="http://www.baidu.com">http://www.baidu.com</a>&rdquo;</p>
+// this should be a const c string. curl_easy_perform() will use this.
+let url: CString = "http://www.baidu.com"
 
-<p>curl_easy_setopt(handle, CURLOPT_URL, url)
-curl_easy_setopt(handle, CURLOPT_VERBOSE, true)</p>
+curl_easy_setopt(handle, CURLOPT_URL, url)
+curl_easy_setopt(handle, CURLOPT_VERBOSE, true)
 
-<p>let ret = curl_easy_perform(handle)
+let ret = curl_easy_perform(handle)
 let error = curl_easy_strerror(ret)
-println(&ldquo;error = (error)&rdquo;)
-```</p>
+println("error = \(error)")
+</code></pre>
 
 <p>值得注意的是其中对单个函数的多态声明， <code>curl_easy_setopt</code> 实际上第三个参数是 <code>void *</code>。</p>
 
@@ -553,7 +537,7 @@ println(&ldquo;error = (error)&rdquo;)
 
 <p>我们直接创建一个 Swift 项目，然后 New File，添加一个 <code>.c</code> 文件。</p>
 
-<p>这时候 Xcode 会弹出对话框询问是否配置 Bridge Header，确认就可以了。也可以手动添加 Bridge Header，位置在项目的 Build Settings 中的 Swift Compiler &ndash; Code Generation 子项里。指向你的 Bridge Header 文件名就可以了。</p>
+<p>这时候 Xcode 会弹出对话框询问是否配置 Bridge Header，确认就可以了。也可以手动添加 Bridge Header，位置在项目的 Build Settings 中的 Swift Compiler - Code Generation 子项里。指向你的 Bridge Header 文件名就可以了。</p>
 
 <p>一般这个文件是 <code>ProjectName-Bridging-Header.h</code>。情况基本和与 Objective-C 混编没区别。</p>
 
@@ -571,14 +555,12 @@ println(&ldquo;error = (error)&rdquo;)
 
 <p>那就是 <code>@asmname("func_name_in_c")</code>。用于函数声明前。使用方法：</p>
 
-<p><code>c
-int println() { .... }
-</code></p>
+<pre><code class="c">int println() { .... }
+</code></pre>
 
-<p><code>
-@asmname("println") func c_println() -&gt; CInt // 声明，不需要 {} 函数体
+<pre><code>@asmname("println") func c_println() -&gt; CInt // 声明，不需要 {} 函数体
 c_println() // 调用
-</code></p>
+</code></pre>
 
 <p>也就是 C 中的同名函数，我们可以给赋予一个别名，然后正常调用。这么一看就基本没有问题了。至于类型问题，待会说，详细说。</p>
 
@@ -644,8 +626,7 @@ c_println() // 调用
 
 <p>CString 和 String 的转换通过一个 extension 实现，也是很方便。</p>
 
-<p><code>scala
-extension String {
+<pre><code class="scala">extension String {
   static func fromCString(cs: CString) -&gt; String
   static func fromCString(up: UnsafePointer&lt;CChar&gt;) -&gt; String
 }
@@ -654,24 +635,22 @@ extension String {
   func withCString&lt;Result&gt;(f: (CString) -&gt; Result) -&gt; Result
   func withCString&lt;Result&gt;(f: (UnsafePointer&lt;CChar&gt;) -&gt; Result) -&gt; Result
 }
-</code></p>
+</code></pre>
 
 <p>在我们的 Bridging Header 头文件中 <code>char *</code> 的类型会对应为 <code>UnsafePointer&lt;CChar&gt;</code>，而实际上 <code>CString</code> 更适合。所以在 Swift 代码中，往往我们要再次申明下这个函数。或者用一个函数封装下，转换成我们需要的类型。</p>
 
 <p>例如，假设在 Bridging Header 中我们声明了 <code>char * foo();</code>，那么，在 Swift 代码中我们可以用上面提到的方法：</p>
 
-<p><code>
-@asmname("foo") func c_foo() -&gt; CString
+<pre><code>@asmname("foo") func c_foo() -&gt; CString
 // 注意这里没有 {}，只是声明
 let ret = c_foo()
-</code></p>
+</code></pre>
 
 <p>当然也可以直接调用原始函数然后类型转换：</p>
 
-<p><code>scala
-let raw = foo() // UnsafePointer&lt;Int8&gt; &lt;=&gt; UnsafePointer&lt;CChar&gt;
+<pre><code class="scala">let raw = foo() // UnsafePointer&lt;Int8&gt; &lt;=&gt; UnsafePointer&lt;CChar&gt;
 let ret = String.fromCString(ret)
-</code></p>
+</code></pre>
 
 <p>如果这里要转成 CString 就略复杂了，因为 CString 构造函数接受的参数是 <code>UnsafePointer&lt;UInt8&gt;</code>， 而 <code>CChar</code> 是 <code>Int8</code> 的别名，所以还牵扯到 Genrics 类型转换，不够方便。</p>
 
@@ -679,11 +658,10 @@ let ret = String.fromCString(ret)
 
 <p>例如获得环境变量字符串：</p>
 
-<p><code>
-let key = "PATH"
+<pre><code>let key = "PATH"
 // 这里相当于把 UnsafePointer&lt;CChar&gt; 转为了 UnsafePointer&lt;UInt8&gt; 然后到 CString
 let path_str: CString = reinterpretCast(key.withCString(getenv))
-</code></p>
+</code></pre>
 
 <h3>Unmanaged</h3>
 
@@ -705,38 +683,31 @@ let path_str: CString = reinterpretCast(key.withCString(getenv))
 
 <p>Xcode 自带了个工具， 可以查看这些 mangled name 到底是什么东西：</p>
 
-<p><code>
-xcrun swift-demangle __TFV5hello4Rectg9subscriptFOS_9DirectionSi
+<pre><code>xcrun swift-demangle __TFV5hello4Rectg9subscriptFOS_9DirectionSi
 _TFV5hello4Rectg9subscriptFOS_9DirectionSi ---&gt; hello.Rect.subscript.getter (hello.Direction) -&gt; Swift.Int
-</code></p>
+</code></pre>
 
 <p>当我们从 C 调用的时候，应该规避这样的名字。还记得前面的 <code>@asmname</code> 么？没错，它可以用于指定 Swift 函数的符号名，我猜测应该有指定 mangled name 的作用，但是不是特别确定。</p>
 
 <p>这里随便指定个例子先。</p>
 
-<p>```scala
-@asmname(&ldquo;say_hello&rdquo;) func say_hello() &ndash;> Double {</p>
-
-<pre><code>println("This is say_hello() in swift")
-return 3.14
+<pre><code class="scala">@asmname("say_hello") func say_hello() -&gt; Double {
+    println("This is say_hello() in swift")
+    return 3.14
+}
 </code></pre>
-
-<p>}
-```</p>
 
 <p>然后在 .c 文件中：</p>
 
-<p>```scala</p>
+<pre><code class="scala">#include &lt;ProjectName-Swift.h&gt;
 
-<h1>include &lt;ProjectName-Swift.h></h1>
+extern double say_hello();
 
-<p>extern double say_hello();</p>
-
-<p>int some_func() {
+int some_func() {
   say_hello(); // or capture its value and process it
   return 0
 }
-```</p>
+</code></pre>
 
 <p><del>当然这里的 extern 一行是可选的，因为实际上声明会存在于 ProjectName-Swift.h 中，只是为了避免首次编译警告而已（第二次以后的编译，其实这个 Header 已经被缓存起来了，这个牵扯到 Xcode 的编译过程）。</del> 错了。</p>
 
@@ -842,14 +813,13 @@ return 3.14
 
 <p>Conditional 多了个判断函数，也就是说这个类型可能是并没有对等起来的，什么情况下用呢，目前猜测应该是带泛型参数的类型中用到，有的泛型可以对应，有的不可以。</p>
 
-<p><code>scala
-protocol _BridgedToObjectiveC {
+<pre><code class="scala">protocol _BridgedToObjectiveC {
   typealias ObjectiveCType
   class func getObjectiveCType() -&gt; Any.Type
   func bridgeToObjectiveC() -&gt; ObjectiveCType
   class func bridgeFromObjectiveC(source: ObjectiveCType) -&gt; Self?
 }
-</code></p>
+</code></pre>
 
 <h3><code>Reflectable</code> <code>Mirror</code></h3>
 
@@ -872,24 +842,17 @@ protocol _BridgedToObjectiveC {
 
 <p>例如</p>
 
-<p>```
-@objc(NSNumber) class NSNumber : NSValue {</p>
-
-<pre><code>@objc(init) convenience init()
-@objc var integerValue: Int {
-    @objc(integerValue) get {}
+<pre><code>@objc(NSNumber) class NSNumber : NSValue {
+    @objc(init) convenience init()
+    @objc var integerValue: Int {
+        @objc(integerValue) get {}
+    }
+    ...
 }
-...
+@objc(NSCopying) protocol NSCopying {
+    @objc(copyWithZone:) func copyWithZone(zone: NSZone) -&gt; AnyObject!
+}
 </code></pre>
-
-<p>}
-@objc(NSCopying) protocol NSCopying {</p>
-
-<pre><code>@objc(copyWithZone:) func copyWithZone(zone: NSZone) -&gt; AnyObject!
-</code></pre>
-
-<p>}
-```</p>
 
 <p>所有可能为 <code>nil</code> 的指针类型几乎都被转为 <code>Type!</code>，由于 <code>ImplicitlyUnwrappedOptional</code> 的特性，所以几乎用起来一样。</p>
 
@@ -913,11 +876,10 @@ protocol _BridgedToObjectiveC {
 
 <p><code>String</code> 实现了 <code>_BridgedToObjectiveC</code> 对应于 <code>NSString</code>。</p>
 
-<p><code>scala
-extension NSString {
+<pre><code class="scala">extension NSString {
   @conversion func __conversion() -&gt; String
 }
-</code></p>
+</code></pre>
 
 <p>这就是为什么官方文档说 Swift 中 <code>String</code> 和 Objective-C 基本是相同操作的。其实都是背后的隐式类型转换。</p>
 
@@ -948,7 +910,7 @@ extension NSString {
 
 <p>一般说来，你在 Swift 项目新建 Objective-C 类的时候，直接弹出是否创建 Bridge Header 的窗口，点 YES 就是了，这时候一般多出来个 <code>ProjectName-Bridging-Header.h</code> 。</p>
 
-<p>如果没有自动的话，这个配置在项目的 Build Settings 中的 Swift Compiler &ndash; Code Generation 子项里。</p>
+<p>如果没有自动的话，这个配置在项目的 Build Settings 中的 Swift Compiler - Code Generation 子项里。</p>
 
 <p>说到底，其实是调用编译命令的 <code>-import-objc-header</code> 参数，后面加上这个 Header 文件。</p>
 
@@ -966,8 +928,7 @@ extension NSString {
 
 <p>头文件内容大概是会包含一堆宏定义。然后是 Swift 的类定义等。这里可以看到 Swift 的 mangling 名字。</p>
 
-<p><code>scala
-SWIFT_CLASS("_TtC5Hello11AppDelegate")
+<pre><code class="scala">SWIFT_CLASS("_TtC5Hello11AppDelegate")
 @interface AppDelegate : UIResponder &lt;UIApplicationDelegate&gt;
 @property (nonatomic) UIWindow * window;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions;
@@ -978,7 +939,7 @@ SWIFT_CLASS("_TtC5Hello11AppDelegate")
 - (void)applicationWillTerminate:(UIApplication *)application;
 - (instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
-</code></p>
+</code></pre>
 
 <h1>第四部分：一个 Swift 和 Objective-C 混合项目的编译过程</h1>
 

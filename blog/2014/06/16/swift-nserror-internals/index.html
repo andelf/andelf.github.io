@@ -86,7 +86,7 @@
   
 
 
-<time datetime="2014-06-16T14:45:15+08:00" pubdate data-updated="true">Jun 16<span>th</span>, 2014</time>
+<time datetime="2014-06-16T14:45:15+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -364,7 +364,7 @@
 
 <h2>总结</h2>
 
-<p>这三个 static 函数合起来组成了整体功能。我觉得可以把这个功能叫做“引用的隐式类型转换”或者&#8221;隐式引用类型转换&#8221;。</p>
+<p>这三个 static 函数合起来组成了整体功能。我觉得可以把这个功能叫做“引用的隐式类型转换”或者"隐式引用类型转换"。</p>
 
 <p>当然，它的强大之处在于用隐藏了二重指针的细节，同时这个特性也可以有其他作用。比如。。。（我没想好）</p>
 
@@ -398,7 +398,7 @@
   
 
 
-<time datetime="2014-06-16T14:45:15+08:00" pubdate data-updated="true">Jun 16<span>th</span>, 2014</time>
+<time datetime="2014-06-16T14:45:15+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -529,6 +529,35 @@
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -549,7 +578,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

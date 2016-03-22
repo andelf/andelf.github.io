@@ -101,7 +101,7 @@ use syntax::ast; fn main() { &hellip;">
   
 
 
-<time datetime="2014-04-29T01:06:38+08:00" pubdate data-updated="true">Apr 29<span>th</span>, 2014</time>
+<time datetime="2014-04-29T01:06:38+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -124,18 +124,18 @@ use syntax::ast; fn main() { &hellip;">
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="n">extern</span> <span class="n">crate</span> <span class="k">syntax</span><span class="p">;</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">extern</span> <span class="n">crate</span> <span class="n">syntax</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">parse</span><span class="p">;</span>
-</span><span class='line'><span class="k">use</span> <span class="k">syntax</span><span class="o">::</span><span class="n">ast</span><span class="p">;</span>
+</span><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">parse</span><span class="p">;</span>
+</span><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">ast</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">let</span> <span class="n">sess</span> <span class="o">=</span> <span class="n">parse</span><span class="o">::</span><span class="n">new_parse_sess</span><span class="p">();</span>
-</span><span class='line'>    <span class="k">let</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">Vec</span><span class="o">::</span><span class="n">new</span><span class="p">();</span>
-</span><span class='line'>    <span class="k">let</span> <span class="k">mut</span> <span class="n">p</span> <span class="o">=</span> <span class="n">parse</span><span class="o">::</span><span class="n">new_parser_from_file</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sess</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Path</span><span class="o">::</span><span class="n">new</span><span class="p">(</span><span class="s">&quot;./mytest.rs&quot;</span><span class="p">));</span>
-</span><span class='line'>    <span class="n">while</span> <span class="n">p</span><span class="p">.</span><span class="n">token</span> <span class="o">!=</span> <span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="o">::</span><span class="n">EOF</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">let</span> <span class="n">sess</span> <span class="o">=</span> <span class="n">parse</span><span class="o">::</span><span class="n">new_parse_sess</span><span class="p">();</span>
+</span><span class='line'>    <span class="kd">let</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">Vec</span><span class="o">::</span><span class="n">new</span><span class="p">();</span>
+</span><span class='line'>    <span class="kd">let</span> <span class="k">mut</span> <span class="n">p</span> <span class="o">=</span> <span class="n">parse</span><span class="o">::</span><span class="n">new_parser_from_file</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sess</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="o">&amp;</span><span class="nb">Path</span><span class="o">::</span><span class="n">new</span><span class="p">(</span><span class="s">&quot;./mytest.rs&quot;</span><span class="p">));</span>
+</span><span class='line'>    <span class="k">while</span> <span class="n">p</span><span class="p">.</span><span class="n">token</span> <span class="o">!=</span> <span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="o">::</span><span class="n">EOF</span> <span class="p">{</span>
 </span><span class='line'>        <span class="n">p</span><span class="p">.</span><span class="n">bump</span><span class="p">();</span>
-</span><span class='line'>        <span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;debug =&gt; {}&quot;</span><span class="p">,</span> <span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="o">::</span><span class="n">to_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">.</span><span class="n">token</span><span class="p">));</span>
+</span><span class='line'>        <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;debug =&gt; {}&quot;</span><span class="p">,</span> <span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="o">::</span><span class="n">to_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">.</span><span class="n">token</span><span class="p">));</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -167,7 +167,7 @@ token list.</p>
   
 
 
-<time datetime="2014-04-29T01:06:38+08:00" pubdate data-updated="true">Apr 29<span>th</span>, 2014</time>
+<time datetime="2014-04-29T01:06:38+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -298,6 +298,35 @@ token list.</p>
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -318,7 +347,7 @@ token list.</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

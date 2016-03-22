@@ -9,7 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo 本文的发现基于个人研究。请尊重原创。 引子 你之所以认为 Swift 最像 Scala, 那是因为你还没学过 Rust. &mdash;&mdash; 猫·仁波切 Swift 中模块是什么？当写下 Swift &hellip;">
+  <meta name="description" content="声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo 本文的发现基于个人研究。请尊重原创。 引子 你之所以认为 Swift 最像 Scala, 那是因为你还没学过 Rust. &mdash;- 猫·仁波切 Swift 中模块是什么？当写下 Swift 中一句 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -86,7 +86,7 @@
   
 
 
-<time datetime="2014-06-19T15:14:31+08:00" pubdate data-updated="true">Jun 19<span>th</span>, 2014</time>
+<time datetime="2014-06-19T15:14:31+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -99,7 +99,7 @@
 
 <h2>引子</h2>
 
-<blockquote><p>你之所以认为 Swift 最像 Scala, 那是因为你还没学过 Rust. &mdash;&mdash; 猫·仁波切</p></blockquote>
+<blockquote><p>你之所以认为 Swift 最像 Scala, 那是因为你还没学过 Rust. &mdash;- 猫·仁波切</p></blockquote>
 
 <p>Swift 中模块是什么？当写下 Swift 中一句 <code>import Cocoa</code> 的时候到底整了个什么玩意？官方 ibook 很含糊只是提了半页不到。</p>
 
@@ -191,7 +191,7 @@
 然后就可以在 Swift 代码里直接通过 <code>import curl</code> 导入所有的接口函数、结构体、常量等，(实测，发现 <code>curl_easy_setopt</code>
 无法自动导入，看起来是声明语法太复杂导致）。甚至可以直接从 swift repl 调用，体验脚本语言解释器般的快感（因为我们已经指定了链接到 curl 库）。</p>
 
-<p>Xcode 选项位于 Build Settings 下面的 Swift Compiler &ndash; Search Paths 。添加路劲即可。</p>
+<p>Xcode 选项位于 Build Settings 下面的 Swift Compiler - Search Paths 。添加路劲即可。</p>
 
 <p>再举个复杂点的 <code>SDL2.framework</code> 的例子，看看如何实现树形的模块结构，这个需要把 <code>module.map</code> 放到 <code>.framework</code> 目录里</p>
 
@@ -245,7 +245,7 @@
 
 <p>另外 Swift 的 <code>-module-cache-path</code> 参数可以控制这类模块预编译头的存放位置（ .pcm 文件： pre compiled module）。</p>
 
-<p>Xcode 项目的 Build Settings ， Apple LLVM 6.0 &ndash; Language &ndash; Modules 有项目对 Module 支持的相关选项，默认是打开的。</p>
+<p>Xcode 项目的 Build Settings ， Apple LLVM 6.0 - Language - Modules 有项目对 Module 支持的相关选项，默认是打开的。</p>
 
 <h2>第二部分 Swift 模块</h2>
 
@@ -413,11 +413,11 @@
 <hr/>
 <ol>
 <li id="fn:1">
-<p>Modules &ndash; Doug Gregor, Apple, 2012 LLVM DevMeeting <a href="http://llvm.org/devmtg/2012-11/Gregor-Modules.pdf">PDF</a> <a href="http://llvm.org/devmtg/2012-11/videos/Gregor-Modules.mp4">Video</a><a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+<p>Modules - Doug Gregor, Apple, 2012 LLVM DevMeeting <a href="http://llvm.org/devmtg/2012-11/Gregor-Modules.pdf">PDF</a> <a href="http://llvm.org/devmtg/2012-11/videos/Gregor-Modules.mp4">Video</a><a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
 <li id="fn:2">
 <p><a href="http://www.csdn.net/article/2012-11-28/2812274-module-replace-C-based-languages-headers">为什么应该用模块取代C/C++中的头文件？</a><a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
 <li id="fn:3">
-<p><a href="http://clang.llvm.org/docs/Modules.html">Modules &ndash; Clang 3.5 documentation</a><a href="#fnref:3" rev="footnote">&#8617;</a></p></li>
+<p><a href="http://clang.llvm.org/docs/Modules.html">Modules - Clang 3.5 documentation</a><a href="#fnref:3" rev="footnote">&#8617;</a></p></li>
 <li id="fn:4">
 <p><a href="http://cocoapods.org/">CocoaPods</a><a href="#fnref:4" rev="footnote">&#8617;</a></p></li>
 </ol>
@@ -445,7 +445,7 @@
   
 
 
-<time datetime="2014-06-19T15:14:31+08:00" pubdate data-updated="true">Jun 19<span>th</span>, 2014</time>
+<time datetime="2014-06-19T15:14:31+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -576,6 +576,35 @@
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/andelf">@andelf</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'andelf',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 
 
 <section class="googleplus">
@@ -596,7 +625,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
