@@ -4,7 +4,7 @@
 
 url: http://andelf.github.io
 title: 猫·仁波切
-subtitle: 我得把我那么多吐槽笔记都迁移过来别整到不靠谱的那堆上
+subtitle: 会研发的PM才是好OP.
 author: 猫·仁波切 (Feather)
 simple_search: https://www.google.com/search
 description:
@@ -98,4 +98,4 @@ disqus_show_comment_count: false
 google_analytics_tracking_id:
 
 # Facebook Like
-facebook_like: false
+facebook_like: true
