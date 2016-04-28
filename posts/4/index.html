@@ -9,8 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="UPDATE: 我还真没用过 Xcode。
-输入 import Swift，按住 Command 鼠标点击 Swift。然后就出来了。 ORZ。 via reddit。 不过那个列表是不全的，有部分影藏的还是要慢慢来。比如 NilType. 通过命令行 lldb 命令获得相关信息。转载注明。 &hellip;">
+  <meta name="description" content="@availability(*, unavailable, message=&ldquo;a Message&rdquo;) to disable a func? @asmname(&ldquo;a_name&rdquo;) Undocumented Attributes By me. :) @ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +67,243 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/06/swift-attributes/">Swift Attributes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-06T17:12:53+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>@availability(*, unavailable, message=&ldquo;a Message&rdquo;)</h2>
+
+<p>to disable a func?</p>
+
+<h2>@asmname(&ldquo;a_name&rdquo;)</h2>
+
+<p>Undocumented Attributes By me. :)</p>
+
+<p>@asmname(&ldquo;swift_xxxx&rdquo;) func funname(&hellip;)</p>
+
+<p>Builtin asm symbol. maybe internal functions.</p>
+
+<p>这里用于调用 C 函数。相当于与 Objective-C 交互时候用的 @objc(name)。避免名字冲突，也可以相当于别名。</p>
+
+<p>使用方法：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">println</span><span class="p">()</span> <span class="p">{</span> <span class="p">....</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="err">@</span><span class="n">asmname</span><span class="p">(</span><span class="s">&quot;println&quot;</span><span class="p">)</span> <span class="n">func</span> <span class="n">c_println</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">CInt</span><span class="p">;</span> <span class="c1">// 声明</span>
+</span><span class='line'><span class="n">c_println</span><span class="p">()</span> <span class="c1">// 调用</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也就是 C 中的同名函数，我们可以给赋予一个别名，然后正常调用。</p>
+
+<p>同时也用于指定 Swift 导出符号的名字，用于在 C 语言调用。</p>
+
+<p>详细参考 <a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">简析Swift和C的交互</a></p>
+
+<h2>@transparent</h2>
+
+<p>用在函数、方法定义前，根据 lldb 和 llvm ir 猜测，作用相当于 inline。内联函数。</p>
+
+<p>需要扯一点 Swift 的编译，会生成 <code>.swiftmodule</code>，这个文件里包含信息更多，引用外部 <code>.swiftmodule</code> 时候，inline 仍然有效。</p>
+
+<h2>@assignment</h2>
+
+<p>用于重载操作符时表示赋值副作用。参数类型需要标记为 <code>inout</code>。参考运算符重载的那篇文章。</p>
+
+<p><a href="http://andelf.github.io/blog/2014/06/06/swift-operator-overload/">Swift 运算符重载、自定义运算符</a></p>
+
+<h2>@final</h2>
+
+<p>这个好像没什么多说的。文档里有。类似 java 的 <code>final</code>，C井中的 <code>sealed</code>。</p>
+
+<h2>@conversion</h2>
+
+<p>参考上面的一篇。隐式类型转换好了。</p>
+
+<p><a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">Implicit Type Convertion in Swift //Swift 的隐式类型转换</a></p>
+
+<h2>@noreturn</h2>
+
+<p>表示函数不返回它的调用者。类似于 Rust 的 Buttom Type。</p>
+
+<p>实例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@noreturn</span> <span class="nd">@transparent</span> <span class="n">func</span> <span class="n">fatalError</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">StaticString</span><span class="o">,</span> <span class="n">file</span><span class="k">:</span> <span class="kt">StaticString</span> <span class="o">=</span> <span class="n">default</span><span class="o">,</span> <span class="n">line</span><span class="k">:</span> <span class="kt">UWord</span> <span class="o">=</span> <span class="n">default</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>执行后打印出错消息，退出。</p>
+
+<h2>@auto_closure</h2>
+
+<p>用于函数参数类型前，表示一个空参数的 closure，调用时直接以语句的方式创建 closure，很自然。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">func</span> <span class="n">simpleAssert</span><span class="o">(</span><span class="n">condition</span><span class="k">:</span> <span class="kt">@auto_closure</span> <span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">Bool</span><span class="o">,</span> <span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">!</span><span class="n">condition</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">println</span><span class="o">(</span><span class="n">message</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">let</span> <span class="n">testNumber</span> <span class="k">=</span> <span class="mi">5</span>
+</span><span class='line'><span class="n">simpleAssert</span><span class="o">(</span><span class="n">testNumber</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">,</span> <span class="s">&quot;testNumber isn&#39;t an even number.&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="c1">// prints &quot;testNumber isn&#39;t an even number.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>simpleAssert</code> 中第一个参数，实际上是自动创建了一个 closure。文档中有详细描述。</p>
+
+<h2>@IBAction, @IBDesignable, @IBInspectable, and @IBOutlet</h2>
+
+<p>同 Objective-C</p>
+
+<h2>@objc @objc(name:name:)</h2>
+
+<p>参考文档。</p>
+
+<h2>@objc_block</h2>
+
+<h2>@class_protocol</h2>
+
+<h2>@required</h2>
+
+<h2>@optional</h2>
+
+<h2>@UIApplicationMain</h2>
+
+<h2>@NSManaged</h2>
+
+<h2>@NSCopying</h2>
+
+<h2>@lazy</h2>
+
+<p>In class property:</p>
+
+<pre><code>@lazy let prop_name: PropType = PropType()
+</code></pre>
+
+<h2>@exported</h2>
+
+<p>e.g.</p>
+
+<p>@exported import ModName</p>
+
+<h2>@sil_weak</h2>
+
+<h2>@sil_unowned</h2>
+
+<h2>@sil_unmanaged</h2>
+
+<p>猜测是语言内部表示一个属性禁用 ARC？</p>
+
+<p>Safety Integrity Level</p>
+
+<h2>@sil_self</h2>
+
+<h2>@opened(&hellip;)</h2>
+
+<h2>@cc(&hellip;)</h2>
+
+<h2>@autoreleased</h2>
+
+<h2>@objc_metatype</h2>
+
+<h2>@LLDBDebuggerFunction</h2>
+
+<h2>@requires_stored_property_inits</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@requires_stored_property_inits</span> <span class="k">class</span> <span class="nc">Point</span> <span class="o">{</span>
+</span><span class='line'>  <span class="o">...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>only in sil modules</h2>
+
+<ul>
+<li>@callee_unowned</li>
+<li>@callee_owned</li>
+<li>@callee_guaranteed</li>
+<li>@guaranteed</li>
+<li>@out</li>
+<li>@thin</li>
+<li>@thick</li>
+<li>@owned</li>
+</ul>
+
+
+<h2>unused</h2>
+
+<p>这里可以看到一些 Swift 的历史变迁。4 年也不算很短。</p>
+
+<ul>
+<li>@lvalue</li>
+<li>@unchecked
+
+<ul>
+<li>&lsquo;@unchecked T?&rsquo; syntax is going away, use &rsquo;T!'</li>
+</ul>
+</li>
+<li>@inout
+
+<ul>
+<li>@inout is no longer an attribute 应该是现在的 inout 关键字</li>
+</ul>
+</li>
+<li>@unowned
+
+<ul>
+<li>&lsquo;@unowned&rsquo; is not an attribute, use the &lsquo;unowned&rsquo; keyword instead</li>
+</ul>
+</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -8321,6 +8557,10 @@ and generates corresponding ast type.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/22/rust-pattern-match/">Rust Pattern Match(Rust中的模式匹配)</a>
       </li>
     
@@ -8394,10 +8634,6 @@ and generates corresponding ast type.</p>
     
       <li class="post">
         <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
       </li>
     
   </ul>

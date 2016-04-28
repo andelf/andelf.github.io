@@ -9,8 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="其实这是很早就像要说的了，大概当时信誓旦旦说要看完那本 epub 写个读后感谈谈对 Swift 看法什么的。后来不了了之。
-现在觉得这个时机或许差不多，对 Swift 的了解也算凑合了。 纯个人观点。 Swift 是系统编程语言 一开始大家还不太了解的时候，可能会有很多误解。现在好歹一个月了。 &hellip;">
+  <meta name="description" content="声明： 转载请注明，方便的情况下请知会本人. weibo 本文主要介绍 Swift 所有标准库类型的层次结构，及所有标准类型。本文可作为参考手册使用。 本人不保证内容及时性和正确性，请善于怀疑并反馈。谢谢。 本文探索 Swift 所有基础类型和高级类型，以及所有协议和他们之间的继承关系。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +67,501 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T15:10:41+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>本文主要介绍 Swift 所有标准库类型的层次结构，及所有标准类型。本文可作为参考手册使用。</p>
+
+<p>本人不保证内容及时性和正确性，请善于怀疑并反馈。谢谢。</p>
+
+<p>本文探索 Swift 所有基础类型和高级类型，以及所有协议和他们之间的继承关系。</p>
+
+<p>为了简化问题，某些类型略去了中间的过渡类型，人肉保证不歧义。</p>
+
+<h2>Swift 基础类型</h2>
+
+<h3>数值类型</h3>
+
+<h4>位</h4>
+
+<pre><code>Bit
+</code></pre>
+
+<p>只有一位，实现为 <code>enum</code>， <code>.zero</code> 或 <code>.one</code>。简单明了。</p>
+
+<p>协议: <code>RandomAccessIndex IntegerArithmetic</code></p>
+
+<h4>整型</h4>
+
+<p>有符号:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Int Int8 Int16 Int32 Int64</span></code></pre></td></tr></table></div></figure>
+
+
+<p>协议：<code>SignedInteger RandomAccessIndex BitwiseOperations SignedNumber CVarArg</code></p>
+
+<p>无符号:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>UInt UInt8 UInt16 UInt32 UInt64</span></code></pre></td></tr></table></div></figure>
+
+
+<p>协议：<code>UnsignedInteger RandomAccessIndex BitwiseOperations</code></p>
+
+<p>别名:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>IntMax = Int64
+</span><span class='line'>UIntMax = UInt64
+</span><span class='line'>IntegerLiteralType = Int
+</span><span class='line'>Word = Int // 字长
+</span><span class='line'>UWord = UInt</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>浮点型</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Float Double Float80</span></code></pre></td></tr></table></div></figure>
+
+
+<p>别名：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>FloatLiteralType = Double
+</span><span class='line'>Float64 = Double</span></code></pre></td></tr></table></div></figure>
+
+
+<p>协议：<code>FloatingPointNumber</code>。</p>
+
+<h3>逻辑型</h3>
+
+<p>只有一个 <code>Bool</code>。</p>
+
+<p>实例： <code>true</code>、<code>false</code></p>
+
+<p>协议：<code>LogicValue</code>。</p>
+
+<h3>空</h3>
+
+<p>只有一个 <code>NilType</code>。</p>
+
+<p>唯一实例 <code>nil</code>。</p>
+
+<h3>字符（串）类型</h3>
+
+<ul>
+<li><code>String</code></li>
+<li><code>Character</code> Unicode 字符</li>
+<li><code>UnicodeScalar</code> 相当于 C 中的 <code>wchar_t</code></li>
+<li><code>CString</code> 用于表示 C 中的 <code>const char *</code>，请参考相关文章</li>
+<li><code>StaticString</code> 静态字符串，内部使用，例如 <code>fatalError</code></li>
+</ul>
+
+
+<p>别名：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>StringLiteralType = String
+</span><span class='line'>ExtendedGraphemeClusterType = String</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文档</p>
+
+<blockquote><p><code>Character</code> represents some Unicode grapheme cluster as
+defined by a canonical, localized, or otherwise tailored
+segmentation algorithm.</p></blockquote>
+
+<p><code>String</code> 实现协议：<code>Collection ExtensibleCollection OutputStream TargetStream</code>。</p>
+
+<h3>Array 类型</h3>
+
+<ul>
+<li><code>Array&lt;T&gt;</code></li>
+<li><code>ContiguousArray&lt;T&gt;</code></li>
+</ul>
+
+
+<p>实现协议 <code>ArrayType</code>。</p>
+
+<p>内部容器：</p>
+
+<ul>
+<li><code>ArrayBuffer&lt;T&gt;</code></li>
+<li><code>ContiguousArrayBuffer&lt;T&gt;</code></li>
+</ul>
+
+
+<p>这两个类型看起来是 Array 的内部容器，一般不应该直接使用。</p>
+
+<h3>字典类型</h3>
+
+<p><code>Dictionary&lt;KeyType : Hashable, ValueType&gt;</code></p>
+
+<p>只实现了 <code>Collection</code>。</p>
+
+<h3>元祖类型</h3>
+
+<p>除正常元祖外，还有个特殊的别名</p>
+
+<pre><code>Void = ()
+</code></pre>
+
+<p>其实很多语言都这么定义的，比如 Haskell 。</p>
+
+<h3>Optional 类型</h3>
+
+<ul>
+<li><code>Optional&lt;T&gt;</code> 即 <code>T?</code></li>
+<li><code>ImplicitlyUnwrappedOptional&lt;T&gt;</code> 即 <code>T!</code></li>
+</ul>
+
+
+<p>实现协议: <code>LogicValue</code>，行为是判断是否为 <code>.None</code>。</p>
+
+<p>另外 <a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">Swift 的隐式类型转换</a>
+有提到，为什么 <code>nil</code> 可以给 <code>Optional</code> 类型赋值的问题。</p>
+
+<h3>C/ObjC 兼容类型</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>CBool = Bool
+</span><span class='line'>CFloat = Float
+</span><span class='line'>CDouble = Double
+</span><span class='line'>CChar = Int8
+</span><span class='line'>CSignedChar = Int8
+</span><span class='line'>CUnsignedChar = UInt8
+</span><span class='line'>CChar16 = UInt16
+</span><span class='line'>CWideChar = UnicodeScalar
+</span><span class='line'>CChar32 = UnicodeScalar
+</span><span class='line'>CInt = Int32
+</span><span class='line'>CUnsignedInt = UInt32
+</span><span class='line'>CShort = Int16
+</span><span class='line'>CUnsignedShort = UInt16
+</span><span class='line'>CLong = Int
+</span><span class='line'>CUnsignedLong = UInt
+</span><span class='line'>CLongLong = Int64
+</span><span class='line'>CUnsignedLongLong = UInt64</span></code></pre></td></tr></table></div></figure>
+
+
+<p>具体使用参考 C 交互的几篇文章，基本没区别。</p>
+
+<h3>Any 类型</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AnyObject
+</span><span class='line'>// 别名
+</span><span class='line'>Any = protocol&lt;&gt;
+</span><span class='line'>AnyClass = AnyObject.Type</span></code></pre></td></tr></table></div></figure>
+
+
+<p>还有个用在函数定义的类型签名上， <code>Any.Type</code>。</p>
+
+<p>顺便这里看到一个奇异的语法 <code>protocol&lt;&gt;</code>，这个也是 Swift 一种用来表示类型限制的方法，可以用在类型的位置，尖括号里可以是协议的列表。</p>
+
+<h3>指针类型</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>UnsafePointer&lt;T&gt;
+</span><span class='line'>CMutableVoidPointer
+</span><span class='line'>CConstVoidPointer
+</span><span class='line'>COpaquePointer
+</span><span class='line'>CConstPointer&lt;T&gt;
+</span><span class='line'>AutoreleasingUnsafePointer&lt;T&gt;
+</span><span class='line'>CVaListPointer
+</span><span class='line'>CMutablePointer&lt;T&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>参考 C 交互文章。</p>
+
+<ul>
+<li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">简析Swift和C的交互</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift 与 ObjC 和 C 的交互，第三部分</a></li>
+</ul>
+
+
+<h3>其他辅助类型</h3>
+
+<p>多了去了。比如 for-in 实现时候的 Generator 、比如反射时候用的 <code>*Mirror</code>、比如切片操作用的 <code>Range&lt;T&gt;</code>。比如内部储存类。</p>
+
+<p>还有储存辅助类 <code>OnHeap&lt;T&gt;</code> 等等。以后有机会再探索。</p>
+
+<h2>Swift 标准库协议</h2>
+
+<h3>打印相关 <code>Printable DebugPrintable</code></h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Printable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">description</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">protocol</span> <span class="nc">DebugPrintable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">var</span> <span class="n">debugDescription</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>用于打印和字符串的 Interpolation 。</p>
+
+<h3><code>*LiteralConvertible</code></h3>
+
+<p>从字面常量获取。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nc">ArrayLiteralConvertible</span>
+</span><span class='line'><span class="nc">IntegerLiteralConvertible</span>
+</span><span class='line'><span class="nc">DictionaryLiteralConvertible</span>
+</span><span class='line'><span class="nc">CharacterLiteralConvertible</span>
+</span><span class='line'><span class="nc">FloatLiteralConvertible</span>
+</span><span class='line'><span class="nc">ExtendedGraphemeClusterLiteralConvertible</span>
+</span><span class='line'><span class="nc">StringLiteralConvertible</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其中字符串和字符的字面常量表示有所重合，也就是说 <code>"a"</code> 可以是字符串也可以是字符。<a href="http://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/">简析 Swift 中的 Pattern Match</a> 一文中就是遇到了类似的情况。</p>
+
+<h3><code>LogicValue</code></h3>
+
+<p>相当于重载 <code>if</code>、<code>while</code> 的行为。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">LogicValue</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">getLogicValue</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>Sequence</code></h3>
+
+<p>相当于重载 for-in 。和 <code>Generator</code> 联用。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Sequence</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">typealias</span> <span class="nc">GeneratorType</span> <span class="k">:</span> <span class="kt">Generator</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">generate</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">GeneratorType</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">protocol</span> <span class="nc">Generator</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">typealias</span> <span class="nc">Element</span>
+</span><span class='line'>  <span class="n">mutating</span> <span class="n">func</span> <span class="n">next</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Element</span><span class="o">?</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// for .. in { }</span>
+</span><span class='line'><span class="k">var</span> <span class="nc">__g</span> <span class="k">=</span> <span class="n">someSequence</span><span class="o">.</span><span class="n">generate</span><span class="o">()</span>
+</span><span class='line'><span class="k">while</span> <span class="n">let</span> <span class="n">x</span> <span class="k">=</span> <span class="nc">__g</span><span class="o">.</span><span class="n">next</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'><span class="o">}}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>整型、 Index 相关协议</h3>
+
+<p>这些协议都是用来表示容器类型的索引、及相关的索引运算。</p>
+
+<p>这里略去了部分私有内容。略去了 <code>Printable</code> 等。</p>
+
+<p><img class="left" src="/images/attachments/swift-integer.png" title="'Swift Integer Type Hierarchy'" ></p>
+
+<h3>RawOptionSet 相关协议</h3>
+
+<p>一般用来表示二进制的选项，类似于 C enum ，很多 Cocoa 的 flag 被映射到它。相当于一个 Wrapper 的作用。</p>
+
+<p><img class="left" src="/images/attachments/swift-rawoptset.png" title="'Swift RawOptionSet'" ></p>
+
+<p>可以看到要求被 Wrap 的对象支持 <code>BitwiseOperations</code>。</p>
+
+<h3>Array 相关协议</h3>
+
+<p>图中用虚线标注了和 <code>Generator</code> 的关系。</p>
+
+<p><img class="left" src="/images/attachments/swift-collection.png" title="'Swift Collection Protocol'" ></p>
+
+<p><code>Array&lt;T&gt;</code> 类型实现了 <code>ArrayType</code> 协议。</p>
+
+<p><code>Dictionary</code> 类型实现了 <code>Collection</code> 协议。</p>
+
+<h3>反射相关协议</h3>
+
+<p>包括 <code>Mirror</code>、<code>MirrorDisposition</code>、<code>Reflectable</code>。</p>
+
+<p>请参考 <a href="http://andelf.github.io/blog/2014/06/20/swift-reflection/">Swift 的反射</a>。</p>
+
+<h3>浮点数协议</h3>
+
+<p>只有一个 <code>FloatingPointNumber</code>。单独存在。是为了定义完整而存在。看官自己搞定。</p>
+
+<h3>IO 输出，伪输出相关</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Streamable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">writeTo</span><span class="o">&lt;</span><span class="nc">Target</span> <span class="k">:</span> <span class="kt">OutputStream&gt;</span><span class="o">(</span><span class="kt">inout</span> <span class="kt">target:</span> <span class="kt">Target</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Streamable</code> 表示可以被写入到输出流中，比如字符串、字符等。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">OutputStream</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">write</span><span class="o">(</span><span class="n">string</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>OutputStream</code> 表示一个输出流，比如标准输出（<code>stdout</code>），也可以表示一个伪输出流，例如字符串 <code>String</code>。</p>
+
+<p>标准输出的获取方法</p>
+
+<pre><code>var stdout = _Stdout()
+</code></pre>
+
+<p>看起来是私有结构，某一天不能用的话，别怪我。调用时候用 <code>inout</code> 引用语法。</p>
+
+<h3>CVarArg 处理</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">CVarArg</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">encode</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Word</span><span class="o">[]</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>用于处理 C 函数的可变参数，参考 <a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a>。</p>
+
+<h3>Bridge 协议</h3>
+
+<p>这里有个疑问就是编译过程中这些 Bridge 协议有没有参与。目前还没办法确定。</p>
+
+<ul>
+<li><code>_BridgedToObjectiveC</code></li>
+<li><code>_ConditionallyBridgedToObjectiveC</code></li>
+</ul>
+
+
+<p>具体内容可以参考 <a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift 与 Objective-C 之间的交互</a>一文。</p>
+
+<h3>其他</h3>
+
+<p><code>Sink</code> 看起来是一个容器，可能是用来编码时使用。</p>
+
+<p><code>ArrayBufferType</code> 用于表示 <code>ArrayType</code> 的内部储存，看起来似乎也可以直接用。</p>
+
+<p><code>UnicodeCodec</code> 用于处理编码。有 <code>UTF8</code>、<code>UTF16</code>、<code>UTF32</code> 可用。</p>
+
+<p><code>ArrayBound</code> 用来处理数组边界，详细原理和作用过程未知。</p>
+
+<h2>总结</h2>
+
+<p>无。</p>
+
+<p>参考：</p>
+
+<ul>
+<li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2318,324 +2812,6 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-16T14:45:15+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>声明： 原创发现，原创内容。转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
-
-<p>其中基础部分借鉴了 WWDC 407 部分的介绍。</p>
-
-<p>相关的分析主要基于我 dump 出的 Swift 标准库声明代码，位于 <a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a>。</p>
-
-<h2>引子</h2>
-
-<p>WWDC 407 中简单提到了 NSError 在 Swift 中的处理方法，说<code>NSErrorPointer is Swift’s version of NSError **</code>，其中大概内容是：</p>
-
-<ul>
-<li>Foundation 的所有函数中的 <code>NSError **</code> 都被对应为 Swift 中的 <code>NSErrorPointer</code> (自定义函数也应如此)</li>
-<li>调用时候使用下面的方式：</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">var</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSError?</span>
-</span><span class='line'><span class="n">foobar</span><span class="o">(....,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">&amp;error</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>这里一定要用 <code>var</code>，只有 var 才有引用的概念，才可以作为左值</li>
-<li>定义时（重载一些带 NSError 参数的函数）(注意其中的 <code>.memory</code> 部分。)：</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">override</span> <span class="n">func</span> <span class="n">contentsForType</span><span class="o">(</span><span class="n">typeName</span><span class="k">:</span> <span class="kt">String!</span><span class="o">,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSErrorPointer</span><span class="o">)</span><span class="err"> </span> <span class="o">-&gt;</span> <span class="nc">AnyObject</span><span class="o">!</span> <span class="o">{</span><span class="err"> </span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">cannotProduceContentsForType</span><span class="o">(</span><span class="n">typeName</span><span class="o">)</span> <span class="o">{</span><span class="err"> </span> <span class="k">if</span> <span class="n">error</span> <span class="o">{</span><span class="err"> </span>
-</span><span class='line'>        <span class="n">error</span><span class="o">.</span><span class="n">memory</span> <span class="k">=</span> <span class="nc">NSError</span><span class="o">(</span><span class="n">domain</span><span class="k">:</span> <span class="kt">domain</span><span class="o">,</span> <span class="n">code</span><span class="k">:</span> <span class="kt">code</span><span class="o">,</span> <span class="n">userInfo</span><span class="k">:</span> <span class="err">[</span><span class="kt">:</span><span class="err">]</span><span class="o">)</span><span class="err"> </span> <span class="o">}</span><span class="err"> </span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">nil</span><span class="err"> </span> <span class="o">}</span><span class="err"> </span>
-</span><span class='line'>    <span class="c1">// ...</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>到这里，基本怎么在 Swift 使用 <code>NSError</code> 已经足够了。但是本着探究妈蛋 Swift 到底藏起了多少黑魔法的伟(er)大(bi)精神，我继续分析下这里面的槽点。</p>
-
-<h2>这不科学！</h2>
-
-<p>我们知道 Swift 是强类型语言。类型不同怎么能在一起？直接出错才对。</p>
-
-<p>当然也可能是之前提到过的“隐式类型转换”，所以这里探索下 <code>NSError</code> 和 <code>NSErrorPointer</code> 的关系，到底是如何实现了 Objective-C 中的 <code>NSError **</code>。</p>
-
-<p>而且有一个逆天的地方是，<code>NSErrorPointer</code> 没有被标记为 <code>inout</code>，但传递参数时候需要传递 <code>NSError</code> 的引用。</p>
-
-<h2>上代码</h2>
-
-<p>这里给出 Swift 中 <code>NSError</code>、<code>NSErrorPointer</code> 及相关类型的声明代码。(部分）</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@objc</span><span class="o">(</span><span class="nc">NSError</span><span class="o">)</span> <span class="k">class</span> <span class="nc">NSError</span> <span class="k">:</span> <span class="kt">NSObject</span><span class="o">,</span> <span class="nc">NSCopying</span><span class="o">,</span> <span class="nc">NSSecureCoding</span><span class="o">,</span> <span class="nc">NSCoding</span> <span class="o">{</span>
-</span><span class='line'>  <span class="nd">@objc</span><span class="o">(</span><span class="n">initWithDomain</span><span class="k">:</span><span class="kt">code:userInfo:</span><span class="o">)</span> <span class="n">init</span><span class="o">(</span><span class="n">domain</span><span class="k">:</span> <span class="kt">String!</span><span class="o">,</span> <span class="n">code</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">userInfo</span> <span class="n">dict</span><span class="k">:</span> <span class="kt">NSDictionary!</span><span class="o">)</span>
-</span><span class='line'>  <span class="nd">@objc</span><span class="o">(</span><span class="n">errorWithDomain</span><span class="k">:</span><span class="kt">code:userInfo:</span><span class="o">)</span> <span class="k">class</span> <span class="nc">func</span> <span class="n">errorWithDomain</span><span class="o">(</span><span class="n">domain</span><span class="k">:</span> <span class="kt">String!</span><span class="o">,</span> <span class="n">code</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">userInfo</span> <span class="n">dict</span><span class="k">:</span> <span class="kt">NSDictionary!</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">!</span>
-</span><span class='line'>  <span class="nd">@objc</span> <span class="k">var</span> <span class="n">domain</span><span class="k">:</span> <span class="kt">String!</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kt">@objc</span><span class="o">(</span><span class="kt">domain</span><span class="o">)</span> <span class="kt">get</span> <span class="o">{}</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>  <span class="kt">@objc</span><span class="o">(</span><span class="kt">init</span><span class="o">)</span> <span class="kt">convenience</span> <span class="kt">init</span><span class="o">()</span>
-</span><span class='line'>  <span class="kt">....</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">typealias</span> <span class="nc">NSErrorPointer</span> <span class="k">=</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="nc">NSError</span><span class="o">?&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">struct</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="k">:</span> <span class="kt">Equatable</span><span class="o">,</span> <span class="nc">LogicValue</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">let</span> <span class="n">value</span><span class="k">:</span> <span class="kt">RawPointer</span>
-</span><span class='line'>  <span class="nd">@transparent</span> <span class="n">init</span><span class="o">(</span><span class="k">_</span> <span class="n">value</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span>
-</span><span class='line'>  <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_get</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">RawPointer</span>
-</span><span class='line'>  <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_set</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">T</span>
-</span><span class='line'>  <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion</span><span class="o">(</span><span class="n">inout</span> <span class="n">autoreleasingTemp</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="k">var</span> <span class="nc">_isNull</span><span class="k">:</span> <span class="kt">Bool</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kt">@transparent</span> <span class="kt">get</span> <span class="o">{}</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>  <span class="kt">@transparent</span> <span class="kt">func</span> <span class="kt">getLogicValue</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">Bool</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">memory</span><span class="k">:</span> <span class="kt">T</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kt">@transparent</span> <span class="kt">get</span> <span class="o">{}</span>
-</span><span class='line'>    <span class="kt">@transparent</span> <span class="kt">set</span> <span class="o">{}</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>分析</h2>
-
-<p>由以上代码可以知道，<code>NSErrorPointer</code> 实际上是 <code>AutoreleasingUnsafePointer&lt;Optional&lt;NSError&gt;&gt;</code> 类型（这里我顺便展开了 <code>Type?</code>），
-<code>AutoreleasingUnsafePointer&lt;T&gt;</code> 封装了一个 <code>RawPointer</code>，发挥想象力，差不多知道它就是个 <code>void *</code>，指向类型 <code>T</code>。在本例中，指向 <code>NSError?</code>。</p>
-
-<p>一般情况下 Swift 的 <code>NSError!</code> 被用于对应 Objective-C 的 <code>NSError *</code>， 一层指针，可 nil. 所以这里，两层指针算是对应上了（一层 RawPointer, 一层靠语言本身的特性实现，这里暂时不考虑 <code>Type!</code> 和 <code>Type?</code> 的差异性，使用时候多注意就可以）。</p>
-
-<p>然后就是棘手的问题，这里的类型转换是如何实现的？这里没有看到标准的隐式类型转换。但是有 <code>__writeback_conversion*</code> 一系列 static 函数。应该是他们起到了转换的作用（再次说明，Swift 是强类型语言，所以必然这样的特性有黑魔法）。</p>
-
-<p>从名字和标准库的定义看，这三个函数应该是同时起作用，用于表述三个类型的关联关系。我写了个例子。</p>
-
-<h3>示例代码</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">struct</span> <span class="nc">Foobar</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">var</span> <span class="k">val:</span> <span class="kt">Int</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_get</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Int</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">println</span><span class="o">(</span><span class="s">&quot;location 1&quot;</span><span class="o">)</span>
-</span><span class='line'>        <span class="k">if</span> <span class="n">let</span> <span class="n">v</span> <span class="k">=</span> <span class="n">x</span><span class="o">.</span><span class="n">toInt</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="n">v</span>
-</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="mi">0</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_set</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">println</span><span class="o">(</span><span class="s">&quot;location 2&quot;</span><span class="o">)</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">toString</span><span class="o">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">10000</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion</span><span class="o">(</span><span class="n">inout</span> <span class="n">temp</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Foobar</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">println</span><span class="o">(</span><span class="s">&quot;location 3&quot;</span><span class="o">)</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nc">Foobar</span><span class="o">(</span><span class="k">val:</span> <span class="kt">temp</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">func</span> <span class="n">test_foobar</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">Foobar</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">dump</span><span class="o">(</span><span class="n">v</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="err">&quot;</span><span class="kt">dump</span> <span class="kt">from</span> <span class="kt">test_foobar</span><span class="err">&quot;</span><span class="o">)</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">var</span> <span class="n">word</span> <span class="k">=</span> <span class="s">&quot;9527&quot;</span>
-</span><span class='line'><span class="n">test_foobar</span><span class="o">(&amp;</span><span class="n">word</span><span class="o">)</span>
-</span><span class='line'><span class="n">dump</span><span class="o">(</span><span class="n">word</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="err">&quot;</span><span class="kt">word</span><span class="err">&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如上，代码输出是：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">location</span> <span class="mi">1</span>
-</span><span class='line'><span class="n">location</span> <span class="mi">3</span>
-</span><span class='line'><span class="o">▿</span> <span class="n">dump</span> <span class="n">from</span> <span class="n">test_foobar</span><span class="k">:</span> <span class="kt">V5trans6Foobar</span> <span class="o">(</span><span class="kt">has</span> <span class="err">1</span> <span class="kt">child</span><span class="o">)</span>
-</span><span class='line'>  <span class="kt">-</span> <span class="kt">val:</span> <span class="err">9527</span>
-</span><span class='line'><span class="kt">location</span> <span class="err">2</span>
-</span><span class='line'><span class="kt">-</span> <span class="kt">word:</span> <span class="err">19527</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这三个函数在一次隐式调用中，全部都用到了，调用顺序如上。看起来隐藏在背后的关系明了了一些，流程大概是：</p>
-
-<ul>
-<li>用 <code>word</code> 调用 <code>Foobar.__writeback_conversion_get</code>，获得一个 <code>Int</code></li>
-<li>用 <code>Int</code> 调用 <code>Foobar.__writeback_conversion</code>，构造了一个 <code>Foobar</code> 对象</li>
-<li>将 <code>Foobar</code> 交给 <code>test_foobar</code> 函数内部处理</li>
-<li>函数逻辑结束后，调用 <code>Foobar.__writeback_conversion_set</code>，获得字符串，赋值给 <code>word</code></li>
-</ul>
-
-
-<p>我返回到 <code>NSError</code> 说。</p>
-
-<h3>回到 NSError 说</h3>
-
-<p>最简删节版代码：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// T = NSError? = Optional&lt;NSError&gt;</span>
-</span><span class='line'><span class="n">struct</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">let</span> <span class="n">value</span><span class="k">:</span> <span class="kt">RawPointer</span>
-</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_get</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">RawPointer</span>
-</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_set</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">T</span>
-</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion</span><span class="o">(</span><span class="n">inout</span> <span class="n">autoreleasingTemp</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">...</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">memory</span><span class="k">:</span> <span class="kt">T</span> <span class="o">{</span> <span class="kt">get</span> <span class="kt">set</span> <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当一个函数接受 <code>AutoreleasingUnsafePointer&lt;T&gt;</code> 作为参数的时候，我们可以直接传递 T 的引用 <code>&amp;T</code>，然后整个流程自动转换为</p>
-
-<ul>
-<li>用该引用参数调用 <code>__writeback_conversion_get</code> 获得一个 <code>RawPointer</code></li>
-<li>调用 <code>__writeback_conversion</code> 获得一个 <code>AutoreleasingUnsafePointer&lt;T&gt;</code> 对象</li>
-<li>将这个对象交给函数内部处里，调用相关方法</li>
-<li>函数返回时，调用 <code>__writeback_conversion_set</code>，然后将结果赋值给一开始的引用参数，类型 <code>&amp;T</code> 的那个。</li>
-</ul>
-
-
-<p>如果是 <code>NSError</code> 的情况, 情况如下：</p>
-
-<ul>
-<li>某库函数接受 <code>NSErrorPointer</code> 作为参数，我们直接传递 <code>NSError?</code> 的引用 <code>&amp;error</code></li>
-<li><code>error</code> 作为参数调用 <code>__writeback_conversion_get</code>， 获得 <code>RawPointer</code></li>
-<li>用这个 <code>RawPointer</code> 调用 <code>__writeback_conversion</code>，获得一个 <code>NSErrorPointer</code> 对象</li>
-<li>函数进行相关处理。对于 NSError 来说，这里一般是 Foundation 代码或者是 override 后的代码，在出错或者异常时访问 <code>.memory</code>，设置相应的错误</li>
-<li>函数返回。用之前的 <code>RawPointer</code> 调用 <code>__writeback_conversion_set</code>，获得 <code>NSError?</code> 然后赋值给引用 error</li>
-<li>接下来代码中可以对 error 进行判断，处理异常</li>
-</ul>
-
-
-<p>其中 <code>RawPointer</code> 之前我们已经讨论过，是指针，在整个过程中值不变，指针指向的内存，就是 <code>.memory</code> 属性操作的部分，才是可变的部分，不属于 <code>AutoreleasingUnsafePointer&lt;T&gt;</code> 的成员访问控制范围，所以这就是为什么函数参数中的 <code>NSErrorPointer</code> 为什么没有标记为 <code>inout</code> 的原因。</p>
-
-<h2>总结</h2>
-
-<p>这三个 static 函数合起来组成了整体功能。我觉得可以把这个功能叫做“引用的隐式类型转换”或者"隐式引用类型转换"。</p>
-
-<p>当然，它的强大之处在于用隐藏了二重指针的细节，同时这个特性也可以有其他作用。比如。。。（我没想好）</p>
-
-<h2>参考文献</h2>
-
-<ul>
-<li>WWDC 407</li>
-<li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">隐式类型转换</a></li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -2651,6 +2827,10 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/03/22/rust-pattern-match/">Rust Pattern Match(Rust中的模式匹配)</a>
@@ -2726,10 +2906,6 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
     
       <li class="post">
         <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
       </li>
     
   </ul>

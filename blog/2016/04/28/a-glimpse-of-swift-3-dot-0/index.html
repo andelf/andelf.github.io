@@ -5,14 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Swift Undocumented Grammar （Swift 黑语法） - 猫·仁波切</title>
+  <title>Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0) - 猫·仁波切</title>
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="本文介绍 Swift 的 Undocumented 语法特性。 电子书上介绍的 default function parameter 这里都不好意思拿出来写。 咳咳。持续更新。 用关键字当变量名 Keywards as variable name. 1
-2
-3
-// escaped &hellip;">
+  <meta name="description" content="Swift 3.0 新变化 TODO AST 结构 ModuleDecl
+模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。 FileUnit（抽象类）
+文件作用域，是代码组织的最小单元。 DerivedFileUnit: A container for a module-level &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +20,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar">
+  <link rel="canonical" href="http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
@@ -73,7 +72,7 @@
   
   <header>
     
-      <h1 class="entry-title">Swift Undocumented Grammar （Swift 黑语法）</h1>
+      <h1 class="entry-title">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</h1>
     
     
       <p class="meta">
@@ -89,50 +88,105 @@
   
 
 
-<time datetime="2014-07-04T03:05:11+08:00" pubdate data-updated="true"></time>
+<time datetime="2016-04-28T10:06:53+08:00" pubdate data-updated="true"></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>本文介绍 Swift 的 Undocumented 语法特性。</p>
+<div class="entry-content"><h2>Swift 3.0 新变化</h2>
 
-<p>电子书上介绍的 default function parameter 这里都不好意思拿出来写。</p>
+<p>TODO</p>
 
-<p>咳咳。持续更新。</p>
+<h2>AST 结构</h2>
 
-<h2>用关键字当变量名</h2>
+<p>ModuleDecl
+模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。</p>
 
-<p>Keywards as variable name.</p>
+<p>FileUnit（抽象类）
+文件作用域，是代码组织的最小单元。</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<ul>
+<li>DerivedFileUnit: A container for a module-level definition derived as part of an implicit protocol conformance.</li>
+<li>SourceFile: A file containing Swift source code. .swift 或 .sil 也可以是虚拟 REPL
+
+<ul>
+<li>Imports: Vec&lt;(ImportedModule, ImportOptions)></li>
+<li>Identifier</li>
+<li>Decls: Vec<Decl></li>
+<li>LocalTypeDecl: Vec<TypeDecl></li>
+<li>ObjCMethods: Map&lt;ObjCSelector, AbstractFunctionDecl></li>
+<li>infix, postfix, prefix operators: OperatorMap</li>
+</ul>
+</li>
+<li>BuiltinUnit</li>
+</ul>
+
+
+<h2>swift 命令入口</h2>
+
+<p>入口函数 <code>tools/driver/driver.cpp</code>，<code>main</code> 函数。</p>
+
+<p>集成多个子工具。同时若 <code>PATH</code> 下有名为 <code>swift-foobar</code> 的可执行文件，则可通过 <code>swift foobar</code> 调用。</p>
+
+<h3>编译器前端 <code>swift -frontend</code></h3>
+
+<p>主要用于编译。还能打印出各种编译时中间结果。</p>
+
+<h3>API Notes 功能 <code>swift -apinotes</code></h3>
+
+<p>参考信息位于 <a href="https://github.com/apple/swift/tree/master/apinotes">https://github.com/apple/swift/tree/master/apinotes</a> .</p>
+
+<p>简单说，API Notes 机制就是通过 <code>.apinotes</code> 文件（YAML格式）描述 Objective-C Framework 和对应 Swift API 的关系。最终生成 <code>.apinotesc</code> 文件，与 <code>.swiftmodule</code> 文件一起作为 Swift 的模块。</p>
+
+<p>主要功能包括且不限于：</p>
+
+<ul>
+<li><code>SwiftBridge</code>：设置对应的 Bridge 类型，例如 NSArray 对应与 <code>Swift.Array</code></li>
+<li><code>Nullability</code>/<code>NullabilityOfRet</code>： 类的属性、方法的参数、返回值对应类型是否可以为 null，即对应与 Swift 的 T 还是 T?</li>
+<li><code>Availability</code>：方法是否在 Swift 中暴露，并给出 availability message</li>
+<li><code>SwiftName</code>：方法 Selector 在 Swift 中的重命名，例如 <code>filteredArrayUsingPredicate:</code> 替换为 <code>filtered(using:)</code></li>
+</ul>
+
+
+<p>Dump 为YAML文件：</p>
+
+<pre><code>$&gt; swift -apinotes -binary-to-yaml /path/to/lib/swift/macosx/x86_64/Dispatch.apinotesc -o=-
+</code></pre>
+
+<h3>Module Wrap 工具 <code>swift -modulewrap</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// escaped variable name</span>
-</span><span class='line'><span class="n">let</span> <span class="n">`let`</span> <span class="k">=</span> <span class="mi">1000</span>
-</span><span class='line'><span class="n">dump</span><span class="o">(</span><span class="n">`let`</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="err">&quot;</span><span class="kt">variable</span> <span class="kt">named</span> <span class="kt">let</span><span class="err">&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// Wraps .swiftmodule files inside an object file container so they
+</span><span class='line'>// can be passed to the linker directly. Mostly useful for platforms
+</span><span class='line'>// where the debug info typically stays in the executable.
+</span><span class='line'>// (ie. ELF-based platforms).</span></code></pre></td></tr></table></div></figure>
 
 
-<h2><code>new</code> 关键字</h2>
+<p>用法：</p>
 
-<p>The <code>new</code> keyword.</p>
+<pre><code>swift -modulewrap ObjectiveC.swiftmodule -o objc.o
+</code></pre>
 
-<p>快速初始化数组。</p>
+<p>实际发现是在 <code>.o</code> 里定义了 <code>___Swift_AST</code> 符号。</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="n">an_array_with_100_zero</span> <span class="k">=</span> <span class="k">new</span><span class="o">(</span><span class="nc">Int</span><span class="o">)[</span><span class="err">100</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
+<h3>REPL</h3>
+
+<p>Swift 提供了两个 REPL(Read-Evaluate-Print Loop)，一个是 Swift 本身内置，另一个集成到了 lldb 命令行下。前者只有基本功能，即将废弃，后者功能更强大。</p>
+
+<p>子命令分别是：</p>
+
+<ul>
+<li><code>swift -deprecated-integrated-repl</code></li>
+<li><code>swift -lldb-repl</code>。</li>
+</ul>
 
 
-<h2>protocol type</h2>
-
-<p>use <code>protocol&lt;Protocol1, Protocol2, ...&gt;</code> as a type.</p>
-
-<h2>How I find it?</h2>
-
-<p>瞎试出来的。</p>
+<p><code>swift -repl</code> 子命令选择可用的 REPL 进入，一般是 <code>lldb-repl</code>，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。</p>
 </div>
 
 
@@ -155,12 +209,12 @@
   
 
 
-<time datetime="2014-07-04T03:05:11+08:00" pubdate data-updated="true"></time>
+<time datetime="2016-04-28T10:06:53+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/swift/'>swift</a>, <a class='category' href='/blog/categories/swift-internals/'>swift-internals</a>
+    <a class='category' href='/blog/categories/swift/'>swift</a>
   
 </span>
 
@@ -169,7 +223,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/" >Tweet</a>
   
   
   <div class="g-plusone" data-size="medium"></div>
@@ -182,10 +236,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/07/04/cocoa-in-swift/" title="Previous Post: Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）">&laquo; Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
+        <a class="basic-alignment left" href="/blog/2016/03/22/rust-pattern-match/" title="Previous Post: Rust Pattern Match(Rust中的模式匹配)">&laquo; Rust Pattern Match(Rust中的模式匹配)</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/07/07/use-swift-dynamic-library/" title="Next Post: Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库) &raquo;</a>
       
     </p>
   </footer>
@@ -349,8 +401,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/';
-        var disqus_url = 'http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/';
+        var disqus_identifier = 'http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/';
+        var disqus_url = 'http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/';
         var disqus_script = 'embed.js';
       
     (function () {

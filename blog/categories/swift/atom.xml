@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Swift | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/swift/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2016-03-23T00:26:03+08:00</updated>
+  <updated>2016-04-29T00:30:50+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)]]></title>
+    <link href="http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/"/>
+    <updated>2016-04-28T10:06:53+08:00</updated>
+    <id>http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0</id>
+    <content type="html"><![CDATA[<h2>Swift 3.0 新变化</h2>
+
+<p>TODO</p>
+
+<h2>AST 结构</h2>
+
+<p>ModuleDecl
+模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。</p>
+
+<p>FileUnit（抽象类）
+文件作用域，是代码组织的最小单元。</p>
+
+<ul>
+<li>DerivedFileUnit: A container for a module-level definition derived as part of an implicit protocol conformance.</li>
+<li>SourceFile: A file containing Swift source code. .swift 或 .sil 也可以是虚拟 REPL
+
+<ul>
+<li>Imports: Vec&lt;(ImportedModule, ImportOptions)></li>
+<li>Identifier</li>
+<li>Decls: Vec<Decl></li>
+<li>LocalTypeDecl: Vec<TypeDecl></li>
+<li>ObjCMethods: Map&lt;ObjCSelector, AbstractFunctionDecl></li>
+<li>infix, postfix, prefix operators: OperatorMap</li>
+</ul>
+</li>
+<li>BuiltinUnit</li>
+</ul>
+
+
+<h2>swift 命令入口</h2>
+
+<p>入口函数 <code>tools/driver/driver.cpp</code>，<code>main</code> 函数。</p>
+
+<p>集成多个子工具。同时若 <code>PATH</code> 下有名为 <code>swift-foobar</code> 的可执行文件，则可通过 <code>swift foobar</code> 调用。</p>
+
+<h3>编译器前端 <code>swift -frontend</code></h3>
+
+<p>主要用于编译。还能打印出各种编译时中间结果。</p>
+
+<h3>API Notes 功能 <code>swift -apinotes</code></h3>
+
+<p>参考信息位于 <a href="https://github.com/apple/swift/tree/master/apinotes">https://github.com/apple/swift/tree/master/apinotes</a> .</p>
+
+<p>简单说，API Notes 机制就是通过 <code>.apinotes</code> 文件（YAML格式）描述 Objective-C Framework 和对应 Swift API 的关系。最终生成 <code>.apinotesc</code> 文件，与 <code>.swiftmodule</code> 文件一起作为 Swift 的模块。</p>
+
+<p>主要功能包括且不限于：</p>
+
+<ul>
+<li><code>SwiftBridge</code>：设置对应的 Bridge 类型，例如 NSArray 对应与 <code>Swift.Array</code></li>
+<li><code>Nullability</code>/<code>NullabilityOfRet</code>： 类的属性、方法的参数、返回值对应类型是否可以为 null，即对应与 Swift 的 T 还是 T?</li>
+<li><code>Availability</code>：方法是否在 Swift 中暴露，并给出 availability message</li>
+<li><code>SwiftName</code>：方法 Selector 在 Swift 中的重命名，例如 <code>filteredArrayUsingPredicate:</code> 替换为 <code>filtered(using:)</code></li>
+</ul>
+
+
+<p>Dump 为YAML文件：</p>
+
+<pre><code>$&gt; swift -apinotes -binary-to-yaml /path/to/lib/swift/macosx/x86_64/Dispatch.apinotesc -o=-
+</code></pre>
+
+<h3>Module Wrap 工具 <code>swift -modulewrap</code></h3>
+
+<pre><code>// Wraps .swiftmodule files inside an object file container so they
+// can be passed to the linker directly. Mostly useful for platforms
+// where the debug info typically stays in the executable.
+// (ie. ELF-based platforms).
+</code></pre>
+
+<p>用法：</p>
+
+<pre><code>swift -modulewrap ObjectiveC.swiftmodule -o objc.o
+</code></pre>
+
+<p>实际发现是在 <code>.o</code> 里定义了 <code>___Swift_AST</code> 符号。</p>
+
+<h3>REPL</h3>
+
+<p>Swift 提供了两个 REPL(Read-Evaluate-Print Loop)，一个是 Swift 本身内置，另一个集成到了 lldb 命令行下。前者只有基本功能，即将废弃，后者功能更强大。</p>
+
+<p>子命令分别是：</p>
+
+<ul>
+<li><code>swift -deprecated-integrated-repl</code></li>
+<li><code>swift -lldb-repl</code>。</li>
+</ul>
+
+
+<p><code>swift -repl</code> 子命令选择可用的 REPL 进入，一般是 <code>lldb-repl</code>，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Swift 2.0 的错误处理(Swift 2.0 Error Handling)]]></title>
@@ -342,45 +438,6 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
 <li><a href="http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Swift Undocumented Grammar （Swift 黑语法）]]></title>
-    <link href="http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar/"/>
-    <updated>2014-07-04T03:05:11+08:00</updated>
-    <id>http://andelf.github.io/blog/2014/07/04/swift-undocumented-grammar</id>
-    <content type="html"><![CDATA[<p>本文介绍 Swift 的 Undocumented 语法特性。</p>
-
-<p>电子书上介绍的 default function parameter 这里都不好意思拿出来写。</p>
-
-<p>咳咳。持续更新。</p>
-
-<h2>用关键字当变量名</h2>
-
-<p>Keywards as variable name.</p>
-
-<pre><code class="scala">// escaped variable name
-let `let` = 1000
-dump(`let`, name: "variable named let")
-</code></pre>
-
-<h2><code>new</code> 关键字</h2>
-
-<p>The <code>new</code> keyword.</p>
-
-<p>快速初始化数组。</p>
-
-<pre><code class="scala">let an_array_with_100_zero = new(Int)[100]
-</code></pre>
-
-<h2>protocol type</h2>
-
-<p>use <code>protocol&lt;Protocol1, Protocol2, ...&gt;</code> as a type.</p>
-
-<h2>How I find it?</h2>
-
-<p>瞎试出来的。</p>
 ]]></content>
   </entry>
   

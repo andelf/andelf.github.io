@@ -9,7 +9,9 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="模式匹配 汉语字典中对“模式”的解释是：事物的标准样式。在计算机科学中，它指特定类型的数据（往往是序列或是树形结构）满足某一特定结构或格式。“匹配”本身是指一个判断寻找过程。最早的模式匹配用于文本编辑器中的正则字符串搜索，之后才作为编程语言特性。 模式匹配基础 模式匹配在计算机科学领域有两层意思。 &hellip;">
+  <meta name="description" content="Swift 3.0 新变化 TODO AST 结构 ModuleDecl
+模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。 FileUnit（抽象类）
+文件作用域，是代码组织的最小单元。 DerivedFileUnit: A container for a module-level &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +69,133 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-28T10:06:53+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Swift 3.0 新变化</h2>
+
+<p>TODO</p>
+
+<h2>AST 结构</h2>
+
+<p>ModuleDecl
+模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。</p>
+
+<p>FileUnit（抽象类）
+文件作用域，是代码组织的最小单元。</p>
+
+<ul>
+<li>DerivedFileUnit: A container for a module-level definition derived as part of an implicit protocol conformance.</li>
+<li>SourceFile: A file containing Swift source code. .swift 或 .sil 也可以是虚拟 REPL
+
+<ul>
+<li>Imports: Vec&lt;(ImportedModule, ImportOptions)></li>
+<li>Identifier</li>
+<li>Decls: Vec<Decl></li>
+<li>LocalTypeDecl: Vec<TypeDecl></li>
+<li>ObjCMethods: Map&lt;ObjCSelector, AbstractFunctionDecl></li>
+<li>infix, postfix, prefix operators: OperatorMap</li>
+</ul>
+</li>
+<li>BuiltinUnit</li>
+</ul>
+
+
+<h2>swift 命令入口</h2>
+
+<p>入口函数 <code>tools/driver/driver.cpp</code>，<code>main</code> 函数。</p>
+
+<p>集成多个子工具。同时若 <code>PATH</code> 下有名为 <code>swift-foobar</code> 的可执行文件，则可通过 <code>swift foobar</code> 调用。</p>
+
+<h3>编译器前端 <code>swift -frontend</code></h3>
+
+<p>主要用于编译。还能打印出各种编译时中间结果。</p>
+
+<h3>API Notes 功能 <code>swift -apinotes</code></h3>
+
+<p>参考信息位于 <a href="https://github.com/apple/swift/tree/master/apinotes">https://github.com/apple/swift/tree/master/apinotes</a> .</p>
+
+<p>简单说，API Notes 机制就是通过 <code>.apinotes</code> 文件（YAML格式）描述 Objective-C Framework 和对应 Swift API 的关系。最终生成 <code>.apinotesc</code> 文件，与 <code>.swiftmodule</code> 文件一起作为 Swift 的模块。</p>
+
+<p>主要功能包括且不限于：</p>
+
+<ul>
+<li><code>SwiftBridge</code>：设置对应的 Bridge 类型，例如 NSArray 对应与 <code>Swift.Array</code></li>
+<li><code>Nullability</code>/<code>NullabilityOfRet</code>： 类的属性、方法的参数、返回值对应类型是否可以为 null，即对应与 Swift 的 T 还是 T?</li>
+<li><code>Availability</code>：方法是否在 Swift 中暴露，并给出 availability message</li>
+<li><code>SwiftName</code>：方法 Selector 在 Swift 中的重命名，例如 <code>filteredArrayUsingPredicate:</code> 替换为 <code>filtered(using:)</code></li>
+</ul>
+
+
+<p>Dump 为YAML文件：</p>
+
+<pre><code>$&gt; swift -apinotes -binary-to-yaml /path/to/lib/swift/macosx/x86_64/Dispatch.apinotesc -o=-
+</code></pre>
+
+<h3>Module Wrap 工具 <code>swift -modulewrap</code></h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// Wraps .swiftmodule files inside an object file container so they
+</span><span class='line'>// can be passed to the linker directly. Mostly useful for platforms
+</span><span class='line'>// where the debug info typically stays in the executable.
+</span><span class='line'>// (ie. ELF-based platforms).</span></code></pre></td></tr></table></div></figure>
+
+
+<p>用法：</p>
+
+<pre><code>swift -modulewrap ObjectiveC.swiftmodule -o objc.o
+</code></pre>
+
+<p>实际发现是在 <code>.o</code> 里定义了 <code>___Swift_AST</code> 符号。</p>
+
+<h3>REPL</h3>
+
+<p>Swift 提供了两个 REPL(Read-Evaluate-Print Loop)，一个是 Swift 本身内置，另一个集成到了 lldb 命令行下。前者只有基本功能，即将废弃，后者功能更强大。</p>
+
+<p>子命令分别是：</p>
+
+<ul>
+<li><code>swift -deprecated-integrated-repl</code></li>
+<li><code>swift -lldb-repl</code>。</li>
+</ul>
+
+
+<p><code>swift -repl</code> 子命令选择可用的 REPL 进入，一般是 <code>lldb-repl</code>，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1619,501 +1748,6 @@ Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-30T15:10:41+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
-
-<p>本文主要介绍 Swift 所有标准库类型的层次结构，及所有标准类型。本文可作为参考手册使用。</p>
-
-<p>本人不保证内容及时性和正确性，请善于怀疑并反馈。谢谢。</p>
-
-<p>本文探索 Swift 所有基础类型和高级类型，以及所有协议和他们之间的继承关系。</p>
-
-<p>为了简化问题，某些类型略去了中间的过渡类型，人肉保证不歧义。</p>
-
-<h2>Swift 基础类型</h2>
-
-<h3>数值类型</h3>
-
-<h4>位</h4>
-
-<pre><code>Bit
-</code></pre>
-
-<p>只有一位，实现为 <code>enum</code>， <code>.zero</code> 或 <code>.one</code>。简单明了。</p>
-
-<p>协议: <code>RandomAccessIndex IntegerArithmetic</code></p>
-
-<h4>整型</h4>
-
-<p>有符号:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Int Int8 Int16 Int32 Int64</span></code></pre></td></tr></table></div></figure>
-
-
-<p>协议：<code>SignedInteger RandomAccessIndex BitwiseOperations SignedNumber CVarArg</code></p>
-
-<p>无符号:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>UInt UInt8 UInt16 UInt32 UInt64</span></code></pre></td></tr></table></div></figure>
-
-
-<p>协议：<code>UnsignedInteger RandomAccessIndex BitwiseOperations</code></p>
-
-<p>别名:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>IntMax = Int64
-</span><span class='line'>UIntMax = UInt64
-</span><span class='line'>IntegerLiteralType = Int
-</span><span class='line'>Word = Int // 字长
-</span><span class='line'>UWord = UInt</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>浮点型</h4>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Float Double Float80</span></code></pre></td></tr></table></div></figure>
-
-
-<p>别名：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>FloatLiteralType = Double
-</span><span class='line'>Float64 = Double</span></code></pre></td></tr></table></div></figure>
-
-
-<p>协议：<code>FloatingPointNumber</code>。</p>
-
-<h3>逻辑型</h3>
-
-<p>只有一个 <code>Bool</code>。</p>
-
-<p>实例： <code>true</code>、<code>false</code></p>
-
-<p>协议：<code>LogicValue</code>。</p>
-
-<h3>空</h3>
-
-<p>只有一个 <code>NilType</code>。</p>
-
-<p>唯一实例 <code>nil</code>。</p>
-
-<h3>字符（串）类型</h3>
-
-<ul>
-<li><code>String</code></li>
-<li><code>Character</code> Unicode 字符</li>
-<li><code>UnicodeScalar</code> 相当于 C 中的 <code>wchar_t</code></li>
-<li><code>CString</code> 用于表示 C 中的 <code>const char *</code>，请参考相关文章</li>
-<li><code>StaticString</code> 静态字符串，内部使用，例如 <code>fatalError</code></li>
-</ul>
-
-
-<p>别名：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>StringLiteralType = String
-</span><span class='line'>ExtendedGraphemeClusterType = String</span></code></pre></td></tr></table></div></figure>
-
-
-<p>官方文档</p>
-
-<blockquote><p><code>Character</code> represents some Unicode grapheme cluster as
-defined by a canonical, localized, or otherwise tailored
-segmentation algorithm.</p></blockquote>
-
-<p><code>String</code> 实现协议：<code>Collection ExtensibleCollection OutputStream TargetStream</code>。</p>
-
-<h3>Array 类型</h3>
-
-<ul>
-<li><code>Array&lt;T&gt;</code></li>
-<li><code>ContiguousArray&lt;T&gt;</code></li>
-</ul>
-
-
-<p>实现协议 <code>ArrayType</code>。</p>
-
-<p>内部容器：</p>
-
-<ul>
-<li><code>ArrayBuffer&lt;T&gt;</code></li>
-<li><code>ContiguousArrayBuffer&lt;T&gt;</code></li>
-</ul>
-
-
-<p>这两个类型看起来是 Array 的内部容器，一般不应该直接使用。</p>
-
-<h3>字典类型</h3>
-
-<p><code>Dictionary&lt;KeyType : Hashable, ValueType&gt;</code></p>
-
-<p>只实现了 <code>Collection</code>。</p>
-
-<h3>元祖类型</h3>
-
-<p>除正常元祖外，还有个特殊的别名</p>
-
-<pre><code>Void = ()
-</code></pre>
-
-<p>其实很多语言都这么定义的，比如 Haskell 。</p>
-
-<h3>Optional 类型</h3>
-
-<ul>
-<li><code>Optional&lt;T&gt;</code> 即 <code>T?</code></li>
-<li><code>ImplicitlyUnwrappedOptional&lt;T&gt;</code> 即 <code>T!</code></li>
-</ul>
-
-
-<p>实现协议: <code>LogicValue</code>，行为是判断是否为 <code>.None</code>。</p>
-
-<p>另外 <a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">Swift 的隐式类型转换</a>
-有提到，为什么 <code>nil</code> 可以给 <code>Optional</code> 类型赋值的问题。</p>
-
-<h3>C/ObjC 兼容类型</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>CBool = Bool
-</span><span class='line'>CFloat = Float
-</span><span class='line'>CDouble = Double
-</span><span class='line'>CChar = Int8
-</span><span class='line'>CSignedChar = Int8
-</span><span class='line'>CUnsignedChar = UInt8
-</span><span class='line'>CChar16 = UInt16
-</span><span class='line'>CWideChar = UnicodeScalar
-</span><span class='line'>CChar32 = UnicodeScalar
-</span><span class='line'>CInt = Int32
-</span><span class='line'>CUnsignedInt = UInt32
-</span><span class='line'>CShort = Int16
-</span><span class='line'>CUnsignedShort = UInt16
-</span><span class='line'>CLong = Int
-</span><span class='line'>CUnsignedLong = UInt
-</span><span class='line'>CLongLong = Int64
-</span><span class='line'>CUnsignedLongLong = UInt64</span></code></pre></td></tr></table></div></figure>
-
-
-<p>具体使用参考 C 交互的几篇文章，基本没区别。</p>
-
-<h3>Any 类型</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>AnyObject
-</span><span class='line'>// 别名
-</span><span class='line'>Any = protocol&lt;&gt;
-</span><span class='line'>AnyClass = AnyObject.Type</span></code></pre></td></tr></table></div></figure>
-
-
-<p>还有个用在函数定义的类型签名上， <code>Any.Type</code>。</p>
-
-<p>顺便这里看到一个奇异的语法 <code>protocol&lt;&gt;</code>，这个也是 Swift 一种用来表示类型限制的方法，可以用在类型的位置，尖括号里可以是协议的列表。</p>
-
-<h3>指针类型</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>UnsafePointer&lt;T&gt;
-</span><span class='line'>CMutableVoidPointer
-</span><span class='line'>CConstVoidPointer
-</span><span class='line'>COpaquePointer
-</span><span class='line'>CConstPointer&lt;T&gt;
-</span><span class='line'>AutoreleasingUnsafePointer&lt;T&gt;
-</span><span class='line'>CVaListPointer
-</span><span class='line'>CMutablePointer&lt;T&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>参考 C 交互文章。</p>
-
-<ul>
-<li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">简析Swift和C的交互</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift 与 ObjC 和 C 的交互，第三部分</a></li>
-</ul>
-
-
-<h3>其他辅助类型</h3>
-
-<p>多了去了。比如 for-in 实现时候的 Generator 、比如反射时候用的 <code>*Mirror</code>、比如切片操作用的 <code>Range&lt;T&gt;</code>。比如内部储存类。</p>
-
-<p>还有储存辅助类 <code>OnHeap&lt;T&gt;</code> 等等。以后有机会再探索。</p>
-
-<h2>Swift 标准库协议</h2>
-
-<h3>打印相关 <code>Printable DebugPrintable</code></h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Printable</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">description</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="n">protocol</span> <span class="nc">DebugPrintable</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">debugDescription</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>用于打印和字符串的 Interpolation 。</p>
-
-<h3><code>*LiteralConvertible</code></h3>
-
-<p>从字面常量获取。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nc">ArrayLiteralConvertible</span>
-</span><span class='line'><span class="nc">IntegerLiteralConvertible</span>
-</span><span class='line'><span class="nc">DictionaryLiteralConvertible</span>
-</span><span class='line'><span class="nc">CharacterLiteralConvertible</span>
-</span><span class='line'><span class="nc">FloatLiteralConvertible</span>
-</span><span class='line'><span class="nc">ExtendedGraphemeClusterLiteralConvertible</span>
-</span><span class='line'><span class="nc">StringLiteralConvertible</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>其中字符串和字符的字面常量表示有所重合，也就是说 <code>"a"</code> 可以是字符串也可以是字符。<a href="http://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/">简析 Swift 中的 Pattern Match</a> 一文中就是遇到了类似的情况。</p>
-
-<h3><code>LogicValue</code></h3>
-
-<p>相当于重载 <code>if</code>、<code>while</code> 的行为。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">LogicValue</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">getLogicValue</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><code>Sequence</code></h3>
-
-<p>相当于重载 for-in 。和 <code>Generator</code> 联用。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Sequence</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">typealias</span> <span class="nc">GeneratorType</span> <span class="k">:</span> <span class="kt">Generator</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">generate</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">GeneratorType</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">protocol</span> <span class="nc">Generator</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">typealias</span> <span class="nc">Element</span>
-</span><span class='line'>  <span class="n">mutating</span> <span class="n">func</span> <span class="n">next</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Element</span><span class="o">?</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// for .. in { }</span>
-</span><span class='line'><span class="k">var</span> <span class="nc">__g</span> <span class="k">=</span> <span class="n">someSequence</span><span class="o">.</span><span class="n">generate</span><span class="o">()</span>
-</span><span class='line'><span class="k">while</span> <span class="n">let</span> <span class="n">x</span> <span class="k">=</span> <span class="nc">__g</span><span class="o">.</span><span class="n">next</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'><span class="o">}}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>整型、 Index 相关协议</h3>
-
-<p>这些协议都是用来表示容器类型的索引、及相关的索引运算。</p>
-
-<p>这里略去了部分私有内容。略去了 <code>Printable</code> 等。</p>
-
-<p><img class="left" src="/images/attachments/swift-integer.png" title="'Swift Integer Type Hierarchy'" ></p>
-
-<h3>RawOptionSet 相关协议</h3>
-
-<p>一般用来表示二进制的选项，类似于 C enum ，很多 Cocoa 的 flag 被映射到它。相当于一个 Wrapper 的作用。</p>
-
-<p><img class="left" src="/images/attachments/swift-rawoptset.png" title="'Swift RawOptionSet'" ></p>
-
-<p>可以看到要求被 Wrap 的对象支持 <code>BitwiseOperations</code>。</p>
-
-<h3>Array 相关协议</h3>
-
-<p>图中用虚线标注了和 <code>Generator</code> 的关系。</p>
-
-<p><img class="left" src="/images/attachments/swift-collection.png" title="'Swift Collection Protocol'" ></p>
-
-<p><code>Array&lt;T&gt;</code> 类型实现了 <code>ArrayType</code> 协议。</p>
-
-<p><code>Dictionary</code> 类型实现了 <code>Collection</code> 协议。</p>
-
-<h3>反射相关协议</h3>
-
-<p>包括 <code>Mirror</code>、<code>MirrorDisposition</code>、<code>Reflectable</code>。</p>
-
-<p>请参考 <a href="http://andelf.github.io/blog/2014/06/20/swift-reflection/">Swift 的反射</a>。</p>
-
-<h3>浮点数协议</h3>
-
-<p>只有一个 <code>FloatingPointNumber</code>。单独存在。是为了定义完整而存在。看官自己搞定。</p>
-
-<h3>IO 输出，伪输出相关</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">Streamable</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">writeTo</span><span class="o">&lt;</span><span class="nc">Target</span> <span class="k">:</span> <span class="kt">OutputStream&gt;</span><span class="o">(</span><span class="kt">inout</span> <span class="kt">target:</span> <span class="kt">Target</span><span class="o">)</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>Streamable</code> 表示可以被写入到输出流中，比如字符串、字符等。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">OutputStream</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">write</span><span class="o">(</span><span class="n">string</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>OutputStream</code> 表示一个输出流，比如标准输出（<code>stdout</code>），也可以表示一个伪输出流，例如字符串 <code>String</code>。</p>
-
-<p>标准输出的获取方法</p>
-
-<pre><code>var stdout = _Stdout()
-</code></pre>
-
-<p>看起来是私有结构，某一天不能用的话，别怪我。调用时候用 <code>inout</code> 引用语法。</p>
-
-<h3>CVarArg 处理</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">CVarArg</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">encode</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Word</span><span class="o">[]</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>用于处理 C 函数的可变参数，参考 <a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a>。</p>
-
-<h3>Bridge 协议</h3>
-
-<p>这里有个疑问就是编译过程中这些 Bridge 协议有没有参与。目前还没办法确定。</p>
-
-<ul>
-<li><code>_BridgedToObjectiveC</code></li>
-<li><code>_ConditionallyBridgedToObjectiveC</code></li>
-</ul>
-
-
-<p>具体内容可以参考 <a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift 与 Objective-C 之间的交互</a>一文。</p>
-
-<h3>其他</h3>
-
-<p><code>Sink</code> 看起来是一个容器，可能是用来编码时使用。</p>
-
-<p><code>ArrayBufferType</code> 用于表示 <code>ArrayType</code> 的内部储存，看起来似乎也可以直接用。</p>
-
-<p><code>UnicodeCodec</code> 用于处理编码。有 <code>UTF8</code>、<code>UTF16</code>、<code>UTF32</code> 可用。</p>
-
-<p><code>ArrayBound</code> 用来处理数组边界，详细原理和作用过程未知。</p>
-
-<h2>总结</h2>
-
-<p>无。</p>
-
-<p>参考：</p>
-
-<ul>
-<li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -2127,6 +1761,10 @@ segmentation algorithm.</p></blockquote>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/03/22/rust-pattern-match/">Rust Pattern Match(Rust中的模式匹配)</a>
@@ -2202,10 +1840,6 @@ segmentation algorithm.</p></blockquote>
     
       <li class="post">
         <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a>
       </li>
     
   </ul>
