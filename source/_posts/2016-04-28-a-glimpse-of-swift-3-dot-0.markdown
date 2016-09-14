@@ -6,11 +6,26 @@ comments: true
 categories: swift
 ---
 
+安装工具
+
+https://github.com/kylef/swiftenv
+
 ## Swift 3.0 新变化
 
-TODO
+以下内容来自 Swift 语言提案[^1]。
+
+[^1]: (apple/swift-evolution)[https://github.com/apple/swift-evolution]
+
+Swift 3.0 发布计划
+
+### Swift Package System
+
+https://github.com/donald-pinckney/swift-packages
+
 
 ## AST 结构
+
+代码位于 ``include/swift/AST`` 和 ``lib/AST``。
 
 ModuleDecl 
 模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。
@@ -37,7 +52,7 @@ FileUnit（抽象类）
 
 ### 编译器前端 ``swift -frontend``
 
-主要用于编译。还能打印出各种编译时中间结果。
+编译。同时支持打印出各种编译时中间结果。
 
 ### API Notes 功能 ``swift -apinotes``
 
