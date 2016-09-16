@@ -9,7 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="@availability(*, unavailable, message=&ldquo;a Message&rdquo;) to disable a func? @asmname(&ldquo;a_name&rdquo;) Undocumented Attributes By me. :) @ &hellip;">
+  <meta name="description" content="这是我自己给的命名，因为这个特性暂时看是 undocumented 的。通过 lldb 和 Xcode 的变量 inspector 功能发掘出来的。然后尝试调用没有问题。 This is an undocumented feature. I found it by lldb and the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,190 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/08/swift-implicit-type-cast/">Implicit Type Convertion in Swift (Swift 的隐式类型转换)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-08T00:25:43+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这是我自己给的命名，因为这个特性暂时看是 undocumented 的。通过 lldb 和 Xcode 的变量 inspector 功能发掘出来的。然后尝试调用没有问题。</p>
+
+<p>This is an undocumented feature. I found it by lldb and the variable inspector of Xcode6-beta.</p>
+
+<p>形式: <code>@conversion func __conversion&lt;T&gt;() -&gt; T { }</code></p>
+
+<p>对了 Reddit 网友提出 <code>@conversion</code> 是可以省略的。个人认为编译器可能对不同的两种方式行为略有不同，最好还是加上。还有就是 <code>@transparent</code> 其实是表示 inline 。</p>
+
+<p>先随便设想个场合。比如我们某个库需要表示一个二维点。</p>
+
+<p>Suppose we need a Point type in our library.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">struct</span> <span class="nc">Point</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">var</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">var</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">let</span> <span class="n">p</span> <span class="k">=</span> <span class="nc">Point</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="err">23</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="err">45</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>相信看了几天的 Swift，信手捏来啊。啧啧。
+然后你发现你的另个库已经用了 (Int, Int) 来表示二维点了。。。。。你的把手头一堆的 Point 在转成 (Int, Int)，或者加个什么方法。？</p>
+
+<p>For some reason, we need to work with another library, which uses <code>(Int, Int)</code> as the representation of a point.
+Must we refacotr the code and add type conversion function calls?</p>
+
+<p>妈蛋重构么？</p>
+
+<p>No no~~</p>
+
+<p>我们这样来</p>
+
+<p>复习下 extension 语法, 加上这里要介绍的“隐式类型转换”</p>
+
+<p>We can use the Swift&rsquo;s hiding feature &ndash; Implicit Type Convertion(or to say Cast?).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">Point</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nc">Int</span><span class="o">,</span> <span class="nc">Int</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>赞爆了。然后我们就可以这么写</p>
+
+<p>The we can directly make a <code>(Int, Int)</code> from a <code>Point</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">)</span> <span class="k">=</span> <span class="n">p</span>
+</span><span class='line'><span class="c1">// suppose: func drawPoint(pt: (Int,Int)) { }</span>
+</span><span class='line'><span class="n">drawPoint</span><span class="o">(</span><span class="n">p</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你看无痛苦吧。然后所有需要 (Int, Int) 参数的函数，直接传递 Point 类型是没有任何问题的。（这个我也很吃惊，理论上这个玩意还是有个推导过程的，会有BUG什么的，没想到老crash 的 Swift 编译器竟然这个做得很好)</p>
+
+<p>好吧这个例子实在是太渣了。我们换个例子说。</p>
+
+<p>假设，我们有个库函数，接受 Color struct (r, g, b 三原色表示) 作为参数。
+比如调用  <code>setColor(Color(r:23, g:34, b:34))</code>
+然后实际上颜色我们用字符串表示，比如"white", &ldquo;black&rdquo; 或者 UInt32 表示比如 #ffeeff 。。。</p>
+
+<p>然后为了方便，我们本来需要写一些转换函数，然后调用。</p>
+
+<p>现在不同了，比如我们给 String 写个 隐式转换，代码里直接用。（用protocol 也可以实现相同的功能）</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Color</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">switch</span> <span class="n">self</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">case</span> <span class="s">&quot;red&quot;</span><span class="k">:</span>
+</span><span class='line'>            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">255</span><span class="o">,</span> <span class="kt">g:</span><span class="err">0</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="err">0</span><span class="o">)</span>
+</span><span class='line'>        <span class="k">case</span> <span class="s">&quot;green&quot;</span><span class="k">:</span>
+</span><span class='line'>            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">0</span><span class="o">,</span> <span class="kt">g:</span><span class="err">255</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span><span class="err">0</span><span class="o">)</span>
+</span><span class='line'>        <span class="o">.....</span>
+</span><span class='line'>        <span class="n">default</span><span class="k">:</span>
+</span><span class='line'>            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">0</span><span class="o">,</span> <span class="kt">g:</span><span class="err">0</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span><span class="err">0</span><span class="o">)</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后代码里用到 Color 的地方你直接写个 &ldquo;red&rdquo; 啊 &ldquo;pink&rdquo; 骚粉啊。都是没有问题的。
+setColor(&ldquo;red&rdquo;)</p>
+
+<p>上面都是废话。</p>
+
+<p>隐式类型转换标准： <code>@conversion func __conversion&lt;T&gt;() -&gt; T { }</code> 可以作为方法写到 struct 里。也可以通过 extension 附加。</p>
+
+<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。</p>
+
+<p>然后就是语言本身中有个细小的问题 微博 onevcat 文章里提到。</p>
+
+<p>nil 是 NilType 的唯一实例（来自Python的同学对这种定义一定不陌生)
+而 Type? 是 Optional<Type> 类型的，是个enum，变种是  Some(T) 和 None.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">enum</span> <span class="nc">Optional</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>  <span class="o">{</span>
+</span><span class='line'>    <span class="k">case</span> <span class="nc">None</span>
+</span><span class='line'>    <span class="k">case</span> <span class="nc">Some</span><span class="o">(</span><span class="n">T</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>那同学你有没有想到 ，我们为什么可以给一个 Type? 赋值 nil 呢?</p>
+
+<p>答案就是这里讲到的 隐式类型转换。</p>
+
+<p>In Swift standard library, the unique <code>nil</code> has a type of <code>NilType</code> and is the only instance. And <code>Type?</code> is the
+shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
+
+<p>Why we can directly set a <code>Type?</code> variable to <code>nil</code>?</p>
+
+<p>The Implicit Types Convertion is the answer. The <code>NilType</code> implements conversion methed to <code>Type?</code> and <code>Type!</code>.</p>
+
+<p>I&rsquo;ve dump the definitions from lldb. You can find them in:</p>
+
+<p>我导出的一些标准库定义在下面的链接。</p>
+
+<p><a href="https://github.com/andelf/Defines-Swift/blob/master/Swift-misc.swift">My Github Repo</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -8503,46 +8687,9 @@ and generates corresponding ast type.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/11/20/hello-world/">Hello World!</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-11-20T17:26:26+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='haskell'><span class='line'><span class="nf">main</span> <span class="ow">=</span> <span class="n">putStrLn</span> <span class="s">&quot;Hello World&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="5">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -8555,6 +8702,10 @@ and generates corresponding ast type.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/">折腾 Raspberry Pi + HomeKit 手记</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a>
@@ -8630,10 +8781,6 @@ and generates corresponding ast type.</p>
     
       <li class="post">
         <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
       </li>
     
   </ul>

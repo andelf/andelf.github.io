@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Swift | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/swift/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2016-04-29T00:30:50+08:00</updated>
+  <updated>2016-09-16T21:48:10+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -18,11 +18,23 @@
     <link href="http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/"/>
     <updated>2016-04-28T10:06:53+08:00</updated>
     <id>http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0</id>
-    <content type="html"><![CDATA[<h2>Swift 3.0 新变化</h2>
+    <content type="html"><![CDATA[<p>安装工具</p>
 
-<p>TODO</p>
+<p><a href="https://github.com/kylef/swiftenv">https://github.com/kylef/swiftenv</a></p>
+
+<h2>Swift 3.0 新变化</h2>
+
+<p>以下内容来自 Swift 语言提案<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>。</p>
+
+<p>Swift 3.0 发布计划</p>
+
+<h3>Swift Package System</h3>
+
+<p><a href="https://github.com/donald-pinckney/swift-packages">https://github.com/donald-pinckney/swift-packages</a></p>
 
 <h2>AST 结构</h2>
+
+<p>代码位于 <code>include/swift/AST</code> 和 <code>lib/AST</code>。</p>
 
 <p>ModuleDecl
 模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。</p>
@@ -55,7 +67,7 @@
 
 <h3>编译器前端 <code>swift -frontend</code></h3>
 
-<p>主要用于编译。还能打印出各种编译时中间结果。</p>
+<p>编译。同时支持打印出各种编译时中间结果。</p>
 
 <h3>API Notes 功能 <code>swift -apinotes</code></h3>
 
@@ -106,6 +118,14 @@
 
 
 <p><code>swift -repl</code> 子命令选择可用的 REPL 进入，一般是 <code>lldb-repl</code>，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。</p>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>(apple/swift-evolution)[https://github.com/apple/swift-evolution]<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
 ]]></content>
   </entry>
   

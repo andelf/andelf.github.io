@@ -9,9 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="Swift 3.0 新变化 TODO AST 结构 ModuleDecl
-模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。 FileUnit（抽象类）
-文件作用域，是代码组织的最小单元。 DerivedFileUnit: A container for a module-level &hellip;">
+  <meta name="description" content="安装工具 https://github.com/kylef/swiftenv Swift 3.0 新变化 以下内容来自 Swift 语言提案1。 Swift 3.0 发布计划 Swift Package System https://github.com/donald-pinckney/swift &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -95,11 +93,23 @@
   </header>
 
 
-<div class="entry-content"><h2>Swift 3.0 新变化</h2>
+<div class="entry-content"><p>安装工具</p>
 
-<p>TODO</p>
+<p><a href="https://github.com/kylef/swiftenv">https://github.com/kylef/swiftenv</a></p>
+
+<h2>Swift 3.0 新变化</h2>
+
+<p>以下内容来自 Swift 语言提案<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>。</p>
+
+<p>Swift 3.0 发布计划</p>
+
+<h3>Swift Package System</h3>
+
+<p><a href="https://github.com/donald-pinckney/swift-packages">https://github.com/donald-pinckney/swift-packages</a></p>
 
 <h2>AST 结构</h2>
+
+<p>代码位于 <code>include/swift/AST</code> 和 <code>lib/AST</code>。</p>
 
 <p>ModuleDecl
 模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。</p>
@@ -132,7 +142,7 @@
 
 <h3>编译器前端 <code>swift -frontend</code></h3>
 
-<p>主要用于编译。还能打印出各种编译时中间结果。</p>
+<p>编译。同时支持打印出各种编译时中间结果。</p>
 
 <h3>API Notes 功能 <code>swift -apinotes</code></h3>
 
@@ -187,6 +197,14 @@
 
 
 <p><code>swift -repl</code> 子命令选择可用的 REPL 进入，一般是 <code>lldb-repl</code>，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。</p>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>(apple/swift-evolution)[https://github.com/apple/swift-evolution]<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
 </div>
 
 
@@ -239,6 +257,8 @@
         <a class="basic-alignment left" href="/blog/2016/03/22/rust-pattern-match/" title="Previous Post: Rust Pattern Match(Rust中的模式匹配)">&laquo; Rust Pattern Match(Rust中的模式匹配)</a>
       
       
+        <a class="basic-alignment right" href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/" title="Next Post: 折腾 Raspberry Pi + HomeKit 手记">折腾 Raspberry Pi + HomeKit 手记 &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -256,6 +276,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/">折腾 Raspberry Pi + HomeKit 手记</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a>
@@ -331,10 +355,6 @@
     
       <li class="post">
         <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
       </li>
     
   </ul>

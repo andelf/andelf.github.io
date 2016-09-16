@@ -9,7 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="声明： 原创发现，原创内容。转载注明我或者 SwiftChina . weibo 其中基础部分借鉴了 WWDC 407 部分的介绍。 相关的分析主要基于我 dump 出的 Swift 标准库声明代码，位于 我的 Github andelf/Defines-Swift。 引子 WWDC 407 &hellip;">
+  <meta name="description" content="本文正式标题是：简析 Swift 中的 Pattern Match 副标题是：妈蛋 Swift 你又用黑属性坑大家了: 为什么 switch case 可以用数字匹配字符 声明： 原创发现，原创内容。转载注明我或者 SwiftChina . weibo 问题的提出 故事是这样的， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,362 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-17T09:29:48+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文正式标题是：简析 Swift 中的 Pattern Match</p>
+
+<p>副标题是：妈蛋 Swift 你又用黑属性坑大家了: 为什么 switch case 可以用数字匹配字符</p>
+
+<p>声明： 原创发现，原创内容。转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
+
+<h2>问题的提出</h2>
+
+<p>故事是这样的，昨天有人在论坛上发了个帖子，虽然不太规范而且含糊，不过还是能看出来他在问什么。<a href="http://swift.sh/topic/151/switch-case10/">传送门</a></p>
+
+<p>重新把问题简化搬运过来。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="n">count</span> <span class="k">=</span> <span class="s">&quot;0&quot;</span>
+</span><span class='line'><span class="n">switch</span> <span class="n">count</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">case</span> <span class="mi">1</span><span class="k">:</span>
+</span><span class='line'>    <span class="kt">println</span><span class="o">(</span><span class="err">&quot;</span><span class="kt">location</span> <span class="err">1&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="kt">case</span> <span class="err">0</span><span class="kt">:</span>
+</span><span class='line'>    <span class="n">println</span><span class="o">(</span><span class="s">&quot;location 2&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">case</span> <span class="s">&quot;1&quot;</span><span class="k">:</span>
+</span><span class='line'>    <span class="kt">println</span><span class="o">(</span><span class="err">&quot;</span><span class="kt">location</span> <span class="err">3&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="kt">default:</span>
+</span><span class='line'>    <span class="n">println</span><span class="o">(</span><span class="s">&quot;location 4&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>为什么上面的代码可以通过编译？</p>
+
+<h2>问题验证</h2>
+
+<p>这几天说了很多了， Swift 是强类型语言，所以类型不同肯定不能在一起。直觉上，这段代码肯定不可能编译通过，错误一定是类型错误。</p>
+
+<p>果断扔代码到文件，然后编译（我个人习惯用命令行直接编译）:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// 填入 test.swift</span>
+</span><span class='line'><span class="n">xcrun</span> <span class="n">swift</span> <span class="o">-</span><span class="n">g</span> <span class="n">test</span><span class="o">.</span><span class="n">swift</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>果然出错，不过出错信息略诡异：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">test</span><span class="o">.</span><span class="n">swift</span><span class="k">:</span><span class="err">4</span><span class="kt">:</span><span class="err">6</span><span class="kt">:</span> <span class="kt">error:</span> <span class="kt">could</span> <span class="kt">not</span> <span class="kt">find</span> <span class="kt">an</span> <span class="kt">overload</span> <span class="kt">for</span> <span class="err">&#39;</span><span class="kt">~=</span><span class="err">&#39;</span> <span class="kt">that</span> <span class="kt">accepts</span> <span class="kt">the</span> <span class="kt">supplied</span> <span class="kt">arguments</span>
+</span><span class='line'><span class="k">case</span> <span class="mi">1</span><span class="k">:</span>
+</span><span class='line'>     <span class="kt">^</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>故事到这里也许完事了。嗯，不可以编译，问题也许是 Xcode 6 beta 版的 BUG 什么的。微博上的 <a href="http://weibo.com/owenzx">@肇鑫</a> 也提到， 用 Playground 编译也是出错，出错信息同上。</p>
+
+<p>看起来暂时是无法重现问题。</p>
+
+<h3>出错信息</h3>
+
+<p>先解释下这个出错信息，熟读那本 ibook 的同学，可能会记得，在 swift case 那节是有讲到 <code>~=</code> 这个运算符的，也讲到了如何自定义它。</p>
+
+<blockquote><p>Expression Pattern</p>
+
+<p>An expression pattern represents the value of an expression. Expression patterns appear only in switch statement case labels.</p>
+
+<p>The expression represented by the expression pattern is compared with the value of an input expression using the Swift standard library ~= operator. The matches succeeds if the ~= operator returns true. By default, the ~= operator compares two values of the same type using the == operator. It can also match an integer value with a range of integers in an Range object.</p></blockquote>
+
+<p>所以其实 <code>~=</code> 是一个匹配运算符(Pattern Match Operator)，专门用在 Pattern Match 的地方，比如 switch 的 case 。一般情况下它直接调用 <code>==</code> 运算符。</p>
+
+<p>原书还写道：</p>
+
+<blockquote><p>You can overload the ~= operator to provide custom expression matching behavior. For example, you can rewrite the above example to compare the point expression with a string representations of points.</p></blockquote>
+
+<p>说明 Pattern Match 的行为是可以通过重载 <code>~=</code> 控制的。书中有重载的例子，小伙伴们可以看看。</p>
+
+<p>深入下，来看看 <code>~=</code> 到底是什么东西：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@transparent</span> <span class="n">func</span> <span class="o">~=&lt;</span><span class="n">T</span> <span class="k">:</span> <span class="kt">Equatable&gt;</span><span class="o">(</span><span class="kt">a:</span> <span class="kt">T</span><span class="o">,</span> <span class="kt">b:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span><span class='line'><span class="n">func</span> <span class="o">~=&lt;</span><span class="n">T</span> <span class="k">:</span> <span class="kt">RandomAccessIndex</span> <span class="kt">where</span> <span class="kt">T.DistanceType</span> <span class="kt">:</span> <span class="kt">SignedInteger&gt;</span><span class="o">(</span><span class="kt">x:</span> <span class="kt">Range&lt;T&gt;</span><span class="o">,</span> <span class="kt">y:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到，首先它可以匹配两个相同类型的 Equatable，而且是 <code>@transparent</code>，说明没有额外开销， inline 函数，从书中看，完全等价于调用 <code>==</code>，不深究了。</p>
+
+<p>然后，它可以匹配一个 <code>Rnage&lt;T&gt;</code> 和 <code>T</code>，这也就是我们在 switch case 里写的 <code>case 1..18: println("未成年")</code> 背后的奥秘，略有开销。</p>
+
+<p>以上说明了为什么出错信息提示为什么是 <code>~=</code> 运算符重载失败，而不是类型错误（其实也算是一种类型错误，没有找到适合运算符的类型）。</p>
+
+<h3>再次尝试重现</h3>
+
+<p>有了上面的线索，是不是怀疑我们遗漏了什么？回到原问题提出的地方：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">override</span> <span class="n">func</span> <span class="n">viewDidLoad</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'><span class="k">super</span><span class="o">.</span><span class="n">viewDidLoad</span><span class="o">()</span>
+</span><span class='line'><span class="n">let</span> <span class="n">count</span> <span class="k">=</span> <span class="s">&quot;0&quot;</span>
+</span><span class='line'><span class="o">....</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>看起来，他是在 App 环境下调用的，这也许就是问题的根源。之前有介绍过， Cocoa 框架给 Swift 语言添加了很多东西，包括一大批的 <code>extension</code>，还有一堆隐式类型转换。</p>
+
+<p>我们在 <code>test.swift</code> 第一行加入 <code>import Cocoa</code>，重新编译。结果正常通过编译。代码执行结果符合预期，走 default 分支。</p>
+
+<h3>这也不科学!</h3>
+
+<p>小伙伴们惊呆了，看起来 <code>count</code> 变量明明是一个 <code>Character</code>，结果竟然能匹配 <code>Character</code> 和 <code>Int</code>。</p>
+
+<h2>祭出 lldb</h2>
+
+<p>lldb 挂上 exe ，看看汇编代码是怎么样的。带上注释。我摘录最能说明问题的一段。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='gas'><span class='line'>   <span class="err">;</span> <span class="err">这里是</span> <span class="nf">case</span> <span class="mi">1</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d1a:</span>  <span class="nf">movabsq</span> <span class="no">$0x01</span><span class="p">,</span> <span class="nv">%rdi</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d24:</span>  <span class="nf">movq</span>   <span class="nv">%rax</span><span class="p">,</span> <span class="p">-</span><span class="mi">0x148</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="err">;</span> <span class="err">将</span> <span class="err">1</span> <span class="err">转换为</span> <span class="nf">NSNumber</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d2b:</span>  <span class="nf">callq</span>  <span class="mi">0x100003f32</span>               <span class="err">;</span> <span class="no">symbol</span> <span class="no">stub</span> <span class="no">for</span><span class="p">:</span> <span class="no">Swift.Int.__conversion</span> <span class="p">(</span><span class="no">Swift.Int</span><span class="p">)()</span> <span class="p">-</span><span class="err">&gt;</span> <span class="no">ObjectiveC.NSNumber</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="err">;</span> <span class="err">此处省略调用</span> <span class="nf">ARC</span> <span class="err">代码若干</span>
+</span><span class='line'>   <span class="na">....</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="err">;</span> <span class="err">这里其实是</span> <span class="nl">count:</span> <span class="nf">String</span> <span class="p">,</span> <span class="err">三个寄存器表示</span>
+</span><span class='line'>   <span class="err">;</span> <span class="err">检查</span> <span class="nf">String</span> <span class="err">大小你会发现</span> <span class="no">sizeof</span><span class="p">(</span><span class="no">String</span><span class="p">)</span> <span class="err">是</span> <span class="mi">24</span><span class="err">，三个</span> <span class="mi">64</span><span class="no">bit</span>
+</span><span class='line'>   <span class="err">;</span> <span class="err">熟悉</span> <span class="nf">Rust</span> <span class="err">的同学知道，字符串实现，无非三个</span> <span class="no">field</span> <span class="err">：</span> <span class="no">size</span> <span class="err">、</span> <span class="no">capacity</span> <span class="err">、</span><span class="no">pointer</span>
+</span><span class='line'>   <span class="err">;</span> <span class="err">猜测</span> <span class="nf">Swift</span> <span class="err">完全相同因为它大量借鉴了</span> <span class="no">Rust</span> <span class="err">（不服来喷）</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d43:</span>  <span class="nf">movq</span>   <span class="p">-</span><span class="mi">0x128</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rdi</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d4a:</span>  <span class="nf">movq</span>   <span class="p">-</span><span class="mi">0x130</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rsi</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d51:</span>  <span class="nf">movq</span>   <span class="p">-</span><span class="mi">0x138</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rdx</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d58:</span>  <span class="nf">movq</span>   <span class="nv">%rax</span><span class="p">,</span> <span class="p">-</span><span class="mi">0x158</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+</span><span class='line'>   <span class="err">;</span> <span class="err">这里将</span> <span class="nl">count:</span> <span class="nf">String</span> <span class="err">转换为</span> <span class="no">NSString</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d5f:</span>  <span class="nf">callq</span>  <span class="mi">0x100003f26</span>               <span class="err">;</span> <span class="no">symbol</span> <span class="no">stub</span> <span class="no">for</span><span class="p">:</span> <span class="no">Swift.String.__conversion</span> <span class="p">(</span><span class="no">Swift.String</span><span class="p">)()</span> <span class="p">-</span><span class="err">&gt;</span> <span class="no">ObjectiveC.NSString</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d64:</span>  <span class="nf">movq</span>   <span class="p">-</span><span class="mi">0x150</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rdi</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d6b:</span>  <span class="nf">movq</span>   <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rsi</span>
+</span><span class='line'>   <span class="err">;</span> <span class="err">**最最神奇的地方来了，这里调用了</span> <span class="err">~=</span> <span class="nf">ObjectiveC</span> <span class="err">版，比较两个</span> <span class="no">NSObject</span> <span class="err">的版本。</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100001d6e:</span>  <span class="nf">callq</span>  <span class="mi">0x100003f20</span>               <span class="err">;</span> <span class="no">symbol</span> <span class="no">stub</span> <span class="no">for</span><span class="p">:</span> <span class="no">ObjectiveC.</span><span class="err">~=</span> <span class="err">@</span><span class="no">infix</span> <span class="p">(</span><span class="no">ObjectiveC.NSObject</span><span class="p">,</span> <span class="no">ObjectiveC.NSObject</span><span class="p">)</span> <span class="p">-</span><span class="err">&gt;</span> <span class="no">Swift.Bool</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>分析</h2>
+
+<p>上面一堆看不懂没关系，这里再复述下在 Cocoa 环境（或者说 Foundation 环境下）第一条 <code>case 1:</code> 的流程:</p>
+
+<ul>
+<li>将 1 转换为 <code>NSNumber</code>，通过隐式类型转换实现</li>
+<li>将 <code>count</code> 转换为 <code>NSString</code>，通过隐式类型转换实现</li>
+<li>调用 <code>NSObject</code> 重载版的 <code>~=</code> 运算符进行比较</li>
+</ul>
+
+
+<p>这么看起来明了多了。但是，我们的 <code>Character</code> 哪里去了？为什么 count 的类型变了？</p>
+
+<p>直接下断点然后 repl 命令检查，果然，我们没有指定类型的 <code>count</code> 在这个版本中变成了一个 <code>String</code>。</p>
+
+<p>从标准库定义看， <code>Character</code> 和 <code>String</code> 都实现了 <code>ExtendedGraphemeClusterLiteralConvertible</code> 协议，保证他们能从字符字面常量获得。所以实际上每当我们写 <code>let foo = "a"</code> 其实是完全依赖编译器的类型推导，选择到底是 <code>Character</code> 还是 <code>String</code>。</p>
+
+<p>说明 Swift 编译器高大上，可以从当前加载的所有类型中推导出合法合理能编译的类型组合。来自 Haskell 背景的同学一定笑而不语，当然那种怎么改都凑不对类型的痛苦也是其他同学无法理解和感同身受的。</p>
+
+<p>回头再看看 <code>ObjectiveC.~=</code> 这个运算符重载：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">func</span> <span class="o">~=(</span><span class="n">x</span><span class="k">:</span> <span class="kt">NSObject</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">NSObject</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>定义在 ObjectiveC 模块里，使用 <code>import ObjectiveC</code> 可以加载。这个模块是 Swift 到 Objective-C 的一些映射模块，基础的 <code>NSObject</code> 方法还有一些运行时控制函数。</p>
+
+<p>当然 <code>Foundation</code>, <code>Cocoa</code> 这些都会加载它，所以理论上写应用的时候不需要指定，只要你用到了 <code>NSObject</code> 就一定有它。</p>
+
+<p>实际上 WWDC 某一集里讲到（忘记了，等我再找到会补上），对比 <code>NSObject</code> 的时候，Swift 会选择调用 <code>isEqual</code> 方法。我们反汇编验证下。简单加点注释。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='gas'><span class='line'><span class="err">(</span><span class="nf">lldb</span><span class="p">)</span> <span class="no">dis</span> <span class="p">-</span><span class="no">a</span> <span class="mi">0x100003f20</span>
+</span><span class='line'><span class="nf">asmtest</span><span class="err">`</span><span class="no">symbol</span> <span class="no">stub</span> <span class="no">for</span><span class="p">:</span> <span class="no">ObjectiveC.</span><span class="err">~=</span> <span class="err">@</span><span class="no">infix</span> <span class="p">(</span><span class="no">ObjectiveC.NSObject</span><span class="p">,</span> <span class="no">ObjectiveC.NSObject</span><span class="p">)</span> <span class="p">-</span><span class="err">&gt;</span> <span class="no">Swift.Bool</span><span class="p">:</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x100003f20:</span>  <span class="nf">jmpq</span>   <span class="p">*</span><span class="mi">0x1252</span><span class="p">(</span><span class="nv">%rip</span><span class="p">)</span>             <span class="err">;</span> <span class="p">(</span><span class="no">void</span> <span class="p">*)</span><span class="mi">0x00000001000e88d0</span><span class="p">:</span> <span class="no">ObjectiveC.</span><span class="err">~=</span> <span class="err">@</span><span class="no">infix</span> <span class="p">(</span><span class="no">ObjectiveC.NSObject</span><span class="p">,</span> <span class="no">ObjectiveC.NSObject</span><span class="p">)</span> <span class="p">-</span><span class="err">&gt;</span> <span class="no">Swift.Bool</span>
+</span><span class='line'><span class="err">(</span><span class="nf">lldb</span><span class="p">)</span> <span class="no">dis</span> <span class="p">-</span><span class="no">a</span> <span class="mi">0x00000001000e88d0</span>
+</span><span class='line'><span class="nf">libswiftObjectiveC.dylib</span><span class="err">`</span><span class="no">ObjectiveC.</span><span class="err">~=</span> <span class="err">@</span><span class="no">infix</span> <span class="p">(</span><span class="no">ObjectiveC.NSObject</span><span class="p">,</span> <span class="no">ObjectiveC.NSObject</span><span class="p">)</span> <span class="p">-</span><span class="err">&gt;</span> <span class="no">Swift.Bool</span><span class="p">:</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88d0:</span>  <span class="nf">pushq</span>  <span class="nv">%rbp</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88d1:</span>  <span class="nf">movq</span>   <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88d4:</span>  <span class="nf">pushq</span>  <span class="nv">%r15</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88d6:</span>  <span class="nf">pushq</span>  <span class="nv">%r14</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88d8:</span>  <span class="nf">pushq</span>  <span class="nv">%rbx</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88d9:</span>  <span class="nf">pushq</span>  <span class="nv">%rax</span>
+</span><span class='line'>   <span class="err">;</span> <span class="err">64位</span> <span class="err">寄存器传参</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88da:</span>  <span class="nf">movq</span>   <span class="nv">%rsi</span><span class="p">,</span> <span class="nv">%rbx</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88dd:</span>  <span class="nf">movq</span>   <span class="nv">%rdi</span><span class="p">,</span> <span class="nv">%r14</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88e0:</span>  <span class="nf">movq</span>   <span class="mi">0x3da1</span><span class="p">(</span><span class="nv">%rip</span><span class="p">),</span> <span class="nv">%rsi</span>        <span class="err">;</span> <span class="err">&quot;</span><span class="no">isEqual</span><span class="p">:</span><span class="err">&quot;</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88e7:</span>  <span class="nf">movq</span>   <span class="nv">%rbx</span><span class="p">,</span> <span class="nv">%rdx</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88ea:</span>  <span class="nf">callq</span>  <span class="mi">0x1000eb670</span>               <span class="err">;</span> <span class="no">symbol</span> <span class="no">stub</span> <span class="no">for</span><span class="p">:</span> <span class="no">objc_msgSend</span>
+</span><span class='line'>   <span class="err">;</span> <span class="err">测试</span> <span class="nl">isEqual:</span> <span class="err">调用的返回值，存到</span> <span class="err">%</span><span class="nf">r16b</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88ef:</span>  <span class="nf">testb</span>  <span class="nv">%al</span><span class="p">,</span> <span class="nv">%al</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88f1:</span>  <span class="nf">setne</span>  <span class="nv">%r15b</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88f5:</span>  <span class="nf">movq</span>   <span class="nv">%rbx</span><span class="p">,</span> <span class="nv">%rdi</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88f8:</span>  <span class="nf">callq</span>  <span class="mi">0x1000eb676</span>               <span class="err">;</span> <span class="no">symbol</span> <span class="no">stub</span> <span class="no">for</span><span class="p">:</span> <span class="no">objc_release</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e88fd:</span>  <span class="nf">movq</span>   <span class="nv">%r14</span><span class="p">,</span> <span class="nv">%rdi</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e8900:</span>  <span class="nf">callq</span>  <span class="mi">0x1000eb676</span>               <span class="err">;</span> <span class="no">symbol</span> <span class="no">stub</span> <span class="no">for</span><span class="p">:</span> <span class="no">objc_release</span>
+</span><span class='line'>   <span class="err">;</span> <span class="err">本运算符函数返回值</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e8905:</span>  <span class="nf">movb</span>   <span class="nv">%r15b</span><span class="p">,</span> <span class="nv">%al</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e8908:</span>  <span class="nf">addq</span>   <span class="no">$0x8</span><span class="p">,</span> <span class="nv">%rsp</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e890c:</span>  <span class="nf">popq</span>   <span class="nv">%rbx</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e890d:</span>  <span class="nf">popq</span>   <span class="nv">%r14</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e890f:</span>  <span class="nf">popq</span>   <span class="nv">%r15</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e8911:</span>  <span class="nf">popq</span>   <span class="nv">%rbp</span>
+</span><span class='line'>   <span class="err">0</span><span class="nl">x1000e8912:</span>  <span class="nf">retq</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>啧啧， Instruction Pointer Relative Addressing 用的飞起。 64 位名字也特好听。 RIP 。 对了， MacOSX 下都是 PIC 位置无关代码。</p>
+
+<p>从上面看，果然是调用了 Objective-C 的 <code>isEqual:</code>。</p>
+
+<h2>总结</h2>
+
+<ul>
+<li>Swift 的编译器会根据大范围的代码推导类型，遍历 AST 然后用树或者图算法填充未指定的类型
+
+<ul>
+<li><code>"c"</code> 可以是任意 <code>ExtendedGraphemeClusterLiteralConvertible</code> 类型，包括 <code>Character</code>、<code>String</code>、<code>CString</code>、<code>UnicodeScalar</code>、<code>StaticString</code> 等</li>
+</ul>
+</li>
+<li>swith case 语句使用 <code>~=</code> 运算符执行匹配操作
+
+<ul>
+<li>非 Foundation 环境下，相当于 <code>==</code> 运算符</li>
+<li>在 Foundation 环境下，如果是 <code>NSObject</code> 及其子类，相当于 <code>isEqual:</code> 方法</li>
+<li><code>a..b</code> 这样的匹配也是通过 <code>~=</code> 运算符实现，也可以重载后自定义</li>
+</ul>
+</li>
+<li>在 Foundation 环境下，隐式类型转换遍地都是</li>
+</ul>
+
+
+<h2>教训</h2>
+
+<ul>
+<li>真用到字符类型 <code>Character</code> 的时候，还是显式指定吧</li>
+<li>需要额外注意能隐式类型转换到 <code>NSObject</code> 的几个类型，避免非预期行为</li>
+</ul>
+
+
+<h2>参考文献</h2>
+
+<ul>
+<li>Apple Inc. “The Swift Programming Language”。 iBooks. <a href="https://itun.es/cn/jEUH0.l">https://itun.es/cn/jEUH0.l</a></li>
+<li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
+<li><a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">隐式类型转换</a></li>
+<li>WWDC 某集讲到的 <code>isEqual:</code></li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1706,190 +2062,6 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/08/swift-implicit-type-cast/">Implicit Type Convertion in Swift (Swift 的隐式类型转换)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-08T00:25:43+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这是我自己给的命名，因为这个特性暂时看是 undocumented 的。通过 lldb 和 Xcode 的变量 inspector 功能发掘出来的。然后尝试调用没有问题。</p>
-
-<p>This is an undocumented feature. I found it by lldb and the variable inspector of Xcode6-beta.</p>
-
-<p>形式: <code>@conversion func __conversion&lt;T&gt;() -&gt; T { }</code></p>
-
-<p>对了 Reddit 网友提出 <code>@conversion</code> 是可以省略的。个人认为编译器可能对不同的两种方式行为略有不同，最好还是加上。还有就是 <code>@transparent</code> 其实是表示 inline 。</p>
-
-<p>先随便设想个场合。比如我们某个库需要表示一个二维点。</p>
-
-<p>Suppose we need a Point type in our library.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">struct</span> <span class="nc">Point</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">var</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="k">var</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="n">let</span> <span class="n">p</span> <span class="k">=</span> <span class="nc">Point</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="err">23</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="err">45</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>相信看了几天的 Swift，信手捏来啊。啧啧。
-然后你发现你的另个库已经用了 (Int, Int) 来表示二维点了。。。。。你的把手头一堆的 Point 在转成 (Int, Int)，或者加个什么方法。？</p>
-
-<p>For some reason, we need to work with another library, which uses <code>(Int, Int)</code> as the representation of a point.
-Must we refacotr the code and add type conversion function calls?</p>
-
-<p>妈蛋重构么？</p>
-
-<p>No no~~</p>
-
-<p>我们这样来</p>
-
-<p>复习下 extension 语法, 加上这里要介绍的“隐式类型转换”</p>
-
-<p>We can use the Swift&rsquo;s hiding feature &ndash; Implicit Type Convertion(or to say Cast?).</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">Point</span> <span class="o">{</span>
-</span><span class='line'>    <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nc">Int</span><span class="o">,</span> <span class="nc">Int</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>赞爆了。然后我们就可以这么写</p>
-
-<p>The we can directly make a <code>(Int, Int)</code> from a <code>Point</code>.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">)</span> <span class="k">=</span> <span class="n">p</span>
-</span><span class='line'><span class="c1">// suppose: func drawPoint(pt: (Int,Int)) { }</span>
-</span><span class='line'><span class="n">drawPoint</span><span class="o">(</span><span class="n">p</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>你看无痛苦吧。然后所有需要 (Int, Int) 参数的函数，直接传递 Point 类型是没有任何问题的。（这个我也很吃惊，理论上这个玩意还是有个推导过程的，会有BUG什么的，没想到老crash 的 Swift 编译器竟然这个做得很好)</p>
-
-<p>好吧这个例子实在是太渣了。我们换个例子说。</p>
-
-<p>假设，我们有个库函数，接受 Color struct (r, g, b 三原色表示) 作为参数。
-比如调用  <code>setColor(Color(r:23, g:34, b:34))</code>
-然后实际上颜色我们用字符串表示，比如"white", &ldquo;black&rdquo; 或者 UInt32 表示比如 #ffeeff 。。。</p>
-
-<p>然后为了方便，我们本来需要写一些转换函数，然后调用。</p>
-
-<p>现在不同了，比如我们给 String 写个 隐式转换，代码里直接用。（用protocol 也可以实现相同的功能）</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
-</span><span class='line'>    <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Color</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">switch</span> <span class="n">self</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">case</span> <span class="s">&quot;red&quot;</span><span class="k">:</span>
-</span><span class='line'>            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">255</span><span class="o">,</span> <span class="kt">g:</span><span class="err">0</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="err">0</span><span class="o">)</span>
-</span><span class='line'>        <span class="k">case</span> <span class="s">&quot;green&quot;</span><span class="k">:</span>
-</span><span class='line'>            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">0</span><span class="o">,</span> <span class="kt">g:</span><span class="err">255</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span><span class="err">0</span><span class="o">)</span>
-</span><span class='line'>        <span class="o">.....</span>
-</span><span class='line'>        <span class="n">default</span><span class="k">:</span>
-</span><span class='line'>            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">0</span><span class="o">,</span> <span class="kt">g:</span><span class="err">0</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span><span class="err">0</span><span class="o">)</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>然后代码里用到 Color 的地方你直接写个 &ldquo;red&rdquo; 啊 &ldquo;pink&rdquo; 骚粉啊。都是没有问题的。
-setColor(&ldquo;red&rdquo;)</p>
-
-<p>上面都是废话。</p>
-
-<p>隐式类型转换标准： <code>@conversion func __conversion&lt;T&gt;() -&gt; T { }</code> 可以作为方法写到 struct 里。也可以通过 extension 附加。</p>
-
-<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。</p>
-
-<p>然后就是语言本身中有个细小的问题 微博 onevcat 文章里提到。</p>
-
-<p>nil 是 NilType 的唯一实例（来自Python的同学对这种定义一定不陌生)
-而 Type? 是 Optional<Type> 类型的，是个enum，变种是  Some(T) 和 None.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">enum</span> <span class="nc">Optional</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>  <span class="o">{</span>
-</span><span class='line'>    <span class="k">case</span> <span class="nc">None</span>
-</span><span class='line'>    <span class="k">case</span> <span class="nc">Some</span><span class="o">(</span><span class="n">T</span><span class="o">)</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>那同学你有没有想到 ，我们为什么可以给一个 Type? 赋值 nil 呢?</p>
-
-<p>答案就是这里讲到的 隐式类型转换。</p>
-
-<p>In Swift standard library, the unique <code>nil</code> has a type of <code>NilType</code> and is the only instance. And <code>Type?</code> is the
-shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
-
-<p>Why we can directly set a <code>Type?</code> variable to <code>nil</code>?</p>
-
-<p>The Implicit Types Convertion is the answer. The <code>NilType</code> implements conversion methed to <code>Type?</code> and <code>Type!</code>.</p>
-
-<p>I&rsquo;ve dump the definitions from lldb. You can find them in:</p>
-
-<p>我导出的一些标准库定义在下面的链接。</p>
-
-<p><a href="https://github.com/andelf/Defines-Swift/blob/master/Swift-misc.swift">My Github Repo</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="4">&larr; Older</a>
@@ -1905,6 +2077,10 @@ shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/">折腾 Raspberry Pi + HomeKit 手记</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a>
@@ -1980,10 +2156,6 @@ shortcut to <code>Option&lt;T&gt;</code>， an enum.</p>
     
       <li class="post">
         <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/17/nsobject-pattern-match-in-swift/">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</a>
       </li>
     
   </ul>
