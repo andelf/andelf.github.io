@@ -56,7 +56,7 @@ deb ftp://ftp.cn.debian.org/debian jessie-backports main contrib non-free
 
 安装好 golang 1.6.2，建立开发目录。
 
-```
+```bash
 # 似乎直接 install golang 会出点小问题，所以折衷用了如下方法:
 > sudo apt-get install -t jessie-backports golang-1.6 golang-1.6-go golang-1.6-src golang-1.6-doc
 > sudo apt-get install -t jessie-backports golang
@@ -66,7 +66,7 @@ deb ftp://ftp.cn.debian.org/debian jessie-backports main contrib non-free
 
 跑通官方示例代码：
 
-```golang
+```go
 package main
 
 import (
@@ -135,49 +135,8 @@ amixer set PCM off
 
 代码：
 
-```golang
+```go
 package main
-
-import (
-        "os/exec"
-        "github.com/brutella/hc"
-        "github.com/brutella/hc/accessory"
-        "log"
-)
-
-func main() {
-        info := accessory.Info{
-                Name:            "Radio",
-                SerialNumber: "051AC-23AAM2",
-                Manufacturer: "Apple",
-                Model:          "RPI3",
-        }
-        acc := accessory.NewSwitch(info)
-
-        acc.Switch.On.OnValueRemoteUpdate(func(on bool) {
-                log.Println("Toggled PCM!")
-
-                if on == true {
-                        exec.Command("amixer", "set", "PCM", "on").Run()
-                        log.Println("Client changed switch to on")
-                } else {
-                        exec.Command("amixer", "set", "PCM", "off").Run()
-                        log.Println("Client changed switch to off")
-                }
-        })
-
-        config := hc.Config{Pin: "00102004"}
-        t, err := hc.NewIPTransport(config, acc.Accessory)
-        if err != nil {
-                log.Fatal(err)
-        }
-
-        hc.OnTermination(func() {
-                t.Stop()
-        })
-
-        t.Start()
-}package main
 
 import (
         "os/exec"
