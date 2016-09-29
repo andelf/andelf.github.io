@@ -4,7 +4,7 @@
   <title><![CDATA[猫·仁波切]]></title>
   <link href="http://andelf.github.io/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2016-09-16T21:48:10+08:00</updated>
+  <updated>2016-09-29T19:14:08+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -249,89 +249,7 @@ iOS 10 终于强化了推出已有两年智能家居平台，提供了官方 App
 <span class='line-number'>40</span>
 <span class='line-number'>41</span>
 <span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>        <span class="s">&quot;os/exec&quot;</span>
-</span><span class='line'>        <span class="s">&quot;github.com/brutella/hc&quot;</span>
-</span><span class='line'>        <span class="s">&quot;github.com/brutella/hc/accessory&quot;</span>
-</span><span class='line'>        <span class="s">&quot;log&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">info</span> <span class="o">:=</span> <span class="nx">accessory</span><span class="p">.</span><span class="nx">Info</span><span class="p">{</span>
-</span><span class='line'>                <span class="nx">Name</span><span class="p">:</span>            <span class="s">&quot;Radio&quot;</span><span class="p">,</span>
-</span><span class='line'>                <span class="nx">SerialNumber</span><span class="p">:</span> <span class="s">&quot;051AC-23AAM2&quot;</span><span class="p">,</span>
-</span><span class='line'>                <span class="nx">Manufacturer</span><span class="p">:</span> <span class="s">&quot;Apple&quot;</span><span class="p">,</span>
-</span><span class='line'>                <span class="nx">Model</span><span class="p">:</span>          <span class="s">&quot;RPI3&quot;</span><span class="p">,</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>        <span class="nx">acc</span> <span class="o">:=</span> <span class="nx">accessory</span><span class="p">.</span><span class="nx">NewSwitch</span><span class="p">(</span><span class="nx">info</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nx">acc</span><span class="p">.</span><span class="nx">Switch</span><span class="p">.</span><span class="nx">On</span><span class="p">.</span><span class="nx">OnValueRemoteUpdate</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">on</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Toggled PCM!&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>                <span class="k">if</span> <span class="nx">on</span> <span class="o">==</span> <span class="kc">true</span> <span class="p">{</span>
-</span><span class='line'>                        <span class="nx">exec</span><span class="p">.</span><span class="nx">Command</span><span class="p">(</span><span class="s">&quot;amixer&quot;</span><span class="p">,</span> <span class="s">&quot;set&quot;</span><span class="p">,</span> <span class="s">&quot;PCM&quot;</span><span class="p">,</span> <span class="s">&quot;on&quot;</span><span class="p">).</span><span class="nx">Run</span><span class="p">()</span>
-</span><span class='line'>                        <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Client changed switch to on&quot;</span><span class="p">)</span>
-</span><span class='line'>                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>                        <span class="nx">exec</span><span class="p">.</span><span class="nx">Command</span><span class="p">(</span><span class="s">&quot;amixer&quot;</span><span class="p">,</span> <span class="s">&quot;set&quot;</span><span class="p">,</span> <span class="s">&quot;PCM&quot;</span><span class="p">,</span> <span class="s">&quot;off&quot;</span><span class="p">).</span><span class="nx">Run</span><span class="p">()</span>
-</span><span class='line'>                        <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Client changed switch to off&quot;</span><span class="p">)</span>
-</span><span class='line'>                <span class="p">}</span>
-</span><span class='line'>        <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nx">config</span> <span class="o">:=</span> <span class="nx">hc</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span><span class="nx">Pin</span><span class="p">:</span> <span class="s">&quot;00102004&quot;</span><span class="p">}</span>
-</span><span class='line'>        <span class="nx">t</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">hc</span><span class="p">.</span><span class="nx">NewIPTransport</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span> <span class="nx">acc</span><span class="p">.</span><span class="nx">Accessory</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nx">hc</span><span class="p">.</span><span class="nx">OnTermination</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">t</span><span class="p">.</span><span class="nx">Stop</span><span class="p">()</span>
-</span><span class='line'>        <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nx">t</span><span class="p">.</span><span class="nx">Start</span><span class="p">()</span>
-</span><span class='line'><span class="p">}</span><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
 </span><span class='line'>        <span class="s">&quot;os/exec&quot;</span>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ios | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/ios/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2016-09-16T21:48:10+08:00</updated>
+  <updated>2016-09-29T19:14:08+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -151,47 +151,6 @@ amixer set PCM off
 <p>代码：</p>
 
 <pre><code class="go">package main
-
-import (
-        "os/exec"
-        "github.com/brutella/hc"
-        "github.com/brutella/hc/accessory"
-        "log"
-)
-
-func main() {
-        info := accessory.Info{
-                Name:            "Radio",
-                SerialNumber: "051AC-23AAM2",
-                Manufacturer: "Apple",
-                Model:          "RPI3",
-        }
-        acc := accessory.NewSwitch(info)
-
-        acc.Switch.On.OnValueRemoteUpdate(func(on bool) {
-                log.Println("Toggled PCM!")
-
-                if on == true {
-                        exec.Command("amixer", "set", "PCM", "on").Run()
-                        log.Println("Client changed switch to on")
-                } else {
-                        exec.Command("amixer", "set", "PCM", "off").Run()
-                        log.Println("Client changed switch to off")
-                }
-        })
-
-        config := hc.Config{Pin: "00102004"}
-        t, err := hc.NewIPTransport(config, acc.Accessory)
-        if err != nil {
-                log.Fatal(err)
-        }
-
-        hc.OnTermination(func() {
-                t.Stop()
-        })
-
-        t.Start()
-}package main
 
 import (
         "os/exec"
