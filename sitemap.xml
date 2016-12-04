@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://andelf.github.io/blog/2016/11/18/circleci-meets-rust/</loc>
+<lastmod>2016-11-18T13:26:15+08:00</lastmod>
+</url>
+<url>
 <loc>http://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/</loc>
 <lastmod>2016-09-16T20:34:43+08:00</lastmod>
 </url>
@@ -199,5 +203,8 @@
 </url>
 <url>
 <loc>http://andelf.github.io/blog/categories/ios/</loc>
+</url>
+<url>
+<loc>http://andelf.github.io/blog/categories/ci/</loc>
 </url>
 </urlset>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rust | 猫·仁波切]]></title>
   <link href="http://andelf.github.io/blog/categories/rust/atom.xml" rel="self"/>
   <link href="http://andelf.github.io/"/>
-  <updated>2016-09-29T19:14:08+08:00</updated>
+  <updated>2016-12-04T21:20:59+08:00</updated>
   <id>http://andelf.github.io/</id>
   <author>
     <name><![CDATA[猫·仁波切 (Feather)]]></name>
@@ -12,6 +12,70 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[在 CircleCI 上使用 Rust(CircleCI Meets Rust)]]></title>
+    <link href="http://andelf.github.io/blog/2016/11/18/circleci-meets-rust/"/>
+    <updated>2016-11-18T13:26:15+08:00</updated>
+    <id>http://andelf.github.io/blog/2016/11/18/circleci-meets-rust</id>
+    <content type="html"><![CDATA[<p>最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长，
+影响开发效率。</p>
+
+<p>了解到 CircleCI 是不错的替代品，所以打算迁移 Rust 项目过去。当然说起来， CircleCI 的野心更大，是要来替代 jenkins 的。</p>
+
+<p>目前官方支持语言其实都比较落后，包括 go 也只是 1.6 版本，但似乎不是问题，而且据介绍， CircleCI 2.0 支持自定义 build image，支持语言的版本当然不在话下。</p>
+
+<p>每天面对各种 IaaS, PaaS，免不了写配置是，这也是 yaml 程序员的日常。</p>
+
+<pre><code class="yaml">dependencies:
+  pre:
+    - curl https://sh.rustup.rs -sSf | sh
+
+test:
+  override:
+    - cargo build
+    - cargo test
+</code></pre>
+
+<p>如上。然而不 work。报错：</p>
+
+<pre><code>cargo build
+    Updating registry `https://github.com/rust-lang/crates.io-index`
+warning: spurious network error (2 tries remaining): [12/-12] Malformed URL 'ssh://git@github.com:/rust-lang/crates.io-index'
+warning: spurious network error (1 tries remaining): [12/-12] Malformed URL 'ssh://git@github.com:/rust-lang/crates.io-index'
+error: failed to fetch `https://github.com/rust-lang/crates.io-index`
+
+To learn more, run the command again with --verbose.
+
+cargo build returned exit code 101
+
+Action failed: cargo build
+</code></pre>
+
+<p>神了。原来， CircleCI 自作聪明在 <code>.gitconfig</code> 里修改了映射配置，强制用它自己的 ssh key 去访问 github，rewrite 了 <code>https://github.com</code> 的所有仓库。
+这恰恰和 cargo 的 registry 机制冲突。所以报错。</p>
+
+<blockquote><p>CircleCI has rewrite <code>https:://github.com</code> to <code>ssh://git@github.com:</code> in <code>.gitconfig</code>. And this made cargo fail with above error message.</p></blockquote>
+
+<p>找到了原因，就可以搞了：</p>
+
+<pre><code class="yaml">machine:
+  pre:
+    - sed -i 's/github/git-non-exist-hub/g' ~/.gitconfig
+
+dependencies:
+  pre:
+    - curl https://sh.rustup.rs -sSf | sh
+
+test:
+  override:
+    - cargo build
+    - cargo test
+</code></pre>
+
+<p>嗯, Ugly but works.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rust Pattern Match(Rust中的模式匹配)]]></title>
@@ -308,158 +372,6 @@ fn main() {
 
 <p><code>p.parse_token_tree()</code> will return a <code>TokenTree</code>, which is a nested
 token list.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rust Syntax Extensions]]></title>
-    <link href="http://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/"/>
-    <updated>2014-04-23T23:44:43+08:00</updated>
-    <id>http://andelf.github.io/blog/2014/04/23/rust-syntax-extensions</id>
-    <content type="html"><![CDATA[<p>All rust ASTs are in <code>syntax::ast</code>. And extensions are in
-<code>syntax::ext</code>.</p>
-
-<pre><code class="rust">#![feature(macro_registrar, managed_boxes)];
-
-extern crate syntax;
-
-use syntax::ast;
-use syntax::ast::Name;
-use syntax::ext::base::SyntaxExtension;
-
-#[macro_registrar]
-pub fn macro_registrar(register: |Name, SyntaxExtension|);
-</code></pre>
-
-<p>Managed boxes, the <code>@-pointer</code> is still used in rust compiler, so it
-is essential to enable this feature.</p>
-
-<p>where the doc says:</p>
-
-<pre><code class="rust">/// A name is a part of an identifier, representing a string or
-gensym. It's the result of interning.
-/// created by token::intern()
-type Name = u32;
-
-/// An enum representing the different kinds of syntax extensions.
-pub enum SyntaxExtension {
-    /// A syntax extension that is attached to an item and creates new items
-    /// based upon it.
-    ///
-    /// `#[deriving(...)]` is an `ItemDecorator`.
-    ItemDecorator(ItemDecorator),
-
-    /// A syntax extension that is attached to an item and modifies it
-    /// in-place.
-    ItemModifier(ItemModifier),
-
-    /// A normal, function-like syntax extension.
-    ///
-    /// `bytes!` is a `NormalTT`.
-    NormalTT(~MacroExpander:'static, Option&lt;Span&gt;),
-
-    /// A function-like syntax extension that has an extra ident before
-    /// the block.
-    ///
-    /// `macro_rules!` is an `IdentTT`.
-    IdentTT(~IdentMacroExpander:'static, Option&lt;Span&gt;),
-}
-
-type ItemDecorator = fn(&amp;mut ExtCtxt, Span, @MetaItem, @Item, |@Item|);
-type ItemModifier = fn(&amp;mut ExtCtxt, Span, @MetaItem, @Item) -&gt; @Item;
-
-pub trait MacroExpander {
-    fn expand(&amp;self, ecx: &amp;mut ExtCtxt, span: Span, token_tree: &amp;[TokenTree]) -&gt; ~MacResult;
-}
-
-pub trait IdentMacroExpander {
-    fn expand(&amp;self, cx: &amp;mut ExtCtxt, sp: Span, ident: Ident, token_tree: Vec&lt;TokenTree&gt;) -&gt; ~MacResult;
-}
-
-/// The result of a macro expansion. The return values of the various
-/// methods are spliced into the AST at the callsite of the macro (or
-/// just into the compiler's internal macro table, for `make_def`).
-pub trait MacResult {
-    /// Define a new macro.
-    fn make_def(&amp;self) -&gt; Option&lt;MacroDef&gt; {
-        None
-    }
-    /// Create an expression.
-    fn make_expr(&amp;self) -&gt; Option&lt;@ast::Expr&gt; {
-        None
-    }
-    /// Create zero or more items.
-    fn make_items(&amp;self) -&gt; Option&lt;SmallVector&lt;@ast::Item&gt;&gt; {
-        None
-    }
-
-    /// Create a statement.
-    ///
-    /// By default this attempts to create an expression statement,
-    /// returning None if that fails.
-    fn make_stmt(&amp;self) -&gt; Option&lt;@ast::Stmt&gt; {
-        self.make_expr()
-            .map(|e| @codemap::respan(e.span, ast::StmtExpr(e, ast::DUMMY_NODE_ID)))
-    }
-}
-</code></pre>
-
-<h2>How to call</h2>
-
-<pre><code class="rust">use syntax::parse::token;
-
-#[macro_registrar]
-pub fn registrar(register: |Name, SyntaxExtension|) {
-    register(token::intern("your_ext_name"), your_extension);
-}
-</code></pre>
-
-<p>Note: <code>registrar</code> is not <code>register</code>.</p>
-
-<p>How to create each part:</p>
-
-<p><code>Name</code> is generated from
-<code>syntax::parse::token::intern()</code>.</p>
-
-<p>For different SyntaxExtension Enum, write the function, and wrap in Enum constructor.</p>
-
-<h3>ItemDecorator</h3>
-
-<p><code>src/libsyntax/ext/deriving/mod.rs</code>. The
-<code>#[deriving(...)</code>.</p>
-
-<p>To make items from an existing item.</p>
-
-<h3>ItemModifier</h3>
-
-<p><code>src/test/auxiliary/macro_crate_test.rs</code></p>
-
-<p>Modify existing item.</p>
-
-<h3>NormalTT</h3>
-
-<p>Builtin sample in: <code>src/libsyntax/ext/base.rs</code> and sub dirs.
-Normal <code>macro_name!(...)</code> call.</p>
-
-<h3>IdentTT</h3>
-
-<p>Builtin sample in: <code>src/libsyntax/ext/tt/macro_rules.rs</code>, <code>pub fn add_new_extension</code>.</p>
-
-<pre><code>macro_name! ident(
-    whatever here...
-)
-</code></pre>
-
-<h2>Aux</h2>
-
-<p>The <code>quote</code> feature.</p>
-
-<pre><code>#![feature(quote, phase)]
-</code></pre>
-
-<p>This enables <code>quote_expr!(ExtCtxt, [Code])</code>, <code>quote_tokens!</code>,
-<code>quote_item!</code>, <code>quote_pat!</code>, <code>quote_stmt!</code>, <code>quote_ty!</code> macros,
-and generates corresponding ast type.</p>
 ]]></content>
   </entry>
   

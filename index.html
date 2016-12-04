@@ -9,8 +9,8 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="9月14日凌晨苹果终于推送了 iOS 10 的更新。从之前发布会来看，并没有多少亮点，除了几天的新鲜感之外，
-尤其是对于目前还在用上两代机型的我来说，2333。 两年前苹果发布 Swift 语言的同时，新增了 HomeKit，当时用工具 dump 过最老版本的 Swift 声明。传送门： &hellip;">
+  <meta name="description" content="最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长，
+影响开发效率。 了解到 CircleCI 是不错的替代品，所以打算迁移 Rust 项目过去。当然说起来， CircleCI 的野心更大，是要来替代 jenkins 的 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +68,131 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-11-18T13:26:15+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长，
+影响开发效率。</p>
+
+<p>了解到 CircleCI 是不错的替代品，所以打算迁移 Rust 项目过去。当然说起来， CircleCI 的野心更大，是要来替代 jenkins 的。</p>
+
+<p>目前官方支持语言其实都比较落后，包括 go 也只是 1.6 版本，但似乎不是问题，而且据介绍， CircleCI 2.0 支持自定义 build image，支持语言的版本当然不在话下。</p>
+
+<p>每天面对各种 IaaS, PaaS，免不了写配置是，这也是 yaml 程序员的日常。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">dependencies</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">pre</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">curl https://sh.rustup.rs -sSf | sh</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">test</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">override</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cargo build</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cargo test</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如上。然而不 work。报错：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">cargo build</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">Updating registry `https://github.com/rust-lang/crates.io-index`</span>
+</span><span class='line'><span class="l-Scalar-Plain">warning</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">spurious network error (2 tries remaining)</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="nv">12/-12</span><span class="p-Indicator">]</span> <span class="l-Scalar-Plain">Malformed URL &#39;ssh://git@github.com:/rust-lang/crates.io-index&#39;</span>
+</span><span class='line'><span class="l-Scalar-Plain">warning</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">spurious network error (1 tries remaining)</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="nv">12/-12</span><span class="p-Indicator">]</span> <span class="l-Scalar-Plain">Malformed URL &#39;ssh://git@github.com:/rust-lang/crates.io-index&#39;</span>
+</span><span class='line'><span class="l-Scalar-Plain">error</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">failed to fetch `https://github.com/rust-lang/crates.io-index`</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">To learn more, run the command again with --verbose.</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">cargo build returned exit code 101</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">Action failed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">cargo build</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>神了。原来， CircleCI 自作聪明在 <code>.gitconfig</code> 里修改了映射配置，强制用它自己的 ssh key 去访问 github，rewrite 了 <code>https://github.com</code> 的所有仓库。
+这恰恰和 cargo 的 registry 机制冲突。所以报错。</p>
+
+<blockquote><p>CircleCI has rewrite <code>https:://github.com</code> to <code>ssh://git@github.com:</code> in <code>.gitconfig</code>. And this made cargo fail with above error message.</p></blockquote>
+
+<p>找到了原因，就可以搞了：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">machine</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">pre</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">sed -i &#39;s/github/git-non-exist-hub/g&#39; ~/.gitconfig</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">dependencies</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">pre</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">curl https://sh.rustup.rs -sSf | sh</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">test</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">override</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cargo build</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cargo test</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>嗯, Ugly but works.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1518,78 +1643,6 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-04T03:05:11+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本文介绍 Swift 的 Undocumented 语法特性。</p>
-
-<p>电子书上介绍的 default function parameter 这里都不好意思拿出来写。</p>
-
-<p>咳咳。持续更新。</p>
-
-<h2>用关键字当变量名</h2>
-
-<p>Keywards as variable name.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// escaped variable name</span>
-</span><span class='line'><span class="n">let</span> <span class="n">`let`</span> <span class="k">=</span> <span class="mi">1000</span>
-</span><span class='line'><span class="n">dump</span><span class="o">(</span><span class="n">`let`</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="err">&quot;</span><span class="kt">variable</span> <span class="kt">named</span> <span class="kt">let</span><span class="err">&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2><code>new</code> 关键字</h2>
-
-<p>The <code>new</code> keyword.</p>
-
-<p>快速初始化数组。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="n">an_array_with_100_zero</span> <span class="k">=</span> <span class="k">new</span><span class="o">(</span><span class="nc">Int</span><span class="o">)[</span><span class="err">100</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>protocol type</h2>
-
-<p>use <code>protocol&lt;Protocol1, Protocol2, ...&gt;</code> as a type.</p>
-
-<h2>How I find it?</h2>
-
-<p>瞎试出来的。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -1603,6 +1656,10 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/">折腾 Raspberry Pi + HomeKit 手记</a>
@@ -1678,10 +1735,6 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
     
       <li class="post">
         <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
       </li>
     
   </ul>

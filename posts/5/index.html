@@ -9,8 +9,10 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="1
-main = putStrLn &quot;Hello World&quot; ">
+  <meta name="description" content="可以模拟OO, 模块级别的继承. -extends(parent). 反编译 beam, 对加密过或者 hipe 的似乎无效. 1
+2
+{ok,{_,[{abstract_code,{_,AC}}]}} = beam_lib:chunks(Beam,[abstract_code]).
+io: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -74,6 +76,87 @@ main = putStrLn &quot;Hello World&quot; ">
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2013/11/21/erlang-tips/">Erlang 的一些好玩 Tips</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-21T11:36:18+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>可以模拟OO, 模块级别的继承.</p>
+
+<pre><code>-extends(parent).
+</code></pre>
+
+<p>反编译 beam, 对加密过或者 hipe 的似乎无效.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='erlang'><span class='line'><span class="p">{</span><span class="n">ok</span><span class="p">,{_,[{</span><span class="n">abstract_code</span><span class="p">,{_,</span><span class="nv">AC</span><span class="p">}}]}}</span> <span class="o">=</span> <span class="nn">beam_lib</span><span class="p">:</span><span class="nf">chunks</span><span class="p">(</span><span class="nv">Beam</span><span class="p">,[</span><span class="n">abstract_code</span><span class="p">]).</span>
+</span><span class='line'><span class="nn">io</span><span class="p">:</span><span class="nf">fwrite</span><span class="p">(</span><span class="s">&quot;</span><span class="si">~s~n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nn">erl_prettypr</span><span class="p">:</span><span class="nf">format</span><span class="p">(</span><span class="nn">erl_syntax</span><span class="p">:</span><span class="nf">form_list</span><span class="p">(</span><span class="nv">AC</span><span class="p">))]).</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>语句块, 比较少用到.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='erlang'><span class='line'><span class="k">begin</span>
+</span><span class='line'>   <span class="p">...</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Parameterised Modules 参数化模块, 也是模拟 OO 的.
+很多 web 框架都这么用, 不过这货在 R16 被去掉了, 也是&hellip; 其实挺恶心.</p>
+
+<pre><code>-module(xxx, [Arg1, Arg2]).
+</code></pre>
+
+<p>Stateful Modules, 用于替换 Parameterised Modules. 将模块和对应状态保存在 tuple 里,
+看起来像是调用某一对象的方法一样.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='erlang'><span class='line'><span class="nv">X</span> <span class="o">=</span> <span class="p">{</span><span class="nv">Mod</span><span class="p">,</span> <span class="nv">P1</span><span class="p">,</span> <span class="nv">P2</span><span class="p">,</span> <span class="p">...,</span> <span class="nv">Pn</span><span class="p">},</span>
+</span><span class='line'><span class="nv">X</span><span class="p">:</span><span class="nv">Func</span><span class="p">(</span><span class="nv">A1</span><span class="p">,</span> <span class="nv">A2</span><span class="p">,</span> <span class="p">...,</span> <span class="nv">An</span><span class="p">).</span>
+</span><span class='line'><span class="c">%% 等价于</span>
+</span><span class='line'><span class="nv">Mod</span><span class="p">:</span><span class="nv">Func</span><span class="p">(</span><span class="nv">A1</span><span class="p">,</span> <span class="nv">A2</span><span class="p">,</span> <span class="p">...,</span> <span class="nv">An</span><span class="p">,</span> <span class="nv">X</span><span class="p">).</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所以 web 框架就转为使用这个特性了, 看起来很无害而且不反 FP.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2013/11/20/hello-world/">Hello World!</a></h1>
     
     
@@ -121,6 +204,10 @@ main = putStrLn &quot;Hello World&quot; ">
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/">折腾 Raspberry Pi + HomeKit 手记</a>
@@ -196,10 +283,6 @@ main = putStrLn &quot;Hello World&quot; ">
     
       <li class="post">
         <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
       </li>
     
   </ul>

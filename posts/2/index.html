@@ -9,8 +9,10 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="最近看到了 Swift Style Guide 个人觉得内容太少，
-Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。 Swift 本身的特性，导致它在一些用法上和 Objective-C 上有所不同，比如 &hellip;">
+  <meta name="description" content="本文介绍 Swift 的 Undocumented 语法特性。 电子书上介绍的 default function parameter 这里都不好意思拿出来写。 咳咳。持续更新。 用关键字当变量名 Keywards as variable name. 1
+2
+3
+// escaped &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +70,78 @@ Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身�
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-04T03:05:11+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文介绍 Swift 的 Undocumented 语法特性。</p>
+
+<p>电子书上介绍的 default function parameter 这里都不好意思拿出来写。</p>
+
+<p>咳咳。持续更新。</p>
+
+<h2>用关键字当变量名</h2>
+
+<p>Keywards as variable name.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// escaped variable name</span>
+</span><span class='line'><span class="n">let</span> <span class="n">`let`</span> <span class="k">=</span> <span class="mi">1000</span>
+</span><span class='line'><span class="n">dump</span><span class="o">(</span><span class="n">`let`</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="err">&quot;</span><span class="kt">variable</span> <span class="kt">named</span> <span class="kt">let</span><span class="err">&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2><code>new</code> 关键字</h2>
+
+<p>The <code>new</code> keyword.</p>
+
+<p>快速初始化数组。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">let</span> <span class="n">an_array_with_100_zero</span> <span class="k">=</span> <span class="k">new</span><span class="o">(</span><span class="nc">Int</span><span class="o">)[</span><span class="err">100</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>protocol type</h2>
+
+<p>use <code>protocol&lt;Protocol1, Protocol2, ...&gt;</code> as a type.</p>
+
+<h2>How I find it?</h2>
+
+<p>瞎试出来的。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2599,363 +2673,6 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-18T23:38:01+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>声明： 转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
-
-<p>本文的发现基于个人研究，目测是官方外的首创。请尊重原创。</p>
-
-<p>本文是讲述 Swift 与 C 交互操作系列文章的第二部分。解决之前的所有遗留问题。</p>
-
-<p>第一部分请参考 <a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop 简析Swift和C的交互</a></p>
-
-<p>本文将介绍实际应用过程中会遇到的各类情况。</p>
-
-<h2>再看类型对应</h2>
-
-<p>标准类型这里就不提了，上面的文章讲的很明白了。</p>
-
-<h3>7 种指针类型</h3>
-
-<p>从代码看，我认为 Swift 对应 C 的指针时候，存在一个最原始的类型 <code>RawPointer</code>，但是它是内部表示，不可以直接使用。所以略过。但它是基础，可以认为它相当于 <code>Word</code> 类型（机器字长）。</p>
-
-<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。</p>
-
-<h4>COpaquePointer</h4>
-
-<p>不透明指针。之前我以为它很少会用到，不过现在看来想错了，虽然类型不安全，但是很多场合只能用它。它是直接对应 <code>RawPointer</code> 的。字长相等。</p>
-
-<blockquote><p>In computer programming, an opaque pointer is a special case of an opaque data type, a datatype declared to be a pointer to a record or data structure of some unspecified type. - 来自 Wikipedia</p></blockquote>
-
-<p>几乎没有任何操作方法，不带类型，主要用于 Bridging Header 中表示 C 中的复杂结构指针</p>
-
-<p>比如一个例子， libcurl 中的 <code>CURL *</code> 的处理，其实就是对应为 <code>COpaquePointer</code>。</p>
-
-<h4>UnsafePointer<T></h4>
-
-<p>泛型指针。直接对应 <code>RawPointer</code>。字长相等。</p>
-
-<p>处理指针的主力类型。常量中的 <code>C_ARGV</code> 的类型也是它 <code>UnsafePointer&lt;CString&gt;</code>。</p>
-
-<p>支持大量操作方法：</p>
-
-<ul>
-<li>通过 <code>.memory</code> 属性 <code>{ get set }</code> 操作指针指向的内容</li>
-<li>支持 subscript ，直接对应于 C 的数组，例如 <code>C_ARGV[1]</code></li>
-<li>通过 <code>alloc(num: Int)</code> 分配数组空间</li>
-<li><code>initialize(val: T)</code> 直接初始化</li>
-<li>offset 操作 <code>.succ()</code> <code>.pred()</code></li>
-<li>可以从任意一种指针直接调用构造函数获得</li>
-<li>隐式类型转换为非 <code>COpaquePointer</code> 之外的任意一种指针</li>
-</ul>
-
-
-<h4>AutoreleasingUnsafePointer<T></h4>
-
-<p>之前特地写文介绍过这个指针类型。<code>NSError</code> 的处理就主要用它。传送门： <a href="http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a></p>
-
-<p>内部实现用了语言内置特性，从名字也可以看出来，这个应该是非常棒的一个指针，可以帮助管理内存，逼格也高。内存直接对应 <code>RawPointer</code> 可以传递给 C 函数。</p>
-
-<ul>
-<li>通过 <code>.memory</code> 属性 <code>{ get set }</code> 操作指针指向的内容</li>
-<li>直接从 <code>&amp;T</code> 类型获得，使用方法比较诡异，建议参考文章</li>
-</ul>
-
-
-<h4>CMutablePointer<T> CConstPointer<T></h4>
-
-<p>分别对应于 C 中的 <code>T *</code>、<code>const T *</code>。不可直接传递给 C 函数，因为表示结构里还有一个 <code>owner</code> 域，应该是用来自动管理生命周期的。<code>sizeof</code> 操作返回 16。但是可以有隐式类型转换。</p>
-
-<p>操作方法主要是 <code>func withUnsafePointer&lt;U&gt;(f: UnsafePointer&lt;T&gt; -&gt; U) -&gt; U</code>，用 Trailing Closure 语法非常方便。</p>
-
-<h4>CMutableVoidPointer CConstVoidPointer</h4>
-
-<p>分别对应于 C 中的 <code>void *</code>、<code>const void *</code>。其他内容同上一种。</p>
-
-<h4>小结指针</h4>
-
-<p>以上 7 种指针类型可以分未两类，我给他们起名为 第一类指针 和 第二类指针 。（你看我在黑马克思耶，算了这个梗太深，参考马克思主义政治经济学）</p>
-
-<ul>
-<li>可以直接用于 C 函数声明的 第一类指针
-
-<ul>
-<li><code>COpaquePointer</code> <code>UnsafePointer&lt;T&gt;</code> <code>AutoreleasingUnsafePointer&lt;T&gt;</code></li>
-<li>是对 <code>RawPointer</code> 的封装，直接对应于 C 的指针，它们的 <code>sizeof</code> 都是单位字长</li>
-</ul>
-</li>
-<li>不可用于声明 第二类指针
-
-<ul>
-<li><code>CMutablePointer&lt;T&gt; CConstPointer&lt;T&gt; CMutableVoidPointer CConstVoidPointer</code></li>
-<li>直接从 Swift 对象的引用获得（一个隐藏特性，引用隐式转换）（主要构造方法）</li>
-<li>包含了一个 <code>owner</code> 字段，可以管理生命周期，理论上在 Swift 中使用</li>
-<li>通过 <code>.withUnsafePointer</code> 方法调用</li>
-</ul>
-</li>
-</ul>
-
-
-<p>所有指针都实现了 <code>LogicValue</code> 协议，可以直接 <code>if a_pointer</code> 判断是否为 <code>NULL</code>。</p>
-
-<p><code>nil</code> 类型实现了到所有指针类型的隐式类型转换，等价于 C 中的 <code>`NULL</code>，可以直接判断。</p>
-
-<p>什么时候用什么？这个问题我也在考虑中，以下是我的建议。</p>
-
-<ul>
-<li>对应复杂结构体，不操作结构体字段的： <code>COpaquePointer</code> 例如 <code>CURL *</code></li>
-<li>日常操作： <code>UnsafePointer&lt;T&gt;</code></li>
-<li>同时需要在 Swift 和 C 中操作结构体字段，由 Swift 管理内存：<code>AutoreleasingUnsafePointer&lt;T&gt;</code></li>
-<li>Swift 中创建对象，传递给 C： 第二类指针</li>
-</ul>
-
-
-<h2>工具类型</h2>
-
-<h3>CVarArg CVaListPointer VaListBuilder</h3>
-
-<p>用于处理 C 语言中的可变参数 valist 函数。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">CVarArg</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">encode</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Word</span><span class="o">[]</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>表示该类型可以作为可变参数，相当多的类型都实现了这个。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">struct</span> <span class="nc">CVaListPointer</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">var</span> <span class="n">value</span><span class="k">:</span> <span class="kt">UnsafePointer&lt;Void&gt;</span>
-</span><span class='line'>    <span class="n">init</span><span class="o">(</span><span class="n">fromUnsafePointer</span> <span class="n">from</span><span class="k">:</span> <span class="kt">UnsafePointer&lt;Void&gt;</span><span class="o">)</span>
-</span><span class='line'>    <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">CMutableVoidPointer</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>对应于 C，直接给 C 函数传递，声明、定义时使用。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">VaListBuilder</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">init</span><span class="o">()</span>
-</span><span class='line'>    <span class="n">func</span> <span class="n">append</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">CVarArg</span><span class="o">)</span>
-</span><span class='line'>    <span class="n">func</span> <span class="n">va_list</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">CVaListPointer</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>工具类，方便地创建 <code>CVaListPointer</code>。</p>
-
-<p>还有一些工具函数：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">func</span> <span class="n">getVaList</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">CVarArg</span><span class="o">[])</span> <span class="o">-&gt;</span> <span class="nc">CVaListPointer</span>
-</span><span class='line'><span class="n">func</span> <span class="n">withVaList</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;(</span><span class="n">args</span><span class="k">:</span> <span class="kt">CVarArg</span><span class="o">[],</span> <span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">CVaListPointer</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">R</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">R</span>
-</span><span class='line'><span class="n">func</span> <span class="n">withVaList</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;(</span><span class="n">builder</span><span class="k">:</span> <span class="kt">VaListBuilder</span><span class="o">,</span> <span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">CVaListPointer</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">R</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">R</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>非常方便。</p>
-
-<h3>UnsafeArray<T></h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">struct</span> <span class="nc">UnsafeArray</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="k">:</span> <span class="kt">Collection</span><span class="o">,</span> <span class="nc">Generator</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">startIndex</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-</span><span class='line'>  <span class="kt">var</span> <span class="kt">endIndex:</span> <span class="kt">Int</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-</span><span class='line'>  <span class="kt">subscript</span> <span class="o">(</span><span class="kt">i:</span> <span class="kt">Int</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">T</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-</span><span class='line'>  <span class="kt">init</span><span class="o">(</span><span class="kt">start:</span> <span class="kt">UnsafePointer&lt;T&gt;</span><span class="o">,</span> <span class="kt">length:</span> <span class="kt">Int</span><span class="o">)</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">next</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">?</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">generate</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">UnsafeArray</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>处理 C 数组的工具类型，可以直接 for-in 处理。当然，只读的，略可惜。</p>
-
-<h3>Unmanaged<T></h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">struct</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">var</span> <span class="nc">_value</span><span class="k">:</span> <span class="kt">T</span>
-</span><span class='line'>  <span class="n">init</span><span class="o">(</span><span class="nc">_private</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">fromOpaque</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">COpaquePointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">toOpaque</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">COpaquePointer</span>
-</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">passRetained</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">static</span> <span class="n">func</span> <span class="n">passUnretained</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">takeUnretainedValue</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="n">T</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">takeRetainedValue</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="n">T</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">retain</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">release</span><span class="o">()</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">autorelease</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>顾名思义，手动管理 RC 的。避免 Swift 插入的 ARC 代码影响程序逻辑。</p>
-
-<h2>C 头文件的导入行为</h2>
-
-<h3>宏定义</h3>
-
-<p>数字常量 CInt, CDouble (带类型后缀则为对应类型，如 1.0f ）
-字符常量 CString
-其他宏 展开后，无定义</p>
-
-<h3>枚举 enum</h3>
-
-<p>创建 enum 类型，并继承自 <code>CUnsignedInt</code> 或 <code>CInt</code> （enum 是否有负初始值）</p>
-
-<p>可以通过 <code>.value</code> 访问。</p>
-
-<h3>结构体 struct</h3>
-
-<p>创建 struct 类型，只有默认 init ，需要加上所有结构体字段名创建。</p>
-
-<h3>可变参数函数</h3>
-
-<p>转为 <code>CVaListPointer</code>。手动重声明更好。这里举 <code>Darwin</code> 模块的例子说。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">func</span> <span class="n">vprintf</span><span class="o">(</span><span class="k">_:</span> <span class="kt">CString</span><span class="o">,</span> <span class="k">_:</span> <span class="kt">CVaListPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CInt</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>从 C 调用 Swift</h2>
-
-<p>只能调用函数。</p>
-
-<p>之前说过，用 <code>@asmname("name")</code> 指定 mangled name 即可。</p>
-
-<p>然后 C 语言中人工声明下函数。很可惜自动导出头文件不适用于 C 语言，只适用于 Objective-C 。</p>
-
-<p>目测暂时无法导出结构体，因为 Swift 闭源不提供相关头文件。靠猜有风险。</p>
-
-<p>全局变量不支持用 <code>@asmname("name")</code> 控制导出符号名。目测可以尝试用 mangled name 访问，但是很不方便。</p>
-
-<h2>示例</h2>
-
-<p>我尝试调用了下 libcurl 。</p>
-
-<p>项目地址在 <a href="https://github.com/andelf/curl-swift">andelf/curl-swift</a> 包含编译脚本（就一句命令）。</p>
-
-<p>Bridging Header 只写入 <code>#include&lt;curl/curl.h&gt;</code> 即可。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@asmname</span><span class="o">(</span><span class="s">&quot;curl_easy_setopt&quot;</span><span class="o">)</span> <span class="n">func</span> <span class="n">curl_easy_setopt</span><span class="o">(</span><span class="n">curl</span><span class="k">:</span> <span class="kt">COpaquePointer</span><span class="o">,</span> <span class="n">option</span><span class="k">:</span> <span class="kt">CURLoption</span><span class="o">,</span> <span class="n">param</span><span class="k">:</span> <span class="kt">CString</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CURLcode</span>
-</span><span class='line'><span class="nd">@asmname</span><span class="o">(</span><span class="s">&quot;curl_easy_setopt&quot;</span><span class="o">)</span> <span class="n">func</span> <span class="n">curl_easy_setopt</span><span class="o">(</span><span class="n">curl</span><span class="k">:</span> <span class="kt">COpaquePointer</span><span class="o">,</span> <span class="n">option</span><span class="k">:</span> <span class="kt">CURLoption</span><span class="o">,</span> <span class="n">param</span><span class="k">:</span> <span class="kt">CBool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CURLcode</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">let</span> <span class="n">handle</span> <span class="k">=</span> <span class="n">curl_easy_init</span><span class="o">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// this should be a const c string. curl_easy_perform() will use this.</span>
-</span><span class='line'><span class="n">let</span> <span class="n">url</span><span class="k">:</span> <span class="kt">CString</span> <span class="o">=</span> <span class="s">&quot;http://www.baidu.com&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">curl_easy_setopt</span><span class="o">(</span><span class="n">handle</span><span class="o">,</span> <span class="nc">CURLOPT_URL</span><span class="o">,</span> <span class="n">url</span><span class="o">)</span>
-</span><span class='line'><span class="n">curl_easy_setopt</span><span class="o">(</span><span class="n">handle</span><span class="o">,</span> <span class="nc">CURLOPT_VERBOSE</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">let</span> <span class="n">ret</span> <span class="k">=</span> <span class="n">curl_easy_perform</span><span class="o">(</span><span class="n">handle</span><span class="o">)</span>
-</span><span class='line'><span class="n">let</span> <span class="n">error</span> <span class="k">=</span> <span class="n">curl_easy_strerror</span><span class="o">(</span><span class="n">ret</span><span class="o">)</span>
-</span><span class='line'><span class="n">println</span><span class="o">(</span><span class="s">&quot;error = \(error)&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>值得注意的是其中对单个函数的多态声明， <code>curl_easy_setopt</code> 实际上第三个参数是 <code>void *</code>。</p>
-
-<p>以及对 <code>url</code> 的处理，实际上 libcurl 要求设置的 url 参数一直保持到 <code>curl_easy_perform</code> 时，所以这里用 <code>withUnsafePointer</code> 或者
-<code>withCString</code> 是不太可取的方法。实际上或许可以用 <code>Unmanaged&lt;T&gt;</code> 来解决。</p>
-
-<h2>总结</h2>
-
-<p>我觉得说这么多。。。</p>
-
-<p>调用 C 已经再没有别的内容可说了。其他的就是编程经验的问题，比如如何实现 C 回调 Swift 或者 Swift 回调 C 。可以参考其他语言的做法。解决方法不只一种。</p>
-
-<h2>参考文献</h2>
-
-<ul>
-<li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a>。</li>
-<li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop 简析Swift和C的交互 第一部分</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a></li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -2971,6 +2688,10 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/">折腾 Raspberry Pi + HomeKit 手记</a>
@@ -3046,10 +2767,6 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
     
       <li class="post">
         <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/18/swift-and-c-interop-cont/">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</a>
       </li>
     
   </ul>

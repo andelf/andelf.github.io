@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0) - 猫·仁波切</title>
+  <title>Category: Ci - 猫·仁波切</title>
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="安装工具 https://github.com/kylef/swiftenv Swift 3.0 新变化 以下内容来自 Swift 语言提案1。 Swift 3.0 发布计划 Swift Package System https://github.com/donald-pinckney/swift &hellip;">
+  <meta name="description" content="Category: ci">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0">
+  <link rel="canonical" href="http://andelf.github.io/blog/categories/ci">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
@@ -66,208 +66,36 @@
   <div id="main">
     <div id="content">
       <div>
-<article class="hentry" role="article">
+<article role="article">
   
   <header>
-    
-      <h1 class="entry-title">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-04-28T10:06:53+08:00" pubdate data-updated="true"></time>
-        
-      </p>
+    <h1 class="entry-title">Category: Ci</h1>
     
   </header>
-
-
-<div class="entry-content"><p>安装工具</p>
-
-<p><a href="https://github.com/kylef/swiftenv">https://github.com/kylef/swiftenv</a></p>
-
-<h2>Swift 3.0 新变化</h2>
-
-<p>以下内容来自 Swift 语言提案<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>。</p>
-
-<p>Swift 3.0 发布计划</p>
-
-<h3>Swift Package System</h3>
-
-<p><a href="https://github.com/donald-pinckney/swift-packages">https://github.com/donald-pinckney/swift-packages</a></p>
-
-<h2>AST 结构</h2>
-
-<p>代码位于 <code>include/swift/AST</code> 和 <code>lib/AST</code>。</p>
-
-<p>ModuleDecl
-模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。</p>
-
-<p>FileUnit（抽象类）
-文件作用域，是代码组织的最小单元。</p>
-
-<ul>
-<li>DerivedFileUnit: A container for a module-level definition derived as part of an implicit protocol conformance.</li>
-<li>SourceFile: A file containing Swift source code. .swift 或 .sil 也可以是虚拟 REPL
-
-<ul>
-<li>Imports: Vec&lt;(ImportedModule, ImportOptions)></li>
-<li>Identifier</li>
-<li>Decls: Vec<Decl></li>
-<li>LocalTypeDecl: Vec<TypeDecl></li>
-<li>ObjCMethods: Map&lt;ObjCSelector, AbstractFunctionDecl></li>
-<li>infix, postfix, prefix operators: OperatorMap</li>
-</ul>
-</li>
-<li>BuiltinUnit</li>
-</ul>
-
-
-<h2>swift 命令入口</h2>
-
-<p>入口函数 <code>tools/driver/driver.cpp</code>，<code>main</code> 函数。</p>
-
-<p>集成多个子工具。同时若 <code>PATH</code> 下有名为 <code>swift-foobar</code> 的可执行文件，则可通过 <code>swift foobar</code> 调用。</p>
-
-<h3>编译器前端 <code>swift -frontend</code></h3>
-
-<p>编译。同时支持打印出各种编译时中间结果。</p>
-
-<h3>API Notes 功能 <code>swift -apinotes</code></h3>
-
-<p>参考信息位于 <a href="https://github.com/apple/swift/tree/master/apinotes">https://github.com/apple/swift/tree/master/apinotes</a> .</p>
-
-<p>简单说，API Notes 机制就是通过 <code>.apinotes</code> 文件（YAML格式）描述 Objective-C Framework 和对应 Swift API 的关系。最终生成 <code>.apinotesc</code> 文件，与 <code>.swiftmodule</code> 文件一起作为 Swift 的模块。</p>
-
-<p>主要功能包括且不限于：</p>
-
-<ul>
-<li><code>SwiftBridge</code>：设置对应的 Bridge 类型，例如 NSArray 对应与 <code>Swift.Array</code></li>
-<li><code>Nullability</code>/<code>NullabilityOfRet</code>： 类的属性、方法的参数、返回值对应类型是否可以为 null，即对应与 Swift 的 T 还是 T?</li>
-<li><code>Availability</code>：方法是否在 Swift 中暴露，并给出 availability message</li>
-<li><code>SwiftName</code>：方法 Selector 在 Swift 中的重命名，例如 <code>filteredArrayUsingPredicate:</code> 替换为 <code>filtered(using:)</code></li>
-</ul>
-
-
-<p>Dump 为YAML文件：</p>
-
-<pre><code>$&gt; swift -apinotes -binary-to-yaml /path/to/lib/swift/macosx/x86_64/Dispatch.apinotesc -o=-
-</code></pre>
-
-<h3>Module Wrap 工具 <code>swift -modulewrap</code></h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>// Wraps .swiftmodule files inside an object file container so they
-</span><span class='line'>// can be passed to the linker directly. Mostly useful for platforms
-</span><span class='line'>// where the debug info typically stays in the executable.
-</span><span class='line'>// (ie. ELF-based platforms).</span></code></pre></td></tr></table></div></figure>
-
-
-<p>用法：</p>
-
-<pre><code>swift -modulewrap ObjectiveC.swiftmodule -o objc.o
-</code></pre>
-
-<p>实际发现是在 <code>.o</code> 里定义了 <code>___Swift_AST</code> 符号。</p>
-
-<h3>REPL</h3>
-
-<p>Swift 提供了两个 REPL(Read-Evaluate-Print Loop)，一个是 Swift 本身内置，另一个集成到了 lldb 命令行下。前者只有基本功能，即将废弃，后者功能更强大。</p>
-
-<p>子命令分别是：</p>
-
-<ul>
-<li><code>swift -deprecated-integrated-repl</code></li>
-<li><code>swift -lldb-repl</code>。</li>
-</ul>
-
-
-<p><code>swift -repl</code> 子命令选择可用的 REPL 进入，一般是 <code>lldb-repl</code>，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。</p>
-<div class="footnotes">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>(apple/swift-evolution)[https://github.com/apple/swift-evolution]<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
-</ol>
-</div>
-
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
   
-
-<span class="byline author vcard">Posted by <span class="fn">猫·仁波切 (Feather)</span></span>
-
-      
-
-
-
-
-
+  <div id="blog-archives" class="category">
 
 
 
   
+  <h2>2016</h2>
+
+<article>
+  
+<h1><a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a></h1>
+<time datetime="2016-11-18T13:26:15+08:00" pubdate><span class='month'>Nov</span> <span class='day'>18</span> <span class='year'>2016</span></time>
+
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/ci/'>ci</a>, <a class='category' href='/blog/categories/rust/'>rust</a></span>
+</footer>
 
 
-<time datetime="2016-04-28T10:06:53+08:00" pubdate data-updated="true"></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/swift/'>swift</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/" data-via="andelf" data-counturl="http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/" >Tweet</a>
-  
-  
-  <div class="g-plusone" data-size="medium"></div>
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2016/03/22/rust-pattern-match/" title="Previous Post: Rust Pattern Match(Rust中的模式匹配)">&laquo; Rust Pattern Match(Rust中的模式匹配)</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/" title="Next Post: 折腾 Raspberry Pi + HomeKit 手记">折腾 Raspberry Pi + HomeKit 手记 &raquo;</a>
-      
-    </p>
-  </footer>
 </article>
 
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
-  </section>
+
+  
+</article>
 
 </div>
 
@@ -420,10 +248,7 @@
       var disqus_shortname = 'andelf';
       
         
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/';
-        var disqus_url = 'http://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/';
-        var disqus_script = 'embed.js';
+        var disqus_script = 'count.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
