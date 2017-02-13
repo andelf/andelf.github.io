@@ -9,8 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长，
-影响开发效率。 了解到 CircleCI 是不错的替代品，所以打算迁移 Rust 项目过去。当然说起来， CircleCI 的野心更大，是要来替代 jenkins 的 &hellip;">
+  <meta name="description" content="Ansible Tower will report stdout capture is missing when restoring from previous backup. Or run from docker? (得，不装 B 英语了) 长话短说，之前要把 Ansible Tower 拆到 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +67,73 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/">Fix Ansible Tower: Stdout Capture Is Missing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-12-07T16:33:20+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Ansible Tower will report <code>stdout capture is missing</code> when restoring from previous backup.</p>
+
+<p>Or run from docker?</p>
+
+<p>(得，不装 B 英语了)</p>
+
+<p>长话短说，之前要把 Ansible Tower 拆到 Docker 里，结果发现总不能正常执行。任务界面会提示：</p>
+
+<pre><code>stdout capture is missing
+</code></pre>
+
+<p>检查发现是 celery 进程出错，用 root 启动 celery 倒是正常的。</p>
+
+<p>最后发现是 docker 中的 supervisord 启动时缺乏部分环境变量，解决方法：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>change supervisor/conf.d/tower.conf
+</span><span class='line'>ADD:
+</span><span class='line'>[program:awx-celeryd]
+</span><span class='line'>......
+</span><span class='line'>environment=HOME="/var/lib/awx",USER="awx"
+</span><span class='line'>......</span></code></pre></td></tr></table></div></figure>
+
+
+<p>是的，为找到原因，逆向了整个 Ansible Tower。</p>
+
+<p>Ref: <a href="https://github.com/ansible/ansible/issues/13904">GitHub Issue</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1522,127 +1588,6 @@ iOS 10 终于强化了推出已有两年智能家居平台，提供了官方 App
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-07T12:09:54+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>排名 16 了。啧啧。你看才刚出一个月。</p>
-
-<p>目前已经有了很多非常棒的 Swift 第三方库， JSON 处理啊、 HTTP 访问啊、 UIView 插件啊等等。</p>
-
-<p>如何科学地引用这些第三方库呢？</p>
-
-<h2>现状</h2>
-
-<p>CocoaPods 由于完全使用静态链接解决方法，过度依赖 Objective-C ，目前应该是官方 repo 有提到是 <code>-Xlinker</code> error , 这个问题之前我也遇到过，无解。除非手工执行 <code>ar</code> 不用 <code>ld</code> 和 <code>libtool</code>。</p>
-
-<p>小伙伴有用子目录的方法引用代码，貌似不错，还有就是直接用 <code>git submodule</code>，看起来维护性也可以。</p>
-
-<h2>简单解决方案</h2>
-
-<p>一个良好的第三方库应该实现为 Cocoa Touch Framework (实际内容为 Header + 动态链接库)。而不是直接把 Swift 代码 Copy 过来放入自己的项目。这里以一个简单项目为例，介绍如何科学使用。</p>
-
-<h3>目标描述</h3>
-
-<p>用 Swift 创建一个 Demo ，使用 SwiftyJSON 和 LTMorphingLabel 库。</p>
-
-<p>项目的名字叫 DemoApp 。</p>
-
-<h4>创建 Workspace</h4>
-
-<p>创建一个 Workspace ，名字随意，位置能找到就好。这个 Workspace 主要用来管理我们的项目及其依赖的第三方库。</p>
-
-<h4>创建 DemoApp</h4>
-
-<p>在 Workspace 创建一个 App ，因为是测试所以我选了 Single View Application 。</p>
-
-<h4>引入 SwiftyJSON</h4>
-
-<p>SwiftyJSON 是一个 Cocoa Touch Framework ，可以直接使用， <code>git clone</code> 后，添加项目到 Workspace 即可。</p>
-
-<p>尝试操作发现。。最容易最不会出错的方法就是直接从 Finder 里把 <code>.xcodeproj</code> 文件拖动到 Workspace 。</p>
-
-<h4>引入 LTMorphingLabel</h4>
-
-<p>LTMorphingLabel 是一个 App Deme 式项目。其中 Label View 的实现在一个子目录中。可以采用创建 Cocoa
-Touch Framework 的方法来引入这几个文件。</p>
-
-<p>当然也可以直接把目录拖到我们的 DemoApp 里，不过太原始粗暴了。</p>
-
-<h4>为 App 添加依赖</h4>
-
-<p>在 DemoApp 的 Genral 选项卡中，添加 Linked Frameworks and Libraries 。选择  Workspace 中 SwiftyJSON 和
-LTMorphingLabel 两个 <code>.framework</code> 。</p>
-
-<p>如果是直接选择来自其他项目的 <code>.framework</code> 而不是同一 Workspace ，那么这里也许还要同时加入 <code>Embedded Binaries</code>。</p>
-
-<h4>使用</h4>
-
-<p>添加好依赖后，就可以在 DemoApp 项目代码中 <code>import SwiftyJSON</code> 或者 <code>import LTMorphingLabel</code> 来使用对应的库。同时还可以用 Command + 鼠标点击的方法查看声明代码。</p>
-
-<h4>除错</h4>
-
-<p>比较坑爹的是，实际上按照以上方法， <code>LTMorphingLabel</code> 并不能正常使用，查看报错信息发现是自动生成的 <code>LTMorphingLabel-Swift.h</code> 有处语法无法被识别，编辑器找到 <code>.h</code> 文件，注释掉这行诡异代码即可。</p>
-
-<p>看起来目前的 Bridge Header 和 -emit-objc-header 实现还是有问题的。小伙伴一定要淡定。</p>
-
-<h2>对于非 Workspace</h2>
-
-<p>如果不喜欢使用 Workspace ，也可以将第三方库的编译结果，一个 <code>.framework</code> 目录拖到项目文件里，然后添加 <code>Embedded Binaries</code>。</p>
-
-<h2>评论</h2>
-
-<p>创建 Cocoa Touch Framework 选项中，可以使用 Swift 代码，此时编译结果（默认）会包含 <code>module.modulemap</code> 文件，
-之前有介绍过它的作用，通过它， Swift 可以使用第三方模块。参考 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a> 。</p>
-
-<p>实际上这个解决方案绕了一大圈，通过 Swift 文件导出 <code>ProjName-Swift.h</code>、然后 <code>module.modulemap</code> 模块描述文件引入、然后再由 Swift 导入。</p>
-
-<p>其实 <code>.framework</code> 同时也包含了 <code>ProjName.swiftmodule/[ARCH].swiftmodule</code> 不过看起来没有使用到，而且默认在 IDE 下也不支持 Swift 从 <code>.swiftmodule</code> 文件导入，比较坑。希望以后版本能加入支持。</p>
-
-<p><code>.framework</code> 包含了所有 Swift 标准库的动态链接库，小伙伴可能会以为这会导致编译后的 App 变大。其实大可放心，任何 Swift 语言的 App 都会包含这些动态链接库，而且只会包含一个副本。此方法对 App 最终的大小几乎无影响。</p>
-
-<p>注： 个人测试了下，发现这个 <code>.swiftmodule</code> 是可以通过其他方法使用的，绕过 <code>module.modulemap</code>，应该是更佳的解决方案，但是需要控制命令行参数。</p>
-
-<p>至于静态链接库，过时了。抛弃吧。</p>
-
-<h2>参考</h2>
-
-<ul>
-<li><a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
-<li><a href="http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a></li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -1656,6 +1601,10 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/">Fix Ansible Tower: Stdout Capture Is Missing</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a>
@@ -1733,10 +1682,6 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
         <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -1788,7 +1733,7 @@ LTMorphingLabel 两个 <code>.framework</code> 。</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2017 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

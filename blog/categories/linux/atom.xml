@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Linux | 猫·仁波切]]></title>
+  <link href="http://andelf.github.io/blog/categories/linux/atom.xml" rel="self"/>
+  <link href="http://andelf.github.io/"/>
+  <updated>2017-02-13T22:05:35+08:00</updated>
+  <id>http://andelf.github.io/</id>
+  <author>
+    <name><![CDATA[猫·仁波切 (Feather)]]></name>
+    <email><![CDATA[andelf@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Fix Ansible Tower: Stdout Capture Is Missing]]></title>
+    <link href="http://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/"/>
+    <updated>2016-12-07T16:33:20+08:00</updated>
+    <id>http://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing</id>
+    <content type="html"><![CDATA[<p>Ansible Tower will report <code>stdout capture is missing</code> when restoring from previous backup.</p>
+
+<p>Or run from docker?</p>
+
+<p>(得，不装 B 英语了)</p>
+
+<p>长话短说，之前要把 Ansible Tower 拆到 Docker 里，结果发现总不能正常执行。任务界面会提示：</p>
+
+<pre><code>stdout capture is missing
+</code></pre>
+
+<p>检查发现是 celery 进程出错，用 root 启动 celery 倒是正常的。</p>
+
+<p>最后发现是 docker 中的 supervisord 启动时缺乏部分环境变量，解决方法：</p>
+
+<pre><code>change supervisor/conf.d/tower.conf
+ADD:
+[program:awx-celeryd]
+......
+environment=HOME="/var/lib/awx",USER="awx"
+......
+</code></pre>
+
+<p>是的，为找到原因，逆向了整个 Ansible Tower。</p>
+
+<p>Ref: <a href="https://github.com/ansible/ansible/issues/13904">GitHub Issue</a></p>
+]]></content>
+  </entry>
+  
+</feed>

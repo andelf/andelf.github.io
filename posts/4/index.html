@@ -9,17 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="1
-2
-3
-4
-5
-6
-7
-8
-9
-typealias Any = protocol&lt;&gt; typealias AnyClass = AnyObject.Type @class_protocol protocol AnyObject {
-} // Also there is &hellip;">
+  <meta name="description" content="主要介绍原有 Objective-C 中的一些类型在 Swift 中的操作问题。差不多就能知道，你在 Swift 如何对 Objective-C (Foundation) 原生类型进行操作以及和 Swift 类型互转。 瞎写的，有错或者不明白的地方直接告诉我。转载注明我或者 SwiftChina &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +67,274 @@ typealias Any = protocol&lt;&gt; typealias AnyClass = AnyObject.Type @class_prot
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/11/swift-and-objectivec-interop/">Swift and ObjectiveC Interop (Swift 与 Objective-C 之间的交互)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-11T20:01:11+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>主要介绍原有 Objective-C 中的一些类型在 Swift 中的操作问题。差不多就能知道，你在 Swift 如何对 Objective-C (Foundation) 原生类型进行操作以及和 Swift 类型互转。</p>
+
+<p>瞎写的，有错或者不明白的地方直接告诉我。转载注明我或者 SwiftChina 。</p>
+
+<p>参考资料是 我的 Github : <a href="https://github.com/andelf/Defines-Swift">andelf/Defines-Swift</a> 是我dump出的定义。10w行swift代码。</p>
+
+<h1>预备知识</h1>
+
+<h2>Objective-C (Cocoa) 特色</h2>
+
+<p>数值类型统一用 <code>NSNumber</code>，不区分具体。大量操作在指针上进行，也就隐含着一切可能出错的调用都会返回 <code>nil</code>。
+没有泛型支持，字典或者数组更多用 <code>id</code> 类型。</p>
+
+<h2>对应 Swift 特色</h2>
+
+<p>数值类型众多 （<code>Int, UInt, Float, Double, ...</code>），无指针（<code>UnsafePointer</code> 这类用于和其他代码交互的结构不计，<code>&amp;</code> + <code>inout</code> 认为是引用。）。
+<code>nil</code> 用于 <code>Type?</code>, <code>Type!</code>。字典和数组用泛型表示。</p>
+
+<h2>一些属性</h2>
+
+<p>有几个属性用于和 Objective-C 之间的交互。</p>
+
+<h3><code>@objc</code> 和 <code>@objc(a_name_defined_in_objc)</code></h3>
+
+<h3><code>@objc_block</code></h3>
+
+<p>用于函数类型前，标记后面的 block 是 Objective-C 的。个人觉得编译器会自动转换相关的 block 类型。</p>
+
+<p>然后需要预备下几个属性的知识。</p>
+
+<h3><code>@conversion</code></h3>
+
+<p>Swift 中的隐式类型转换。有另一篇文章介绍。</p>
+
+<h3><code>@final</code></h3>
+
+<p>就是 final 了。</p>
+
+<h3><code>@transparent</code></h3>
+
+<p>经过反汇编查看，相当于 <code>inline</code> 的作用。同时生成的 <code>.swiftmodule</code> 文件依然带有原函数实现。这个很高大上。保证了 <code>inline</code> 特性在包外可用。</p>
+
+<h2>重要 Swift protocol</h2>
+
+<h3><code>*LiteralConvertible</code></h3>
+
+<p>表示可以从 Swift 字面常量转换而得。比如 <code>let a: Type = 100</code>, 那么 Type 必须实现 IntegerLiteralConvertible。</p>
+
+<p>大概有 IntegerLiteralConvertible, FloatLiteralConvertible, StringLiteralConvertible, ArrayLiteralConvertible, DictionaryLiteralConvertible, CharacterLiteralConvertible 等。</p>
+
+<h3><code>_BridgedToObjectiveC</code> <code>_ConditionallyBridgedToObjectiveC</code></h3>
+
+<p>顾名思义。就是相当于这个 Swift 类型可以和某一 Objective-C 类型对等，可以相互转换。</p>
+
+<p>Conditional 多了个判断函数，也就是说这个类型可能是并没有对等起来的，什么情况下用呢，目前猜测应该是带泛型参数的类型中用到，有的泛型可以对应，有的不可以。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">_BridgedToObjectiveC</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">typealias</span> <span class="nc">ObjectiveCType</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">func</span> <span class="n">getObjectiveCType</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Any</span><span class="o">.</span><span class="nc">Type</span>
+</span><span class='line'>  <span class="n">func</span> <span class="n">bridgeToObjectiveC</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">ObjectiveCType</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">func</span> <span class="n">bridgeFromObjectiveC</span><span class="o">(</span><span class="n">source</span><span class="k">:</span> <span class="kt">ObjectiveCType</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">?</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>Reflectable</code> <code>Mirror</code></h3>
+
+<p>这个具体暂时不清楚。反射相关的两个 protocol 。</p>
+
+<h3><code>Sequence</code> <code>Generator</code></h3>
+
+<p>这两个用于 Swift 的 for-in 循环，简单说就是，实现了 <code>Sequence</code> 协议的对象可以 <code>.generate()</code> 出一个 <code>Generator</code>，
+然后 <code>Generator</code> 可以不断地 <code>.next()</code> 返回 <code>Type?</code>，其中 <code>Type</code> 是这个序列的泛型。</p>
+
+<h3><code>Hashable</code> <code>Equatable</code></h3>
+
+<p>英汉字典拿来。所以其实为了让 Objective-C 类型在 Swift 代码中正常工作，这个是必不可少的。</p>
+
+<h1>第一部分，类型交互</h1>
+
+<h2>For 类、方法、协议</h2>
+
+<p>通过 <code>@objc(name)</code> 转为 Swift 定义。其中 name 为 Objective-C 下的名字。</p>
+
+<p>例如</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@objc</span><span class="o">(</span><span class="nc">NSNumber</span><span class="o">)</span> <span class="k">class</span> <span class="nc">NSNumber</span> <span class="k">:</span> <span class="kt">NSValue</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">@objc</span><span class="o">(</span><span class="kt">init</span><span class="o">)</span> <span class="kt">convenience</span> <span class="kt">init</span><span class="o">()</span>
+</span><span class='line'>    <span class="kt">@objc</span> <span class="kt">var</span> <span class="kt">integerValue:</span> <span class="kt">Int</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kt">@objc</span><span class="o">(</span><span class="kt">integerValue</span><span class="o">)</span> <span class="kt">get</span> <span class="o">{}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kt">...</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="kt">@objc</span><span class="o">(</span><span class="kt">NSCopying</span><span class="o">)</span> <span class="kt">protocol</span> <span class="kt">NSCopying</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">@objc</span><span class="o">(</span><span class="kt">copyWithZone:</span><span class="o">)</span> <span class="kt">func</span> <span class="kt">copyWithZone</span><span class="o">(</span><span class="kt">zone:</span> <span class="kt">NSZone</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">AnyObject!</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所有可能为 <code>nil</code> 的指针类型几乎都被转为 <code>Type!</code>，由于 <code>ImplicitlyUnwrappedOptional</code> 的特性，所以几乎用起来一样。</p>
+
+<h2>For 基础数字类型</h2>
+
+<p><code>Int</code>, <code>UInt</code>, <code>Float</code>, <code>Double</code> 均实现了 <code>_BridgedToObjectiveC</code>, 其中类型参数 <code>ObjectiveCType</code> 均为 <code>NSNumber</code>。</p>
+
+<p>也就是说，可以直接 <code>.getObjectiveCType()</code> 获取到 <code>NSNumber</code>，然后剩下的就很熟悉了。</p>
+
+<p><code>NSNumber</code> 实现了 <code>FloatLiteralConvertible</code>, <code>IntegerLiteralConvertible</code>，所以其实，也可以直接从 Swift 字面常量获得。</p>
+
+<h2>For Bool</h2>
+
+<p>实际上 Objective-C 中的 <code>BOOL</code> 是某一数字类型，<code>YES</code>, <code>NO</code> 也分别是 1, 0 。</p>
+
+<p>所以 Swift <code>Bool</code> 实现了 <code>_BridgedToObjectiveC</code>，对应于 <code>NSNumber</code> 类型。</p>
+
+<h2>For String</h2>
+
+<p><code>NSString</code> 实现了 <code>StringLiteralConvertible</code>，可以直接通过字面常量获得，同时还有到 <code>String</code> 的隐式类型转换。</p>
+
+<p><code>String</code> 实现了 <code>_BridgedToObjectiveC</code> 对应于 <code>NSString</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">NSString</span> <span class="o">{</span>
+</span><span class='line'>  <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这就是为什么官方文档说 Swift 中 <code>String</code> 和 Objective-C 基本是相同操作的。其实都是背后的隐式类型转换。</p>
+
+<p>同时 Foundation 还为 <code>String</code> 扩充了很多方法，发现几个比较有意思的是 <code>._ns</code>，直接返回 <code>NSString</code>, <code>._index(Int)</code> 返回 <code>String.Index</code>，等等。</p>
+
+<h2>For Array</h2>
+
+<p><code>NSArray</code> 实现了 <code>ArrayLiteralConvertible</code>， 可以从字面常量直接获得。还实现了到 <code>AnyObject[]</code> 的隐式类型转换。</p>
+
+<p><code>Array&lt;T&gt;</code> 实现了 <code>_ConditionallyBridgedToObjectiveC</code>, 对应于 <code>NSArray</code>.</p>
+
+<p><code>NSArray</code> 还实现了 <code>Sequence</code> 协议，也就是可以通过 for-in 操作。其中 <code>generate()</code> 返回 <code>NSFastGenerator</code> 类，这个应该是在原有 Foundation 没有的。
+当然 <code>.next()</code> 返回 <code>AnyObject?</code></p>
+
+<h2>For Dictionary</h2>
+
+<p><code>NSDictionary</code> 实现了 <code>DictionaryLiteralConvertible</code>, <code>Sequence</code>。同时还实现了到 <code>Dictionary&lt;NSObject, AnyObject&gt;</code> 的隐式类型转换。</p>
+
+<p><code>Dictionary&lt;KeyType, ValueType&gt;</code> 实现了到 <code>NSDictionary</code> 的隐式类型转换。实现了 <code>_ConditionallyBridgedToObjectiveC</code> 对应于 <code>NSDictionary</code>。</p>
+
+<h2>其他扩充类型</h2>
+
+<p>新类型 <code>NSRange</code>，实现了 <code>_BridgedToObjectiveC</code>，对应于 <code>NSValue</code>，实现了到 <code>Range&lt;Int&gt;</code> 的隐式类型转换。</p>
+
+<p><code>NSMutableSet</code> <code>NSMutableDictionary</code> <code>NSSet</code> <code>NSMutableArray</code> 均实现了 <code>Sequence</code> 可以 for-in .</p>
+
+<h1>第二部分：从 Swift 调用 Objective-C</h1>
+
+<p>一般说来，你在 Swift 项目新建 Objective-C 类的时候，直接弹出是否创建 Bridge Header 的窗口，点 YES 就是了，这时候一般多出来个 <code>ProjectName-Bridging-Header.h</code> 。</p>
+
+<p>如果没有自动的话，这个配置在项目的 Build Settings 中的 Swift Compiler - Code Generation 子项里。</p>
+
+<p>说到底，其实是调用编译命令的 <code>-import-objc-header</code> 参数，后面加上这个 Header 文件。</p>
+
+<p>然后你就可以把你的 Objective-C Class 的 .h 文件都 import 到这个 Herder 文件里了。</p>
+
+<p>所有 Swift 代码都可以直接调用。完全透明，自动生成。</p>
+
+<h1>第三部分：从 Objective-C 调用 Swift</h1>
+
+<p>头文件是 <code>ProjectName-Swift.h</code>。直接 import 。</p>
+
+<p>不要吝啬你的键盘大量地加入 <code>@objc</code> 属性就是了。</p>
+
+<p>具体实现据我猜测是这样，先 swift 调用 <code>-emit-objc-header</code> <code>-emit-objc-header-path</code> 参数控制生成 Objective-C 的 Header，同时 swift 编译为模块，然后再编译一次。</p>
+
+<p>头文件内容大概是会包含一堆宏定义。然后是 Swift 的类定义等。这里可以看到 Swift 的 mangling 名字。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nc">SWIFT_CLASS</span><span class="o">(</span><span class="s">&quot;_TtC5Hello11AppDelegate&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="nd">@interface</span> <span class="nc">AppDelegate</span> <span class="k">:</span> <span class="kt">UIResponder</span> <span class="kt">&lt;UIApplicationDelegate&gt;</span>
+</span><span class='line'><span class="nd">@property</span> <span class="o">(</span><span class="n">nonatomic</span><span class="o">)</span> <span class="nc">UIWindow</span> <span class="o">*</span> <span class="n">window</span><span class="o">;</span>
+</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="nc">BOOL</span><span class="o">)</span><span class="n">application</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span> <span class="kt">didFinishLaunchingWithOptions:</span><span class="o">(</span><span class="kt">NSDictionary</span> <span class="kt">*</span><span class="o">)</span><span class="kt">launchOptions</span><span class="o">;</span>
+</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationWillResignActive</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
+</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationDidEnterBackground</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
+</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationWillEnterForeground</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
+</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationDidBecomeActive</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
+</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationWillTerminate</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
+</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">instancetype</span><span class="o">)</span><span class="n">init</span> <span class="nc">OBJC_DESIGNATED_INITIALIZER</span><span class="o">;</span>
+</span><span class='line'><span class="nd">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>第四部分：一个 Swift 和 Objective-C 混合项目的编译过程</h1>
+
+<p>这里只先考虑一个 Swift 项目使用 Objective-C 代码的情况，这个应该暂时比较多见（使用旧的 MVC 代码，用新的 Swift 创建 ui 一类）。</p>
+
+<ul>
+<li>编译所有 <code>X.swift</code> 文件到 <code>X.o</code> (with <code>-emit-objc-header</code>, <code>-import-objc-header</code>) (其中包含 <code>.swiftmodule</code> 子过程)
+
+<ul>
+<li>由于选项里有 <code>-emit-objc-header</code>，所以之后的 Objective-C 文件可以直接 import 对应的 <code>ProjectName-Swift.h</code></li>
+</ul>
+</li>
+<li>编译 <code>X.m</code> 到 <code>X.o</code></li>
+<li>链接所有 <code>.o</code> 生成可执行文件</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -8411,276 +8669,6 @@ token list.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/23/rust-syntax-extensions/">Rust Syntax Extensions</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-23T23:44:43+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>All rust ASTs are in <code>syntax::ast</code>. And extensions are in
-<code>syntax::ext</code>.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">macro_registrar</span><span class="p">,</span> <span class="n">managed_boxes</span><span class="p">)];</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extern</span> <span class="n">crate</span> <span class="n">syntax</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">ast</span><span class="p">;</span>
-</span><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">ast</span><span class="o">::</span><span class="n">Name</span><span class="p">;</span>
-</span><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">ext</span><span class="o">::</span><span class="n">base</span><span class="o">::</span><span class="n">SyntaxExtension</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#[macro_registrar]</span>
-</span><span class='line'><span class="k">pub</span> <span class="k">fn</span> <span class="n">macro_registrar</span><span class="p">(</span><span class="n">register</span><span class="o">:</span> <span class="o">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="o">|</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Managed boxes, the <code>@-pointer</code> is still used in rust compiler, so it
-is essential to enable this feature.</p>
-
-<p>where the doc says:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="c-Doc">/// A name is a part of an identifier, representing a string or</span>
-</span><span class='line'><span class="n">gensym</span><span class="p">.</span> <span class="n">It</span><span class="nl">&#39;s</span> <span class="n">the</span> <span class="n">result</span> <span class="n">of</span> <span class="n">interning</span><span class="p">.</span>
-</span><span class='line'><span class="c-Doc">/// created by token::intern()</span>
-</span><span class='line'><span class="k">type</span> <span class="n">Name</span> <span class="o">=</span> <span class="kt">u32</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c-Doc">/// An enum representing the different kinds of syntax extensions.</span>
-</span><span class='line'><span class="k">pub</span> <span class="k">enum</span> <span class="n">SyntaxExtension</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c-Doc">/// A syntax extension that is attached to an item and creates new items</span>
-</span><span class='line'>    <span class="c-Doc">/// based upon it.</span>
-</span><span class='line'>    <span class="c-Doc">///</span>
-</span><span class='line'>    <span class="c-Doc">/// `#[deriving(...)]` is an `ItemDecorator`.</span>
-</span><span class='line'>    <span class="n">ItemDecorator</span><span class="p">(</span><span class="n">ItemDecorator</span><span class="p">),</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// A syntax extension that is attached to an item and modifies it</span>
-</span><span class='line'>    <span class="c-Doc">/// in-place.</span>
-</span><span class='line'>    <span class="n">ItemModifier</span><span class="p">(</span><span class="n">ItemModifier</span><span class="p">),</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// A normal, function-like syntax extension.</span>
-</span><span class='line'>    <span class="c-Doc">///</span>
-</span><span class='line'>    <span class="c-Doc">/// `bytes!` is a `NormalTT`.</span>
-</span><span class='line'>    <span class="n">NormalTT</span><span class="p">(</span><span class="o">~</span><span class="n">MacroExpander</span><span class="o">:</span><span class="k">&#39;static</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// A function-like syntax extension that has an extra ident before</span>
-</span><span class='line'>    <span class="c-Doc">/// the block.</span>
-</span><span class='line'>    <span class="c-Doc">///</span>
-</span><span class='line'>    <span class="c-Doc">/// `macro_rules!` is an `IdentTT`.</span>
-</span><span class='line'>    <span class="n">IdentTT</span><span class="p">(</span><span class="o">~</span><span class="n">IdentMacroExpander</span><span class="o">:</span><span class="k">&#39;static</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">type</span> <span class="n">ItemDecorator</span> <span class="o">=</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">Span</span><span class="p">,</span> <span class="o">@</span><span class="n">MetaItem</span><span class="p">,</span> <span class="o">@</span><span class="n">Item</span><span class="p">,</span> <span class="o">|@</span><span class="n">Item</span><span class="o">|</span><span class="p">);</span>
-</span><span class='line'><span class="k">type</span> <span class="n">ItemModifier</span> <span class="o">=</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">Span</span><span class="p">,</span> <span class="o">@</span><span class="n">MetaItem</span><span class="p">,</span> <span class="o">@</span><span class="n">Item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">@</span><span class="n">Item</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">pub</span> <span class="k">trait</span> <span class="n">MacroExpander</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span> <span class="n">ecx</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">span</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">token_tree</span><span class="o">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">TokenTree</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">pub</span> <span class="k">trait</span> <span class="n">IdentMacroExpander</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span> <span class="n">cx</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">sp</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">ident</span><span class="o">:</span> <span class="n">Ident</span><span class="p">,</span> <span class="n">token_tree</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">TokenTree</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c-Doc">/// The result of a macro expansion. The return values of the various</span>
-</span><span class='line'><span class="c-Doc">/// methods are spliced into the AST at the callsite of the macro (or</span>
-</span><span class='line'><span class="c-Doc">/// just into the compiler&#39;s internal macro table, for `make_def`).</span>
-</span><span class='line'><span class="k">pub</span> <span class="k">trait</span> <span class="n">MacResult</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c-Doc">/// Define a new macro.</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">make_def</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">MacroDef</span><span class="o">&gt;</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nb">None</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="c-Doc">/// Create an expression.</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">make_expr</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Expr</span><span class="o">&gt;</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nb">None</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="c-Doc">/// Create zero or more items.</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">make_items</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">SmallVector</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Item</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nb">None</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// Create a statement.</span>
-</span><span class='line'>    <span class="c-Doc">///</span>
-</span><span class='line'>    <span class="c-Doc">/// By default this attempts to create an expression statement,</span>
-</span><span class='line'>    <span class="c-Doc">/// returning None if that fails.</span>
-</span><span class='line'>    <span class="k">fn</span> <span class="n">make_stmt</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;@</span><span class="n">ast</span><span class="o">::</span><span class="n">Stmt</span><span class="o">&gt;</span> <span class="p">{</span>
-</span><span class='line'>        <span class="bp">self</span><span class="p">.</span><span class="n">make_expr</span><span class="p">()</span>
-</span><span class='line'>            <span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">e</span><span class="o">|</span> <span class="o">@</span><span class="n">codemap</span><span class="o">::</span><span class="n">respan</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">span</span><span class="p">,</span> <span class="n">ast</span><span class="o">::</span><span class="n">StmtExpr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">ast</span><span class="o">::</span><span class="n">DUMMY_NODE_ID</span><span class="p">)))</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>How to call</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="kn">use</span> <span class="n">syntax</span><span class="o">::</span><span class="n">parse</span><span class="o">::</span><span class="n">token</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#[macro_registrar]</span>
-</span><span class='line'><span class="k">pub</span> <span class="k">fn</span> <span class="n">registrar</span><span class="p">(</span><span class="n">register</span><span class="o">:</span> <span class="o">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="o">|</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">register</span><span class="p">(</span><span class="n">token</span><span class="o">::</span><span class="n">intern</span><span class="p">(</span><span class="s">&quot;your_ext_name&quot;</span><span class="p">),</span> <span class="n">your_extension</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Note: <code>registrar</code> is not <code>register</code>.</p>
-
-<p>How to create each part:</p>
-
-<p><code>Name</code> is generated from
-<code>syntax::parse::token::intern()</code>.</p>
-
-<p>For different SyntaxExtension Enum, write the function, and wrap in Enum constructor.</p>
-
-<h3>ItemDecorator</h3>
-
-<p><code>src/libsyntax/ext/deriving/mod.rs</code>. The
-<code>#[deriving(...)</code>.</p>
-
-<p>To make items from an existing item.</p>
-
-<h3>ItemModifier</h3>
-
-<p><code>src/test/auxiliary/macro_crate_test.rs</code></p>
-
-<p>Modify existing item.</p>
-
-<h3>NormalTT</h3>
-
-<p>Builtin sample in: <code>src/libsyntax/ext/base.rs</code> and sub dirs.
-Normal <code>macro_name!(...)</code> call.</p>
-
-<h3>IdentTT</h3>
-
-<p>Builtin sample in: <code>src/libsyntax/ext/tt/macro_rules.rs</code>, <code>pub fn add_new_extension</code>.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="n">macro_name</span><span class="o">!</span> <span class="n">ident</span><span class="p">(</span>
-</span><span class='line'>    <span class="n">whatever</span> <span class="n">here</span><span class="p">...</span>
-</span><span class='line'><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Aux</h2>
-
-<p>The <code>quote</code> feature.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">quote</span><span class="p">,</span> <span class="n">phase</span><span class="p">)]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This enables <code>quote_expr!(ExtCtxt, [Code])</code>, <code>quote_tokens!</code>,
-<code>quote_item!</code>, <code>quote_pat!</code>, <code>quote_stmt!</code>, <code>quote_ty!</code> macros,
-and generates corresponding ast type.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="5">&larr; Older</a>
@@ -8696,6 +8684,10 @@ and generates corresponding ast type.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/">Fix Ansible Tower: Stdout Capture Is Missing</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a>
@@ -8773,10 +8765,6 @@ and generates corresponding ast type.</p>
         <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -8828,7 +8816,7 @@ and generates corresponding ast type.</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2017 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

@@ -9,7 +9,7 @@
   <meta name="author" content="猫·仁波切 (Feather)">
 
   
-  <meta name="description" content="声明： 转载注明我或者 SwiftChina . weibo 本文的发现基于个人研究，目测是官方外的首创。请尊重原创。 本文是讲述 Swift 与 C 交互操作系列文章的第二部分。解决之前的所有遗留问题。 第一部分请参考 Swift and C Interop 简析Swift和C的交互 &hellip;">
+  <meta name="description" content="声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo 本文的发现基于个人研究。请尊重原创。 引子 你之所以认为 Swift 最像 Scala, 那是因为你还没学过 Rust. &mdash;- 猫·仁波切 Swift 中模块是什么？当写下 Swift 中一句 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,371 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-19T15:14:31+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>本文的发现基于个人研究。请尊重原创。</p>
+
+<h2>引子</h2>
+
+<blockquote><p>你之所以认为 Swift 最像 Scala, 那是因为你还没学过 Rust. &mdash;- 猫·仁波切</p></blockquote>
+
+<p>Swift 中模块是什么？当写下 Swift 中一句 <code>import Cocoa</code> 的时候到底整了个什么玩意？官方 ibook 很含糊只是提了半页不到。</p>
+
+<p>本文解决如下问题</p>
+
+<ul>
+<li>介绍 Swift 中两种可 import 的模块</li>
+<li>如何用 Swift 写一个可被其他 Swift 代码使用的模块</li>
+<li>分析 Swift 的标准库实现方式</li>
+</ul>
+
+
+<h2>第一部分 Clang 模块（系统模块）</h2>
+
+<p>Clang 模块是来自系统底层的模块，一般是 C/ObjC 的头文件。原始 API 通过它们暴露给 Swift ，编译时需要链接到对应的 Library。</p>
+
+<p>例如 <code>UIKit</code>、<code>Foundation</code> 模块，从这些模块 dump 出的定义来看，几乎是完全自动生成的。当然， <code>Foundation</code> 模块更像是自动生成 + 人工扩展（我是说其中的隐式类型转换定义、对 Swift 对象的扩展等，以及 <code>@availability</code> 禁用掉部分函数。）。相关函数声明可以从 <a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a> 获得。</p>
+
+<p>我可不觉得这些定义全部都是官方生成后给封装进去的。所以在整个 Xcode-6 beta2 目录树里进行了探索。</p>
+
+<p>在 Xcode 目录寻找相关信息，最后目标锁定到了一个特殊的文件名 <code>module.map</code>。</p>
+
+<p>原来这个文件叫 Module map(这个名字还真是缺乏想象力)，属于 llvm 的 Module 系统。本来是用来颠覆传统的 C/C++/Objc 中的 <code>#include</code> 和 <code>#import</code>。最早在 2012 年 11 月的 LLVM DevMeeting 中由 Apple 的 Doug Gregor 提出 <sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>。相关内容 CSDN 也有文章介绍，不过是直译版，没有提出自己见解 <sup id="fnref:2"><a href="#fn:2" rel="footnote">2</a></sup>。</p>
+
+<h3>关于 llvm Module 系统</h3>
+
+<p>2012 年提出概念，所以其实这个东西已经很早就实现了 。简单说就是用树形的结构化描述来取代以往的平坦式 <code>#include</code>， 例如传统的 <code>#include &lt;stdio.h&gt;</code> 现在变成了 <code>import std.io;</code>， 逼格更高。主要好处有：</p>
+
+<ul>
+<li>语义上完整描述了一个框架的作用</li>
+<li>提高编译时可扩展性，只编译或 include 一次。避免头文件多次引用，只解析一次头文件甚至不需要解析（类似预编译头文件）</li>
+<li>减少碎片化，每个 module 只处理一次，环境的变化不会导致不一致</li>
+<li>对工具友好，工具（语言编译器）可以获取更多关于 module 的信息，比如链接库，比如语言是 C++ 还是 C</li>
+<li>等等</li>
+</ul>
+
+
+<p>所以这么好的一个东西， Apple 作为 llvm 的主力，在它的下一代语言中采用几乎是一定的。</p>
+
+<p>算了，我是个半路出家的，之前没接触过 iOS / MacOSX 开发，其实 2013 年的 WWDC， Apple 为 Objective-C 加入的 <code>@import</code> 语法就是它。可以认为，这是第一次这个 Module 系统得到应用。</p>
+
+<h4>module.map 文件</h4>
+
+<p><code>module.map</code> 文件就是对一个框架，一个库的所有头文件的结构化描述。通过这个描述，桥接了新语言特性和老的头文件。默认文件名是 <code>module.modulemap</code>，<code>module.map</code> 其实是为了兼容老标准，不过现在 Xcode 里的还都是这个文件名，相信以后会改成新名字。</p>
+
+<p>文件的内容以 <code>Module Map Language</code> 描述，大概语法我从 llvm 官方文档 <sup id="fnref:3"><a href="#fn:3" rel="footnote">3</a></sup> 摘录一段，大家体会一下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>module MyLib {
+</span><span class='line'>  explicit module A {
+</span><span class='line'>    header "A.h"
+</span><span class='line'>    export *
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  explicit module B {
+</span><span class='line'>    header "B.h"
+</span><span class='line'>    export *
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>类似上面的语法，描述了 <code>MyLib</code>、<code>MyLib.A</code>、<code>MyLib.B</code> 这样的模块结构。</p>
+
+<p>官方文档 [^3] 中有更多相关内容，可以描述框架，描述系统头文件，控制导出的范围，描述依赖关系，链接参数等等。这里不多叙述，举个 libcurl 的例子：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>module curl [system] [extern_c] {
+</span><span class='line'>    header "/usr/include/curl/curl.h"
+</span><span class='line'>    link "curl"    
+</span><span class='line'>    export *
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将此 <code>module.map</code> 文件放入任意文件夹，通过 Xcode 选项或者命令行参数，添加路径到 import search path （swift 的 -I 参数）。
+然后就可以在 Swift 代码里直接通过 <code>import curl</code> 导入所有的接口函数、结构体、常量等，(实测，发现 <code>curl_easy_setopt</code>
+无法自动导入，看起来是声明语法太复杂导致）。甚至可以直接从 swift repl 调用，体验脚本语言解释器般的快感（因为我们已经指定了链接到 curl 库）。</p>
+
+<p>Xcode 选项位于 Build Settings 下面的 Swift Compiler - Search Paths 。添加路劲即可。</p>
+
+<p>再举个复杂点的 <code>SDL2.framework</code> 的例子，看看如何实现树形的模块结构，这个需要把 <code>module.map</code> 放到 <code>.framework</code> 目录里</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>framework module SDL2 [system] {
+</span><span class='line'>  umbrella header "SDL.h"
+</span><span class='line'>  link -framework SDL2
+</span><span class='line'>
+</span><span class='line'>  module Version {
+</span><span class='line'>    header "SDL_version.h"
+</span><span class='line'>    export *
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  module Event {
+</span><span class='line'>    header "SDL_events.h"
+</span><span class='line'>    export *
+</span><span class='line'>  }
+</span><span class='line'>  // ....
+</span><span class='line'>  export *
+</span><span class='line'>  module * {
+</span><span class='line'>    export *
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>小结</h3>
+
+<p>Swift 的 C 模块（也是它的标准库部分）完全就是 llvm 的 Module 系统，在 import search path 的所有 module.map 中的模块都可以被识别，唯一缺点可能是如果有过于复杂用到太多高级 C 或者黑暗 C 语法的函数，无法很好识别，相信以后的版本会有所改善。</p>
+
+<p>所以当有人问 Swift 到底有多少标准库的时候，答案就是，基本上系统里所有的 Objective-C 和 C 头文件都可以调用。自 iOS 7 时代，这些头文件就已经被组织为 Module 了，包括标准 C 库 <code>Darwin.C</code>。同样因为 Module 系统来自于传统的 C/C++/Objc 头文件，所以 Swift 虽然可以有 <code>import ModA.ModB.ModC</code> 的语句，但是整个模块函数名字空间还是平坦的。</p>
+
+<p>一些有意思的模块可以探索探索，比如 <code>simd</code>，比如 <code>Python</code>（没错是的，直接调用 Python 解释器）等。</p>
+
+<p>另外 Swift 的 <code>-module-cache-path</code> 参数可以控制这类模块预编译头的存放位置（ .pcm 文件： pre compiled module）。</p>
+
+<p>Xcode 项目的 Build Settings ， Apple LLVM 6.0 - Language - Modules 有项目对 Module 支持的相关选项，默认是打开的。</p>
+
+<h2>第二部分 Swift 模块</h2>
+
+<p>说完了系统模块，该说 Swift 模块了。 Swift 自身的这个系统还是很赞的。</p>
+
+<p>本节介绍怎样用 Swift 创建一个可 import 的模块。</p>
+
+<h3>几个文件类型</h3>
+
+<p>先清楚几个文件类型。假设 <code>ModName.swift</code> 是我们的 Swift 源码文件。</p>
+
+<ul>
+<li><code>ModName.swiftmodule</code> Swift 的模块文件，有了它，才能 import</li>
+<li><code>ModName.swiftdoc</code> 保存了从源码获得的文档注释
+
+<ul>
+<li>文档注释以 <code>///</code> 开头</li>
+</ul>
+</li>
+<li><code>libswiftModName.dylib</code> 动态链接库</li>
+<li><code>libswiftModName.a</code>  静态链接库</li>
+</ul>
+
+
+<p>TODO: 目前有个疑问就是 <code>.swiftmodule</code> 和链接库到底什么时候用哪个，以及具体作用。</p>
+
+<h4>.swift 源码文件</h4>
+
+<p>先明确一个概念，一个 .swift 文件执行是从它的第一条非声明语句（表达式、控制结构）开始的，同时包括声明中的赋值部分（对应为 mov 指令或者 lea 指令），所有这些语句，构成了该 .swift 文件的 <code>top_level_code()</code> 函数。</p>
+
+<p>而所有的声明，包括结构体、类、枚举及其方法，都不属于 <code>top_level_code()</code> 代码部分，其中的代码逻辑，包含在其他区域，<code>top_level_code()</code> 可以直接调用他们。</p>
+
+<p>程序的入口是隐含的一个 <code>main(argc, argv)</code> 函数，该函数执行逻辑是设置全局变量 <code>C_ARGC</code> <code>C_ARGV</code>，然后调用 <code>top_level_code()</code>。</p>
+
+<p>不是所有的 .swift 文件都可以作为模块，目前看，任何包含表达式语句和控制控制的 .swift 文件都不可以作为模块。正常情况下模块可以包含全局变量(<code>var</code>)、全局常量(<code>let</code>)、结构体(<code>struct</code>)、类(<code>class</code>)、枚举(<code>enum</code>)、协议(<code>protocol</code>)、扩展(<code>extension</code>)、函数(func)、以及全局属性(<code>var { get set }</code>)。这里的全局，指的是定义在 top level 。</p>
+
+<p>这里说的表达式指 expression ，语句指 statement ，声明指 declaration 。可能和有些人对相关概念的定义不同。实际上我特无奈有些人纠结于概念问题，而不是问题本身，本来翻译过来的舶来品就有可能有误差，当你明白那指的是什么的时候，就可以了。</p>
+
+<h3>模块编译方法</h3>
+
+<p>这里先以命令行操作为例，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) ModName.swift -emit-library -emit-module -module-name ModName -v -o libswiftModName.dylib -module-link-name swiftModName</span></code></pre></td></tr></table></div></figure>
+
+
+<p>执行后获得 <code>ModName.swiftdoc</code>、<code>ModName.swiftmodule</code>、<code>libswiftModName.dylib</code>.</p>
+
+<p>这三个文件就可以表示一个可 import 的 Swift 模块。目前看起来 dylib 是必须得有的，否则链接过程报错。实际感觉 <code>.swiftmodule</code> 文件所包含的信息还需要继续挖掘挖掘。</p>
+
+<p>多个源码文件直接依次传递所有文件名即可。</p>
+
+<p>静态链接库 <code>.a</code> 目前还没有找到方法， <code>-Xlinker -static</code> 会报错。</p>
+
+<h4>命令行参数解释</h4>
+
+<p>相关命令行参数：</p>
+
+<ul>
+<li><code>-module-name &lt;value&gt;</code>       Name of the module to build 模块名</li>
+<li><code>-emit-library</code>              编译为链接库文件</li>
+<li><code>-emit-module-path &lt;path&gt;</code>   Emit an importable module to <path> 编译模块到路径（全路径，包含文件名）</li>
+<li><code>-emit-module</code>               Emit an importable module</li>
+<li><code>-module-link-name &lt;value&gt;</code>  Library to link against when using this module 该模块的链接库名，就是 <code>libswiftModName.dylib</code>，这个信息会直接写入到 <code>.swiftmodule</code></li>
+</ul>
+
+
+<h3>使用模块</h3>
+
+<p>使用模块就很简单了，记住两个参数：</p>
+
+<p><code>-I</code> 表示 import search path ，前面介绍过，保证 <code>.swiftmodule</code> 文件可以在 import search path 找到（这点很类似 module.map 文件，找得到这个就可以 import 可以编译）</p>
+
+<p><code>-L</code> 表示 链接库搜索路径，保证 <code>.dylib</code> 文件可以在其中找到，如果已经在系统链接库目录中，就不需要这个参数。</p>
+
+<p>例如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) mymodtest.swift -I. -L.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此时表示所有 module 文件都在当前目录。</p>
+
+<p>这两个选项都可以在 Xcode 中指定，所以如果你有小伙伴编译好的 module 想在你的项目里用是完全 ok 的。</p>
+
+<h3>For Xcode</h3>
+
+<p>很不幸，没能在 Xcode 中找到编译模块的相关方法。等我发现如何搞定的时候我会补上这个坑。</p>
+
+<p>不过在任何含 Swift 项目的编译过程中， <code>.swiftmodule</code> 文件总是伴随着 <code>.o</code> 文件传递。</p>
+
+<h2>第三部分 瞎分析 .swiftmodule 文件</h2>
+
+<p>简单分析下一个 .swiftmodule 所包含的信息。</p>
+
+<h3>Foundation</h3>
+
+<p>这里先以标准库的 <code>Foundation.swiftmodule</code> 下手。</p>
+
+<p>用 hexdump 查看发现它包含所有导出符号，以及 mangled name 。还有个文件列表，表示它是从哪些文件获得的（可以是 .swift 也可以是 .swiftmodule ）。</p>
+
+<p>用 strings 列出内容，发现 Foundation 库有如下特征:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>...
+</span><span class='line'>Foundation
+</span><span class='line'>LLVM 3.5svn
+</span><span class='line'>/SourceCache/compiler_KLONDIKE/compiler_KLONDIKE-600.0.34.4.8/src/tools/swift/stdlib/objc/Foundation/Foundation.swift
+</span><span class='line'>/SourceCache/compiler_KLONDIKE/compiler_KLONDIKE-600.0.34.4.8/src/tools/swift/stdlib/objc/Foundation/KVO.swift
+</span><span class='line'>/SourceCache/compiler_KLONDIKE/compiler_KLONDIKE-600.0.34.4.8/src/tools/swift/stdlib/objc/Foundation/NSStringAPI.swift
+</span><span class='line'>CoreFoundation
+</span><span class='line'>Foundation
+</span><span class='line'>Swift
+</span><span class='line'>swiftFoundation
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以大胆猜测对应下：</p>
+
+<ul>
+<li><code>-module-name</code> => <code>Foundation</code></li>
+<li>编译环境 => LLVM 3.5svn</li>
+<li>源文件列表 => &hellip;</li>
+<li>依赖列表 => <code>CoreFoundation</code>, <code>Foundation</code>, <code>Swift</code></li>
+<li><code>-module-link-name</code> => <code>swiftFoundation</code></li>
+</ul>
+
+
+<p>我由此猜测， <code>Foundation</code> 的确是只有少量 Swift 代码做桥接。然后通过 Clang 模块将剩下工作交到底层。</p>
+
+<p>分析其他类似模块也得到相同结果。</p>
+
+<h3>Swift 标准库</h3>
+
+<p>接下来有点好奇标准库 Swift 是怎么实现的。得到如下结果。</p>
+
+<p>节选重要部分到 <a href="https://gist.github.com/andelf/8f28ead66cdc3637f978">我的 Gist</a></p>
+
+<p>里面有些很有意思的信息，有兴趣的同学可以去看看。</p>
+
+<p>依赖模块 SwiftShims 是一个 <code>module.map</code> 定义的模块，桥接的部分头文件。源文件有相关信息和注释。大致意思是用来实现几个底层接口对象，比如 <code>NSRange</code> 邓。</p>
+
+<p>其中<code>-module-link-name</code> 是 <code>swift_stdlib_core</code>。</p>
+
+<h2>结论</h2>
+
+<p>LLVM Module 作为 Apple 提出的特性，已经被 Swift 完全采用，直接在它基础上建立了自己的模块系统。我相信它会影响到我们处理第三方库的方式方法。相信不久就会有相关工具基于它来管理依赖关系，比如老的 cocoapods<sup id="fnref:4"><a href="#fn:4" rel="footnote">4</a></sup> 可以加入新特性。</p>
+
+<p>用 Swift 写模块目前并没有很好的 IDE 支持，所以不是很方便。基于猜测验证，上面的方法可以实现在 Swift 里 import Swift 模块，方法和结果看起来完全和官方模块相同。</p>
+
+<p>Swift 的标准库完全是上面两种模块的结合体，用 Swift 模块封装 Clang 模块。这就解决了文章一开始提出的问题：为什么标准库大部分看起来是自动生成代码，少部分又好像是人工写的接口代码。</p>
+
+<h2>参考文献</h2>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>Modules - Doug Gregor, Apple, 2012 LLVM DevMeeting <a href="http://llvm.org/devmtg/2012-11/Gregor-Modules.pdf">PDF</a> <a href="http://llvm.org/devmtg/2012-11/videos/Gregor-Modules.mp4">Video</a><a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+<li id="fn:2">
+<p><a href="http://www.csdn.net/article/2012-11-28/2812274-module-replace-C-based-languages-headers">为什么应该用模块取代C/C++中的头文件？</a><a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
+<li id="fn:3">
+<p><a href="http://clang.llvm.org/docs/Modules.html">Modules - Clang 3.5 documentation</a><a href="#fnref:3" rev="footnote">&#8617;</a></p></li>
+<li id="fn:4">
+<p><a href="http://cocoapods.org/">CocoaPods</a><a href="#fnref:4" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2086,274 +2451,6 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/11/swift-and-objectivec-interop/">Swift and ObjectiveC Interop (Swift 与 Objective-C 之间的交互)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-11T20:01:11+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>主要介绍原有 Objective-C 中的一些类型在 Swift 中的操作问题。差不多就能知道，你在 Swift 如何对 Objective-C (Foundation) 原生类型进行操作以及和 Swift 类型互转。</p>
-
-<p>瞎写的，有错或者不明白的地方直接告诉我。转载注明我或者 SwiftChina 。</p>
-
-<p>参考资料是 我的 Github : <a href="https://github.com/andelf/Defines-Swift">andelf/Defines-Swift</a> 是我dump出的定义。10w行swift代码。</p>
-
-<h1>预备知识</h1>
-
-<h2>Objective-C (Cocoa) 特色</h2>
-
-<p>数值类型统一用 <code>NSNumber</code>，不区分具体。大量操作在指针上进行，也就隐含着一切可能出错的调用都会返回 <code>nil</code>。
-没有泛型支持，字典或者数组更多用 <code>id</code> 类型。</p>
-
-<h2>对应 Swift 特色</h2>
-
-<p>数值类型众多 （<code>Int, UInt, Float, Double, ...</code>），无指针（<code>UnsafePointer</code> 这类用于和其他代码交互的结构不计，<code>&amp;</code> + <code>inout</code> 认为是引用。）。
-<code>nil</code> 用于 <code>Type?</code>, <code>Type!</code>。字典和数组用泛型表示。</p>
-
-<h2>一些属性</h2>
-
-<p>有几个属性用于和 Objective-C 之间的交互。</p>
-
-<h3><code>@objc</code> 和 <code>@objc(a_name_defined_in_objc)</code></h3>
-
-<h3><code>@objc_block</code></h3>
-
-<p>用于函数类型前，标记后面的 block 是 Objective-C 的。个人觉得编译器会自动转换相关的 block 类型。</p>
-
-<p>然后需要预备下几个属性的知识。</p>
-
-<h3><code>@conversion</code></h3>
-
-<p>Swift 中的隐式类型转换。有另一篇文章介绍。</p>
-
-<h3><code>@final</code></h3>
-
-<p>就是 final 了。</p>
-
-<h3><code>@transparent</code></h3>
-
-<p>经过反汇编查看，相当于 <code>inline</code> 的作用。同时生成的 <code>.swiftmodule</code> 文件依然带有原函数实现。这个很高大上。保证了 <code>inline</code> 特性在包外可用。</p>
-
-<h2>重要 Swift protocol</h2>
-
-<h3><code>*LiteralConvertible</code></h3>
-
-<p>表示可以从 Swift 字面常量转换而得。比如 <code>let a: Type = 100</code>, 那么 Type 必须实现 IntegerLiteralConvertible。</p>
-
-<p>大概有 IntegerLiteralConvertible, FloatLiteralConvertible, StringLiteralConvertible, ArrayLiteralConvertible, DictionaryLiteralConvertible, CharacterLiteralConvertible 等。</p>
-
-<h3><code>_BridgedToObjectiveC</code> <code>_ConditionallyBridgedToObjectiveC</code></h3>
-
-<p>顾名思义。就是相当于这个 Swift 类型可以和某一 Objective-C 类型对等，可以相互转换。</p>
-
-<p>Conditional 多了个判断函数，也就是说这个类型可能是并没有对等起来的，什么情况下用呢，目前猜测应该是带泛型参数的类型中用到，有的泛型可以对应，有的不可以。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">_BridgedToObjectiveC</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">typealias</span> <span class="nc">ObjectiveCType</span>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">func</span> <span class="n">getObjectiveCType</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Any</span><span class="o">.</span><span class="nc">Type</span>
-</span><span class='line'>  <span class="n">func</span> <span class="n">bridgeToObjectiveC</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">ObjectiveCType</span>
-</span><span class='line'>  <span class="k">class</span> <span class="nc">func</span> <span class="n">bridgeFromObjectiveC</span><span class="o">(</span><span class="n">source</span><span class="k">:</span> <span class="kt">ObjectiveCType</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">?</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><code>Reflectable</code> <code>Mirror</code></h3>
-
-<p>这个具体暂时不清楚。反射相关的两个 protocol 。</p>
-
-<h3><code>Sequence</code> <code>Generator</code></h3>
-
-<p>这两个用于 Swift 的 for-in 循环，简单说就是，实现了 <code>Sequence</code> 协议的对象可以 <code>.generate()</code> 出一个 <code>Generator</code>，
-然后 <code>Generator</code> 可以不断地 <code>.next()</code> 返回 <code>Type?</code>，其中 <code>Type</code> 是这个序列的泛型。</p>
-
-<h3><code>Hashable</code> <code>Equatable</code></h3>
-
-<p>英汉字典拿来。所以其实为了让 Objective-C 类型在 Swift 代码中正常工作，这个是必不可少的。</p>
-
-<h1>第一部分，类型交互</h1>
-
-<h2>For 类、方法、协议</h2>
-
-<p>通过 <code>@objc(name)</code> 转为 Swift 定义。其中 name 为 Objective-C 下的名字。</p>
-
-<p>例如</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nd">@objc</span><span class="o">(</span><span class="nc">NSNumber</span><span class="o">)</span> <span class="k">class</span> <span class="nc">NSNumber</span> <span class="k">:</span> <span class="kt">NSValue</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kt">@objc</span><span class="o">(</span><span class="kt">init</span><span class="o">)</span> <span class="kt">convenience</span> <span class="kt">init</span><span class="o">()</span>
-</span><span class='line'>    <span class="kt">@objc</span> <span class="kt">var</span> <span class="kt">integerValue:</span> <span class="kt">Int</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kt">@objc</span><span class="o">(</span><span class="kt">integerValue</span><span class="o">)</span> <span class="kt">get</span> <span class="o">{}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="kt">...</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="kt">@objc</span><span class="o">(</span><span class="kt">NSCopying</span><span class="o">)</span> <span class="kt">protocol</span> <span class="kt">NSCopying</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kt">@objc</span><span class="o">(</span><span class="kt">copyWithZone:</span><span class="o">)</span> <span class="kt">func</span> <span class="kt">copyWithZone</span><span class="o">(</span><span class="kt">zone:</span> <span class="kt">NSZone</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">AnyObject!</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>所有可能为 <code>nil</code> 的指针类型几乎都被转为 <code>Type!</code>，由于 <code>ImplicitlyUnwrappedOptional</code> 的特性，所以几乎用起来一样。</p>
-
-<h2>For 基础数字类型</h2>
-
-<p><code>Int</code>, <code>UInt</code>, <code>Float</code>, <code>Double</code> 均实现了 <code>_BridgedToObjectiveC</code>, 其中类型参数 <code>ObjectiveCType</code> 均为 <code>NSNumber</code>。</p>
-
-<p>也就是说，可以直接 <code>.getObjectiveCType()</code> 获取到 <code>NSNumber</code>，然后剩下的就很熟悉了。</p>
-
-<p><code>NSNumber</code> 实现了 <code>FloatLiteralConvertible</code>, <code>IntegerLiteralConvertible</code>，所以其实，也可以直接从 Swift 字面常量获得。</p>
-
-<h2>For Bool</h2>
-
-<p>实际上 Objective-C 中的 <code>BOOL</code> 是某一数字类型，<code>YES</code>, <code>NO</code> 也分别是 1, 0 。</p>
-
-<p>所以 Swift <code>Bool</code> 实现了 <code>_BridgedToObjectiveC</code>，对应于 <code>NSNumber</code> 类型。</p>
-
-<h2>For String</h2>
-
-<p><code>NSString</code> 实现了 <code>StringLiteralConvertible</code>，可以直接通过字面常量获得，同时还有到 <code>String</code> 的隐式类型转换。</p>
-
-<p><code>String</code> 实现了 <code>_BridgedToObjectiveC</code> 对应于 <code>NSString</code>。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">extension</span> <span class="nc">NSString</span> <span class="o">{</span>
-</span><span class='line'>  <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">String</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这就是为什么官方文档说 Swift 中 <code>String</code> 和 Objective-C 基本是相同操作的。其实都是背后的隐式类型转换。</p>
-
-<p>同时 Foundation 还为 <code>String</code> 扩充了很多方法，发现几个比较有意思的是 <code>._ns</code>，直接返回 <code>NSString</code>, <code>._index(Int)</code> 返回 <code>String.Index</code>，等等。</p>
-
-<h2>For Array</h2>
-
-<p><code>NSArray</code> 实现了 <code>ArrayLiteralConvertible</code>， 可以从字面常量直接获得。还实现了到 <code>AnyObject[]</code> 的隐式类型转换。</p>
-
-<p><code>Array&lt;T&gt;</code> 实现了 <code>_ConditionallyBridgedToObjectiveC</code>, 对应于 <code>NSArray</code>.</p>
-
-<p><code>NSArray</code> 还实现了 <code>Sequence</code> 协议，也就是可以通过 for-in 操作。其中 <code>generate()</code> 返回 <code>NSFastGenerator</code> 类，这个应该是在原有 Foundation 没有的。
-当然 <code>.next()</code> 返回 <code>AnyObject?</code></p>
-
-<h2>For Dictionary</h2>
-
-<p><code>NSDictionary</code> 实现了 <code>DictionaryLiteralConvertible</code>, <code>Sequence</code>。同时还实现了到 <code>Dictionary&lt;NSObject, AnyObject&gt;</code> 的隐式类型转换。</p>
-
-<p><code>Dictionary&lt;KeyType, ValueType&gt;</code> 实现了到 <code>NSDictionary</code> 的隐式类型转换。实现了 <code>_ConditionallyBridgedToObjectiveC</code> 对应于 <code>NSDictionary</code>。</p>
-
-<h2>其他扩充类型</h2>
-
-<p>新类型 <code>NSRange</code>，实现了 <code>_BridgedToObjectiveC</code>，对应于 <code>NSValue</code>，实现了到 <code>Range&lt;Int&gt;</code> 的隐式类型转换。</p>
-
-<p><code>NSMutableSet</code> <code>NSMutableDictionary</code> <code>NSSet</code> <code>NSMutableArray</code> 均实现了 <code>Sequence</code> 可以 for-in .</p>
-
-<h1>第二部分：从 Swift 调用 Objective-C</h1>
-
-<p>一般说来，你在 Swift 项目新建 Objective-C 类的时候，直接弹出是否创建 Bridge Header 的窗口，点 YES 就是了，这时候一般多出来个 <code>ProjectName-Bridging-Header.h</code> 。</p>
-
-<p>如果没有自动的话，这个配置在项目的 Build Settings 中的 Swift Compiler - Code Generation 子项里。</p>
-
-<p>说到底，其实是调用编译命令的 <code>-import-objc-header</code> 参数，后面加上这个 Header 文件。</p>
-
-<p>然后你就可以把你的 Objective-C Class 的 .h 文件都 import 到这个 Herder 文件里了。</p>
-
-<p>所有 Swift 代码都可以直接调用。完全透明，自动生成。</p>
-
-<h1>第三部分：从 Objective-C 调用 Swift</h1>
-
-<p>头文件是 <code>ProjectName-Swift.h</code>。直接 import 。</p>
-
-<p>不要吝啬你的键盘大量地加入 <code>@objc</code> 属性就是了。</p>
-
-<p>具体实现据我猜测是这样，先 swift 调用 <code>-emit-objc-header</code> <code>-emit-objc-header-path</code> 参数控制生成 Objective-C 的 Header，同时 swift 编译为模块，然后再编译一次。</p>
-
-<p>头文件内容大概是会包含一堆宏定义。然后是 Swift 的类定义等。这里可以看到 Swift 的 mangling 名字。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nc">SWIFT_CLASS</span><span class="o">(</span><span class="s">&quot;_TtC5Hello11AppDelegate&quot;</span><span class="o">)</span>
-</span><span class='line'><span class="nd">@interface</span> <span class="nc">AppDelegate</span> <span class="k">:</span> <span class="kt">UIResponder</span> <span class="kt">&lt;UIApplicationDelegate&gt;</span>
-</span><span class='line'><span class="nd">@property</span> <span class="o">(</span><span class="n">nonatomic</span><span class="o">)</span> <span class="nc">UIWindow</span> <span class="o">*</span> <span class="n">window</span><span class="o">;</span>
-</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="nc">BOOL</span><span class="o">)</span><span class="n">application</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span> <span class="kt">didFinishLaunchingWithOptions:</span><span class="o">(</span><span class="kt">NSDictionary</span> <span class="kt">*</span><span class="o">)</span><span class="kt">launchOptions</span><span class="o">;</span>
-</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationWillResignActive</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
-</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationDidEnterBackground</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
-</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationWillEnterForeground</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
-</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationDidBecomeActive</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
-</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">void</span><span class="o">)</span><span class="n">applicationWillTerminate</span><span class="k">:</span><span class="o">(</span><span class="kt">UIApplication</span> <span class="kt">*</span><span class="o">)</span><span class="kt">application</span><span class="o">;</span>
-</span><span class='line'><span class="o">-</span> <span class="o">(</span><span class="n">instancetype</span><span class="o">)</span><span class="n">init</span> <span class="nc">OBJC_DESIGNATED_INITIALIZER</span><span class="o">;</span>
-</span><span class='line'><span class="nd">@end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>第四部分：一个 Swift 和 Objective-C 混合项目的编译过程</h1>
-
-<p>这里只先考虑一个 Swift 项目使用 Objective-C 代码的情况，这个应该暂时比较多见（使用旧的 MVC 代码，用新的 Swift 创建 ui 一类）。</p>
-
-<ul>
-<li>编译所有 <code>X.swift</code> 文件到 <code>X.o</code> (with <code>-emit-objc-header</code>, <code>-import-objc-header</code>) (其中包含 <code>.swiftmodule</code> 子过程)
-
-<ul>
-<li>由于选项里有 <code>-emit-objc-header</code>，所以之后的 Objective-C 文件可以直接 import 对应的 <code>ProjectName-Swift.h</code></li>
-</ul>
-</li>
-<li>编译 <code>X.m</code> 到 <code>X.o</code></li>
-<li>链接所有 <code>.o</code> 生成可执行文件</li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="4">&larr; Older</a>
@@ -2369,6 +2466,10 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/">Fix Ansible Tower: Stdout Capture Is Missing</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a>
@@ -2446,10 +2547,6 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
         <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -2501,7 +2598,7 @@ Read, experiment, and have fun. There’s plenty to discover!</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2016 - 猫·仁波切 (Feather) -
+  Copyright &copy; 2017 - 猫·仁波切 (Feather) -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
