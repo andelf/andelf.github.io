@@ -1,1794 +1,291 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
+<html lang="en"><head>
   <meta charset="utf-8">
-  <title>猫·仁波切</title>
-  <meta name="author" content="猫·仁波切 (Feather)">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>猫·仁波切 | 会研发的PM才是好OP.</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="猫·仁波切" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="会研发的PM才是好OP." />
+<meta property="og:description" content="会研发的PM才是好OP." />
+<link rel="canonical" href="https://andelf.github.io/" />
+<meta property="og:url" content="https://andelf.github.io/" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="猫·仁波切" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/","headline":"猫·仁波切","description":"会研发的PM才是好OP.","name":"猫·仁波切","@type":"WebSite","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
 
-  
-  <meta name="description" content="Ansible Tower will report stdout capture is missing when restoring from previous backup. Or run from docker? (得，不装 B 英语了) 长话短说，之前要把 Ansible Tower 拆到 &hellip;">
-  
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
 
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://andelf.github.io">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="猫·仁波切" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
-
-  
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">猫·仁波切</a></h1>
-  
-    <h2>会研发的PM才是好OP.</h2>
-  
-</hgroup>
-
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
 </header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="https://www.google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:andelf.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-  <li><a href="/about">About</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div class="blog-index">
-  
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/">Fix Ansible Tower: Stdout Capture Is Missing</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-12-07T16:33:20+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Ansible Tower will report <code>stdout capture is missing</code> when restoring from previous backup.</p>
-
-<p>Or run from docker?</p>
-
-<p>(得，不装 B 英语了)</p>
-
-<p>长话短说，之前要把 Ansible Tower 拆到 Docker 里，结果发现总不能正常执行。任务界面会提示：</p>
-
-<pre><code>stdout capture is missing
-</code></pre>
-
-<p>检查发现是 celery 进程出错，用 root 启动 celery 倒是正常的。</p>
-
-<p>最后发现是 docker 中的 supervisord 启动时缺乏部分环境变量，解决方法：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>change supervisor/conf.d/tower.conf
-</span><span class='line'>ADD:
-</span><span class='line'>[program:awx-celeryd]
-</span><span class='line'>......
-</span><span class='line'>environment=HOME="/var/lib/awx",USER="awx"
-</span><span class='line'>......</span></code></pre></td></tr></table></div></figure>
-
-
-<p>是的，为找到原因，逆向了整个 Ansible Tower。</p>
-
-<p>Ref: <a href="https://github.com/ansible/ansible/issues/13904">GitHub Issue</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-11-18T13:26:15+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长，
-影响开发效率。</p>
-
-<p>了解到 CircleCI 是不错的替代品，所以打算迁移 Rust 项目过去。当然说起来， CircleCI 的野心更大，是要来替代 jenkins 的。</p>
-
-<p>目前官方支持语言其实都比较落后，包括 go 也只是 1.6 版本，但似乎不是问题，而且据介绍， CircleCI 2.0 支持自定义 build image，支持语言的版本当然不在话下。</p>
-
-<p>每天面对各种 IaaS, PaaS，免不了写配置是，这也是 yaml 程序员的日常。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">dependencies</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">pre</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">curl https://sh.rustup.rs -sSf | sh</span>
-</span><span class='line'>
-</span><span class='line'><span class="l-Scalar-Plain">test</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">override</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cargo build</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cargo test</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如上。然而不 work。报错：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">cargo build</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">Updating registry `https://github.com/rust-lang/crates.io-index`</span>
-</span><span class='line'><span class="l-Scalar-Plain">warning</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">spurious network error (2 tries remaining)</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="nv">12/-12</span><span class="p-Indicator">]</span> <span class="l-Scalar-Plain">Malformed URL &#39;ssh://git@github.com:/rust-lang/crates.io-index&#39;</span>
-</span><span class='line'><span class="l-Scalar-Plain">warning</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">spurious network error (1 tries remaining)</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="nv">12/-12</span><span class="p-Indicator">]</span> <span class="l-Scalar-Plain">Malformed URL &#39;ssh://git@github.com:/rust-lang/crates.io-index&#39;</span>
-</span><span class='line'><span class="l-Scalar-Plain">error</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">failed to fetch `https://github.com/rust-lang/crates.io-index`</span>
-</span><span class='line'>
-</span><span class='line'><span class="l-Scalar-Plain">To learn more, run the command again with --verbose.</span>
-</span><span class='line'>
-</span><span class='line'><span class="l-Scalar-Plain">cargo build returned exit code 101</span>
-</span><span class='line'>
-</span><span class='line'><span class="l-Scalar-Plain">Action failed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">cargo build</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>神了。原来， CircleCI 自作聪明在 <code>.gitconfig</code> 里修改了映射配置，强制用它自己的 ssh key 去访问 github，rewrite 了 <code>https://github.com</code> 的所有仓库。
-这恰恰和 cargo 的 registry 机制冲突。所以报错。</p>
-
-<blockquote><p>CircleCI has rewrite <code>https:://github.com</code> to <code>ssh://git@github.com:</code> in <code>.gitconfig</code>. And this made cargo fail with above error message.</p></blockquote>
-
-<p>找到了原因，就可以搞了：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">machine</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">pre</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">sed -i &#39;s/github/git-non-exist-hub/g&#39; ~/.gitconfig</span>
-</span><span class='line'>
-</span><span class='line'><span class="l-Scalar-Plain">dependencies</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">pre</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">curl https://sh.rustup.rs -sSf | sh</span>
-</span><span class='line'>
-</span><span class='line'><span class="l-Scalar-Plain">test</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">override</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cargo build</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cargo test</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>嗯, Ugly but works.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/">折腾 Raspberry Pi + HomeKit 手记</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-09-16T20:34:43+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>9月14日凌晨苹果终于推送了 iOS 10 的更新。从之前发布会来看，并没有多少亮点，除了几天的新鲜感之外，
-尤其是对于目前还在用上两代机型的我来说，2333。</p>
-
-<p>两年前苹果发布 Swift 语言的同时，新增了 HomeKit，当时用工具 dump 过最老版本的 Swift 声明。传送门：<a href="https://github.com/andelf/Defines-Swift/blob/6a8cda2e12bf6e5a23979a1ad121e70a0eeef6dd/HomeKit.swift">HomeKit.swift</a>。目前所有官方相关的资料位于 <a href="http://www.apple.com/ios/home/">HomeKit - Apple</a>。</p>
-
-<p>好消息是期待很久的 HomeKit 应用终于上线，屏幕上多了“家庭(Home)”应用，控制中心（从屏幕下方滑动）、
-Siri 均对此有支持。
-iOS 10 终于强化了推出已有两年智能家居平台，提供了官方 App，有不少硬件厂商支持。</p>
-
-<p>简单说，HomeKit 就是苹果官方的智能家居平台解决方案，包括移动设备 SDK，智能家居硬件通信协议(HAP: HomeKit Accessory Protocol)、以及 MFi(Made for iPhone/iPod/iPad) 认证等等。通过 WiFi 或蓝牙连接智能家居设备（或 bridge 设备），也可以利用 Apple TV(4代) 或闲家中的置 iPad 实现设备的远程控制（HAP over iCloud）。</p>
-
-<p>Home App 的维度划分：</p>
-
-<ul>
-<li>Home: 家，和地理位置绑定，支持共享给好友控制。</li>
-<li>Room: 房间，用于对设备进行分组。</li>
-<li>Scene: 场景，一组对设备的配置，例如“起床”，那么可能的配置是打开卧室灯、窗帘、放段舒缓music等等。</li>
-</ul>
-
-
-<p>众所周知苹果是卖数据线等硬件的公司（嗯，假设你数据线也坏过不少），HAP 协议部分是需要加入 MFi Program 才能获取文档，而且 MFi Program 无法以个人开发者身份加入。</p>
-
-<p>好在有好心人逆向了 HAP 的服务端协议（对于智能硬件来说，硬件是服务端，手机App是客户端）。</p>
-
-<p>对于折腾党来说，机会来了，自己动手改造家居！本文不涉及 App 开发，只涉及如何自制支持 HomeKit 的设备。</p>
-
-<h2>准备工作</h2>
-
-<p>设备列表：</p>
-
-<ul>
-<li>iPhone 6P (iOS 10)</li>
-<li>Raspberry Pi 3 (Debian jessie)</li>
-</ul>
-
-
-<p>考察了两个比较靠谱的 HAP 实现：</p>
-
-<ul>
-<li><a href="https://github.com/KhaosT/HAP-NodeJS">https://github.com/KhaosT/HAP-NodeJS</a></li>
-<li><a href="https://github.com/brutella/hc">https://github.com/brutella/hc</a> (golang)</li>
-</ul>
-
-
-<p>最终选择使用 golang 的 <code>brutella/hc</code>，准备环境。</p>
-
-<p>需要保证树莓派和手机位于统一子网，因为 HAP 底层是基于 Apple mDNS(RFC 6762)。</p>
-
-<p><code>brutella/hc</code> 要求 golang >= 1.4，而 Debian jessie 版本较低，
-需要配置 jessie-backports 源：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>deb ftp://ftp.cn.debian.org/debian jessie-backports main contrib non-free</span></code></pre></td></tr></table></div></figure>
-
-
-<p>同时导入源的 GPG Key。方法参考 <a href="http://raspberrypi.stackexchange.com/questions/12258/where-is-the-archive-key-for-backports-debian-org">这里</a>。</p>
-
-<p>安装好 golang 1.6.2，建立开发目录。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># 似乎直接 install golang 会出点小问题，所以折衷用了如下方法:</span>
-</span><span class='line'>&gt; sudo apt-get install -t jessie-backports golang-1.6 golang-1.6-go golang-1.6-src golang-1.6-doc
-</span><span class='line'>&gt; sudo apt-get install -t jessie-backports golang
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>示例</h2>
-
-<p>跑通官方示例代码：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;github.com/brutella/hc&quot;</span>
-</span><span class='line'>  <span class="s">&quot;github.com/brutella/hc/accessory&quot;</span>
-</span><span class='line'>  <span class="s">&quot;log&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">info</span> <span class="o">:=</span> <span class="nx">accessory</span><span class="p">.</span><span class="nx">Info</span><span class="p">{</span>
-</span><span class='line'>      <span class="nx">Name</span><span class="p">:</span>         <span class="s">&quot;Lamp&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">SerialNumber</span><span class="p">:</span> <span class="s">&quot;051AC-23AAM1&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">Manufacturer</span><span class="p">:</span> <span class="s">&quot;Apple&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">Model</span><span class="p">:</span>        <span class="s">&quot;AB&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nx">acc</span> <span class="o">:=</span> <span class="nx">accessory</span><span class="p">.</span><span class="nx">NewSwitch</span><span class="p">(</span><span class="nx">info</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">acc</span><span class="p">.</span><span class="nx">Switch</span><span class="p">.</span><span class="nx">On</span><span class="p">.</span><span class="nx">OnValueRemoteUpdate</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">on</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span> <span class="nx">on</span> <span class="o">==</span> <span class="kc">true</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Client changed switch to on&quot;</span><span class="p">)</span>
-</span><span class='line'>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Client changed switch to off&quot;</span><span class="p">)</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">config</span> <span class="o">:=</span> <span class="nx">hc</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span><span class="nx">Pin</span><span class="p">:</span> <span class="s">&quot;00102003&quot;</span><span class="p">}</span>
-</span><span class='line'>  <span class="nx">t</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">hc</span><span class="p">.</span><span class="nx">NewIPTransport</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span> <span class="nx">acc</span><span class="p">.</span><span class="nx">Accessory</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">hc</span><span class="p">.</span><span class="nx">OnTermination</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">t</span><span class="p">.</span><span class="nx">Stop</span><span class="p">()</span>
-</span><span class='line'>  <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">t</span><span class="p">.</span><span class="nx">Start</span><span class="p">()</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>编译执行.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="err">$</span> <span class="nx">AppleHome</span><span class="p">&gt;</span> <span class="err">#</span> <span class="nx">current</span> <span class="nx">dir</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">$</span> <span class="nx">AppleHome</span><span class="p">&gt;</span> <span class="k">go</span> <span class="nx">get</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">$</span> <span class="nx">AppleHome</span><span class="p">&gt;</span> <span class="k">go</span> <span class="nx">build</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">$</span> <span class="nx">AppleHome</span><span class="p">&gt;</span> <span class="p">.</span><span class="o">/</span><span class="nx">AppleHome</span>
-</span><span class='line'><span class="o">...</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>随后打开手机的 Home App，添加设备，选择 Lamp，输入 PIN 00102003，完成配对，即可使用。</p>
-
-<h2>自定义设备</h2>
-
-<p>树莓派外接小音箱一只，用来放电台，尝试用 HomeKit 控制树莓派的禁音。命令：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">amixer</span> <span class="nx">set</span> <span class="nx">PCM</span> <span class="nx">on</span>
-</span><span class='line'><span class="nx">amixer</span> <span class="nx">set</span> <span class="nx">PCM</span> <span class="nx">off</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>代码：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>        <span class="s">&quot;os/exec&quot;</span>
-</span><span class='line'>        <span class="s">&quot;github.com/brutella/hc&quot;</span>
-</span><span class='line'>        <span class="s">&quot;github.com/brutella/hc/accessory&quot;</span>
-</span><span class='line'>        <span class="s">&quot;log&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">info</span> <span class="o">:=</span> <span class="nx">accessory</span><span class="p">.</span><span class="nx">Info</span><span class="p">{</span>
-</span><span class='line'>                <span class="nx">Name</span><span class="p">:</span>            <span class="s">&quot;Radio&quot;</span><span class="p">,</span>
-</span><span class='line'>                <span class="nx">SerialNumber</span><span class="p">:</span> <span class="s">&quot;051AC-23AAM2&quot;</span><span class="p">,</span>
-</span><span class='line'>                <span class="nx">Manufacturer</span><span class="p">:</span> <span class="s">&quot;Apple&quot;</span><span class="p">,</span>
-</span><span class='line'>                <span class="nx">Model</span><span class="p">:</span>          <span class="s">&quot;RPI3&quot;</span><span class="p">,</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>        <span class="nx">acc</span> <span class="o">:=</span> <span class="nx">accessory</span><span class="p">.</span><span class="nx">NewSwitch</span><span class="p">(</span><span class="nx">info</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nx">acc</span><span class="p">.</span><span class="nx">Switch</span><span class="p">.</span><span class="nx">On</span><span class="p">.</span><span class="nx">OnValueRemoteUpdate</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">on</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Toggled PCM!&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>                <span class="k">if</span> <span class="nx">on</span> <span class="o">==</span> <span class="kc">true</span> <span class="p">{</span>
-</span><span class='line'>                        <span class="nx">exec</span><span class="p">.</span><span class="nx">Command</span><span class="p">(</span><span class="s">&quot;amixer&quot;</span><span class="p">,</span> <span class="s">&quot;set&quot;</span><span class="p">,</span> <span class="s">&quot;PCM&quot;</span><span class="p">,</span> <span class="s">&quot;on&quot;</span><span class="p">).</span><span class="nx">Run</span><span class="p">()</span>
-</span><span class='line'>                        <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Client changed switch to on&quot;</span><span class="p">)</span>
-</span><span class='line'>                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>                        <span class="nx">exec</span><span class="p">.</span><span class="nx">Command</span><span class="p">(</span><span class="s">&quot;amixer&quot;</span><span class="p">,</span> <span class="s">&quot;set&quot;</span><span class="p">,</span> <span class="s">&quot;PCM&quot;</span><span class="p">,</span> <span class="s">&quot;off&quot;</span><span class="p">).</span><span class="nx">Run</span><span class="p">()</span>
-</span><span class='line'>                        <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Client changed switch to off&quot;</span><span class="p">)</span>
-</span><span class='line'>                <span class="p">}</span>
-</span><span class='line'>        <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nx">config</span> <span class="o">:=</span> <span class="nx">hc</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span><span class="nx">Pin</span><span class="p">:</span> <span class="s">&quot;00102004&quot;</span><span class="p">}</span>
-</span><span class='line'>        <span class="nx">t</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">hc</span><span class="p">.</span><span class="nx">NewIPTransport</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span> <span class="nx">acc</span><span class="p">.</span><span class="nx">Accessory</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nx">hc</span><span class="p">.</span><span class="nx">OnTermination</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">t</span><span class="p">.</span><span class="nx">Stop</span><span class="p">()</span>
-</span><span class='line'>        <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nx">t</span><span class="p">.</span><span class="nx">Start</span><span class="p">()</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>其他</h2>
-
-<p>HAP 将智能家居分为以下维度：</p>
-
-<ul>
-<li>Accessory: 单个设备，例如开关，温度计，调节器</li>
-<li>Service: 一组值，合起来提供服务，例如中央空调（调节温度，风速等等）</li>
-</ul>
-
-
-<p>TODO</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-04-28T10:06:53+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>安装工具</p>
-
-<p><a href="https://github.com/kylef/swiftenv">https://github.com/kylef/swiftenv</a></p>
-
-<h2>Swift 3.0 新变化</h2>
-
-<p>以下内容来自 Swift 语言提案<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>。</p>
-
-<p>Swift 3.0 发布计划</p>
-
-<h3>Swift Package System</h3>
-
-<p><a href="https://github.com/donald-pinckney/swift-packages">https://github.com/donald-pinckney/swift-packages</a></p>
-
-<h2>AST 结构</h2>
-
-<p>代码位于 <code>include/swift/AST</code> 和 <code>lib/AST</code>。</p>
-
-<p>ModuleDecl
-模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。</p>
-
-<p>FileUnit（抽象类）
-文件作用域，是代码组织的最小单元。</p>
-
-<ul>
-<li>DerivedFileUnit: A container for a module-level definition derived as part of an implicit protocol conformance.</li>
-<li>SourceFile: A file containing Swift source code. .swift 或 .sil 也可以是虚拟 REPL
-
-<ul>
-<li>Imports: Vec&lt;(ImportedModule, ImportOptions)></li>
-<li>Identifier</li>
-<li>Decls: Vec<Decl></li>
-<li>LocalTypeDecl: Vec<TypeDecl></li>
-<li>ObjCMethods: Map&lt;ObjCSelector, AbstractFunctionDecl></li>
-<li>infix, postfix, prefix operators: OperatorMap</li>
-</ul>
-</li>
-<li>BuiltinUnit</li>
-</ul>
-
-
-<h2>swift 命令入口</h2>
-
-<p>入口函数 <code>tools/driver/driver.cpp</code>，<code>main</code> 函数。</p>
-
-<p>集成多个子工具。同时若 <code>PATH</code> 下有名为 <code>swift-foobar</code> 的可执行文件，则可通过 <code>swift foobar</code> 调用。</p>
-
-<h3>编译器前端 <code>swift -frontend</code></h3>
-
-<p>编译。同时支持打印出各种编译时中间结果。</p>
-
-<h3>API Notes 功能 <code>swift -apinotes</code></h3>
-
-<p>参考信息位于 <a href="https://github.com/apple/swift/tree/master/apinotes">https://github.com/apple/swift/tree/master/apinotes</a> .</p>
-
-<p>简单说，API Notes 机制就是通过 <code>.apinotes</code> 文件（YAML格式）描述 Objective-C Framework 和对应 Swift API 的关系。最终生成 <code>.apinotesc</code> 文件，与 <code>.swiftmodule</code> 文件一起作为 Swift 的模块。</p>
-
-<p>主要功能包括且不限于：</p>
-
-<ul>
-<li><code>SwiftBridge</code>：设置对应的 Bridge 类型，例如 NSArray 对应与 <code>Swift.Array</code></li>
-<li><code>Nullability</code>/<code>NullabilityOfRet</code>： 类的属性、方法的参数、返回值对应类型是否可以为 null，即对应与 Swift 的 T 还是 T?</li>
-<li><code>Availability</code>：方法是否在 Swift 中暴露，并给出 availability message</li>
-<li><code>SwiftName</code>：方法 Selector 在 Swift 中的重命名，例如 <code>filteredArrayUsingPredicate:</code> 替换为 <code>filtered(using:)</code></li>
-</ul>
-
-
-<p>Dump 为YAML文件：</p>
-
-<pre><code>$&gt; swift -apinotes -binary-to-yaml /path/to/lib/swift/macosx/x86_64/Dispatch.apinotesc -o=-
-</code></pre>
-
-<h3>Module Wrap 工具 <code>swift -modulewrap</code></h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>// Wraps .swiftmodule files inside an object file container so they
-</span><span class='line'>// can be passed to the linker directly. Mostly useful for platforms
-</span><span class='line'>// where the debug info typically stays in the executable.
-</span><span class='line'>// (ie. ELF-based platforms).</span></code></pre></td></tr></table></div></figure>
-
-
-<p>用法：</p>
-
-<pre><code>swift -modulewrap ObjectiveC.swiftmodule -o objc.o
-</code></pre>
-
-<p>实际发现是在 <code>.o</code> 里定义了 <code>___Swift_AST</code> 符号。</p>
-
-<h3>REPL</h3>
-
-<p>Swift 提供了两个 REPL(Read-Evaluate-Print Loop)，一个是 Swift 本身内置，另一个集成到了 lldb 命令行下。前者只有基本功能，即将废弃，后者功能更强大。</p>
-
-<p>子命令分别是：</p>
-
-<ul>
-<li><code>swift -deprecated-integrated-repl</code></li>
-<li><code>swift -lldb-repl</code>。</li>
-</ul>
-
-
-<p><code>swift -repl</code> 子命令选择可用的 REPL 进入，一般是 <code>lldb-repl</code>，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。</p>
-<div class="footnotes">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>(apple/swift-evolution)[https://github.com/apple/swift-evolution]<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
-</ol>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="home">
+<h2 class="post-list-heading">Posts</h2>
+    <ul class="post-list"><li><span class="post-meta">Nov 16, 2020</span>
+        <h3>
+          <a class="post-link" href="/jekyll/update/2020/11/16/welcome-to-jekyll.html">
+            Welcome to Jekyll!
+          </a>
+        </h3></li><li><span class="post-meta">Dec 7, 2016</span>
+        <h3>
+          <a class="post-link" href="/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing.html">
+            Fix Ansible Tower: stdout capture is missing
+          </a>
+        </h3></li><li><span class="post-meta">Nov 18, 2016</span>
+        <h3>
+          <a class="post-link" href="/blog/2016/11/18/circleci-meets-rust.html">
+            在 CircleCI 上使用 Rust(CircleCI meets Rust)
+          </a>
+        </h3></li><li><span class="post-meta">Sep 16, 2016</span>
+        <h3>
+          <a class="post-link" href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi.html">
+            折腾 Raspberry Pi + HomeKit 手记
+          </a>
+        </h3></li><li><span class="post-meta">Apr 28, 2016</span>
+        <h3>
+          <a class="post-link" href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0.html">
+            Swift 3.0 尝试——从入门到再学一门(A Glimpse of Swift 3.0)
+          </a>
+        </h3></li><li><span class="post-meta">Mar 22, 2016</span>
+        <h3>
+          <a class="post-link" href="/blog/2016/03/22/rust-pattern-match.html">
+            Rust Pattern Match(Rust中的模式匹配)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 18, 2015</span>
+        <h3>
+          <a class="post-link" href="/blog/2015/06/18/guangzhou-realtime-bus.html">
+            广州实时工具App逆向
+          </a>
+        </h3></li><li><span class="post-meta">Jun 9, 2015</span>
+        <h3>
+          <a class="post-link" href="/blog/2015/06/09/swift-2-dot-0-error-handling.html">
+            Swift 2.0 的错误处理(Swift 2.0 Error Handling)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 1, 2015</span>
+        <h3>
+          <a class="post-link" href="/blog/2015/06/01/beijing-realtime-bus.html">
+            北京实时公交分析
+          </a>
+        </h3></li><li><span class="post-meta">Jan 23, 2015</span>
+        <h3>
+          <a class="post-link" href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules.html">
+            为第三方扩展创建 Swift 模块
+          </a>
+        </h3></li><li><span class="post-meta">Jul 8, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/07/08/swift-beta3-changes.html">
+            Swift beta3 Changes ( Swift 在 beta3 中的变化）
+          </a>
+        </h3></li><li><span class="post-meta">Jul 7, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/07/07/use-swift-dynamic-library.html">
+            Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)
+          </a>
+        </h3></li><li><span class="post-meta">Jul 4, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/07/04/swift-undocumented-grammar.html">
+            Swift Undocumented Grammar （Swift 黑语法）
+          </a>
+        </h3></li><li><span class="post-meta">Jul 4, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/07/04/cocoa-in-swift.html">
+            Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）
+          </a>
+        </h3></li><li><span class="post-meta">Jun 30, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/30/swift-type-hierarchy.html">
+            Swift Type Hierarchy ( Swift 类型层次结构 ）
+          </a>
+        </h3></li><li><span class="post-meta">Jun 30, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/30/my-view-of-swift.html">
+            My View of Swift （闲扯对 Swift 语言的看法）
+          </a>
+        </h3></li><li><span class="post-meta">Jun 28, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/28/swift-interop-with-c-slash-objc.html">
+            Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）
+          </a>
+        </h3></li><li><span class="post-meta">Jun 25, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/25/tilde-arrow-in-swift.html">
+            Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~&gt; ）
+          </a>
+        </h3></li><li><span class="post-meta">Jun 25, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/25/write-swift-module-with-swift-cont.html">
+            Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）
+          </a>
+        </h3></li><li><span class="post-meta">Jun 23, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/23/use-cocoapods-with-swift.html">
+            Use CocoaPods with Swift (在 Swift 中使用 CocoaPods） 
+          </a>
+        </h3></li><li><span class="post-meta">Jun 20, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/20/swift-reflection.html">
+            Swift Reflection （Swift 的反射）
+          </a>
+        </h3></li><li><span class="post-meta">Jun 19, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/19/modules-for-swift.html">
+            Module System of Swift (简析 Swift 的模块系统)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 18, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/18/swift-and-c-interop-cont.html">
+            Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 17, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/17/nsobject-pattern-match-in-swift.html">
+            NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 16, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/16/swift-nserror-internals.html">
+            Swift NSError Internals（解析 Swift 对 NSError 操作）
+          </a>
+        </h3></li><li><span class="post-meta">Jun 16, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/16/swift-runtime.html">
+            Swift Runtime
+          </a>
+        </h3></li><li><span class="post-meta">Jun 15, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/15/swift-and-c-interop.html">
+            Swift and C Interop(简析Swift和C的交互)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 13, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/13/swift-misc.html">
+            Swift Misc
+          </a>
+        </h3></li><li><span class="post-meta">Jun 13, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/13/swift-special-protocols.html">
+            Swift Special Protocols
+          </a>
+        </h3></li><li><span class="post-meta">Jun 12, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/12/swift-and-objectivec-interop-cont.html">
+            Swift and ObjectiveC Interop Cont. (Swift 与 Objective-C 之间的交互，续坑)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 12, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/12/swift-string-extension-for-int-index.html">
+            Swift String Extension for Integer Index(扩展String使之可以支持数字Index和数字Range)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 11, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/11/swift-and-objectivec-interop.html">
+            Swift and ObjectiveC Interop (Swift 与 Objective-C 之间的交互)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 9, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/09/swift-any-star.html">
+            Swift Any*
+          </a>
+        </h3></li><li><span class="post-meta">Jun 8, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/08/swift-implicit-type-cast.html">
+            Implicit Type Convertion in Swift (Swift 的隐式类型转换)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 6, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/06/swift-attributes.html">
+            Swift Attributes
+          </a>
+        </h3></li><li><span class="post-meta">Jun 6, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/06/swift-standard-library-cont.html">
+            Swift Standard Library Cont. (Swift 标准库 第二部分)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 6, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/06/swift-standard-library.html">
+            Swift Standard Library (Swift 标准库)
+          </a>
+        </h3></li><li><span class="post-meta">Jun 6, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/06/06/swift-operator-overload.html">
+            Swift 运算符重载、自定义运算符
+          </a>
+        </h3></li><li><span class="post-meta">May 15, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/05/15/rust-tips.html">
+            Rust Tips
+          </a>
+        </h3></li><li><span class="post-meta">Apr 29, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/04/29/a-rustdoc-plugin.html">
+            A rustdoc plugin
+          </a>
+        </h3></li><li><span class="post-meta">Apr 29, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/04/29/rust-tokenizer.html">
+            Rust Tokenizer
+          </a>
+        </h3></li><li><span class="post-meta">Apr 23, 2014</span>
+        <h3>
+          <a class="post-link" href="/blog/2014/04/23/rust-syntax-extensions.html">
+            Rust Syntax Extensions
+          </a>
+        </h3></li><li><span class="post-meta">Nov 21, 2013</span>
+        <h3>
+          <a class="post-link" href="/blog/2013/11/21/erlang-tips.html">
+            Erlang 的一些好玩 Tips
+          </a>
+        </h3></li><li><span class="post-meta">Nov 20, 2013</span>
+        <h3>
+          <a class="post-link" href="/blog/2013/11/20/hello-world.html">
+            Hello World!
+          </a>
+        </h3></li></ul>
+
+    <p class="rss-subscribe">subscribe <a href="/feed.xml">via RSS</a></p></div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
 </div>
 
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/03/22/rust-pattern-match/">Rust Pattern Match(Rust中的模式匹配)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-03-22T23:35:19+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>模式匹配</h1>
-
-<p>汉语字典中对“模式”的解释是：事物的标准样式。在计算机科学中，它指特定类型的数据（往往是序列或是树形结构）满足某一特定结构或格式。“匹配”本身是指一个判断寻找过程。最早的模式匹配用于文本编辑器中的正则字符串搜索，之后才作为编程语言特性。</p>
-
-<h2>模式匹配基础</h2>
-
-<p>模式匹配在计算机科学领域有两层意思。其一，可以特指字符串匹配算法，例如为人熟知的 KMP 字符串匹配算法、命令行工具 grep 等。
-其二，特指在一些语言中作为一种以结构的方式处理数据的工具，此时的匹配过程往往是树形匹配，与此相伴的往往还有一个特性叫 guard（守卫）。</p>
-
-<p>Rust 中模式匹配随处可见，例如在<code>let</code>变量绑定语句、<code>match</code>匹配语句中等。利用好模式匹配这一特性可以使代码更简洁易懂。<code>Rust</code>支持模式匹配中的变量绑定、结构体/元组解构、守卫条件判断、数值范围匹配等特性。</p>
-
-<h3>原始匹配</h3>
-
-<p><code>match</code> 语句中可以直接匹配字面常量，下划线<code>_</code>匹配任意情形。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
-</span><span class='line'>    <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;one&quot;</span><span class="p">),</span>
-</span><span class='line'>    <span class="mi">2</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;two&quot;</span><span class="p">),</span>
-</span><span class='line'>    <span class="mi">3</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;three&quot;</span><span class="p">),</span>
-</span><span class='line'>    <span class="n">_</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;anything&quot;</span><span class="p">),</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以上代码会打印出<code>one</code>。</p>
-
-<h3>结构匹配</h3>
-
-<p><code>match</code> 用于匹配一个表达式的值，寻找满足条件的子分支(<code>arm</code>)并执行。每个子分支包含三部分：一系列模式、可选的守卫条件以及主体代码块。</p>
-
-<h3>多个模式</h3>
-
-<p>每个子分支可以是多个模式，通过 <code>|</code> 符号分割：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
-</span><span class='line'>    <span class="mi">1</span> <span class="o">|</span> <span class="mi">2</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;one or two&quot;</span><span class="p">),</span>
-</span><span class='line'>    <span class="mi">3</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;three&quot;</span><span class="p">),</span>
-</span><span class='line'>    <span class="n">_</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;anything&quot;</span><span class="p">),</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以上代码打印出<code>one or two</code>。</p>
-
-<h3>守卫条件</h3>
-
-<p>通过<code>if</code>引入子分支的守卫条件：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">enum</span> <span class="n">OptionalInt</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">Value</span><span class="p">(</span><span class="kt">i32</span><span class="p">),</span>
-</span><span class='line'>    <span class="n">Missing</span><span class="p">,</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Got an int bigger than five!&quot;</span><span class="p">),</span>
-</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Value</span><span class="p">(..)</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Got an int!&quot;</span><span class="p">),</span>
-</span><span class='line'>    <span class="n">OptionalInt</span><span class="o">::</span><span class="n">Missing</span> <span class="o">=&gt;</span> <span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;No such luck.&quot;</span><span class="p">),</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>模式匹配进阶</h2>
-
-<p>其实进阶，不如直接从<code>libsyntax</code>源码看看到底模式匹配是如何实现。<code>syntax::ast::Pat</code>。</p>
-
-<p>从AST源码中寻找语法要素屋外户两个要点，其一，语法要素是如何表达为对应AST的；其二，对应AST在哪些父AST中出现。</p>
-
-<p>Rust中使用<code>syntax::ast::Pat</code>枚举来表示一个模式匹配。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">pub</span> <span class="k">struct</span> <span class="n">Pat</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">pub</span> <span class="n">id</span><span class="o">:</span> <span class="n">NodeId</span><span class="p">,</span>
-</span><span class='line'>    <span class="k">pub</span> <span class="n">node</span><span class="o">:</span> <span class="n">PatKind</span><span class="p">,</span>
-</span><span class='line'>    <span class="k">pub</span> <span class="n">span</span><span class="o">:</span> <span class="n">Span</span><span class="p">,</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">pub</span> <span class="k">enum</span> <span class="n">PatKind</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c-Doc">/// Represents a wildcard pattern (`_`)</span>
-</span><span class='line'>    <span class="c-Doc">/// 表示通配，下划线</span>
-</span><span class='line'>    <span class="n">Wild</span><span class="p">,</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// A `PatKind::Ident` may either be a new bound variable,</span>
-</span><span class='line'>    <span class="c-Doc">/// or a unit struct/variant pattern, or a const pattern (in the last two cases</span>
-</span><span class='line'>    <span class="c-Doc">/// the third field must be `None`).</span>
-</span><span class='line'>    <span class="c-Doc">///</span>
-</span><span class='line'>    <span class="c-Doc">/// In the unit or const pattern case, the parser can&#39;t determine</span>
-</span><span class='line'>    <span class="c-Doc">/// which it is. The resolver determines this, and</span>
-</span><span class='line'>    <span class="c-Doc">/// records this pattern&#39;s `NodeId` in an auxiliary</span>
-</span><span class='line'>    <span class="c-Doc">/// set (of &quot;PatIdents that refer to unit patterns or constants&quot;).</span>
-</span><span class='line'>    <span class="n">Ident</span><span class="p">(</span><span class="n">BindingMode</span><span class="p">,</span> <span class="n">SpannedIdent</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.</span>
-</span><span class='line'>    <span class="c-Doc">/// The `bool` is `true` in the presence of a `..`.</span>
-</span><span class='line'>    <span class="n">Struct</span><span class="p">(</span><span class="nb">Path</span><span class="p">,</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Spanned</span><span class="o">&lt;</span><span class="n">FieldPat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="kt">bool</span><span class="p">),</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// A tuple struct/variant pattern `Variant(x, y, z)`.</span>
-</span><span class='line'>    <span class="c-Doc">/// &quot;None&quot; means a `Variant(..)` pattern where we don&#39;t bind the fields to names.</span>
-</span><span class='line'>    <span class="n">TupleStruct</span><span class="p">(</span><span class="nb">Path</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;&gt;</span><span class="p">),</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// A path pattern.</span>
-</span><span class='line'>    <span class="c-Doc">/// Such pattern can be resolved to a unit struct/variant or a constant.</span>
-</span><span class='line'>    <span class="nb">Path</span><span class="p">(</span><span class="nb">Path</span><span class="p">),</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// An associated const named using the qualified path `&lt;T&gt;::CONST` or</span>
-</span><span class='line'>    <span class="c-Doc">/// `&lt;T as Trait&gt;::CONST`. Associated consts from inherent impls can be</span>
-</span><span class='line'>    <span class="c-Doc">/// referred to as simply `T::CONST`, in which case they will end up as</span>
-</span><span class='line'>    <span class="c-Doc">/// PatKind::Path, and the resolver will have to sort that out.</span>
-</span><span class='line'>    <span class="n">QPath</span><span class="p">(</span><span class="n">QSelf</span><span class="p">,</span> <span class="nb">Path</span><span class="p">),</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c-Doc">/// A tuple pattern `(a, b)`</span>
-</span><span class='line'>    <span class="n">Tup</span><span class="p">(</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
-</span><span class='line'>    <span class="c-Doc">/// A `box` pattern</span>
-</span><span class='line'>    <span class="n">Box</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;</span><span class="p">),</span>
-</span><span class='line'>    <span class="c-Doc">/// A reference pattern, e.g. `&amp;mut (a, b)`</span>
-</span><span class='line'>    <span class="n">Ref</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Mutability</span><span class="p">),</span>
-</span><span class='line'>    <span class="c-Doc">/// A literal</span>
-</span><span class='line'>    <span class="n">Lit</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">),</span>
-</span><span class='line'>    <span class="c-Doc">/// A range pattern, e.g. `1...2`</span>
-</span><span class='line'>    <span class="n">Range</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">),</span>
-</span><span class='line'>    <span class="c-Doc">/// `[a, b, ..i, y, z]` is represented as:</span>
-</span><span class='line'>    <span class="c-Doc">///     `PatKind::Vec(box [a, b], Some(i), box [y, z])`</span>
-</span><span class='line'>    <span class="n">Vec</span><span class="p">(</span><span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
-</span><span class='line'>    <span class="c-Doc">/// A macro pattern; pre-expansion</span>
-</span><span class='line'>    <span class="n">Mac</span><span class="p">(</span><span class="n">Mac</span><span class="p">),</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以上AST定义，即说明，到底什么被认为是一个“模式”。</p>
-
-<p>以下介绍<code>Pat</code>在哪些AST中出现。</p>
-
-<h3>全局 Item</h3>
-
-<p>全局 Item 中，使用模式匹配的均为函数参数。</p>
-
-<h4>ItemKind::Fn</h4>
-
-<p><code>Fn</code> 全局函数 -> <code>FnDecl</code> 函数声明 -> <code>[Arg]</code> 函数头参数声明。</p>
-
-<h4>ItemKind::Trait</h4>
-
-<p><code>Trait</code> -> <code>[TraitItem]</code> -> <code>TraitItemKind::Method</code> -> <code>MethodSig</code> -> <code>FnDecl</code> 方法声明，同上。</p>
-
-<h4>ItemKind::Impl</h4>
-
-<p><code>Impl</code> -> <code>[ImplItem]</code> -> <code>ImplItemKind::Method</code> -> <code>MethodSig</code> -> <code>FnDecl</code>。</p>
-
-<h3>ast::Stmt 语句</h3>
-
-<h4>StmtKind::Decl</h4>
-
-<p><code>Decl</code> -> <code>DeclKind::Local</code>。</p>
-
-<p>即 <code>let</code> 语句 <code>let &lt;pat&gt;:&lt;ty&gt; = &lt;expr&gt;;</code>。</p>
-
-<h4>StmtKind::Expr 表达式</h4>
-
-<p>见下。</p>
-
-<h3>ast::Expr</h3>
-
-<p>除<code>match</code>外，<code>if let</code>、<code>while let</code>、<code>for</code>控制语句支持同时进行模式匹配。具体实现是一种<code>desugared</code>过程，即，去语法糖化。</p>
-
-<p>同时类似于函数定义，闭包参数也支持模式匹配。</p>
-
-<h4>if let</h4>
-
-<p><code>IfLet(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;P&lt;Expr&gt;&gt;)</code></p>
-
-<p><code>if let pat = expr { block } else { expr }</code></p>
-
-<p>This is desugared to a match expression.</p>
-
-<h4>while let</h4>
-
-<p><code>WhileLet(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;Ident&gt;)</code></p>
-
-<p><code>'label: while let pat = expr { block }</code></p>
-
-<h4>for</h4>
-
-<p><code>ForLoop(P&lt;Pat&gt;, P&lt;Expr&gt;, P&lt;Block&gt;, Option&lt;Ident&gt;)</code></p>
-
-<p><code>'label: for pat in expr { block }</code></p>
-
-<h4>match</h4>
-
-<p><code>Match(P&lt;Expr&gt;, Vec&lt;Arm&gt;)</code></p>
-
-<p><code>match</code> 语句，在 <code>Arm</code> 中出现，其中 <code>Arm</code> 定义为</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">pub</span> <span class="k">struct</span> <span class="n">Arm</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">pub</span> <span class="n">attrs</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Attribute</span><span class="o">&gt;</span><span class="p">,</span>
-</span><span class='line'>    <span class="k">pub</span> <span class="n">pats</span><span class="o">:</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-</span><span class='line'>    <span class="k">pub</span> <span class="n">guard</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-</span><span class='line'>    <span class="k">pub</span> <span class="n">body</span><span class="o">:</span> <span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">,</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>闭包</h4>
-
-<p><code>Closure(CaptureBy, P&lt;FnDecl&gt;, P&lt;Block&gt;)</code></p>
-
-<p>闭包，例如 <code>move |a, b, c| {a + b + c}</code>。</p>
-
-<h2>相关 feature gate</h2>
-
-<p><code>advanced_slice_patterns</code> - See the match expressions section for discussion; the exact semantics of slice patterns are subject to change, so some types are still unstable.</p>
-
-<p><code>slice_patterns</code> - OK, actually, slice patterns are just scary and completely unstable.</p>
-
-<p><code>box_patterns</code> - Allows box patterns, the exact semantics of which is subject to change.</p>
-
-<h2>参考</h2>
-
-<p><a href="https://doc.rust-lang.org/book/patterns.html">https://doc.rust-lang.org/book/patterns.html</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/18/guangzhou-realtime-bus/">广州实时工具App逆向</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-18T17:39:06+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。</p>
-
-<p><a href="https://github.com/andelf/guangzhou-realtime-bus">Github: guangzhou-realtime-bus</a></p>
-
-<ul>
-<li>生成 e=3 的 1024 位 RSA 密钥对</li>
-<li>公钥串用查表加密(byte 映射)，然后 base64 封装发送给服务器</li>
-<li>服务器返回一串用公钥加密过的数据</li>
-<li>用本地私钥解密后，该数据包含未知96字节的一段数据和 DES Key</li>
-<li>从此通信用 DES 加密</li>
-</ul>
-
-
-<p>base64封装过程：先打包字符串长度，然后是原始字符串（JSON），然后是<code>0x10</code>(md5字符串长度)，
-然后是 md5 校验值。整个二进制字符串用 base64 转码，POST 给服务器。</p>
-
-<p>具体的登录注册过程还需要进一步抓包分析，不过暂时兴趣不在这里了。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/09/swift-2-dot-0-error-handling/">Swift 2.0 的错误处理(Swift 2.0 Error Handling)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-09T15:27:58+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>protocol ErrorType {
-</span><span class='line'>  var _domain: String { get }
-</span><span class='line'>  var _code: Int { get }
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>@asmname("swift_bridgeErrorTypeToNSError") func _bridgeErrorTypeToNSError(e: ErrorType) -&gt; AnyObject
-</span><span class='line'>
-</span><span class='line'>@asmname("swift_stdlib_getErrorCode") func _stdlib_getErrorCode&lt;T : ErrorType&gt;(x: UnsafePointer&lt;T&gt;) -&gt; Int
-</span><span class='line'>
-</span><span class='line'>@asmname("swift_stdlib_getErrorDomainNSString") func _stdlib_getErrorDomainNSString&lt;T : ErrorType&gt;(x: UnsafePointer&lt;T&gt;) -&gt; AnyObject</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Foundation</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>protocol _ObjectiveCBridgeableErrorType : ErrorType {
-</span><span class='line'>  init?(_bridgedNSError: NSError)
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>struct NSCocoaError : RawRepresentable, _BridgedNSError, _ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError, Hashable, Equatable {
-</span><span class='line'>  let rawValue: Int
-</span><span class='line'>  init(rawValue: Int)
-</span><span class='line'>  static var _NSErrorDomain: String {
-</span><span class='line'>    get {}
-</span><span class='line'>  }
-</span><span class='line'>  typealias RawValue = Int
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>infix func ==(a: _GenericObjCError, b: _GenericObjCError) -&gt; Bool
-</span><span class='line'>infix func ==(a: _GenericObjCError, b: _GenericObjCError) -&gt; Bool
-</span><span class='line'>func ==&lt;T : __BridgedNSError where T.RawValue : SignedIntegerType&gt;(lhs: T, rhs: T) -&gt; Bool
-</span><span class='line'>
-</span><span class='line'>@available(OSX 10.11, iOS 9.0, *)
-</span><span class='line'>func resolveError(error: NSError?) throws
-</span><span class='line'>
-</span><span class='line'>enum _GenericObjCError : ErrorType {
-</span><span class='line'>  case NilError
-</span><span class='line'>  var hashValue: Int {
-</span><span class='line'>    get {}
-</span><span class='line'>  }
-</span><span class='line'>  var _domain: String {
-</span><span class='line'>    get {}
-</span><span class='line'>  }
-</span><span class='line'>  var _code: Int {
-</span><span class='line'>    get {}
-</span><span class='line'>  }
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>@asmname("swift_stdlib_bridgeNSErrorToErrorType")
-</span><span class='line'>func _stdlib_bridgeNSErrorToErrorType&lt;T : _ObjectiveCBridgeableErrorType&gt;(error: NSError, out: UnsafeMutablePointer&lt;T&gt;) -&gt; Bool
-</span><span class='line'>
-</span><span class='line'>@asmname("swift_convertNSErrorToErrorType") func _convertNSErrorToErrorType(error: NSError?) -&gt; ErrorType
-</span><span class='line'>
-</span><span class='line'>@objc enum NSURLError : Int, _BridgedNSError, _ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { ... }
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>protocol __BridgedNSError : RawRepresentable {
-</span><span class='line'>  static var _NSErrorDomain: String { get }
-</span><span class='line'>}
-</span><span class='line'>@asmname("swift_convertErrorTypeToNSError") func _convertErrorTypeToNSError(error: ErrorType) -&gt; NSError
-</span><span class='line'>func ~=(match: NSCocoaError, error: ErrorType) -&gt; Bool
-</span><span class='line'>protocol _BridgedNSError : __BridgedNSError, _ObjectiveCBridgeableErrorType, Hashable {
-</span><span class='line'>  static var _NSErrorDomain: String { get }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ErrorType 在 Swift 中表示。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>extension NSError : ErrorType {
-</span><span class='line'>  @objc dynamic var _domain: String {
-</span><span class='line'>    @objc dynamic get {}
-</span><span class='line'>  }
-</span><span class='line'>  @objc dynamic var _code: Int {
-</span><span class='line'>    @objc dynamic get {}
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/01/beijing-realtime-bus/">北京实时公交分析</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-01T13:17:50+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>361 条线路，705条单向线路。 aibang 负责数据服务。</p>
-
-<p>每辆车，每15秒更新一次 GPS，</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-23T23:21:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本文提出了一种将第三方扩展引入到 Swift 标准库的方法。</p>
-
-<p>以 Alamofire 为例，</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cd Path-To-Alamofire-Src-Dir
-</span><span class='line'>mkdir -p 32 64
-</span><span class='line'>
-</span><span class='line'># 创建动态链接库，及对应 Swift 模块，32/64版本
-</span><span class='line'>xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphoneos) Alamofire.swift -target arm64-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
-</span><span class='line'>
-</span><span class='line'>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64
-</span><span class='line'>
-</span><span class='line'>xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphoneos) Alamofire.swift -target armv7-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
-</span><span class='line'>
-</span><span class='line'>mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64
-</span><span class='line'>
-</span><span class='line'># 创建 universal lib
-</span><span class='line'>lipo -create ./{32,64}/libswiftAlamofire.dylib  -output ./libswiftAlamofire.dylib
-</span><span class='line'>
-</span><span class='line'># 创建模拟器用 lib
-</span><span class='line'>xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphonesimulator) Alamofire.swift -target i386-apple-ios7.1 -target-cpu yonah -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib</span></code></pre></td></tr></table></div></figure>
-
-
-<p>其他相关 target</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>-target armv7-apple-ios7.1 -target-cpu cortex-a8
-</span><span class='line'>-target arm64-apple-ios7.1 -target-cpu cyclone
-</span><span class='line'>-target i386-apple-ios7.1 -target-cpu yonah
-</span><span class='line'>-target x86_64-apple-ios7.1 -target-cpu core2</span></code></pre></td></tr></table></div></figure>
-
-
-<p>其实你了解 Swift 模块结构的化，应该回想到，将第三方模块创建为 swiftmodule 应该是最靠谱的选择。不过实际操作发现，
-编译命令无法很方便地调整，主要是因为 xcodebuild 系统，和编译命令不知道怎么导出。也是略纠结。</p>
-
-<p>实际上，如果使用 Carthage 的话，即把第三方扩展作为 Framework 引入，会导致无法支持 iOS 7，但是 Swift 本身是支持 iOS 7 的，
-在编译命令和生成的文件中检查发现，对于 iOS 7，Swift 使用了纯静态模块编译的方法。所以其实我们引入第三方扩展的时候也可以这样做。</p>
-
-<p>以下是静态编译所需命令：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) SwiftyJSON.swift -c -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o
-</span><span class='line'>
-</span><span class='line'>ar rvs libswiftSwiftyJSON.a SwiftyJSON.o</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如何使用？</p>
-
-<p>将编译结果扔到：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift
-</span><span class='line'>/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static</span></code></pre></td></tr></table></div></figure>
-
-
-<p>下对应目录。</p>
-
-<p>然后在 Xcode 里，直接 import。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-08T17:22:11+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>准确说是 beta2 <code>Swift version 1.0 (swift-600.0.34.4.8)</code> 到 beta3 <code>Swift version 1.0 (swift-600.0.38.7)</code> 的变化。</p>
-
-<p>对了，补充下。 beta1 <code>Swift version 1.0 (swift-600.0.34.4.5)</code> 到 beta2 几乎没有什么变化。</p>
-
-<h2>语法</h2>
-
-<p><code>nil</code> 成为关键字。</p>
-
-<p><code>[KeyType : ValueType]</code> 可以表示字典类型 <code>Dictionary&lt;KeyType, ValueType&gt;</code>。</p>
-
-<p><code>[Type]</code> 用于表示原 Array 类型 <code>Type[]</code>，等价 <code>Array&lt;T&gt;</code>，原用法会导致警告。</p>
-
-<p><del>增加 @noinline 属性</del></p>
-
-<p><code>..</code> 运算符改为 <code>..&lt;</code>，不容易和 <code>...</code> 混淆。</p>
-
-<h2>函数、类型</h2>
-
-<p>原 <code>sort()</code> 改名为 <code>sorted()</code>。新增 <code>sort()</code> 函数，参数为 <code>inout</code>。</p>
-
-<p>Index 类型中的 <code>.succ()</code> 变为 <code>.successor()</code>、 <code>.pred()</code> 变为 <code>.predecessor()</code>。</p>
-
-<h2>C/ObjC 交互变化</h2>
-
-<p>增加 <code>UnsafeMutableArray&lt;T&gt;</code> 类型。</p>
-
-<p>增加 <code>CFunctionPointer&lt;T&gt;</code> 类型。</p>
-
-<p>删除 <code>CConstVoidPointer</code>、 <code>CMutableVoidPointer</code>。替换为 <code>UnsafePointer&lt;()&gt;</code>、<code>ConstUnsafePointer&lt;Int32&gt;</code>。</p>
-
-<p>删除 <code>CConstPointer&lt;T&gt;</code>、<code>CMutablePointer&lt;T&gt;</code>。替换为 <code>UnsafePointer&lt;T&gt;</code>、<code>ConstUnsafePointer&lt;T&gt;</code>。</p>
-
-<p>这么一来指针操作简单了好多。原有会出现 <code>COpaquePointer</code> 的不合理情况，也都对应到适合的类型。</p>
-
-<p><code>CString</code> 可以从 <code>UnsafePointer&lt;UInt8&gt;</code> 和 <code>UnsafePointer&lt;CChar&gt;</code> 两种类型构造获得，之前只支持 <code>UInt8</code>。</p>
-
-<p>module.map 中头文件声明转换为 Swift 声明不再使用 C 兼容类型，直接使用 Swift 相应类型。原有 <code>CInt</code>，现在成为 <code>Int32</code>。</p>
-
-<p>结构体会自动添加构造函数 <code>init(field1:field2:...)</code> 这样。</p>
-
-<h3>nil</h3>
-
-<p>去掉了 <code>NilType</code>，增加了 <code>NilLiteralConvertible</code>， <code>nil</code> 成为关键字。可以认为是 nil 常量。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>protocol NilLiteralConvertible {
-</span><span class='line'>  class func convertFromNilLiteral() -&gt; Self
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>除了 Optional 、上面所提到的指针类型外，<code>RawOptionSet</code> 也实现了该协议。</p>
-
-<h3>Array</h3>
-
-<p>去掉了 <code>.copy()</code>、<code>unshare()</code> 方法。</p>
-
-<p>增加了以下方法：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>func makeUnique(inout buffer: ArrayBuffer&lt;T&gt;, e: T, index: Int)
-</span><span class='line'>func sorted(isOrderedBefore: (T, T) -&gt; Bool) -&gt; Array&lt;T&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p>看起来 <code>Array</code> 对底层容器的引用有了更好的控制 <code>ArrayBufferType</code> 增加了判断方法 <code>func isMutableAndUniquelyReferenced() -&gt; Bool</code>。</p>
-
-<p>Array 目前可以认为是真正的值类型。</p>
-
-<h3>指针</h3>
-
-<h4>增加了 <code>_Pointer</code> protocol</h4>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">protocol</span> <span class="nc">_Pointer</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">var</span> <span class="n">value</span><span class="k">:</span> <span class="kt">RawPointer</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-</span><span class='line'>  <span class="kt">init</span><span class="o">(</span><span class="k">_</span> <span class="kt">value:</span> <span class="kt">RawPointer</span><span class="o">)</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>表示一个类型可以对应到原生指针。</p>
-
-<p>同时成为内部桥接类型，编译器内部在转换时使用它（取出 RawPointer, 构造具体指针类型）。</p>
-
-<h2>模块</h2>
-
-<p>增加了  StdlibUnittest 模块。 <a href="https://github.com/andelf/Defines-Swift/blob/79ed8d40659e4d038f41e3c30b4b3358106bd50a/StdlibUnittest.swift">声明代码</a>。单元测试终于有了。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-      <a class="prev" href="2">&larr; Older</a>
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/">Fix Ansible Tower: Stdout Capture Is Missing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/11/18/circleci-meets-rust/">在 CircleCI 上使用 Rust(CircleCI Meets Rust)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/">折腾 Raspberry Pi + HomeKit 手记</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/">Swift 3.0 尝试——从入门到再学一门(a Glimpse of Swift 3.0)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/03/22/rust-pattern-match/">Rust Pattern Match(Rust中的模式匹配)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/18/guangzhou-realtime-bus/">广州实时工具App逆向</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/09/swift-2-dot-0-error-handling/">Swift 2.0 的错误处理(Swift 2.0 Error Handling)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/01/beijing-realtime-bus/">北京实时公交分析</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/">为第三方扩展创建 Swift 模块</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/08/swift-beta3-changes/">Swift Beta3 Changes ( Swift 在 Beta3 中的变化）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/07/use-swift-dynamic-library/">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/04/swift-undocumented-grammar/">Swift Undocumented Grammar （Swift 黑语法）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/04/cocoa-in-swift/">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/30/swift-type-hierarchy/">Swift Type Hierarchy ( Swift 类型层次结构 ）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/30/my-view-of-swift/">My View of Swift （闲扯对 Swift 语言的看法）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift Interop With C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/25/tilde-arrow-in-swift/">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~> ）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/06/20/swift-reflection/">Swift Reflection （Swift 的反射）</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/andelf">@andelf</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'andelf',
-            count: 2,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/+WangMaomao?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
-
-
-
-  
-</aside>
-
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
     </div>
+
   </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2017 - 猫·仁波切 (Feather) -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
 
 </footer>
-  
-
-<script type="text/javascript">
-      var disqus_shortname = 'andelf';
-      
-        
-        var disqus_script = 'count.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
-</script>
-
-
-
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id; js.async = true;
-  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-
-
-  <script type="text/javascript">
-    (function() {
-      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
-      script.src = 'https://apis.google.com/js/plusone.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
-    })();
-  </script>
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
 </body>
+
 </html>

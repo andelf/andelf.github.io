@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Swift Type Hierarchy ( Swift 类型层次结构 ） | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Swift Type Hierarchy ( Swift 类型层次结构 ）" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="声明： 转载请注明，方便的情况下请知会本人. weibo" />
+<meta property="og:description" content="声明： 转载请注明，方便的情况下请知会本人. weibo" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy.html" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy.html" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-30T15:10:41+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Swift Type Hierarchy ( Swift 类型层次结构 ）" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy.html","headline":"Swift Type Hierarchy ( Swift 类型层次结构 ）","dateModified":"2014-06-30T15:10:41+08:00","datePublished":"2014-06-30T15:10:41+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy.html"},"description":"声明： 转载请注明，方便的情况下请知会本人. weibo","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Swift Type Hierarchy ( Swift 类型层次结构 ）</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-30T15:10:41+08:00" itemprop="datePublished">Jun 30, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>本文主要介绍 Swift 所有标准库类型的层次结构，及所有标准类型。本文可作为参考手册使用。</p>
+
+<p>本人不保证内容及时性和正确性，请善于怀疑并反馈。谢谢。</p>
+
+<p>本文探索 Swift 所有基础类型和高级类型，以及所有协议和他们之间的继承关系。</p>
+
+<p>为了简化问题，某些类型略去了中间的过渡类型，人肉保证不歧义。</p>
+
+<h2 id="swift-基础类型">Swift 基础类型</h2>
+
+<h3 id="数值类型">数值类型</h3>
+
+<h4 id="位">位</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Bit
+</code></pre></div></div>
+
+<p>只有一位，实现为 <code class="language-plaintext highlighter-rouge">enum</code>， <code class="language-plaintext highlighter-rouge">.zero</code> 或 <code class="language-plaintext highlighter-rouge">.one</code>。简单明了。</p>
+
+<p>协议: <code class="language-plaintext highlighter-rouge">RandomAccessIndex IntegerArithmetic</code></p>
+
+<h4 id="整型">整型</h4>
+
+<p>有符号:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Int Int8 Int16 Int32 Int64
+</code></pre></div></div>
+
+<p>协议：<code class="language-plaintext highlighter-rouge">SignedInteger RandomAccessIndex BitwiseOperations SignedNumber CVarArg</code></p>
+
+<p>无符号:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>UInt UInt8 UInt16 UInt32 UInt64
+</code></pre></div></div>
+<p>协议：<code class="language-plaintext highlighter-rouge">UnsignedInteger RandomAccessIndex BitwiseOperations</code></p>
+
+<p>别名:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>IntMax = Int64
+UIntMax = UInt64
+IntegerLiteralType = Int
+Word = Int // 字长
+UWord = UInt
+</code></pre></div></div>
+
+<h4 id="浮点型">浮点型</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Float Double Float80
+</code></pre></div></div>
+
+<p>别名：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FloatLiteralType = Double
+Float64 = Double
+</code></pre></div></div>
+
+<p>协议：<code class="language-plaintext highlighter-rouge">FloatingPointNumber</code>。</p>
+
+<h3 id="逻辑型">逻辑型</h3>
+
+<p>只有一个 <code class="language-plaintext highlighter-rouge">Bool</code>。</p>
+
+<p>实例： <code class="language-plaintext highlighter-rouge">true</code>、<code class="language-plaintext highlighter-rouge">false</code></p>
+
+<p>协议：<code class="language-plaintext highlighter-rouge">LogicValue</code>。</p>
+
+<h3 id="空">空</h3>
+
+<p>只有一个 <code class="language-plaintext highlighter-rouge">NilType</code>。</p>
+
+<p>唯一实例 <code class="language-plaintext highlighter-rouge">nil</code>。</p>
+
+<h3 id="字符串类型">字符（串）类型</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">String</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Character</code> Unicode 字符</li>
+  <li><code class="language-plaintext highlighter-rouge">UnicodeScalar</code> 相当于 C 中的 <code class="language-plaintext highlighter-rouge">wchar_t</code></li>
+  <li><code class="language-plaintext highlighter-rouge">CString</code> 用于表示 C 中的 <code class="language-plaintext highlighter-rouge">const char *</code>，请参考相关文章</li>
+  <li><code class="language-plaintext highlighter-rouge">StaticString</code> 静态字符串，内部使用，例如 <code class="language-plaintext highlighter-rouge">fatalError</code></li>
+</ul>
+
+<p>别名：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>StringLiteralType = String
+ExtendedGraphemeClusterType = String
+</code></pre></div></div>
+
+<p>官方文档</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">Character</code> represents some Unicode grapheme cluster as
+defined by a canonical, localized, or otherwise tailored
+segmentation algorithm.</p>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">String</code> 实现协议：<code class="language-plaintext highlighter-rouge">Collection ExtensibleCollection OutputStream TargetStream</code>。</p>
+
+<h3 id="array-类型">Array 类型</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Array&lt;T&gt;</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ContiguousArray&lt;T&gt;</code></li>
+</ul>
+
+<p>实现协议 <code class="language-plaintext highlighter-rouge">ArrayType</code>。</p>
+
+<p>内部容器：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ArrayBuffer&lt;T&gt;</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ContiguousArrayBuffer&lt;T&gt;</code></li>
+</ul>
+
+<p>这两个类型看起来是 Array 的内部容器，一般不应该直接使用。</p>
+
+<h3 id="字典类型">字典类型</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Dictionary&lt;KeyType : Hashable, ValueType&gt;</code></p>
+
+<p>只实现了 <code class="language-plaintext highlighter-rouge">Collection</code>。</p>
+
+<h3 id="元祖类型">元祖类型</h3>
+
+<p>除正常元祖外，还有个特殊的别名</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Void = ()
+</code></pre></div></div>
+
+<p>其实很多语言都这么定义的，比如 Haskell 。</p>
+
+<h3 id="optional-类型">Optional 类型</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Optional&lt;T&gt;</code> 即 <code class="language-plaintext highlighter-rouge">T?</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ImplicitlyUnwrappedOptional&lt;T&gt;</code> 即 <code class="language-plaintext highlighter-rouge">T!</code></li>
+</ul>
+
+<p>实现协议: <code class="language-plaintext highlighter-rouge">LogicValue</code>，行为是判断是否为 <code class="language-plaintext highlighter-rouge">.None</code>。</p>
+
+<p>另外 <a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">Swift 的隐式类型转换</a>
+有提到，为什么 <code class="language-plaintext highlighter-rouge">nil</code> 可以给 <code class="language-plaintext highlighter-rouge">Optional</code> 类型赋值的问题。</p>
+
+<h3 id="cobjc-兼容类型">C/ObjC 兼容类型</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CBool = Bool
+CFloat = Float
+CDouble = Double
+CChar = Int8
+CSignedChar = Int8
+CUnsignedChar = UInt8
+CChar16 = UInt16
+CWideChar = UnicodeScalar
+CChar32 = UnicodeScalar
+CInt = Int32
+CUnsignedInt = UInt32
+CShort = Int16
+CUnsignedShort = UInt16
+CLong = Int
+CUnsignedLong = UInt
+CLongLong = Int64
+CUnsignedLongLong = UInt64
+</code></pre></div></div>
+
+<p>具体使用参考 C 交互的几篇文章，基本没区别。</p>
+
+<h3 id="any-类型">Any 类型</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AnyObject
+// 别名
+Any = protocol&lt;&gt;
+AnyClass = AnyObject.Type
+</code></pre></div></div>
+
+<p>还有个用在函数定义的类型签名上， <code class="language-plaintext highlighter-rouge">Any.Type</code>。</p>
+
+<p>顺便这里看到一个奇异的语法 <code class="language-plaintext highlighter-rouge">protocol&lt;&gt;</code>，这个也是 Swift 一种用来表示类型限制的方法，可以用在类型的位置，尖括号里可以是协议的列表。</p>
+
+<h3 id="指针类型">指针类型</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>UnsafePointer&lt;T&gt;
+CMutableVoidPointer
+CConstVoidPointer
+COpaquePointer
+CConstPointer&lt;T&gt;
+AutoreleasingUnsafePointer&lt;T&gt;
+CVaListPointer
+CMutablePointer&lt;T&gt;
+</code></pre></div></div>
+
+<p>参考 C 交互文章。</p>
+
+<ul>
+  <li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">简析Swift和C的交互</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/">Swift 与 ObjC 和 C 的交互，第三部分</a></li>
+</ul>
+
+<h3 id="其他辅助类型">其他辅助类型</h3>
+
+<p>多了去了。比如 for-in 实现时候的 Generator 、比如反射时候用的 <code class="language-plaintext highlighter-rouge">*Mirror</code>、比如切片操作用的 <code class="language-plaintext highlighter-rouge">Range&lt;T&gt;</code>。比如内部储存类。</p>
+
+<p>还有储存辅助类 <code class="language-plaintext highlighter-rouge">OnHeap&lt;T&gt;</code> 等等。以后有机会再探索。</p>
+
+<h2 id="swift-标准库协议">Swift 标准库协议</h2>
+
+<h3 id="打印相关-printable-debugprintable">打印相关 <code class="language-plaintext highlighter-rouge">Printable DebugPrintable</code></h3>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">protocol</span> <span class="nc">Printable</span> <span class="o">{</span>
+  <span class="k">var</span> <span class="n">description</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+<span class="o">}</span>
+<span class="n">protocol</span> <span class="nc">DebugPrintable</span> <span class="o">{</span>
+  <span class="k">var</span> <span class="n">debugDescription</span><span class="k">:</span> <span class="kt">String</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>用于打印和字符串的 Interpolation 。</p>
+
+<h3 id="literalconvertible"><code class="language-plaintext highlighter-rouge">*LiteralConvertible</code></h3>
+
+<p>从字面常量获取。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ArrayLiteralConvertible
+IntegerLiteralConvertible
+DictionaryLiteralConvertible
+CharacterLiteralConvertible
+FloatLiteralConvertible
+ExtendedGraphemeClusterLiteralConvertible
+StringLiteralConvertible
+</code></pre></div></div>
+
+<p>其中字符串和字符的字面常量表示有所重合，也就是说 <code class="language-plaintext highlighter-rouge">"a"</code> 可以是字符串也可以是字符。<a href="http://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/">简析 Swift 中的 Pattern Match</a> 一文中就是遇到了类似的情况。</p>
+
+<h3 id="logicvalue"><code class="language-plaintext highlighter-rouge">LogicValue</code></h3>
+
+<p>相当于重载 <code class="language-plaintext highlighter-rouge">if</code>、<code class="language-plaintext highlighter-rouge">while</code> 的行为。</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">protocol</span> <span class="nc">LogicValue</span> <span class="o">{</span>
+  <span class="n">func</span> <span class="nf">getLogicValue</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="sequence"><code class="language-plaintext highlighter-rouge">Sequence</code></h3>
+
+<p>相当于重载 for-in 。和 <code class="language-plaintext highlighter-rouge">Generator</code> 联用。</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">protocol</span> <span class="nc">Sequence</span> <span class="o">{</span>
+  <span class="n">typealias</span> <span class="nc">GeneratorType</span> <span class="k">:</span> <span class="kt">Generator</span>
+  <span class="n">func</span> <span class="nf">generate</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">GeneratorType</span>
+<span class="o">}</span>
+
+<span class="n">protocol</span> <span class="nc">Generator</span> <span class="o">{</span>
+  <span class="n">typealias</span> <span class="nc">Element</span>
+  <span class="n">mutating</span> <span class="n">func</span> <span class="nf">next</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Element</span><span class="o">?</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// for .. in { }</span>
+<span class="k">var</span> <span class="nc">__g</span> <span class="k">=</span> <span class="nv">someSequence</span><span class="o">.</span><span class="py">generate</span><span class="o">()</span>
+<span class="k">while</span> <span class="n">let</span> <span class="n">x</span> <span class="k">=</span> <span class="nv">__g</span><span class="o">.</span><span class="py">next</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">...</span>
+<span class="o">}}</span>
+</code></pre></div></div>
+
+<h3 id="整型-index-相关协议">整型、 Index 相关协议</h3>
+
+<p>这些协议都是用来表示容器类型的索引、及相关的索引运算。</p>
+
+<p>这里略去了部分私有内容。略去了 <code class="language-plaintext highlighter-rouge">Printable</code> 等。</p>
+
+<p><img src="/assets/swift-integer.png" alt="Swift Integer Type Hierarchy" /></p>
+
+<h3 id="rawoptionset-相关协议">RawOptionSet 相关协议</h3>
+
+<p>一般用来表示二进制的选项，类似于 C enum ，很多 Cocoa 的 flag 被映射到它。相当于一个 Wrapper 的作用。</p>
+
+<p><img src="/assets/swift-rawoptset.png" alt="Swift RawOptionSet" /></p>
+
+<p>可以看到要求被 Wrap 的对象支持 <code class="language-plaintext highlighter-rouge">BitwiseOperations</code>。</p>
+
+<h3 id="array-相关协议">Array 相关协议</h3>
+
+<p>图中用虚线标注了和 <code class="language-plaintext highlighter-rouge">Generator</code> 的关系。</p>
+
+<p><img src="/assets/swift-collection.png" alt="Swift Collection Protocol" /></p>
+
+<p><code class="language-plaintext highlighter-rouge">Array&lt;T&gt;</code> 类型实现了 <code class="language-plaintext highlighter-rouge">ArrayType</code> 协议。</p>
+
+<p><code class="language-plaintext highlighter-rouge">Dictionary</code> 类型实现了 <code class="language-plaintext highlighter-rouge">Collection</code> 协议。</p>
+
+<h3 id="反射相关协议">反射相关协议</h3>
+
+<p>包括 <code class="language-plaintext highlighter-rouge">Mirror</code>、<code class="language-plaintext highlighter-rouge">MirrorDisposition</code>、<code class="language-plaintext highlighter-rouge">Reflectable</code>。</p>
+
+<p>请参考 <a href="http://andelf.github.io/blog/2014/06/20/swift-reflection/">Swift 的反射</a>。</p>
+
+<h3 id="浮点数协议">浮点数协议</h3>
+
+<p>只有一个 <code class="language-plaintext highlighter-rouge">FloatingPointNumber</code>。单独存在。是为了定义完整而存在。看官自己搞定。</p>
+
+<h3 id="io-输出伪输出相关">IO 输出，伪输出相关</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol Streamable {
+  func writeTo&lt;Target : OutputStream&gt;(inout target: Target)
+}
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Streamable</code> 表示可以被写入到输出流中，比如字符串、字符等。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol OutputStream {
+  func write(string: String)
+}
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">OutputStream</code> 表示一个输出流，比如标准输出（<code class="language-plaintext highlighter-rouge">stdout</code>），也可以表示一个伪输出流，例如字符串 <code class="language-plaintext highlighter-rouge">String</code>。</p>
+
+<p>标准输出的获取方法</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var stdout = _Stdout()
+</code></pre></div></div>
+
+<p>看起来是私有结构，某一天不能用的话，别怪我。调用时候用 <code class="language-plaintext highlighter-rouge">inout</code> 引用语法。</p>
+
+<h3 id="cvararg-处理">CVarArg 处理</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol CVarArg {
+  func encode() -&gt; Word[]
+}
+</code></pre></div></div>
+
+<p>用于处理 C 函数的可变参数，参考 <a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a>。</p>
+
+<h3 id="bridge-协议">Bridge 协议</h3>
+
+<p>这里有个疑问就是编译过程中这些 Bridge 协议有没有参与。目前还没办法确定。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">_BridgedToObjectiveC</code></li>
+  <li><code class="language-plaintext highlighter-rouge">_ConditionallyBridgedToObjectiveC</code></li>
+</ul>
+
+<p>具体内容可以参考 <a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift 与 Objective-C 之间的交互</a>一文。</p>
+
+<h3 id="其他">其他</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Sink</code> 看起来是一个容器，可能是用来编码时使用。</p>
+
+<p><code class="language-plaintext highlighter-rouge">ArrayBufferType</code> 用于表示 <code class="language-plaintext highlighter-rouge">ArrayType</code> 的内部储存，看起来似乎也可以直接用。</p>
+
+<p><code class="language-plaintext highlighter-rouge">UnicodeCodec</code> 用于处理编码。有 <code class="language-plaintext highlighter-rouge">UTF8</code>、<code class="language-plaintext highlighter-rouge">UTF16</code>、<code class="language-plaintext highlighter-rouge">UTF32</code> 可用。</p>
+
+<p><code class="language-plaintext highlighter-rouge">ArrayBound</code> 用来处理数组边界，详细原理和作用过程未知。</p>
+
+<h2 id="总结">总结</h2>
+
+<p>无。</p>
+
+<p>参考：</p>
+
+<ul>
+  <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
+</ul>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/30/swift-type-hierarchy.html" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

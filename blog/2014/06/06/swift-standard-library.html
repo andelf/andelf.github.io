@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Swift Standard Library (Swift 标准库) | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Swift Standard Library (Swift 标准库)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="所有默认函数在 Swift 名字空间，即 Swift.abs 这样。" />
+<meta property="og:description" content="所有默认函数在 Swift 名字空间，即 Swift.abs 这样。" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/06/swift-standard-library.html" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/06/swift-standard-library.html" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-06T10:49:26+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Swift Standard Library (Swift 标准库)" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/06/swift-standard-library.html","headline":"Swift Standard Library (Swift 标准库)","dateModified":"2014-06-06T10:49:26+08:00","datePublished":"2014-06-06T10:49:26+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/06/swift-standard-library.html"},"description":"所有默认函数在 Swift 名字空间，即 Swift.abs 这样。","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Swift Standard Library (Swift 标准库)</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-06T10:49:26+08:00" itemprop="datePublished">Jun 6, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>所有默认函数在 Swift 名字空间，即 Swift.abs 这样。</p>
+
+<p>所有的函数功能都是我猜的。猜错别找我。</p>
+
+<h2 id="第一部分-a-to-z">第一部分 a to z</h2>
+
+<h3 id="abs"><code class="language-plaintext highlighter-rouge">abs</code></h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>abs(x: T) -&gt; T
+</code></pre></div></div>
+
+<p>绝对值， 所有数字类型均可。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>abs(-20.3)
+</code></pre></div></div>
+
+<h3 id="advance"><code class="language-plaintext highlighter-rouge">advance</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>advance(start: T, n: T.DistanceType) -&gt; T
+advance(start: T, n: T.DistanceType, end: T) -&gt; T
+</code></pre></div></div>
+
+<p>计算步进和距离的函数貌似。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>advance(0, 20) // 20
+advance(2, 20, 4) // 4
+</code></pre></div></div>
+
+<h3 id="alignof-alignofvalue"><code class="language-plaintext highlighter-rouge">alignof alignofValue</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alignof(T.Type) -&gt; Int
+alignofValue(T) -&gt; Int
+</code></pre></div></div>
+
+<p>计算类型的 alignment。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alignof(Int)
+alignof(Uint8)
+alignofValue(Float(3.2))
+</code></pre></div></div>
+
+<h3 id="assert"><code class="language-plaintext highlighter-rouge">assert</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>assert(condition: @auto_closure () -&gt; Bool, message: StaticString, file: StaticString, line: UWord) -&gt; Void
+assert(condition: @auto_closure () -&gt; T, message: StaticString, file: StaticString, line: UWord) -&gt; Void
+</code></pre></div></div>
+
+<p>断言语句。因为是 @auto_closure, 所以直接写语句就可以了，第二个 T 的限制是 LogicValue, 所以 Optional 也可以。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let age = 17
+assert(age &gt; 0, "Alive Only")
+assert(age &gt; 18, "Adult Only", file: __FILE__, line: __LINE__)
+assert("342345".toInt())
+</code></pre></div></div>
+
+<h3 id="bridge"><code class="language-plaintext highlighter-rouge">bridge*</code></h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bridgeFromObjectiveC(x: AnyObject, T.Type) -&gt; T?
+bridgeFromObjectiveCUnconditional(x: AnyObject, T.Type) -&gt; T
+bridgeToObjectiveC(x: T) -&gt; AnyObject?
+bridgeToObjectiveCUnconditional(x: T) -&gt; AnyObject
+</code></pre></div></div>
+
+<h3 id="c_malloc_size"><code class="language-plaintext highlighter-rouge">c_malloc_size</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c_malloc_size(heapMemory: UnsafePointer&lt;Void&gt;) -&gt; Int
+</code></pre></div></div>
+
+<h3 id="c_memcpy"><code class="language-plaintext highlighter-rouge">c_memcpy</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c_memcpy(dest: UnsafePointer&lt;Void&gt;, src: UnsafePointer&lt;Void&gt;, size: UInt) -&gt; Void
+</code></pre></div></div>
+
+<h3 id="c_putcharvalue-int32---void"><code class="language-plaintext highlighter-rouge">c_putchar(value: Int32) -&gt; Void</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c_putchar(value: Int32) -&gt; Void
+</code></pre></div></div>
+
+<p>就是 putchar，最基础的 output 语句。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c_putchar(97) // ASCII 'a'
+</code></pre></div></div>
+
+<h3 id="contains"><code class="language-plaintext highlighter-rouge">contains</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>contains(seq: S, predicate: (S.GeneratorType.Element) -&gt; L) -&gt; Bool
+contains(seq: S, x: S.GeneratorType.Element) -&gt; Bool
+</code></pre></div></div>
+
+<p>判断序列是否包含某元素、是否包含满足某条件的元素。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let a = [1,2,4,56,7]
+contains(a, { $0 &gt; 50 }) // true
+contains(a, 56)
+</code></pre></div></div>
+
+<h3 id="count-countelements"><code class="language-plaintext highlighter-rouge">count countElements</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>count(r: Range&lt;I&gt;) -&gt; I.DistanceType
+countElements(x: T) -&gt; T.IndexType.DistanceType
+</code></pre></div></div>
+
+<p>数元素、Range 个数。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>count(1..20)
+let a = [1,2,4,56,7]
+countElements(a) // 5
+</code></pre></div></div>
+
+<h3 id="countleadingzeros"><code class="language-plaintext highlighter-rouge">countLeadingZeros</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>countLeadingZeros(value: Int64) -&gt; Int64
+</code></pre></div></div>
+
+<p>Count Leading Zeros in Binary Format.
+二进制格式前面有多少个 0.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>countLeadingZeros(1) // 63
+countLeadingZeros(-1) // 0
+</code></pre></div></div>
+
+<h3 id="debugprint-debugprintln"><code class="language-plaintext highlighter-rouge">debugPrint debugPrintln</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>debugPrint(object: T) -&gt; Void
+debugPrint(object: T, &amp;target: TargetStream) -&gt; Void
+debugPrintln(object: T) -&gt; Void
+debugPrintln(object: T, &amp;target: TargetStream) -&gt; Void
+</code></pre></div></div>
+
+<p>打印任意对象。<code class="language-plaintext highlighter-rouge">TargetStream</code> 暂时未知。</p>
+
+<h3 id="distance"><code class="language-plaintext highlighter-rouge">distance</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>distance(start: T, end: T) -&gt; T.DistanceType
+</code></pre></div></div>
+
+<p>起止距离.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>distance(1, 20) // 19
+</code></pre></div></div>
+
+<h3 id="dropfirst-droplast"><code class="language-plaintext highlighter-rouge">dropFirst dropLast</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dropFirst(seq: Seq) -&gt; Seq.SliceType
+dropLast(seq: Seq) -&gt; Seq.SliceType
+</code></pre></div></div>
+
+<p>序列操作函数。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let b = [1,2,3,4,5]
+// b : Array&lt;Int&gt; = [1, 2, 3, 4, 5]
+dropFirst(b)
+// r16 : Slice&lt;Int&gt; = [2, 3, 4, 5]
+dropLast(b)
+// r17 : Slice&lt;Int&gt; = [1, 2, 3, 4]
+</code></pre></div></div>
+
+<h3 id="dump"><code class="language-plaintext highlighter-rouge">dump</code></h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dump(x: T, name: String?, indent: Int, maxDepth: Int, maxItems: Int) -&gt; T
+dump(x: T, name: String?, indent: Int, maxDepth: Int, maxItems: Int, &amp;targetStream: TargetStream) -&gt; T
+</code></pre></div></div>
+
+<p>打印变量的详情。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let b = [1,2,3,4,5]
+dump(b) // detailed output at console
+dump(b, name: "A Array B")
+dump("Hello World")
+</code></pre></div></div>
+
+<h3 id="encodebitsaswords"><code class="language-plaintext highlighter-rouge">encodeBitsAsWords</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>encodeBitsAsWords(x: T) -&gt; Word[]
+</code></pre></div></div>
+
+<p>未知作用。尝试发现类型是 ASCII 码。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>encodeBitsAsWords(97) // [97]: Word[]
+</code></pre></div></div>
+
+<h3 id="enumerate"><code class="language-plaintext highlighter-rouge">enumerate</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enumerate(seq: Seq) -&gt; EnumerateGenerator&lt;Seq.GeneratorType&gt;
+</code></pre></div></div>
+
+<p>同 Python enumerate.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let b = [1,2,3,4,5]
+for (idx, val) in enumerate(b) { println("b \(idx) = \(val)") }
+</code></pre></div></div>
+
+<h3 id="equal"><code class="language-plaintext highlighter-rouge">equal</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>equal(a1: S1, a2: S2) -&gt; Bool
+equal(a1: S1, a2: S2, pred: (S1.GeneratorType.Element, S1.GeneratorType.Element) -&gt; Bool) -&gt; Bool
+</code></pre></div></div>
+
+<p>比较相等。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>equal(2, 1+1)
+equal([1,2,3,4], [2,4,6,8], { $0 * 2 == $1 })
+</code></pre></div></div>
+
+<h3 id="fatalerror"><code class="language-plaintext highlighter-rouge">fatalError</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fatalError(message: StaticString, file: StaticString, line: UWord) -&gt; Void
+</code></pre></div></div>
+
+<p>Runtime fatal error. then quit.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fatalError("Taylor Swift Sucks")
+</code></pre></div></div>
+
+<h3 id="filter"><code class="language-plaintext highlighter-rouge">filter</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>filter(source: C, includeElement: (C.GeneratorType.Element) -&gt; Bool) -&gt; FilterCollectionView&lt;C&gt;
+filter(source: S, includeElement: (S.GeneratorType.Element) -&gt; Bool) -&gt; FilterSequenceView&lt;S&gt;
+</code></pre></div></div>
+
+<p>同 Python filter。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let b = [1,2,3,4,5]
+for i in filter(b, { $0 &gt; 3 }) { println("got \(i)") }
+for i in filter(1...100, { $0 % 17 == 0 }) { println("got \(i)") }
+</code></pre></div></div>
+
+<h3 id="find"><code class="language-plaintext highlighter-rouge">find</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>find(domain: C, value: C.GeneratorType.Element) -&gt; C.IndexType?
+</code></pre></div></div>
+
+<p>查找某一元素的索引值。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let b = [1,2,3,4,5]
+find(b, 20) // nil
+find(b, 2)  // 1
+</code></pre></div></div>
+
+<h3 id="getbridgedobjectivectype"><code class="language-plaintext highlighter-rouge">getBridgedObjectiveCType</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>getBridgedObjectiveCType(T.Type) -&gt; Any.Type?
+</code></pre></div></div>
+
+<h3 id="getvalist"><code class="language-plaintext highlighter-rouge">getVaList</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>getVaList(args: CVarArg[]) -&gt; CVaListPointer
+</code></pre></div></div>
+
+<h3 id="indices"><code class="language-plaintext highlighter-rouge">indices</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>indices(seq: Seq) -&gt; Range&lt;Seq.IndexType&gt;
+</code></pre></div></div>
+
+<p>索引的迭代器。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let b = [1,2,3,4,5]
+for i in indices(b) { println(i) }
+// 0 1 2 3 4
+</code></pre></div></div>
+
+<h3 id="insertionsort"><code class="language-plaintext highlighter-rouge">insertionSort</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>insertionSort(&amp;elements: C, range: Range&lt;C.IndexType&gt;) -&gt; Void
+insertionSort(&amp;elements: C, range: Range&lt;C.IndexType&gt;, &amp;less: (C.GeneratorType.Element, C.GeneratorType.Element) -&gt; Bool) -&gt; Void
+</code></pre></div></div>
+
+<p>插入排序。range 表示排序范围。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var tt = [23, 34, 56, 45, 67, 12, 78, 89, 90]
+insertionSort(&amp;tt, 0..5)
+println(tt)
+</code></pre></div></div>
+
+<h3 id="isbridgedtoobjectivec-isbridgedverbatimtoobjectivec"><code class="language-plaintext highlighter-rouge">isBridgedToObjectiveC isBridgedVerbatimToObjectiveC</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>isBridgedToObjectiveC(T.Type) -&gt; Bool
+isBridgedVerbatimToObjectiveC(T.Type) -&gt; Bool
+</code></pre></div></div>
+
+<h3 id="isuniquelyreferenced"><code class="language-plaintext highlighter-rouge">isUniquelyReferenced</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>isUniquelyReferenced(&amp;x: T) -&gt; Bool
+</code></pre></div></div>
+
+<h3 id="join"><code class="language-plaintext highlighter-rouge">join</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func join&lt;C : ExtensibleCollection, S : Sequence where C == C&gt;(separator: C, elements: S) -&gt; C
+</code></pre></div></div>
+
+<p>序列的 join 操作</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>join("!!", ["Hello", "World"])
+</code></pre></div></div>
+
+<h3 id="lexicographicalcompare"><code class="language-plaintext highlighter-rouge">lexicographicalCompare</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lexicographicalCompare(a1: S1, a2: S2) -&gt; Bool
+lexicographicalCompare(a1: S1, a2: S2, less: (S1.GeneratorType.Element, S1.GeneratorType.Element) -&gt; Bool) -&gt; Bool
+</code></pre></div></div>
+
+<h3 id="map"><code class="language-plaintext highlighter-rouge">map</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>map(source: C, transform: (C.GeneratorType.Element) -&gt; T) -&gt; MapCollectionView&lt;C, T&gt;
+map(source: S, transform: (S.GeneratorType.Element) -&gt; T) -&gt; MapSequenceView&lt;S, T&gt;
+map(x: T?, f: (T) -&gt; U) -&gt; U?
+</code></pre></div></div>
+
+<p>同 Python map 操作。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>for i in map([1,2,3,4], { $0 * 10 }) { println(i) }
+let optVal: Int? = 250
+let v: Int? =  map(optVal, { $0 + 1 }) // 251
+</code></pre></div></div>
+
+<h3 id="max-maxelement"><code class="language-plaintext highlighter-rouge">max maxElement</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>max(x: T, y: T, rest: T[]) -&gt; T
+maxElement(range: R) -&gt; R.GeneratorType.Element
+</code></pre></div></div>
+
+<p>最大值。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>max(2, 4)
+max(1,2,4,5,6,100,4,5,6,7) // 100
+maxElement([1,2,4,5,6,100,4,5,6,7])
+</code></pre></div></div>
+
+<h3 id="min-minelement"><code class="language-plaintext highlighter-rouge">min minElement</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>min(x: T, y: T, rest: T[]) -&gt; T
+minElement(range: R) -&gt; R.GeneratorType.Element
+</code></pre></div></div>
+
+<p>最小值。Same usage as <code class="language-plaintext highlighter-rouge">max</code></p>
+
+<h3 id="numericcast"><code class="language-plaintext highlighter-rouge">numericCast</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>numericCast(x: T) -&gt; U
+</code></pre></div></div>
+
+<p>Cast between unsigned and signed integers.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let bb: UInt8 = 20
+let cc: Int = numericCast(bb)
+</code></pre></div></div>
+
+<h3 id="partition"><code class="language-plaintext highlighter-rouge">partition</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>partition(&amp;elements: C, range: Range&lt;C.IndexType&gt;) -&gt; C.IndexType
+partition(&amp;elements: C, range: Range&lt;C.IndexType&gt;, &amp;less: (C.GeneratorType.Element, C.GeneratorType.Element) -&gt; Bool) -&gt; C.IndexType
+</code></pre></div></div>
+
+<p>Unknown usage.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var tt = [12, 23, 34, 45, 56, 67, 78, 89, 90]
+println(partition(&amp;tt, 3..4))
+</code></pre></div></div>
+
+<h3 id="posix_read-posix_write"><code class="language-plaintext highlighter-rouge">posix_read posix_write</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>posix_read(fd: Int32, buf: RawPointer, sz: Int) -&gt; Int
+posix_write(fd: Int32, buf: RawPointer, sz: Int) -&gt; Int
+</code></pre></div></div>
+
+<h3 id="print-println"><code class="language-plaintext highlighter-rouge">print println</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>print(object: T) -&gt; Void
+print(object: T, &amp;target: TargetStream) -&gt; Void
+println() -&gt; Void
+println(object: T) -&gt; Void
+println(object: T, &amp;target: TargetStream) -&gt; Void
+</code></pre></div></div>
+
+<p>打印语句，们。</p>
+
+<h3 id="quicksort"><code class="language-plaintext highlighter-rouge">quickSort</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>quickSort(&amp;elements: C, range: Range&lt;C.IndexType&gt;) -&gt; Void
+quickSort(&amp;elements: C, range: Range&lt;C.IndexType&gt;, less: (C.GeneratorType.Element, C.GeneratorType.Element) -&gt; Bool) -&gt; Void
+</code></pre></div></div>
+
+<p>快排序, range表示需要排序的范围。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var tt = [23, 34, 56, 45, 67, 12, 78, 89, 90]
+quickSort(&amp;tt, 0..5)
+quickSort(&amp;tt, 0..5, { $1 &lt; $0 }) // 逆序
+</code></pre></div></div>
+
+<h3 id="reduce"><code class="language-plaintext highlighter-rouge">reduce</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reduce(sequence: S, initial: U, combine: (U, S.GeneratorType.Element) -&gt; U) -&gt; U
+</code></pre></div></div>
+
+<p>同 Python 中 reduce, 类似 Haskell fold 系列函数。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// reduce 应用之 求和
+let tt = [23, 34, 56, 45, 67, 12, 78, 89, 90]
+reduce(tt, 0, { $0 + $1 })
+</code></pre></div></div>
+
+<h3 id="reflect"><code class="language-plaintext highlighter-rouge">reflect</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reflect(x: T) -&gt; Mirror
+</code></pre></div></div>
+
+<p>暂时未知</p>
+
+<h3 id="reinterpretcast"><code class="language-plaintext highlighter-rouge">reinterpretCast</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reinterpretCast(x: T) -&gt; U
+</code></pre></div></div>
+
+<p>相同 size 的类型，之间的直接 cast.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let a: Int = -1
+let c: UInt = reinterpretCast(a)
+println(c)
+println(UInt.max) // 一定等于 c 。别问我为什么。
+</code></pre></div></div>
+
+<h3 id="reverse"><code class="language-plaintext highlighter-rouge">reverse</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reverse(source: C) -&gt; ReverseView&lt;C&gt;
+</code></pre></div></div>
+
+<p>同 Python reversed()，逆序的迭代器。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let tt = [23, 34, 56, 45, 67, 12, 78, 89, 90]
+for i in reverse(tt) { println(i) }
+</code></pre></div></div>
+
+<h3 id="rounduptoalignment"><code class="language-plaintext highlighter-rouge">roundUpToAlignment</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>roundUpToAlignment(offset: Int, alignment: Int) -&gt; Int
+</code></pre></div></div>
+
+<p>内存 alignment 计算函数。比如 alignment 为 4 字节，offset 为 5, 那么将在下个 4 字节， 即 8 的位置上对齐。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>roundUpToAlignment(2, 4) // 4
+roundUpToAlignment(5, 4) // 8
+</code></pre></div></div>
+
+<h3 id="sizeof-sizeofvalue"><code class="language-plaintext highlighter-rouge">sizeof sizeofValue</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sizeof(T.Type) -&gt; Int
+sizeofValue(T) -&gt; Int
+</code></pre></div></div>
+
+<p>计算类型或者值的 size。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sizeof(Int)
+sizeofValue(2.4)  // a Double
+</code></pre></div></div>
+
+<h3 id="sort"><code class="language-plaintext highlighter-rouge">sort</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sort(array: T[]) -&gt; T[]
+sort(array: T[], pred: (T, T) -&gt; Bool) -&gt; T[]
+</code></pre></div></div>
+
+<p>排序函数。类似 Python sorted()。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let foo = [18, 14, 21, 8, 45, 12, 9]
+sort(foo)
+sort(foo, { String($0) &lt; String($1) }) // 按照 ASCII 顺序排序
+</code></pre></div></div>
+
+<h3 id="split"><code class="language-plaintext highlighter-rouge">split</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>split(seq: Seq, isSeparator: (Seq.GeneratorType.Element) -&gt; R, maxSplit: Int, allowEmptySlices: Bool) -&gt; Seq.SliceType[]
+</code></pre></div></div>
+
+<p>分割序列函数。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>split("Hello World", { $0 == " " })
+// : String[] = ["Hello", "World"]
+</code></pre></div></div>
+
+<h3 id="startswith"><code class="language-plaintext highlighter-rouge">startsWith</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>startsWith(s0: S0, s1: S1) -&gt; Bool
+</code></pre></div></div>
+
+<p>判断序列开头子序列。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>startsWith(1..100, 1..2)
+startsWith("Hello World", "Hel")
+</code></pre></div></div>
+
+<h3 id="strideof-strideofvalue"><code class="language-plaintext highlighter-rouge">strideof strideofValue</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>strideof(T.Type) -&gt; Int
+strideofValue(T) -&gt; Int
+</code></pre></div></div>
+
+<p>计算内存 stride 。用法同 sizeof sizeofValue。</p>
+
+<h3 id="swap"><code class="language-plaintext highlighter-rouge">swap</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swap(&amp;a: T, &amp;b: T) -&gt; Void
+</code></pre></div></div>
+
+<p>交换值。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var a = 1, b = 2
+swap(&amp;a, &amp;b)
+</code></pre></div></div>
+
+<h3 id="swift_"><code class="language-plaintext highlighter-rouge">swift_*</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swift_bufferAllocate(bufferType: HeapBufferStorageBase.Type, size: Int, alignMask: Int) -&gt; AnyObject
+swift_keepAlive(&amp;T) -&gt; Void
+swift_MagicMirrorData_summaryImpl(metadata: Any.Type, result: UnsafePointer&lt;String&gt;) -&gt; Void
+</code></pre></div></div>
+
+<h3 id="tostring"><code class="language-plaintext highlighter-rouge">toString</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>toString(object: T) -&gt; String
+</code></pre></div></div>
+
+<p>这个没啥好说的。就是 toString。例子我都懒得举。</p>
+
+<h3 id="transcode"><code class="language-plaintext highlighter-rouge">transcode</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>transcode(inputEncoding: Encoding.Type, outputEncoding: Encoding.Type, input: Input, output: Output) -&gt; Void
+transcode(inputEncoding: InputEncoding.Type, outputEncoding: OutputEncoding.Type, input: Input, output: Output) -&gt; Void
+</code></pre></div></div>
+
+<p>未知。</p>
+
+<h3 id="underestimatecount"><code class="language-plaintext highlighter-rouge">underestimateCount</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>underestimateCount(x: T) -&gt; Int
+</code></pre></div></div>
+
+<p>预估 Sequence 的成员个数。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>underestimateCount(1..1000)
+</code></pre></div></div>
+
+<h3 id="unsafereflect---"><code class="language-plaintext highlighter-rouge">unsafeReflect   </code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>unsafeReflect(owner: NativeObject, ptr: UnsafePointer&lt;T&gt;) -&gt; Mirror
+</code></pre></div></div>
+
+<p>未知。</p>
+
+<h3 id="withextendedlifetime"><code class="language-plaintext highlighter-rouge">withExtendedLifetime</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>withExtendedLifetime(x: T, f: (T) -&gt; Result) -&gt; Result
+</code></pre></div></div>
+
+<h3 id="withobjectatpluszero"><code class="language-plaintext highlighter-rouge">withObjectAtPlusZero</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>withObjectAtPlusZero(x: AnyObject, f: (COpaquePointer) -&gt; Result) -&gt; Result
+</code></pre></div></div>
+
+<h3 id="withunsafepointer-withunsafepointers-withunsafepointertoobject"><code class="language-plaintext highlighter-rouge">withUnsafePointer withUnsafePointers withUnsafePointerToObject</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>withUnsafePointer(&amp;arg: T, body: (UnsafePointer&lt;T&gt;) -&gt; Result) -&gt; Result
+withUnsafePointers(&amp;arg0: A0, &amp;arg1: A1, &amp;arg2: A2, body: (UnsafePointer&lt;A0&gt;, UnsafePointer&lt;A1&gt;, UnsafePointer&lt;A2&gt;) -&gt; Result) -&gt; Result
+withUnsafePointers(&amp;arg0: A0, &amp;arg1: A1, body: (UnsafePointer&lt;A0&gt;, UnsafePointer&lt;A1&gt;) -&gt; Result) -&gt; Result
+withUnsafePointerToObject(&amp;arg: T?, body: (UnsafePointer&lt;ImplicitlyUnwrappedOptional&lt;T&gt;&gt;) -&gt; Result) -&gt; Result
+</code></pre></div></div>
+
+<p>来自 Rust 的同学对这里一定不会太陌生。不过作用和使用场合未知。</p>
+
+<h3 id="withvalist"><code class="language-plaintext highlighter-rouge">withVaList</code></h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>withVaList(args: CVarArg[], f: (CVaListPointer) -&gt; R) -&gt; R
+withVaList(builder: VaListBuilder, f: (CVaListPointer) -&gt; R) -&gt; R
+</code></pre></div></div>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/06/swift-standard-library.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/06/swift-standard-library.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/06/swift-standard-library.html" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/06/swift-standard-library.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/06/swift-standard-library.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

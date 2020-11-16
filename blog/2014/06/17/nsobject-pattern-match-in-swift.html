@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match) | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="本文正式标题是：简析 Swift 中的 Pattern Match" />
+<meta property="og:description" content="本文正式标题是：简析 Swift 中的 Pattern Match" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift.html" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift.html" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-17T09:29:48+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift.html","headline":"NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)","dateModified":"2014-06-17T09:29:48+08:00","datePublished":"2014-06-17T09:29:48+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift.html"},"description":"本文正式标题是：简析 Swift 中的 Pattern Match","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-17T09:29:48+08:00" itemprop="datePublished">Jun 17, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>本文正式标题是：简析 Swift 中的 Pattern Match</p>
+
+<p>副标题是：妈蛋 Swift 你又用黑属性坑大家了: 为什么 switch case 可以用数字匹配字符</p>
+
+<p>声明： 原创发现，原创内容。转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
+
+<h2 id="问题的提出">问题的提出</h2>
+
+<p>故事是这样的，昨天有人在论坛上发了个帖子，虽然不太规范而且含糊，不过还是能看出来他在问什么。<a href="http://swift.sh/topic/151/switch-case10/">传送门</a></p>
+
+<p>重新把问题简化搬运过来。</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">let</span> <span class="n">count</span> <span class="k">=</span> <span class="s">"0"</span>
+<span class="n">switch</span> <span class="n">count</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="mi">1</span><span class="k">:</span>
+    <span class="kt">println</span><span class="o">(</span><span class="err">"</span><span class="kt">location</span> <span class="err">1"</span><span class="o">)</span>
+    <span class="kt">case</span> <span class="err">0</span><span class="kt">:</span>
+    <span class="kt">println</span><span class="o">(</span><span class="err">"</span><span class="kt">location</span> <span class="err">2"</span><span class="o">)</span>
+    <span class="kt">case</span> <span class="err">"1"</span><span class="kt">:</span>
+    <span class="kt">println</span><span class="o">(</span><span class="err">"</span><span class="kt">location</span> <span class="err">3"</span><span class="o">)</span>
+    <span class="kt">default:</span>
+    <span class="kt">println</span><span class="o">(</span><span class="err">"</span><span class="kt">location</span> <span class="err">4"</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>为什么上面的代码可以通过编译？</p>
+
+<h2 id="问题验证">问题验证</h2>
+
+<p>这几天说了很多了， Swift 是强类型语言，所以类型不同肯定不能在一起。直觉上，这段代码肯定不可能编译通过，错误一定是类型错误。</p>
+
+<p>果断扔代码到文件，然后编译（我个人习惯用命令行直接编译）:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 填入 test.swift
+xcrun swift -g test.swift
+</code></pre></div></div>
+
+<p>果然出错，不过出错信息略诡异：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>test.swift:4:6: error: could not find an overload for '~=' that accepts the supplied arguments
+case 1:
+     ^
+</code></pre></div></div>
+
+<p>故事到这里也许完事了。嗯，不可以编译，问题也许是 Xcode 6 beta 版的 BUG 什么的。微博上的 <a href="http://weibo.com/owenzx">@肇鑫</a> 也提到， 用 Playground 编译也是出错，出错信息同上。</p>
+
+<p>看起来暂时是无法重现问题。</p>
+
+<h3 id="出错信息">出错信息</h3>
+
+<p>先解释下这个出错信息，熟读那本 ibook 的同学，可能会记得，在 swift case 那节是有讲到 <code class="language-plaintext highlighter-rouge">~=</code> 这个运算符的，也讲到了如何自定义它。</p>
+
+<blockquote>
+  <p>Expression Pattern</p>
+</blockquote>
+
+<blockquote>
+  <p>An expression pattern represents the value of an expression. Expression patterns appear only in switch statement case labels.</p>
+</blockquote>
+
+<blockquote>
+  <p>The expression represented by the expression pattern is compared with the value of an input expression using the Swift standard library ~= operator. The matches succeeds if the ~= operator returns true. By default, the ~= operator compares two values of the same type using the == operator. It can also match an integer value with a range of integers in an Range object.</p>
+</blockquote>
+
+<p>所以其实 <code class="language-plaintext highlighter-rouge">~=</code> 是一个匹配运算符(Pattern Match Operator)，专门用在 Pattern Match 的地方，比如 switch 的 case 。一般情况下它直接调用 <code class="language-plaintext highlighter-rouge">==</code> 运算符。</p>
+
+<p>原书还写道：</p>
+
+<blockquote>
+  <p>You can overload the ~= operator to provide custom expression matching behavior. For example, you can rewrite the above example to compare the point expression with a string representations of points.</p>
+</blockquote>
+
+<p>说明 Pattern Match 的行为是可以通过重载 <code class="language-plaintext highlighter-rouge">~=</code> 控制的。书中有重载的例子，小伙伴们可以看看。</p>
+
+<p>深入下，来看看 <code class="language-plaintext highlighter-rouge">~=</code> 到底是什么东西：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@transparent func ~=&lt;T : Equatable&gt;(a: T, b: T) -&gt; Bool
+func ~=&lt;T : RandomAccessIndex where T.DistanceType : SignedInteger&gt;(x: Range&lt;T&gt;, y: T) -&gt; Bool
+</code></pre></div></div>
+
+<p>可以看到，首先它可以匹配两个相同类型的 Equatable，而且是 <code class="language-plaintext highlighter-rouge">@transparent</code>，说明没有额外开销， inline 函数，从书中看，完全等价于调用 <code class="language-plaintext highlighter-rouge">==</code>，不深究了。</p>
+
+<p>然后，它可以匹配一个 <code class="language-plaintext highlighter-rouge">Rnage&lt;T&gt;</code> 和 <code class="language-plaintext highlighter-rouge">T</code>，这也就是我们在 switch case 里写的 <code class="language-plaintext highlighter-rouge">case 1..18: println("未成年")</code> 背后的奥秘，略有开销。</p>
+
+<p>以上说明了为什么出错信息提示为什么是 <code class="language-plaintext highlighter-rouge">~=</code> 运算符重载失败，而不是类型错误（其实也算是一种类型错误，没有找到适合运算符的类型）。</p>
+
+<h3 id="再次尝试重现">再次尝试重现</h3>
+
+<p>有了上面的线索，是不是怀疑我们遗漏了什么？回到原问题提出的地方：</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">override</span> <span class="n">func</span> <span class="nf">viewDidLoad</span><span class="o">()</span> <span class="o">{</span>
+<span class="nv">super</span><span class="o">.</span><span class="py">viewDidLoad</span><span class="o">()</span>
+<span class="n">let</span> <span class="n">count</span> <span class="k">=</span> <span class="s">"0"</span>
+<span class="o">....</span>
+</code></pre></div></div>
+
+<p>看起来，他是在 App 环境下调用的，这也许就是问题的根源。之前有介绍过， Cocoa 框架给 Swift 语言添加了很多东西，包括一大批的 <code class="language-plaintext highlighter-rouge">extension</code>，还有一堆隐式类型转换。</p>
+
+<p>我们在 <code class="language-plaintext highlighter-rouge">test.swift</code> 第一行加入 <code class="language-plaintext highlighter-rouge">import Cocoa</code>，重新编译。结果正常通过编译。代码执行结果符合预期，走 default 分支。</p>
+
+<h3 id="这也不科学">这也不科学!</h3>
+
+<p>小伙伴们惊呆了，看起来 <code class="language-plaintext highlighter-rouge">count</code> 变量明明是一个 <code class="language-plaintext highlighter-rouge">Character</code>，结果竟然能匹配 <code class="language-plaintext highlighter-rouge">Character</code> 和 <code class="language-plaintext highlighter-rouge">Int</code>。</p>
+
+<h2 id="祭出-lldb">祭出 lldb</h2>
+
+<p>lldb 挂上 exe ，看看汇编代码是怎么样的。带上注释。我摘录最能说明问题的一段。</p>
+
+<pre><code class="language-gas">   ; 这里是 case 1
+   0x100001d1a:  movabsq $0x01, %rdi
+   0x100001d24:  movq   %rax, -0x148(%rbp)
+
+   ; 将 1 转换为 NSNumber
+   0x100001d2b:  callq  0x100003f32               ; symbol stub for: Swift.Int.__conversion (Swift.Int)() -&gt; ObjectiveC.NSNumber
+
+   ; 此处省略调用 ARC 代码若干
+   ....
+
+   ; 这里其实是 count: String , 三个寄存器表示
+   ; 检查 String 大小你会发现 sizeof(String) 是 24，三个 64bit
+   ; 熟悉 Rust 的同学知道，字符串实现，无非三个 field ： size 、 capacity 、pointer
+   ; 猜测 Swift 完全相同因为它大量借鉴了 Rust （不服来喷）
+   0x100001d43:  movq   -0x128(%rbp), %rdi
+   0x100001d4a:  movq   -0x130(%rbp), %rsi
+   0x100001d51:  movq   -0x138(%rbp), %rdx
+
+   0x100001d58:  movq   %rax, -0x158(%rbp)
+   ; 这里将 count: String 转换为 NSString
+   0x100001d5f:  callq  0x100003f26               ; symbol stub for: Swift.String.__conversion (Swift.String)() -&gt; ObjectiveC.NSString
+   0x100001d64:  movq   -0x150(%rbp), %rdi
+   0x100001d6b:  movq   %rax, %rsi
+   ; **最最神奇的地方来了，这里调用了 ~= ObjectiveC 版，比较两个 NSObject 的版本。
+   0x100001d6e:  callq  0x100003f20               ; symbol stub for: ObjectiveC.~= @infix (ObjectiveC.NSObject, ObjectiveC.NSObject) -&gt; Swift.Bool
+</code></pre>
+
+<h2 id="分析">分析</h2>
+
+<p>上面一堆看不懂没关系，这里再复述下在 Cocoa 环境（或者说 Foundation 环境下）第一条 <code class="language-plaintext highlighter-rouge">case 1:</code> 的流程:</p>
+
+<ul>
+  <li>将 1 转换为 <code class="language-plaintext highlighter-rouge">NSNumber</code>，通过隐式类型转换实现</li>
+  <li>将 <code class="language-plaintext highlighter-rouge">count</code> 转换为 <code class="language-plaintext highlighter-rouge">NSString</code>，通过隐式类型转换实现</li>
+  <li>调用 <code class="language-plaintext highlighter-rouge">NSObject</code> 重载版的 <code class="language-plaintext highlighter-rouge">~=</code> 运算符进行比较</li>
+</ul>
+
+<p>这么看起来明了多了。但是，我们的 <code class="language-plaintext highlighter-rouge">Character</code> 哪里去了？为什么 count 的类型变了？</p>
+
+<p>直接下断点然后 repl 命令检查，果然，我们没有指定类型的 <code class="language-plaintext highlighter-rouge">count</code> 在这个版本中变成了一个 <code class="language-plaintext highlighter-rouge">String</code>。</p>
+
+<p>从标准库定义看， <code class="language-plaintext highlighter-rouge">Character</code> 和 <code class="language-plaintext highlighter-rouge">String</code> 都实现了 <code class="language-plaintext highlighter-rouge">ExtendedGraphemeClusterLiteralConvertible</code> 协议，保证他们能从字符字面常量获得。所以实际上每当我们写 <code class="language-plaintext highlighter-rouge">let foo = "a"</code> 其实是完全依赖编译器的类型推导，选择到底是 <code class="language-plaintext highlighter-rouge">Character</code> 还是 <code class="language-plaintext highlighter-rouge">String</code>。</p>
+
+<p>说明 Swift 编译器高大上，可以从当前加载的所有类型中推导出合法合理能编译的类型组合。来自 Haskell 背景的同学一定笑而不语，当然那种怎么改都凑不对类型的痛苦也是其他同学无法理解和感同身受的。</p>
+
+<p>回头再看看 <code class="language-plaintext highlighter-rouge">ObjectiveC.~=</code> 这个运算符重载：</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">func</span> <span class="o">~=(</span><span class="n">x</span><span class="k">:</span> <span class="kt">NSObject</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">NSObject</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
+</code></pre></div></div>
+
+<p>定义在 ObjectiveC 模块里，使用 <code class="language-plaintext highlighter-rouge">import ObjectiveC</code> 可以加载。这个模块是 Swift 到 Objective-C 的一些映射模块，基础的 <code class="language-plaintext highlighter-rouge">NSObject</code> 方法还有一些运行时控制函数。</p>
+
+<p>当然 <code class="language-plaintext highlighter-rouge">Foundation</code>, <code class="language-plaintext highlighter-rouge">Cocoa</code> 这些都会加载它，所以理论上写应用的时候不需要指定，只要你用到了 <code class="language-plaintext highlighter-rouge">NSObject</code> 就一定有它。</p>
+
+<p>实际上 WWDC 某一集里讲到（忘记了，等我再找到会补上），对比 <code class="language-plaintext highlighter-rouge">NSObject</code> 的时候，Swift 会选择调用 <code class="language-plaintext highlighter-rouge">isEqual</code> 方法。我们反汇编验证下。简单加点注释。</p>
+
+<pre><code class="language-gas">(lldb) dis -a 0x100003f20
+asmtest`symbol stub for: ObjectiveC.~= @infix (ObjectiveC.NSObject, ObjectiveC.NSObject) -&gt; Swift.Bool:
+   0x100003f20:  jmpq   *0x1252(%rip)             ; (void *)0x00000001000e88d0: ObjectiveC.~= @infix (ObjectiveC.NSObject, ObjectiveC.NSObject) -&gt; Swift.Bool
+(lldb) dis -a 0x00000001000e88d0
+libswiftObjectiveC.dylib`ObjectiveC.~= @infix (ObjectiveC.NSObject, ObjectiveC.NSObject) -&gt; Swift.Bool:
+   0x1000e88d0:  pushq  %rbp
+   0x1000e88d1:  movq   %rsp, %rbp
+   0x1000e88d4:  pushq  %r15
+   0x1000e88d6:  pushq  %r14
+   0x1000e88d8:  pushq  %rbx
+   0x1000e88d9:  pushq  %rax
+   ; 64位 寄存器传参
+   0x1000e88da:  movq   %rsi, %rbx
+   0x1000e88dd:  movq   %rdi, %r14
+   0x1000e88e0:  movq   0x3da1(%rip), %rsi        ; "isEqual:"
+   0x1000e88e7:  movq   %rbx, %rdx
+   0x1000e88ea:  callq  0x1000eb670               ; symbol stub for: objc_msgSend
+   ; 测试 isEqual: 调用的返回值，存到 %r16b
+   0x1000e88ef:  testb  %al, %al
+   0x1000e88f1:  setne  %r15b
+   0x1000e88f5:  movq   %rbx, %rdi
+   0x1000e88f8:  callq  0x1000eb676               ; symbol stub for: objc_release
+   0x1000e88fd:  movq   %r14, %rdi
+   0x1000e8900:  callq  0x1000eb676               ; symbol stub for: objc_release
+   ; 本运算符函数返回值
+   0x1000e8905:  movb   %r15b, %al
+   0x1000e8908:  addq   $0x8, %rsp
+   0x1000e890c:  popq   %rbx
+   0x1000e890d:  popq   %r14
+   0x1000e890f:  popq   %r15
+   0x1000e8911:  popq   %rbp
+   0x1000e8912:  retq
+</code></pre>
+
+<p>啧啧， Instruction Pointer Relative Addressing 用的飞起。 64 位名字也特好听。 RIP 。 对了， MacOSX 下都是 PIC 位置无关代码。</p>
+
+<p>从上面看，果然是调用了 Objective-C 的 <code class="language-plaintext highlighter-rouge">isEqual:</code>。</p>
+
+<h2 id="总结">总结</h2>
+
+<ul>
+  <li>Swift 的编译器会根据大范围的代码推导类型，遍历 AST 然后用树或者图算法填充未指定的类型
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">"c"</code> 可以是任意 <code class="language-plaintext highlighter-rouge">ExtendedGraphemeClusterLiteralConvertible</code> 类型，包括 <code class="language-plaintext highlighter-rouge">Character</code>、<code class="language-plaintext highlighter-rouge">String</code>、<code class="language-plaintext highlighter-rouge">CString</code>、<code class="language-plaintext highlighter-rouge">UnicodeScalar</code>、<code class="language-plaintext highlighter-rouge">StaticString</code> 等</li>
+    </ul>
+  </li>
+  <li>swith case 语句使用 <code class="language-plaintext highlighter-rouge">~=</code> 运算符执行匹配操作
+    <ul>
+      <li>非 Foundation 环境下，相当于 <code class="language-plaintext highlighter-rouge">==</code> 运算符</li>
+      <li>在 Foundation 环境下，如果是 <code class="language-plaintext highlighter-rouge">NSObject</code> 及其子类，相当于 <code class="language-plaintext highlighter-rouge">isEqual:</code> 方法</li>
+      <li><code class="language-plaintext highlighter-rouge">a..b</code> 这样的匹配也是通过 <code class="language-plaintext highlighter-rouge">~=</code> 运算符实现，也可以重载后自定义</li>
+    </ul>
+  </li>
+  <li>在 Foundation 环境下，隐式类型转换遍地都是</li>
+</ul>
+
+<h2 id="教训">教训</h2>
+
+<ul>
+  <li>真用到字符类型 <code class="language-plaintext highlighter-rouge">Character</code> 的时候，还是显式指定吧</li>
+  <li>需要额外注意能隐式类型转换到 <code class="language-plaintext highlighter-rouge">NSObject</code> 的几个类型，避免非预期行为</li>
+</ul>
+
+<h2 id="参考文献">参考文献</h2>
+
+<ul>
+  <li>Apple Inc. “The Swift Programming Language”。 iBooks. https://itun.es/cn/jEUH0.l</li>
+  <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">隐式类型转换</a></li>
+  <li>WWDC 某集讲到的 <code class="language-plaintext highlighter-rouge">isEqual:</code></li>
+</ul>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/17/nsobject-pattern-match-in-swift.html" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

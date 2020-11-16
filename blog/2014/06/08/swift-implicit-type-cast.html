@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Implicit Type Convertion in Swift (Swift 的隐式类型转换) | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Implicit Type Convertion in Swift (Swift 的隐式类型转换)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="这是我自己给的命名，因为这个特性暂时看是 undocumented 的。通过 lldb 和 Xcode 的变量 inspector 功能发掘出来的。然后尝试调用没有问题。" />
+<meta property="og:description" content="这是我自己给的命名，因为这个特性暂时看是 undocumented 的。通过 lldb 和 Xcode 的变量 inspector 功能发掘出来的。然后尝试调用没有问题。" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast.html" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast.html" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-08T00:25:43+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Implicit Type Convertion in Swift (Swift 的隐式类型转换)" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast.html","headline":"Implicit Type Convertion in Swift (Swift 的隐式类型转换)","dateModified":"2014-06-08T00:25:43+08:00","datePublished":"2014-06-08T00:25:43+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast.html"},"description":"这是我自己给的命名，因为这个特性暂时看是 undocumented 的。通过 lldb 和 Xcode 的变量 inspector 功能发掘出来的。然后尝试调用没有问题。","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Implicit Type Convertion in Swift (Swift 的隐式类型转换)</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-08T00:25:43+08:00" itemprop="datePublished">Jun 8, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>这是我自己给的命名，因为这个特性暂时看是 undocumented 的。通过 lldb 和 Xcode 的变量 inspector 功能发掘出来的。然后尝试调用没有问题。</p>
+
+<p>This is an undocumented feature. I found it by lldb and the variable inspector of Xcode6-beta.</p>
+
+<p>形式: <code class="language-plaintext highlighter-rouge">@conversion func __conversion&lt;T&gt;() -&gt; T { }</code></p>
+
+<p>对了 Reddit 网友提出 <code class="language-plaintext highlighter-rouge">@conversion</code> 是可以省略的。个人认为编译器可能对不同的两种方式行为略有不同，最好还是加上。还有就是 <code class="language-plaintext highlighter-rouge">@transparent</code> 其实是表示 inline 。</p>
+
+<p>先随便设想个场合。比如我们某个库需要表示一个二维点。</p>
+
+<p>Suppose we need a Point type in our library.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">struct</span> <span class="nc">Point</span> <span class="o">{</span>
+    <span class="k">var</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">var</span> <span class="n">y</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="o">}</span>
+<span class="n">let</span> <span class="n">p</span> <span class="k">=</span> <span class="nc">Point</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="err">23</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="err">45</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>相信看了几天的 Swift，信手捏来啊。啧啧。
+然后你发现你的另个库已经用了 (Int, Int) 来表示二维点了。。。。。你的把手头一堆的 Point 在转成 (Int, Int)，或者加个什么方法。？</p>
+
+<p>For some reason, we need to work with another library, which uses <code class="language-plaintext highlighter-rouge">(Int, Int)</code> as the representation of a point.
+Must we refacotr the code and add type conversion function calls?</p>
+
+<p>妈蛋重构么？</p>
+
+<p>No no~~</p>
+
+<p>我们这样来</p>
+
+<p>复习下 extension 语法, 加上这里要介绍的“隐式类型转换”</p>
+
+<p>We can use the Swift’s hiding feature – Implicit Type Convertion(or to say Cast?).</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">extension</span> <span class="nc">Point</span> <span class="o">{</span>
+    <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nc">Int</span><span class="o">,</span> <span class="nc">Int</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nf">return</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>赞爆了。然后我们就可以这么写</p>
+
+<p>The we can directly make a <code class="language-plaintext highlighter-rouge">(Int, Int)</code> from a <code class="language-plaintext highlighter-rouge">Point</code>.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">let</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">)</span> <span class="k">=</span> <span class="n">p</span>
+<span class="c1">// suppose: func drawPoint(pt: (Int,Int)) { }</span>
+<span class="nf">drawPoint</span><span class="o">(</span><span class="n">p</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>你看无痛苦吧。然后所有需要 (Int, Int) 参数的函数，直接传递 Point 类型是没有任何问题的。（这个我也很吃惊，理论上这个玩意还是有个推导过程的，会有BUG什么的，没想到老crash 的 Swift 编译器竟然这个做得很好)</p>
+
+<p>好吧这个例子实在是太渣了。我们换个例子说。</p>
+
+<p>假设，我们有个库函数，接受 Color struct (r, g, b 三原色表示) 作为参数。
+比如调用  <code class="language-plaintext highlighter-rouge">setColor(Color(r:23, g:34, b:34))</code>
+然后实际上颜色我们用字符串表示，比如”white”, “black” 或者 UInt32 表示比如 #ffeeff 。。。</p>
+
+<p>然后为了方便，我们本来需要写一些转换函数，然后调用。</p>
+
+<p>现在不同了，比如我们给 String 写个 隐式转换，代码里直接用。（用protocol 也可以实现相同的功能）</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
+    <span class="nd">@conversion</span> <span class="n">func</span> <span class="nc">__conversion</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Color</span> <span class="o">{</span>
+        <span class="n">switch</span> <span class="n">self</span> <span class="o">{</span>
+        <span class="k">case</span> <span class="s">"red"</span><span class="k">:</span>
+            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">255</span><span class="o">,</span> <span class="kt">g:</span><span class="err">0</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="err">0</span><span class="o">)</span>
+        <span class="k">case</span> <span class="s">"green"</span><span class="k">:</span>
+            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">0</span><span class="o">,</span> <span class="kt">g:</span><span class="err">255</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span><span class="err">0</span><span class="o">)</span>
+        <span class="o">.....</span>
+        <span class="n">default</span><span class="k">:</span>
+            <span class="kt">return</span> <span class="kt">Color</span><span class="o">(</span><span class="kt">r:</span><span class="err">0</span><span class="o">,</span> <span class="kt">g:</span><span class="err">0</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span><span class="err">0</span><span class="o">)</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>然后代码里用到 Color 的地方你直接写个 “red” 啊 “pink” 骚粉啊。都是没有问题的。
+setColor(“red”)</p>
+
+<p>上面都是废话。</p>
+
+<p>隐式类型转换标准： <code class="language-plaintext highlighter-rouge">@conversion func __conversion&lt;T&gt;() -&gt; T { }</code> 可以作为方法写到 struct 里。也可以通过 extension 附加。</p>
+
+<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。</p>
+
+<p>然后就是语言本身中有个细小的问题 微博 onevcat 文章里提到。</p>
+
+<p>nil 是 NilType 的唯一实例（来自Python的同学对这种定义一定不陌生)
+而 Type? 是 Optional<Type> 类型的，是个enum，变种是  Some(T) 和 None.</Type></p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">enum</span> <span class="nc">Optional</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>  <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">None</span>
+    <span class="k">case</span> <span class="nc">Some</span><span class="o">(</span><span class="n">T</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>那同学你有没有想到 ，我们为什么可以给一个 Type? 赋值 nil 呢?</p>
+
+<p>答案就是这里讲到的 隐式类型转换。</p>
+
+<p>In Swift standard library, the unique <code class="language-plaintext highlighter-rouge">nil</code> has a type of <code class="language-plaintext highlighter-rouge">NilType</code> and is the only instance. And <code class="language-plaintext highlighter-rouge">Type?</code> is the
+shortcut to <code class="language-plaintext highlighter-rouge">Option&lt;T&gt;</code>， an enum.</p>
+
+<p>Why we can directly set a <code class="language-plaintext highlighter-rouge">Type?</code> variable to <code class="language-plaintext highlighter-rouge">nil</code>?</p>
+
+<p>The Implicit Types Convertion is the answer. The <code class="language-plaintext highlighter-rouge">NilType</code> implements conversion methed to <code class="language-plaintext highlighter-rouge">Type?</code> and <code class="language-plaintext highlighter-rouge">Type!</code>.</p>
+
+<p>I’ve dump the definitions from lldb. You can find them in:</p>
+
+<p>我导出的一些标准库定义在下面的链接。</p>
+
+<p><a href="https://github.com/andelf/Defines-Swift/blob/master/Swift-misc.swift">My Github Repo</a></p>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/08/swift-implicit-type-cast.html" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

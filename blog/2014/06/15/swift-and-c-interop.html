@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Swift and C Interop(简析Swift和C的交互) | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Swift and C Interop(简析Swift和C的交互)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="声明： 转载注明我或者 SwiftChina . weibo" />
+<meta property="og:description" content="声明： 转载注明我或者 SwiftChina . weibo" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/15/swift-and-c-interop.html" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/15/swift-and-c-interop.html" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-15T00:11:44+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Swift and C Interop(简析Swift和C的交互)" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/15/swift-and-c-interop.html","headline":"Swift and C Interop(简析Swift和C的交互)","dateModified":"2014-06-15T00:11:44+08:00","datePublished":"2014-06-15T00:11:44+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/15/swift-and-c-interop.html"},"description":"声明： 转载注明我或者 SwiftChina . weibo","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Swift and C Interop(简析Swift和C的交互)</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-15T00:11:44+08:00" itemprop="datePublished">Jun 15, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>声明： 转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">@asmname</code> 的两个用法源于我的猜测验证，用到了 Xcode, lldb, nm, llvm ir 等工具或格式。</p>
+
+<p>其中 name mangling 部分源自 WWDC。</p>
+
+<p>相关的分析主要基于我 dump 出的 Swift 标准库声明代码，位于 <a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a>。</p>
+
+<p>目前有两个小部分还未完成。</p>
+
+<p>之前好像简单说过 Swift 和 Objective-C 的交互问题。其实我们也可以用 Swift 调用纯 C 代码或者基于 C 的第三方库。（这里不会也永远不会考虑 C++ 的情况，因为不支持，不过可以用 C 写 wrapper, 这个没有任何问题。）</p>
+
+<p>Swift 官方文档中，以及那本已经被迅速翻译为中文的 ibooks 书中，都提到了 Swift 调用 Objective-C 和 C 是有很好支持的。不过没有细节。</p>
+
+<p><del>这里不会考虑如何用 C 调用 Swift, 暂时，看心情。：）</del> 本内容包括 Swift 调用 C 和相应的 C 调用 Swift，项目混编。</p>
+
+<p>这里主要面向 MacOSX 应用。iOS 或许可以适用。</p>
+
+<p>先复习下区别。</p>
+
+<h2 id="第一部分-预备知识">第一部分 预备知识</h2>
+
+<h3 id="语言区别">语言区别</h3>
+
+<p>说到底就是 C 少了很多东西。但是多了个指针。</p>
+
+<p>对于 C 来说，最头疼的莫过于指针，而 Swift 是一门没有指针的语言。是不是要吐血？相对来说指针不但代表者指针操作传参，还有指针运算等等。</p>
+
+<h2 id="第二部分-调用-c">第二部分 调用 C</h2>
+
+<p>这里主要讨论函数的调用。对于结构、枚举、类的兼容性暂时没尝试。</p>
+
+<h3 id="c-标准库">C 标准库</h3>
+
+<p>好消息是，对于标准库中的 C 函数，根本不需要考虑太多导入头文件神马的。比如 <code class="language-plaintext highlighter-rouge">strlen</code>、<code class="language-plaintext highlighter-rouge">putchar</code>、<code class="language-plaintext highlighter-rouge">vprintf</code>。当然 <code class="language-plaintext highlighter-rouge">vprintf</code> 需要多说几句，后面说。</p>
+
+<p>请直接 <code class="language-plaintext highlighter-rouge">import Darwin</code> 模块。</p>
+
+<p>这些标准库函数表示为 <code class="language-plaintext highlighter-rouge">Darwin.C.HEADER.name</code>。</p>
+
+<p>实际上由于 Swift 模块结构是平坦的，他们均位于 <code class="language-plaintext highlighter-rouge">Darwin</code> 中，所以基本上是直接用的。</p>
+
+<p>然后 <code class="language-plaintext highlighter-rouge">CoreFoundation</code> 用到了 <code class="language-plaintext highlighter-rouge">Darwin</code> ( @exported 导入，所以相当于这些名字也在 <code class="language-plaintext highlighter-rouge">CoreFoundation</code> 中)。</p>
+
+<p>然后 <code class="language-plaintext highlighter-rouge">Foundation</code> 用到了 <code class="language-plaintext highlighter-rouge">CoreFoundation</code> （也是 @exported 导入。）</p>
+
+<p>所以其实你导入 <code class="language-plaintext highlighter-rouge">Foundation</code> 的时候，这些 C 函数都是直接可用的。比如 <code class="language-plaintext highlighter-rouge">putchar</code> 一类。</p>
+
+<p>多说一句，<code class="language-plaintext highlighter-rouge">Cocoa</code> 当然也包含 <code class="language-plaintext highlighter-rouge">Foundation</code>。</p>
+
+<h3 id="c-函数">C 函数</h3>
+
+<p>好吧假设你有个牛逼到顶天的算法是 C 写的，不对，假设是别人写的，牛逼到你只能凑合用却看不懂然后自己也写不出没空迁移的地步。</p>
+
+<p>我们直接创建一个 Swift 项目，然后 New File，添加一个 <code class="language-plaintext highlighter-rouge">.c</code> 文件。</p>
+
+<p>这时候 Xcode 会弹出对话框询问是否配置 Bridge Header，确认就可以了。也可以手动添加 Bridge Header，位置在项目的 Build Settings 中的 Swift Compiler - Code Generation 子项里。指向你的 Bridge Header 文件名就可以了。</p>
+
+<p>一般这个文件是 <code class="language-plaintext highlighter-rouge">ProjectName-Bridging-Header.h</code>。情况基本和与 Objective-C 混编没区别。</p>
+
+<p>剩下的工作就很简单了。在 <code class="language-plaintext highlighter-rouge">.c</code> 文件填上传说中的牛逼算法。在 <code class="language-plaintext highlighter-rouge">ProjectName-Bridging-Header.h</code> 中加上该函数原型或者引入相关的头文件。</p>
+
+<p>在 Swift 中调用的名字和 C 名字一样就可以了，比如你定义了一个 <code class="language-plaintext highlighter-rouge">int mycsort()</code> 那么在 Swift 中就是 <code class="language-plaintext highlighter-rouge">func mycsort() -&gt; CInt</code>。</p>
+
+<p>这时候问题来了。一个漂亮的问题。</p>
+
+<p>我的 C 函数名字和 Swift 标准库冲突怎么办？比如我定义了一个函数就叫 <code class="language-plaintext highlighter-rouge">println</code>，我们知道 Swift 里也有个 <code class="language-plaintext highlighter-rouge">println</code>。</p>
+
+<p>这样，如果直接调用会提示 <code class="language-plaintext highlighter-rouge">Ambiguous use of 'println'</code>。没辙了么？</p>
+
+<p>这里有个我发现的 Undocumented Featuer 或者说是 Undocumented Attribute。你转载好歹提下我好吧。（发现方法是通过 Xcode 查看定义，然后通过 nm 命令发现符号, 对照 llvm ir 确认的。)</p>
+
+<p>那就是 <code class="language-plaintext highlighter-rouge">@asmname("func_name_in_c")</code>。用于函数声明前。使用方法：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">println</span><span class="p">()</span> <span class="p">{</span> <span class="p">....</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@asmname("println") func c_println() -&gt; CInt // 声明，不需要 {} 函数体
+c_println() // 调用
+</code></pre></div></div>
+
+<p>也就是 C 中的同名函数，我们可以给赋予一个别名，然后正常调用。这么一看就基本没有问题了。至于类型问题，待会说，详细说。</p>
+
+<h3 id="c-framework">C Framework</h3>
+
+<p>很多时候我们拿到的是第三方库，格式大概是个 Framework。比如 <code class="language-plaintext highlighter-rouge">SDL2.framework</code>。举这个例子是因为我想对来说比较熟悉 SDL2。</p>
+
+<p>直接用 Finder 找到这个 <code class="language-plaintext highlighter-rouge">.framework</code> 文件，拖动到当前项目的文件列表里，这样它将作为一个可以展开的文件夹样式存在于我们的项目中。</p>
+
+<p>在 <code class="language-plaintext highlighter-rouge">ProjectName-Bridging-Header.h</code> 中引入其中需要的 <code class="language-plaintext highlighter-rouge">.h</code>。</p>
+
+<p>比如我们引入 <code class="language-plaintext highlighter-rouge">SDL2.framework</code>，那么我们就需要写上 <code class="language-plaintext highlighter-rouge">#import &lt;SDL2/SDL.h&gt;</code>。</p>
+
+<p>然后在 Swift 文件里正常调用就好了。</p>
+
+<p>所以其实说到底核心就是那个 <code class="language-plaintext highlighter-rouge">ProjectName-Bridging-Header.h</code>，因为它是作为参数传递给 Swift 编译器的，所以 Swit 文件里可以从它找到定义的符号。</p>
+
+<p>但是，这个桥接头文件的一切都是隐式的，类型自动对应，所以很多时候需要我们在 Swift 里调用并封装。或者使用 <code class="language-plaintext highlighter-rouge">@asmname(...)</code> 避免名字冲突。</p>
+
+<h2 id="第三部分-类型转换">第三部分 类型转换</h2>
+
+<p>前面说到了 C 中有指针，而 Swift 中没有，同时基本类型还有很多不同。所以混编难免需要在两种语言的不同类型之间进行转换。</p>
+
+<p>牢记一个万能函数 <code class="language-plaintext highlighter-rouge">reinterpretCast&lt;T, U&gt;(T) -&gt; U</code>，只要 T, U sizeof 运算相等就可以直接转换。这个在之前的标准库函数里有提到。调用 C 代码的利器！</p>
+
+<h3 id="基本类型对应">基本类型对应</h3>
+
+<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。简言之，不在对应为 C 别名类型，而是直接对应到 Siwft 类型。而指针类型简化为 <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;T&gt;</code> 和 <code class="language-plaintext highlighter-rouge">ConstUnsafePointer&lt;T&gt;</code> 两种， <code class="language-plaintext highlighter-rouge">COpaquePointer</code> 依然存在。另新增了 <code class="language-plaintext highlighter-rouge">CFunctionPointer&lt;T&gt;</code>。</p>
+
+<ul>
+  <li>int =&gt; CInt</li>
+  <li>char =&gt; CChar / CSignedChar</li>
+  <li>char* =&gt; CString</li>
+  <li>unsigned long = &gt; CUnsignedLong</li>
+  <li>wchar_t =&gt; CWideChar</li>
+  <li>double =&gt; CDouble</li>
+  <li>T* =&gt; CMutablePointer<T></T></li>
+  <li>void* =&gt; CMutableVoidPointer</li>
+  <li>const T* =&gt; CConstPointer<T></T></li>
+  <li>const void* =&gt; CConstVoidPointer</li>
+  <li>…</li>
+</ul>
+
+<p>继续这个列表，你肯定会想这么多数值类型，怎么搞。其实大都是被 <code class="language-plaintext highlighter-rouge">typealias</code> 定义到 <code class="language-plaintext highlighter-rouge">UInt8</code>，<code class="language-plaintext highlighter-rouge">Double</code> 这些的。放心。C 中数值类型全部被明确地用别名定义到带 size 的 Swift 数值类型上。完全是一样用的。</p>
+
+<p>其实真正的 Pointer 类型只是 <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;T&gt;</code>，大小与 C 保证一致，而对于这里不同类型的 Pointer，其实都是 <code class="language-plaintext highlighter-rouge">UnsafePointer</code>
+到它们的隐式类型转换。<del>还有个指针相关类型是 <code class="language-plaintext highlighter-rouge">COpaquePointer</code>，不过没试验怎么用</del>。</p>
+
+<p>UPDATE: 我们在调用的时候，更多地用到 <code class="language-plaintext highlighter-rouge">COpaquePointer</code>，我将再坑一篇介绍它。</p>
+
+<p>同时 <code class="language-plaintext highlighter-rouge">NilType</code>，也就是 <code class="language-plaintext highlighter-rouge">nil</code> 有到这些指针的隐式类型转换。所以可以当做任何一种指针的 <code class="language-plaintext highlighter-rouge">NULL</code> 用。</p>
+
+<p>还有个需要提到的类型是 CString, 他的内存 layout 等于 <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;UInt8&gt;</code>，下面说。</p>
+
+<h3 id="cstring">CString</h3>
+
+<p>用于表示 <code class="language-plaintext highlighter-rouge">char *</code>，<code class="language-plaintext highlighter-rouge">\0</code> 结尾的 c 字符串，实际上似乎还看到了判断是否 ASCII 的选项，但是没试出来用法。</p>
+
+<p>实现了 <code class="language-plaintext highlighter-rouge">StringLiteralConvertible</code> 和 <code class="language-plaintext highlighter-rouge">LogicValue</code>。可以从字符串常量直接赋值获得 <code class="language-plaintext highlighter-rouge">CString</code>。<code class="language-plaintext highlighter-rouge">LogicValue</code> 也就是是 <code class="language-plaintext highlighter-rouge">if a_c_str {}</code>，实际是用于判断是否为 <code class="language-plaintext highlighter-rouge">NULL</code>，可用，但是不稳定，老 crash。</p>
+
+<p>运算符支持 <code class="language-plaintext highlighter-rouge">==</code>，判断两字符串是否相当，猜测实际是 <code class="language-plaintext highlighter-rouge">strcmp</code> 实现，对比 NULL 会 crash。Orz。</p>
+
+<p>CString 和 String 的转换通过一个 extension 实现，也是很方便。</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
+  <span class="n">static</span> <span class="n">func</span> <span class="nf">fromCString</span><span class="o">(</span><span class="n">cs</span><span class="k">:</span> <span class="kt">CString</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+  <span class="n">static</span> <span class="n">func</span> <span class="nf">fromCString</span><span class="o">(</span><span class="n">up</span><span class="k">:</span> <span class="kt">UnsafePointer&lt;CChar&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span>
+<span class="o">}</span>
+<span class="c1">// 还有两个方便的工具方法。 Rust 背景的同学一定仰天长啸。太相似了。</span>
+<span class="n">extension</span> <span class="nc">String</span> <span class="o">{</span>
+  <span class="n">func</span> <span class="n">withCString</span><span class="o">&lt;</span><span class="nc">Result</span><span class="o">&gt;(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">CString</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">Result</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Result</span>
+  <span class="n">func</span> <span class="n">withCString</span><span class="o">&lt;</span><span class="nc">Result</span><span class="o">&gt;(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">UnsafePointer&lt;CChar&gt;</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">Result</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Result</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>在我们的 Bridging Header 头文件中 <code class="language-plaintext highlighter-rouge">char *</code> 的类型会对应为 <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;CChar&gt;</code>，而实际上 <code class="language-plaintext highlighter-rouge">CString</code> 更适合。所以在 Swift 代码中，往往我们要再次申明下这个函数。或者用一个函数封装下，转换成我们需要的类型。</p>
+
+<p>例如，假设在 Bridging Header 中我们声明了 <code class="language-plaintext highlighter-rouge">char * foo();</code>，那么，在 Swift 代码中我们可以用上面提到的方法：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@asmname("foo") func c_foo() -&gt; CString
+// 注意这里没有 {}，只是声明
+let ret = c_foo()
+</code></pre></div></div>
+
+<p>当然也可以直接调用原始函数然后类型转换：</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">let</span> <span class="n">raw</span> <span class="k">=</span> <span class="nf">foo</span><span class="o">()</span> <span class="c1">// UnsafePointer&lt;Int8&gt; &lt;=&gt; UnsafePointer&lt;CChar&gt;</span>
+<span class="n">let</span> <span class="n">ret</span> <span class="k">=</span> <span class="nv">String</span><span class="o">.</span><span class="py">fromCString</span><span class="o">(</span><span class="n">ret</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>如果这里要转成 CString 就略复杂了，因为 CString 构造函数接受的参数是 <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;UInt8&gt;</code>， 而 <code class="language-plaintext highlighter-rouge">CChar</code> 是 <code class="language-plaintext highlighter-rouge">Int8</code> 的别名，所以还牵扯到 Genrics 类型转换，不够方便。</p>
+
+<p>如果非要作为 CString 处理，可以用 <code class="language-plaintext highlighter-rouge">reinterpretCast()</code>，直接转换。但是请一定要知道自己在转换什么，确保类型的 sizeof 相同，确保转换本身有意义。</p>
+
+<p>例如获得环境变量字符串：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let key = "PATH"
+// 这里相当于把 UnsafePointer&lt;CChar&gt; 转为了 UnsafePointer&lt;UInt8&gt; 然后到 CString
+let path_str: CString = reinterpretCast(key.withCString(getenv))
+</code></pre></div></div>
+
+<h3 id="unmanaged">Unmanaged</h3>
+
+<p>这个先挖坑，随后填上。</p>
+
+<h3 id="valist">VaList</h3>
+
+<p>这个也是坑，随后填上。</p>
+
+<h2 id="第三部分-c-调用-swift">第三部分 C 调用 Swift</h2>
+
+<p>如果项目里加入了 C 文件，那么它可以调用我们的 Swift 函数么？答案是可以的，而且令人吃惊地透明。这也许是因为 Apple 所宣传的，Small Runtime 概念吧。极小的语言运行时。</p>
+
+<p>和 Objective-C 混编类似，配置好 Bridging Header 的项目，在 .c .h .m 文件中都可以使用一个叫做 <code class="language-plaintext highlighter-rouge">ProjectName-Swift.h</code> 的头文件，其中包含 Swift 代码导出的函数等。</p>
+
+<p>参考之前的 Objective-C 和 C 交互我们可以知道，说到底交互就是链接过程，只要链接的时候能找到符号就可以。</p>
+
+<p>不过不能高兴太早，Swift 是带类、枚举、协议、多态、泛型等的高级语言，符号处理明显要比 C 中的复杂的多，现代语言一般靠 name mangle 来解决这个问题。也就是说一个 Swift 函数，在编译到 .o 的时候，名字就不是原来那么简单了。比如 <code class="language-plaintext highlighter-rouge">__TFV5hello4Rectg9subscriptFOS_9DirectionSi</code> 这样的名字。</p>
+
+<p>Xcode 自带了个工具， 可以查看这些 mangled name 到底是什么东西：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>xcrun swift-demangle __TFV5hello4Rectg9subscriptFOS_9DirectionSi
+_TFV5hello4Rectg9subscriptFOS_9DirectionSi ---&gt; hello.Rect.subscript.getter (hello.Direction) -&gt; Swift.Int
+</code></pre></div></div>
+
+<p>当我们从 C 调用的时候，应该规避这样的名字。还记得前面的 <code class="language-plaintext highlighter-rouge">@asmname</code> 么？没错，它可以用于指定 Swift 函数的符号名，我猜测应该有指定 mangled name 的作用，但是不是特别确定。</p>
+
+<p>这里随便指定个例子先。</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@asmname</span><span class="o">(</span><span class="s">"say_hello"</span><span class="o">)</span> <span class="n">func</span> <span class="nf">say_hello</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Double</span> <span class="o">{</span>
+    <span class="nf">println</span><span class="o">(</span><span class="s">"This is say_hello() in swift"</span><span class="o">)</span>
+    <span class="k">return</span> <span class="mf">3.14</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>然后在 .c 文件中：</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">#</span><span class="n">include</span> <span class="o">&lt;</span><span class="nc">ProjectName</span><span class="o">-</span><span class="nv">Swift</span><span class="o">.</span><span class="py">h</span><span class="o">&gt;</span>
+
+<span class="n">extern</span> <span class="n">double</span> <span class="nf">say_hello</span><span class="o">();</span>
+
+<span class="n">int</span> <span class="nf">some_func</span><span class="o">()</span> <span class="o">{</span>
+  <span class="nf">say_hello</span><span class="o">();</span> <span class="c1">// or capture its value and process it</span>
+  <span class="k">return</span> <span class="mi">0</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><del>当然这里的 extern 一行是可选的，因为实际上声明会存在于 ProjectName-Swift.h 中，只是为了避免首次编译警告而已（第二次以后的编译，其实这个 Header 已经被缓存起来了，这个牵扯到 Xcode 的编译过程）。</del> 错了。</p>
+
+<p>对于函数而言 extern 必须手动加上，对于 class  、 protocol ，会在生成的头文件里。</p>
+
+<p>按照这个思路，其实很容易实现 Swift 调用 C 中调用了 Swift 函数的函数。这意味着，可以通过简单的方法封装支持向 C 传递 Swift block 作为回调函数。难度中上，对于有过类似扩展编写经验的人来说很简单。</p>
+
+<h2 id="第四部分-编译过程">第四部分 编译过程</h2>
+
+<p>其实调用基本就这么多， Objective-C 那篇文章中说的编译过程同样有效。我 C-c C-v 下：</p>
+
+<ul>
+  <li>编译所有 <code class="language-plaintext highlighter-rouge">X.swift</code> 文件到 <code class="language-plaintext highlighter-rouge">X.o</code> (with <code class="language-plaintext highlighter-rouge">-emit-objc-header</code>, <code class="language-plaintext highlighter-rouge">-import-objc-header</code>) (其中包含 <code class="language-plaintext highlighter-rouge">.swiftmodule</code> 子过程)
+    <ul>
+      <li>由于选项里有 <code class="language-plaintext highlighter-rouge">-emit-objc-header</code>，所以之后的 C 文件可以直接 import 对应的 <code class="language-plaintext highlighter-rouge">ProjectName-Swift.h</code></li>
+    </ul>
+  </li>
+  <li>编译 <code class="language-plaintext highlighter-rouge">X.c</code> 到 <code class="language-plaintext highlighter-rouge">X.o</code></li>
+  <li>链接所有 <code class="language-plaintext highlighter-rouge">.o</code> 生成可执行文件</li>
+</ul>
+
+<p>仔细理解上面的简简单单四行编译过程说明，你就明白为什么 .swfit 和 .c 可以互相调用了。其中两个 Header 文件起到了媒介的作用，一个将 .c/.m 文件中的定义暴露给 Swift，另一个将 .swift 中的定义暴露给 .c/.m 。</p>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/15/swift-and-c-interop.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/15/swift-and-c-interop.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/15/swift-and-c-interop.html" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/15/swift-and-c-interop.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/15/swift-and-c-interop.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

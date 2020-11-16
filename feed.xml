@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2020-11-16T15:41:46+08:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Welcome to Jekyll!</title><link href="https://andelf.github.io/jekyll/update/2020/11/16/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2020-11-16T14:54:24+08:00</published><updated>2020-11-16T14:54:24+08:00</updated><id>https://andelf.github.io/jekyll/update/2020/11/16/welcome-to-jekyll</id><content type="html" xml:base="https://andelf.github.io/jekyll/update/2020/11/16/welcome-to-jekyll.html">&lt;p&gt;是的我升级了.&lt;/p&gt;</content><author><name></name></author><category term="jekyll" /><category term="update" /><summary type="html">是的我升级了.</summary></entry><entry><title type="html">Fix Ansible Tower: stdout capture is missing</title><link href="https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing.html" rel="alternate" type="text/html" title="Fix Ansible Tower: stdout capture is missing" /><published>2016-12-07T16:33:20+08:00</published><updated>2016-12-07T16:33:20+08:00</updated><id>https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing</id><content type="html" xml:base="https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing.html">&lt;p&gt;Ansible Tower will report &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;stdout capture is missing&lt;/code&gt; when restoring from previous backup.&lt;/p&gt;
+
+&lt;p&gt;Or run from docker?&lt;/p&gt;
+
+&lt;p&gt;(得，不装 B 英语了)&lt;/p&gt;
+
+&lt;p&gt;长话短说，之前要把 Ansible Tower 拆到 Docker 里，结果发现总不能正常执行。任务界面会提示：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;stdout capture is missing
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;检查发现是 celery 进程出错，用 root 启动 celery 倒是正常的。&lt;/p&gt;
+
+&lt;p&gt;最后发现是 docker 中的 supervisord 启动时缺乏部分环境变量，解决方法：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;change supervisor/conf.d/tower.conf
+ADD:
+[program:awx-celeryd]
+......
+environment=HOME=&quot;/var/lib/awx&quot;,USER=&quot;awx&quot;
+......
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;是的，为找到原因，逆向了整个 Ansible Tower。&lt;/p&gt;
+
+&lt;p&gt;Ref: &lt;a href=&quot;https://github.com/ansible/ansible/issues/13904&quot;&gt;GitHub Issue&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><category term="blog" /><category term="linux" /><category term="ansible" /><summary type="html">Ansible Tower will report stdout capture is missing when restoring from previous backup.</summary></entry><entry><title type="html">在 CircleCI 上使用 Rust(CircleCI meets Rust)</title><link href="https://andelf.github.io/blog/2016/11/18/circleci-meets-rust.html" rel="alternate" type="text/html" title="在 CircleCI 上使用 Rust(CircleCI meets Rust)" /><published>2016-11-18T13:26:15+08:00</published><updated>2016-11-18T13:26:15+08:00</updated><id>https://andelf.github.io/blog/2016/11/18/circleci-meets-rust</id><content type="html" xml:base="https://andelf.github.io/blog/2016/11/18/circleci-meets-rust.html">&lt;p&gt;最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长，
+影响开发效率。&lt;/p&gt;
+
+&lt;p&gt;了解到 CircleCI 是不错的替代品，所以打算迁移 Rust 项目过去。当然说起来， CircleCI 的野心更大，是要来替代 jenkins 的。&lt;/p&gt;
+
+&lt;p&gt;目前官方支持语言其实都比较落后，包括 go 也只是 1.6 版本，但似乎不是问题，而且据介绍， CircleCI 2.0 支持自定义 build image，支持语言的版本当然不在话下。&lt;/p&gt;
+
+&lt;p&gt;每天面对各种 IaaS, PaaS，免不了写配置是，这也是 yaml 程序员的日常。&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;dependencies&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;pre&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;curl https://sh.rustup.rs -sSf | sh&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;override&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;cargo build&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;cargo test&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;如上。然而不 work。报错：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cargo build
+    Updating registry `https://github.com/rust-lang/crates.io-index`
+warning: spurious network error (2 tries remaining): [12/-12] Malformed URL 'ssh://git@github.com:/rust-lang/crates.io-index'
+warning: spurious network error (1 tries remaining): [12/-12] Malformed URL 'ssh://git@github.com:/rust-lang/crates.io-index'
+error: failed to fetch `https://github.com/rust-lang/crates.io-index`
+
+To learn more, run the command again with --verbose.
+
+cargo build returned exit code 101
+
+Action failed: cargo build
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;神了。原来， CircleCI 自作聪明在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.gitconfig&lt;/code&gt; 里修改了映射配置，强制用它自己的 ssh key 去访问 github，rewrite 了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https://github.com&lt;/code&gt; 的所有仓库。
+这恰恰和 cargo 的 registry 机制冲突。所以报错。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;CircleCI has rewrite &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https:://github.com&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh://git@github.com:&lt;/code&gt; in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.gitconfig&lt;/code&gt;. And this made cargo fail with above error message.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;找到了原因，就可以搞了：&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;machine&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;pre&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;sed -i 's/github/git-non-exist-hub/g' ~/.gitconfig&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;dependencies&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;pre&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;curl https://sh.rustup.rs -sSf | sh&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;override&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;cargo build&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;cargo test&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;嗯, Ugly but works.&lt;/p&gt;</content><author><name></name></author><category term="blog" /><category term="rust" /><category term="ci" /><summary type="html">最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长， 影响开发效率。</summary></entry><entry><title type="html">折腾 Raspberry Pi + HomeKit 手记</title><link href="https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi.html" rel="alternate" type="text/html" title="折腾 Raspberry Pi + HomeKit 手记" /><published>2016-09-16T20:34:43+08:00</published><updated>2016-09-16T20:34:43+08:00</updated><id>https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi</id><content type="html" xml:base="https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi.html">&lt;p&gt;9月14日凌晨苹果终于推送了 iOS 10 的更新。从之前发布会来看，并没有多少亮点，除了几天的新鲜感之外，
+尤其是对于目前还在用上两代机型的我来说，2333。&lt;/p&gt;
+
+&lt;p&gt;两年前苹果发布 Swift 语言的同时，新增了 HomeKit，当时用工具 dump 过最老版本的 Swift 声明。传送门：&lt;a href=&quot;https://github.com/andelf/Defines-Swift/blob/6a8cda2e12bf6e5a23979a1ad121e70a0eeef6dd/HomeKit.swift&quot;&gt;HomeKit.swift&lt;/a&gt;。目前所有官方相关的资料位于 &lt;a href=&quot;http://www.apple.com/ios/home/&quot;&gt;HomeKit - Apple&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;好消息是期待很久的 HomeKit 应用终于上线，屏幕上多了“家庭(Home)”应用，控制中心（从屏幕下方滑动）、
+Siri 均对此有支持。
+iOS 10 终于强化了推出已有两年智能家居平台，提供了官方 App，有不少硬件厂商支持。&lt;/p&gt;
+
+&lt;p&gt;简单说，HomeKit 就是苹果官方的智能家居平台解决方案，包括移动设备 SDK，智能家居硬件通信协议(HAP: HomeKit Accessory Protocol)、以及 MFi(Made for iPhone/iPod/iPad) 认证等等。通过 WiFi 或蓝牙连接智能家居设备（或 bridge 设备），也可以利用 Apple TV(4代) 或闲家中的置 iPad 实现设备的远程控制（HAP over iCloud）。&lt;/p&gt;
+
+&lt;p&gt;Home App 的维度划分：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Home: 家，和地理位置绑定，支持共享给好友控制。&lt;/li&gt;
+  &lt;li&gt;Room: 房间，用于对设备进行分组。&lt;/li&gt;
+  &lt;li&gt;Scene: 场景，一组对设备的配置，例如“起床”，那么可能的配置是打开卧室灯、窗帘、放段舒缓music等等。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;众所周知苹果是卖数据线等硬件的公司（嗯，假设你数据线也坏过不少），HAP 协议部分是需要加入 MFi Program 才能获取文档，而且 MFi Program 无法以个人开发者身份加入。&lt;/p&gt;
+
+&lt;p&gt;好在有好心人逆向了 HAP 的服务端协议（对于智能硬件来说，硬件是服务端，手机App是客户端）。&lt;/p&gt;
+
+&lt;p&gt;对于折腾党来说，机会来了，自己动手改造家居！本文不涉及 App 开发，只涉及如何自制支持 HomeKit 的设备。&lt;/p&gt;
+
+&lt;h2 id=&quot;准备工作&quot;&gt;准备工作&lt;/h2&gt;
+
+&lt;p&gt;设备列表：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;iPhone 6P (iOS 10)&lt;/li&gt;
+  &lt;li&gt;Raspberry Pi 3 (Debian jessie)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;考察了两个比较靠谱的 HAP 实现：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;https://github.com/KhaosT/HAP-NodeJS&lt;/li&gt;
+  &lt;li&gt;https://github.com/brutella/hc (golang)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;最终选择使用 golang 的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;brutella/hc&lt;/code&gt;，准备环境。&lt;/p&gt;
+
+&lt;p&gt;需要保证树莓派和手机位于统一子网，因为 HAP 底层是基于 Apple mDNS(RFC 6762)。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;brutella/hc&lt;/code&gt; 要求 golang &amp;gt;= 1.4，而 Debian jessie 版本较低，
+需要配置 jessie-backports 源：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;deb ftp://ftp.cn.debian.org/debian jessie-backports main contrib non-free
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;同时导入源的 GPG Key。方法参考 &lt;a href=&quot;http://raspberrypi.stackexchange.com/questions/12258/where-is-the-archive-key-for-backports-debian-org&quot;&gt;这里&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;安装好 golang 1.6.2，建立开发目录。&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# 似乎直接 install golang 会出点小问题，所以折衷用了如下方法:&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; jessie-backports golang-1.6 golang-1.6-go golang-1.6-src golang-1.6-doc
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt-get &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; jessie-backports golang
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;示例&quot;&gt;示例&lt;/h2&gt;
+
+&lt;p&gt;跑通官方示例代码：&lt;/p&gt;
+
+&lt;div class=&quot;language-go highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+	&lt;span class=&quot;s&quot;&gt;&quot;github.com/brutella/hc&quot;&lt;/span&gt;
+	&lt;span class=&quot;s&quot;&gt;&quot;github.com/brutella/hc/accessory&quot;&lt;/span&gt;
+	&lt;span class=&quot;s&quot;&gt;&quot;log&quot;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accessory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;Name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;         &lt;span class=&quot;s&quot;&gt;&quot;Lamp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;SerialNumber&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;051AC-23AAM1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;Manufacturer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Apple&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;Model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;        &lt;span class=&quot;s&quot;&gt;&quot;AB&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;acc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accessory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NewSwitch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;acc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Switch&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;On&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OnValueRemoteUpdate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Client changed switch to on&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Client changed switch to off&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;config&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;00102003&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NewIPTransport&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;acc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Accessory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;nil&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Fatal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;hc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OnTermination&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Stop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;编译执行.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ AppleHome&amp;gt; # current dir
+
+$ AppleHome&amp;gt; go get
+...
+
+$ AppleHome&amp;gt; go build
+...
+
+$ AppleHome&amp;gt; ./AppleHome
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;随后打开手机的 Home App，添加设备，选择 Lamp，输入 PIN 00102003，完成配对，即可使用。&lt;/p&gt;
+
+&lt;h2 id=&quot;自定义设备&quot;&gt;自定义设备&lt;/h2&gt;
+
+&lt;p&gt;树莓派外接小音箱一只，用来放电台，尝试用 HomeKit 控制树莓派的禁音。命令：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;amixer set PCM on
+amixer set PCM off
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;代码：&lt;/p&gt;
+
+&lt;div class=&quot;language-go highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&quot;os/exec&quot;&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&quot;github.com/brutella/hc&quot;&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&quot;github.com/brutella/hc/accessory&quot;&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&quot;log&quot;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;info&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accessory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;Name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;            &lt;span class=&quot;s&quot;&gt;&quot;Radio&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;SerialNumber&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;051AC-23AAM2&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;Manufacturer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Apple&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;Model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;          &lt;span class=&quot;s&quot;&gt;&quot;RPI3&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;acc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accessory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NewSwitch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;acc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Switch&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;On&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OnValueRemoteUpdate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Toggled PCM!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                        &lt;span class=&quot;n&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;amixer&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;set&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;PCM&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;on&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+                        &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Client changed switch to on&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                        &lt;span class=&quot;n&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;amixer&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;set&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;PCM&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;off&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+                        &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Client changed switch to off&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;00102004&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NewIPTransport&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;acc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Accessory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;nil&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Fatal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;hc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OnTermination&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Stop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;其他&quot;&gt;其他&lt;/h2&gt;
+
+&lt;p&gt;HAP 将智能家居分为以下维度：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Accessory: 单个设备，例如开关，温度计，调节器&lt;/li&gt;
+  &lt;li&gt;Service: 一组值，合起来提供服务，例如中央空调（调节温度，风速等等）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;TODO&lt;/p&gt;</content><author><name></name></author><category term="blog" /><category term="ios" /><summary type="html">9月14日凌晨苹果终于推送了 iOS 10 的更新。从之前发布会来看，并没有多少亮点，除了几天的新鲜感之外， 尤其是对于目前还在用上两代机型的我来说，2333。</summary></entry><entry><title type="html">Swift 3.0 尝试——从入门到再学一门(A Glimpse of Swift 3.0)</title><link href="https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0.html" rel="alternate" type="text/html" title="Swift 3.0 尝试——从入门到再学一门(A Glimpse of Swift 3.0)" /><published>2016-04-28T10:06:53+08:00</published><updated>2016-04-28T10:06:53+08:00</updated><id>https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0</id><content type="html" xml:base="https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0.html">&lt;p&gt;安装工具&lt;/p&gt;
+
+&lt;p&gt;https://github.com/kylef/swiftenv&lt;/p&gt;
+
+&lt;h2 id=&quot;swift-30-新变化&quot;&gt;Swift 3.0 新变化&lt;/h2&gt;
+
+&lt;p&gt;以下内容来自 Swift 语言提案&lt;sup id=&quot;fnref:1&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;。&lt;/p&gt;
+
+&lt;p&gt;Swift 3.0 发布计划&lt;/p&gt;
+
+&lt;h3 id=&quot;swift-package-system&quot;&gt;Swift Package System&lt;/h3&gt;
+
+&lt;p&gt;https://github.com/donald-pinckney/swift-packages&lt;/p&gt;
+
+&lt;h2 id=&quot;ast-结构&quot;&gt;AST 结构&lt;/h2&gt;
+
+&lt;p&gt;代码位于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;include/swift/AST&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lib/AST&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;ModuleDecl
+模块（单个库或是可执行文件）。编译的最小单元，由多个文件组成。&lt;/p&gt;
+
+&lt;p&gt;FileUnit（抽象类）
+文件作用域，是代码组织的最小单元。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;DerivedFileUnit: A container for a module-level definition derived as part of an implicit protocol conformance.&lt;/li&gt;
+  &lt;li&gt;SourceFile: A file containing Swift source code. .swift 或 .sil 也可以是虚拟 REPL
+    &lt;ul&gt;
+      &lt;li&gt;Imports: Vec&amp;lt;(ImportedModule, ImportOptions)&amp;gt;&lt;/li&gt;
+      &lt;li&gt;Identifier&lt;/li&gt;
+      &lt;li&gt;Decls: Vec&lt;Decl&gt;&lt;/Decl&gt;&lt;/li&gt;
+      &lt;li&gt;LocalTypeDecl: Vec&lt;TypeDecl&gt;&lt;/TypeDecl&gt;&lt;/li&gt;
+      &lt;li&gt;ObjCMethods: Map&amp;lt;ObjCSelector, AbstractFunctionDecl&amp;gt;&lt;/li&gt;
+      &lt;li&gt;infix, postfix, prefix operators: OperatorMap&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;BuiltinUnit&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;swift-命令入口&quot;&gt;swift 命令入口&lt;/h2&gt;
+
+&lt;p&gt;入口函数 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tools/driver/driver.cpp&lt;/code&gt;，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; 函数。&lt;/p&gt;
+
+&lt;p&gt;集成多个子工具。同时若 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PATH&lt;/code&gt; 下有名为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swift-foobar&lt;/code&gt; 的可执行文件，则可通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swift foobar&lt;/code&gt; 调用。&lt;/p&gt;
+
+&lt;h3 id=&quot;编译器前端-swift--frontend&quot;&gt;编译器前端 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swift -frontend&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;编译。同时支持打印出各种编译时中间结果。&lt;/p&gt;
+
+&lt;h3 id=&quot;api-notes-功能-swift--apinotes&quot;&gt;API Notes 功能 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swift -apinotes&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;参考信息位于 &lt;a href=&quot;https://github.com/apple/swift/tree/master/apinotes&quot;&gt;https://github.com/apple/swift/tree/master/apinotes&lt;/a&gt; .&lt;/p&gt;
+
+&lt;p&gt;简单说，API Notes 机制就是通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.apinotes&lt;/code&gt; 文件（YAML格式）描述 Objective-C Framework 和对应 Swift API 的关系。最终生成 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.apinotesc&lt;/code&gt; 文件，与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.swiftmodule&lt;/code&gt; 文件一起作为 Swift 的模块。&lt;/p&gt;
+
+&lt;p&gt;主要功能包括且不限于：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SwiftBridge&lt;/code&gt;：设置对应的 Bridge 类型，例如 NSArray 对应与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Swift.Array&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Nullability&lt;/code&gt;/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;NullabilityOfRet&lt;/code&gt;： 类的属性、方法的参数、返回值对应类型是否可以为 null，即对应与 Swift 的 T 还是 T?&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Availability&lt;/code&gt;：方法是否在 Swift 中暴露，并给出 availability message&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SwiftName&lt;/code&gt;：方法 Selector 在 Swift 中的重命名，例如 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;filteredArrayUsingPredicate:&lt;/code&gt; 替换为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;filtered(using:)&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Dump 为YAML文件：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$&amp;gt; swift -apinotes -binary-to-yaml /path/to/lib/swift/macosx/x86_64/Dispatch.apinotesc -o=-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;module-wrap-工具-swift--modulewrap&quot;&gt;Module Wrap 工具 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swift -modulewrap&lt;/code&gt;&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// Wraps .swiftmodule files inside an object file container so they
+// can be passed to the linker directly. Mostly useful for platforms
+// where the debug info typically stays in the executable.
+// (ie. ELF-based platforms).
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;用法：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;swift -modulewrap ObjectiveC.swiftmodule -o objc.o
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;实际发现是在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.o&lt;/code&gt; 里定义了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;___Swift_AST&lt;/code&gt; 符号。&lt;/p&gt;
+
+&lt;h3 id=&quot;repl&quot;&gt;REPL&lt;/h3&gt;
+
+&lt;p&gt;Swift 提供了两个 REPL(Read-Evaluate-Print Loop)，一个是 Swift 本身内置，另一个集成到了 lldb 命令行下。前者只有基本功能，即将废弃，后者功能更强大。&lt;/p&gt;
+
+&lt;p&gt;子命令分别是：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swift -deprecated-integrated-repl&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swift -lldb-repl&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swift -repl&lt;/code&gt; 子命令选择可用的 REPL 进入，一般是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lldb-repl&lt;/code&gt;，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。&lt;/p&gt;
+&lt;div class=&quot;footnotes&quot; role=&quot;doc-endnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot; role=&quot;doc-endnote&quot;&gt;
+      &lt;p&gt;(apple/swift-evolution)[https://github.com/apple/swift-evolution] &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html">安装工具</summary></entry><entry><title type="html">Rust Pattern Match(Rust中的模式匹配)</title><link href="https://andelf.github.io/blog/2016/03/22/rust-pattern-match.html" rel="alternate" type="text/html" title="Rust Pattern Match(Rust中的模式匹配)" /><published>2016-03-22T23:35:19+08:00</published><updated>2016-03-22T23:35:19+08:00</updated><id>https://andelf.github.io/blog/2016/03/22/rust-pattern-match</id><content type="html" xml:base="https://andelf.github.io/blog/2016/03/22/rust-pattern-match.html">&lt;h1 id=&quot;模式匹配&quot;&gt;模式匹配&lt;/h1&gt;
+
+&lt;p&gt;汉语字典中对“模式”的解释是：事物的标准样式。在计算机科学中，它指特定类型的数据（往往是序列或是树形结构）满足某一特定结构或格式。“匹配”本身是指一个判断寻找过程。最早的模式匹配用于文本编辑器中的正则字符串搜索，之后才作为编程语言特性。&lt;/p&gt;
+
+&lt;h2 id=&quot;模式匹配基础&quot;&gt;模式匹配基础&lt;/h2&gt;
+
+&lt;p&gt;模式匹配在计算机科学领域有两层意思。其一，可以特指字符串匹配算法，例如为人熟知的 KMP 字符串匹配算法、命令行工具 grep 等。
+其二，特指在一些语言中作为一种以结构的方式处理数据的工具，此时的匹配过程往往是树形匹配，与此相伴的往往还有一个特性叫 guard（守卫）。&lt;/p&gt;
+
+&lt;p&gt;Rust 中模式匹配随处可见，例如在&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;let&lt;/code&gt;变量绑定语句、&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;match&lt;/code&gt;匹配语句中等。利用好模式匹配这一特性可以使代码更简洁易懂。&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Rust&lt;/code&gt;支持模式匹配中的变量绑定、结构体/元组解构、守卫条件判断、数值范围匹配等特性。&lt;/p&gt;
+
+&lt;h3 id=&quot;原始匹配&quot;&gt;原始匹配&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;match&lt;/code&gt; 语句中可以直接匹配字面常量，下划线&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_&lt;/code&gt;匹配任意情形。&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;one&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;two&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;three&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;mi&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;anything&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;以上代码会打印出&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;one&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;结构匹配&quot;&gt;结构匹配&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;match&lt;/code&gt; 用于匹配一个表达式的值，寻找满足条件的子分支(&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;arm&lt;/code&gt;)并执行。每个子分支包含三部分：一系列模式、可选的守卫条件以及主体代码块。&lt;/p&gt;
+
+&lt;h3 id=&quot;多个模式&quot;&gt;多个模式&lt;/h3&gt;
+
+&lt;p&gt;每个子分支可以是多个模式，通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;|&lt;/code&gt; 符号分割：&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;one or two&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;three&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;mi&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;anything&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;以上代码打印出&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;one or two&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;守卫条件&quot;&gt;守卫条件&lt;/h3&gt;
+
+&lt;p&gt;通过&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;if&lt;/code&gt;引入子分支的守卫条件：&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OptionalInt&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Missing&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;OptionalInt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nn&quot;&gt;OptionalInt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Got an int bigger than five!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nn&quot;&gt;OptionalInt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Got an int!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nn&quot;&gt;OptionalInt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Missing&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;No such luck.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;模式匹配进阶&quot;&gt;模式匹配进阶&lt;/h2&gt;
+
+&lt;p&gt;其实进阶，不如直接从&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;libsyntax&lt;/code&gt;源码看看到底模式匹配是如何实现。&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;syntax::ast::Pat&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;从AST源码中寻找语法要素屋外户两个要点，其一，语法要素是如何表达为对应AST的；其二，对应AST在哪些父AST中出现。&lt;/p&gt;
+
+&lt;p&gt;Rust中使用&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;syntax::ast::Pat&lt;/code&gt;枚举来表示一个模式匹配。&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NodeId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PatKind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Span&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PatKind&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// Represents a wildcard pattern (`_`)&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// 表示通配，下划线&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Wild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;/// A `PatKind::Ident` may either be a new bound variable,&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// or a unit struct/variant pattern, or a const pattern (in the last two cases&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// the third field must be `None`).&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;///&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// In the unit or const pattern case, the parser can't determine&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// which it is. The resolver determines this, and&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// records this pattern's `NodeId` in an auxiliary&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// set (of &quot;PatIdents that refer to unit patterns or constants&quot;).&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Ident&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BindingMode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SpannedIdent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;/// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// The `bool` is `true` in the presence of a `..`.&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Struct&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Spanned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FieldPat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;/// A tuple struct/variant pattern `Variant(x, y, z)`.&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// &quot;None&quot; means a `Variant(..)` pattern where we don't bind the fields to names.&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;TupleStruct&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;/// A path pattern.&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// Such pattern can be resolved to a unit struct/variant or a constant.&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;/// An associated const named using the qualified path `&amp;lt;T&amp;gt;::CONST` or&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// `&amp;lt;T as Trait&amp;gt;::CONST`. Associated consts from inherent impls can be&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// referred to as simply `T::CONST`, in which case they will end up as&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// PatKind::Path, and the resolver will have to sort that out.&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;QPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;QSelf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;/// A tuple pattern `(a, b)`&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// A `box` pattern&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// A reference pattern, e.g. `&amp;amp;mut (a, b)`&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Ref&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mutability&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// A literal&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Lit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Expr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// A range pattern, e.g. `1...2`&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Expr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Expr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// `[a, b, ..i, y, z]` is represented as:&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;///     `PatKind::Vec(box [a, b], Some(i), box [y, z])`&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// A macro pattern; pre-expansion&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Mac&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Mac&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;以上AST定义，即说明，到底什么被认为是一个“模式”。&lt;/p&gt;
+
+&lt;p&gt;以下介绍&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Pat&lt;/code&gt;在哪些AST中出现。&lt;/p&gt;
+
+&lt;h3 id=&quot;全局-item&quot;&gt;全局 Item&lt;/h3&gt;
+
+&lt;p&gt;全局 Item 中，使用模式匹配的均为函数参数。&lt;/p&gt;
+
+&lt;h4 id=&quot;itemkindfn&quot;&gt;ItemKind::Fn&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Fn&lt;/code&gt; 全局函数 -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FnDecl&lt;/code&gt; 函数声明 -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[Arg]&lt;/code&gt; 函数头参数声明。&lt;/p&gt;
+
+&lt;h4 id=&quot;itemkindtrait&quot;&gt;ItemKind::Trait&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Trait&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[TraitItem]&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TraitItemKind::Method&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MethodSig&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FnDecl&lt;/code&gt; 方法声明，同上。&lt;/p&gt;
+
+&lt;h4 id=&quot;itemkindimpl&quot;&gt;ItemKind::Impl&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Impl&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[ImplItem]&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ImplItemKind::Method&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MethodSig&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FnDecl&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;aststmt-语句&quot;&gt;ast::Stmt 语句&lt;/h3&gt;
+
+&lt;h4 id=&quot;stmtkinddecl&quot;&gt;StmtKind::Decl&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Decl&lt;/code&gt; -&amp;gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DeclKind::Local&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;即 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;let&lt;/code&gt; 语句 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;let &amp;lt;pat&amp;gt;:&amp;lt;ty&amp;gt; = &amp;lt;expr&amp;gt;;&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;stmtkindexpr-表达式&quot;&gt;StmtKind::Expr 表达式&lt;/h4&gt;
+
+&lt;p&gt;见下。&lt;/p&gt;
+
+&lt;h3 id=&quot;astexpr&quot;&gt;ast::Expr&lt;/h3&gt;
+
+&lt;p&gt;除&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;match&lt;/code&gt;外，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;if let&lt;/code&gt;、&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;while let&lt;/code&gt;、&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;for&lt;/code&gt;控制语句支持同时进行模式匹配。具体实现是一种&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;desugared&lt;/code&gt;过程，即，去语法糖化。&lt;/p&gt;
+
+&lt;p&gt;同时类似于函数定义，闭包参数也支持模式匹配。&lt;/p&gt;
+
+&lt;h4 id=&quot;if-let&quot;&gt;if let&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IfLet(P&amp;lt;Pat&amp;gt;, P&amp;lt;Expr&amp;gt;, P&amp;lt;Block&amp;gt;, Option&amp;lt;P&amp;lt;Expr&amp;gt;&amp;gt;)&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;if let pat = expr { block } else { expr }&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;This is desugared to a match expression.&lt;/p&gt;
+
+&lt;h4 id=&quot;while-let&quot;&gt;while let&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WhileLet(P&amp;lt;Pat&amp;gt;, P&amp;lt;Expr&amp;gt;, P&amp;lt;Block&amp;gt;, Option&amp;lt;Ident&amp;gt;)&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;'label: while let pat = expr { block }&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;for&quot;&gt;for&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ForLoop(P&amp;lt;Pat&amp;gt;, P&amp;lt;Expr&amp;gt;, P&amp;lt;Block&amp;gt;, Option&amp;lt;Ident&amp;gt;)&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;'label: for pat in expr { block }&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;match&quot;&gt;match&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Match(P&amp;lt;Expr&amp;gt;, Vec&amp;lt;Arm&amp;gt;)&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;match&lt;/code&gt; 语句，在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Arm&lt;/code&gt; 中出现，其中 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Arm&lt;/code&gt; 定义为&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pub struct Arm {
+    pub attrs: Vec&amp;lt;Attribute&amp;gt;,
+    pub pats: Vec&amp;lt;P&amp;lt;Pat&amp;gt;&amp;gt;,
+    pub guard: Option&amp;lt;P&amp;lt;Expr&amp;gt;&amp;gt;,
+    pub body: P&amp;lt;Expr&amp;gt;,
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;闭包&quot;&gt;闭包&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Closure(CaptureBy, P&amp;lt;FnDecl&amp;gt;, P&amp;lt;Block&amp;gt;)&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;闭包，例如 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;move |a, b, c| {a + b + c}&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h2 id=&quot;相关-feature-gate&quot;&gt;相关 feature gate&lt;/h2&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;advanced_slice_patterns&lt;/code&gt; - See the match expressions section for discussion; the exact semantics of slice patterns are subject to change, so some types are still unstable.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slice_patterns&lt;/code&gt; - OK, actually, slice patterns are just scary and completely unstable.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;box_patterns&lt;/code&gt; - Allows box patterns, the exact semantics of which is subject to change.&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考&lt;/h2&gt;
+
+&lt;p&gt;https://doc.rust-lang.org/book/patterns.html&lt;/p&gt;</content><author><name></name></author><category term="blog" /><category term="rust" /><summary type="html">模式匹配</summary></entry><entry><title type="html">广州实时工具App逆向</title><link href="https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus.html" rel="alternate" type="text/html" title="广州实时工具App逆向" /><published>2015-06-18T17:39:06+08:00</published><updated>2015-06-18T17:39:06+08:00</updated><id>https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus</id><content type="html" xml:base="https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus.html">&lt;p&gt;简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/andelf/guangzhou-realtime-bus&quot;&gt;Github: guangzhou-realtime-bus&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;生成 e=3 的 1024 位 RSA 密钥对&lt;/li&gt;
+  &lt;li&gt;公钥串用查表加密(byte 映射)，然后 base64 封装发送给服务器&lt;/li&gt;
+  &lt;li&gt;服务器返回一串用公钥加密过的数据&lt;/li&gt;
+  &lt;li&gt;用本地私钥解密后，该数据包含未知96字节的一段数据和 DES Key&lt;/li&gt;
+  &lt;li&gt;从此通信用 DES 加密&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;base64封装过程：先打包字符串长度，然后是原始字符串（JSON），然后是&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0x10&lt;/code&gt;(md5字符串长度)，
+然后是 md5 校验值。整个二进制字符串用 base64 转码，POST 给服务器。&lt;/p&gt;
+
+&lt;p&gt;具体的登录注册过程还需要进一步抓包分析，不过暂时兴趣不在这里了。&lt;/p&gt;</content><author><name></name></author><category term="blog" /><category term="crack" /><summary type="html">简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。</summary></entry><entry><title type="html">Swift 2.0 的错误处理(Swift 2.0 Error Handling)</title><link href="https://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling.html" rel="alternate" type="text/html" title="Swift 2.0 的错误处理(Swift 2.0 Error Handling)" /><published>2015-06-09T15:27:58+08:00</published><updated>2015-06-09T15:27:58+08:00</updated><id>https://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling</id><content type="html" xml:base="https://andelf.github.io/blog/2015/06/09/swift-2-dot-0-error-handling.html">&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;protocol ErrorType {
+  var _domain: String { get }
+  var _code: Int { get }
+}
+
+@asmname(&quot;swift_bridgeErrorTypeToNSError&quot;) func _bridgeErrorTypeToNSError(e: ErrorType) -&amp;gt; AnyObject
+
+@asmname(&quot;swift_stdlib_getErrorCode&quot;) func _stdlib_getErrorCode&amp;lt;T : ErrorType&amp;gt;(x: UnsafePointer&amp;lt;T&amp;gt;) -&amp;gt; Int
+
+@asmname(&quot;swift_stdlib_getErrorDomainNSString&quot;) func _stdlib_getErrorDomainNSString&amp;lt;T : ErrorType&amp;gt;(x: UnsafePointer&amp;lt;T&amp;gt;) -&amp;gt; AnyObject
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;foundation&quot;&gt;Foundation&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;protocol _ObjectiveCBridgeableErrorType : ErrorType {
+  init?(_bridgedNSError: NSError)
+}
+
+struct NSCocoaError : RawRepresentable, _BridgedNSError, _ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError, Hashable, Equatable {
+  let rawValue: Int
+  init(rawValue: Int)
+  static var _NSErrorDomain: String {
+    get {}
+  }
+  typealias RawValue = Int
+}
+
+
+infix func ==(a: _GenericObjCError, b: _GenericObjCError) -&amp;gt; Bool
+infix func ==(a: _GenericObjCError, b: _GenericObjCError) -&amp;gt; Bool
+func ==&amp;lt;T : __BridgedNSError where T.RawValue : SignedIntegerType&amp;gt;(lhs: T, rhs: T) -&amp;gt; Bool
+
+@available(OSX 10.11, iOS 9.0, *)
+func resolveError(error: NSError?) throws
+
+enum _GenericObjCError : ErrorType {
+  case NilError
+  var hashValue: Int {
+    get {}
+  }
+  var _domain: String {
+    get {}
+  }
+  var _code: Int {
+    get {}
+  }
+}
+
+@asmname(&quot;swift_stdlib_bridgeNSErrorToErrorType&quot;)
+func _stdlib_bridgeNSErrorToErrorType&amp;lt;T : _ObjectiveCBridgeableErrorType&amp;gt;(error: NSError, out: UnsafeMutablePointer&amp;lt;T&amp;gt;) -&amp;gt; Bool
+
+@asmname(&quot;swift_convertNSErrorToErrorType&quot;) func _convertNSErrorToErrorType(error: NSError?) -&amp;gt; ErrorType
+
+@objc enum NSURLError : Int, _BridgedNSError, _ObjectiveCBridgeableErrorType, ErrorType, __BridgedNSError { ... }
+
+
+protocol __BridgedNSError : RawRepresentable {
+  static var _NSErrorDomain: String { get }
+}
+@asmname(&quot;swift_convertErrorTypeToNSError&quot;) func _convertErrorTypeToNSError(error: ErrorType) -&amp;gt; NSError
+func ~=(match: NSCocoaError, error: ErrorType) -&amp;gt; Bool
+protocol _BridgedNSError : __BridgedNSError, _ObjectiveCBridgeableErrorType, Hashable {
+  static var _NSErrorDomain: String { get }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;ErrorType 在 Swift 中表示。&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;extension NSError : ErrorType {
+  @objc dynamic var _domain: String {
+    @objc dynamic get {}
+  }
+  @objc dynamic var _code: Int {
+    @objc dynamic get {}
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html">``` protocol ErrorType { var _domain: String { get } var _code: Int { get } }</summary></entry><entry><title type="html">北京实时公交分析</title><link href="https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus.html" rel="alternate" type="text/html" title="北京实时公交分析" /><published>2015-06-01T13:17:50+08:00</published><updated>2015-06-01T13:17:50+08:00</updated><id>https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus</id><content type="html" xml:base="https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus.html">&lt;p&gt;361 条线路，705条单向线路。 aibang 负责数据服务。&lt;/p&gt;
+
+&lt;p&gt;每辆车，每15秒更新一次 GPS，&lt;/p&gt;
+
+&lt;p&gt;整理成为 Repo &lt;a href=&quot;https://github.com/andelf/beijing-realtime-bus&quot;&gt;andelf/beijing-realtime-bus&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="blog" /><summary type="html">361 条线路，705条单向线路。 aibang 负责数据服务。</summary></entry><entry><title type="html">为第三方扩展创建 Swift 模块</title><link href="https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules.html" rel="alternate" type="text/html" title="为第三方扩展创建 Swift 模块" /><published>2015-01-23T23:21:00+08:00</published><updated>2015-01-23T23:21:00+08:00</updated><id>https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules</id><content type="html" xml:base="https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules.html">&lt;p&gt;本文提出了一种将第三方扩展引入到 Swift 标准库的方法。&lt;/p&gt;
+
+&lt;p&gt;以 Alamofire 为例，&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd Path-To-Alamofire-Src-Dir
+mkdir -p 32 64
+
+# 创建动态链接库，及对应 Swift 模块，32/64版本
+xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphoneos) Alamofire.swift -target arm64-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
+
+mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64
+
+xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphoneos) Alamofire.swift -target armv7-apple-ios7.1 -target-cpu cyclone -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
+
+mv Alamofire.swiftdoc Alamofire.swiftmodule libswiftAlamofire.dylib ./64
+
+# 创建 universal lib
+lipo -create ./{32,64}/libswiftAlamofire.dylib  -output ./libswiftAlamofire.dylib
+
+# 创建模拟器用 lib
+xcrun swiftc -sdk $(xcrun --show-sdk-path --sdk iphonesimulator) Alamofire.swift -target i386-apple-ios7.1 -target-cpu yonah -emit-library -emit-module -module-name Alamofire -v -o libswiftAlamofire.dylib -module-link-name swiftAlamofire -Xlinker -install_name -Xlinker @rpath/libswiftAlamofire.dylib
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;其他相关 target&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-target armv7-apple-ios7.1 -target-cpu cortex-a8
+-target arm64-apple-ios7.1 -target-cpu cyclone
+-target i386-apple-ios7.1 -target-cpu yonah
+-target x86_64-apple-ios7.1 -target-cpu core2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;其实你了解 Swift 模块结构的化，应该回想到，将第三方模块创建为 swiftmodule 应该是最靠谱的选择。不过实际操作发现，
+编译命令无法很方便地调整，主要是因为 xcodebuild 系统，和编译命令不知道怎么导出。也是略纠结。&lt;/p&gt;
+
+&lt;p&gt;实际上，如果使用 Carthage 的话，即把第三方扩展作为 Framework 引入，会导致无法支持 iOS 7，但是 Swift 本身是支持 iOS 7 的，
+在编译命令和生成的文件中检查发现，对于 iOS 7，Swift 使用了纯静态模块编译的方法。所以其实我们引入第三方扩展的时候也可以这样做。&lt;/p&gt;
+
+&lt;p&gt;以下是静态编译所需命令：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) SwiftyJSON.swift -c -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o
+
+ar rvs libswiftSwiftyJSON.a SwiftyJSON.o
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;如何使用？&lt;/p&gt;
+
+&lt;p&gt;将编译结果扔到：&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;下对应目录。&lt;/p&gt;
+
+&lt;p&gt;然后在 Xcode 里，直接 import。&lt;/p&gt;</content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html">本文提出了一种将第三方扩展引入到 Swift 标准库的方法。</summary></entry></feed>

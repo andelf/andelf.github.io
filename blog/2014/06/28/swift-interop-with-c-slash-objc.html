@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分） | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="声明： 转载请注明，方便的情况下请知会本人. weibo" />
+<meta property="og:description" content="声明： 转载请注明，方便的情况下请知会本人. weibo" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc.html" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc.html" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-28T21:58:35+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc.html","headline":"Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）","dateModified":"2014-06-28T21:58:35+08:00","datePublished":"2014-06-28T21:58:35+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc.html"},"description":"声明： 转载请注明，方便的情况下请知会本人. weibo","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-28T21:58:35+08:00" itemprop="datePublished">Jun 28, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>之前说那是最后一篇。可惜越来越发现有很多东西还没介绍到。事不过三。再坑一篇。</p>
+
+<h2 id="前言">前言</h2>
+
+<p>本文解决如下问题</p>
+
+<ul>
+  <li>ObjC/C 中定义的某个类型、结构体，通过 Bridge Header 或者 Module 对应到 Swift 到底是什么类型</li>
+  <li>指针间的转换问题</li>
+</ul>
+
+<p>补充之前没解决的一些问题，比如提到 <code class="language-plaintext highlighter-rouge">CMutablePointer</code> 的 <code class="language-plaintext highlighter-rouge">sizeof</code> 是两个字长，那么在函数调用中是如何对应到 C 的指针的？</p>
+
+<p>预备内容：</p>
+
+<ul>
+  <li><a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift 与 Objective-C 之间的交互</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">简析Swift和C的交互</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/">简析 Swift 和 C 的交互，Part 二</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">Swift 的隐式类型转换</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/06/swift-attributes/">Swift Attributes</a></li>
+</ul>
+
+<h2 id="cobjc-to-swift-对应规则">C/ObjC to Swift 对应规则</h2>
+
+<p>以下内容均适合 Objective-C 。第一部分适合 C 。</p>
+
+<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。</p>
+
+<h3 id="for-c">for C</h3>
+
+<h4 id="可导出的类型定义">可导出的类型定义</h4>
+
+<p>函数、枚举、结构体、常量定义、宏定义。</p>
+
+<p>结构体定义支持：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">Name</span> <span class="p">{...}</span> <span class="n">Name</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">Name_t</span> <span class="p">{...}</span> <span class="n">Name</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">Name</span> <span class="p">{</span> <span class="p">...</span> <span class="p">};</span>
+</code></pre></div></div>
+
+<p>其中无法处理的结构体、函数类型、 varargs 定义不导出。预计以后版本会修复。带 bit field 的结构体也无法识别。</p>
+
+<h4 id="类型对应关系">类型对应关系</h4>
+
+<p>仔细分析发现，诡异情况还很多。基础类型请参考上几篇。</p>
+
+<p>在函数定义参数中：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">类型</th>
+      <th style="text-align: center">对应为</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">void *</code></td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">CMutableVoidPointer</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">Type *</code>、<code class="language-plaintext highlighter-rouge">Type[]</code></td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">CMutablePointer&lt;Type&gt;</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">const char *</code></td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">CString</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">const Type *</code></td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">CConstPointer&lt;Type&gt;</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">const void *</code></td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">CConstVoidPointer</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>在函数返回、结构体字段中：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">类型</th>
+      <th style="text-align: center">对应为</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">const char *</code></td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">CString</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">Type *</code>、<code class="language-plaintext highlighter-rouge">const Type *</code></td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">UnsafePointer&lt;Type&gt;</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">void *</code>、<code class="language-plaintext highlighter-rouge">const void *</code></td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">COpaquePointer</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">无法识别的结构指针</td>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">COpaquePointer</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>另外还有如下情况：</p>
+
+<p>全局变量、全局常量(<code class="language-plaintext highlighter-rouge">const</code>)、宏定义常量(<code class="language-plaintext highlighter-rouge">#define</code>) 均使用 <code class="language-plaintext highlighter-rouge">var</code>，常量不带 <code class="language-plaintext highlighter-rouge">set</code>。</p>
+
+<p>结构体中的数组，对应为元祖，例如 <code class="language-plaintext highlighter-rouge">int data[2]</code> 对应为 <code class="language-plaintext highlighter-rouge">(CInt, CInt)</code>，所以也许。。会很长。数组有多少元素就是几元祖。</p>
+
+<h3 id="for-objc">for ObjC</h3>
+
+<p>ObjC 明显情况要好的多，官方文档也很详细。</p>
+
+<p>除了 <code class="language-plaintext highlighter-rouge">NSError **</code> 转为 <code class="language-plaintext highlighter-rouge">NSErrorPointer</code> 外，需要注意的就是：</p>
+
+<p>函数参数、返回中的 <code class="language-plaintext highlighter-rouge">NSString *</code> 被替换为 <code class="language-plaintext highlighter-rouge">String!</code>、<code class="language-plaintext highlighter-rouge">NSArray *</code> 被替换为 <code class="language-plaintext highlighter-rouge">AnyObject[]!</code>。</p>
+
+<p>而全局变量、常量的 <code class="language-plaintext highlighter-rouge">NSString *</code> 不变。</p>
+
+<h2 id="关于-cmutablepointer-的行为">关于 <code class="language-plaintext highlighter-rouge">CMutablePointer</code> 的行为</h2>
+
+<p>上回说到 <code class="language-plaintext highlighter-rouge">CMutablePointer</code>、<code class="language-plaintext highlighter-rouge">CConstPointer</code>、<code class="language-plaintext highlighter-rouge">CMutableVoidPointer</code>、<code class="language-plaintext highlighter-rouge">CConstVoidPointer</code>
+四个指针类型的字长是 2，也就是说，不可以直接对应为 C 中的指针。但是前面说类型对应关系的时候， C 函数声明转为 Swift
+时候又用到了这些类型，所以看起来自相矛盾。仔细分析了 lldb 反汇编代码后发现，有如下隐藏行为:</p>
+
+<h3 id="in-swift">in Swift</h3>
+
+<p>在纯 Swift 环境下，函数定义等等、这些类型字长都为 2，不会有任何意外情况出现。</p>
+
+<h3 id="in-cobjc">in C/ObjC</h3>
+
+<p>当一个函数的声明是由 Bridge Header 或者 LLVM Module 隐式转换而来，且用到了这四个指针类型，那么代码编译过程中类型转换规则、隐式转换调用等规则依然有效。只不过在代码最生成一步，会插入以下私有函数调用之一：</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@transparent</span> <span class="n">func</span> <span class="nc">_convertCMutablePointerToUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;(</span><span class="n">p</span><span class="k">:</span> <span class="kt">CMutablePointer&lt;T&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">UnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
+<span class="nd">@transparent</span> <span class="n">func</span> <span class="nc">_convertCConstPointerToUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;(</span><span class="n">p</span><span class="k">:</span> <span class="kt">CConstPointer&lt;T&gt;</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">UnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
+<span class="nd">@transparent</span> <span class="n">func</span> <span class="nc">_convertCMutableVoidPointerToCOpaquePointer</span><span class="o">(</span><span class="n">p</span><span class="k">:</span> <span class="kt">CMutableVoidPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">COpaquePointer</span>
+<span class="nd">@transparent</span> <span class="n">func</span> <span class="nc">_convertCConstVoidPointerToCOpaquePointer</span><span class="o">(</span><span class="n">p</span><span class="k">:</span> <span class="kt">CConstVoidPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">COpaquePointer</span>
+</code></pre></div></div>
+
+<p>这个过程是背后隐藏的。然后将转换的结果传参给对应的 C/ObjC 函数。实现了指针类型字长正确、一致。</p>
+
+<h3 id="结论">结论</h3>
+
+<p>作为程序员，需要保证调用 C 函数的时候类型一致。如果有特殊需求重新声明了对应的 C 函数，那么以上规则不起作用，所以重声明 C 中的函数时表示指针不可以使用这四个指针类型。</p>
+
+<h2 id="再说指针">再说指针</h2>
+
+<p><img src="/assets/swift-pointers.png" alt="Swift Pointers" /></p>
+
+<p>虚线表示直接隐式类型转换。其中 <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;T&gt;</code> 可以通过用其他任何指针调用构造函数获得。</p>
+
+<p><code class="language-plaintext highlighter-rouge">CMutablePointer&lt;T&gt;</code> 和 <code class="language-plaintext highlighter-rouge">CMutableVoidPointer</code> 也可以通过 <code class="language-plaintext highlighter-rouge">Array&lt;T&gt;</code> 的引用隐式类型转换获得 （ <code class="language-plaintext highlighter-rouge">&amp;arr</code> ）。</p>
+
+<p>椭圆表示类型 <code class="language-plaintext highlighter-rouge">sizeof</code> 为字长，可以用于声明 C 函数。</p>
+
+<p>四大指针可以用 <code class="language-plaintext highlighter-rouge">withUnsafePointer</code> 操作。转换为 <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;T&gt;</code>。上一节提到的私有转换函数请不要使用。</p>
+
+<h2 id="字符串">字符串</h2>
+
+<p>之前的文章已经介绍过怎么从 <code class="language-plaintext highlighter-rouge">CString</code> 获取 <code class="language-plaintext highlighter-rouge">String</code> （静态方法 <code class="language-plaintext highlighter-rouge">String.fromCString</code>）。</p>
+
+<p>从 <code class="language-plaintext highlighter-rouge">String</code> 获取 <code class="language-plaintext highlighter-rouge">CString</code> 也说过， 是用 <code class="language-plaintext highlighter-rouge">withCString</code>。</p>
+
+<p>也可以从 <code class="language-plaintext highlighter-rouge">CString(UnsafePointer.alloc(100))</code> 来分配空数组。</p>
+
+<h2 id="参考">参考</h2>
+
+<ul>
+  <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
+</ul>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/28/swift-interop-with-c-slash-objc.html" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

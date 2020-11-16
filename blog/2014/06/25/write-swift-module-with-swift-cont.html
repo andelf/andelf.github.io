@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库） | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo" />
+<meta property="og:description" content="声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont.html" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont.html" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-25T21:20:55+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont.html","headline":"Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）","dateModified":"2014-06-25T21:20:55+08:00","datePublished":"2014-06-25T21:20:55+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont.html"},"description":"声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-25T21:20:55+08:00" itemprop="datePublished">Jun 25, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>本文的发现基于个人研究。请尊重原创。</p>
+
+<h2 id="摘要">摘要</h2>
+
+<p>本文提出了一种可以编译 Swift 静态链接模块的方法，通过对 swift 编译命令行参数的控制，生成可以自由分发的静态链接库和 swift module 描述文件。同时还提出了导出 objC 头文件供 Objective-C 调用的可能。</p>
+
+<p>关键词： Swift 模块 静态链接库</p>
+
+<p>上次一篇文章 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a> 中提到：</p>
+
+<blockquote>
+  <p>静态链接库 .a 目前还没有找到方法， -Xlinker -static 会报错。</p>
+</blockquote>
+
+<p>最近摸索了下用 Swift 创建静态链接库的方法。有所收获，这里记录下。</p>
+
+<h2 id="废话">废话</h2>
+
+<p>我们中的很多人都知道，编译器编译的最后一个步骤一般都是链接，一般都是调用 <code class="language-plaintext highlighter-rouge">ld</code>。经过仔细分析，之前为什么不能生成 <code class="language-plaintext highlighter-rouge">.a</code> 静态链接库的原因，发现有如下问题：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">-Xlinker -static</code> 参数传递的时候， swift 命令本身不能识别，讲 <code class="language-plaintext highlighter-rouge">-dylib</code> 与 <code class="language-plaintext highlighter-rouge">-static</code> 一起传递（这倒不是问题，参数优先级，静态盖掉了动态）</li>
+  <li>链接到 <code class="language-plaintext highlighter-rouge">-lSystem</code> 时候，这个库没有静态链接。</li>
+</ul>
+
+<p>所以总会报错。</p>
+
+<h3 id="思考">思考</h3>
+
+<p>实际上之前的方法是走了弯路，根本没有必要去调用 <code class="language-plaintext highlighter-rouge">ld</code>，作为一个合格的 <code class="language-plaintext highlighter-rouge">.a</code> 静态链接库，只要有对应的 <code class="language-plaintext highlighter-rouge">.o</code> 就可以了，没必要去链接 <code class="language-plaintext highlighter-rouge">-lSystem</code>，也许是 swift 本身没有编译为静态链接库的参数支持。</p>
+
+<p>检查 Swift 标准库中的静态链接库，果然只包含对应 <code class="language-plaintext highlighter-rouge">.swift</code> 代码编译后的 <code class="language-plaintext highlighter-rouge">.o</code> 文件。（检查方法是用 <code class="language-plaintext highlighter-rouge">ar -t libName.a</code>）</p>
+
+<p>说到底， Swift 静态链接库的目标很简单，就是包含对应 Swift 模块的所有代码，这样就避免了对应动态链接库的引入。和什么 <code class="language-plaintext highlighter-rouge">-lSystem</code> 没啥相干。</p>
+
+<h2 id="解决方法-howto">解决方法 HOWTO</h2>
+
+<p>以 lingoer 的 <a href="https://github.com/lingoer/SwiftyJSON">SwiftyJSON</a> 为例。</p>
+
+<p>我们的目标很简单，就是生成 <code class="language-plaintext highlighter-rouge">ModName.swiftmodule</code>、<code class="language-plaintext highlighter-rouge">ModName.swiftdoc</code>(可选)、<code class="language-plaintext highlighter-rouge">libswiftModName.a</code> 三个文件。</p>
+
+<h3 id="编译">编译</h3>
+
+<h4 id="生成-swiftmodule-swiftdoc">生成 <code class="language-plaintext highlighter-rouge">.swiftmodule</code> <code class="language-plaintext highlighter-rouge">.swiftdoc</code></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) SwiftyJSON.swift -emit-library -emit-module -module-name SwiftyJSON -v -o libswiftSwiftyJSON.dylib -module-link-name swiftSwiftyJSON
+</code></pre></div></div>
+
+<h4 id="生成-o">生成 <code class="language-plaintext highlighter-rouge">.o</code></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>xcrun swift -sdk $(xcrun --show-sdk-path --sdk macosx) -c SwiftyJSON.swift -parse-as-library -module-name SwiftyJSON -v -o SwiftyJSON.o
+</code></pre></div></div>
+
+<h4 id="生成-a">生成 <code class="language-plaintext highlighter-rouge">.a</code></h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ar rvs libswiftSwiftyJSON.a SwiftyJSON.o
+</code></pre></div></div>
+
+<p>大功告成。</p>
+
+<p>同时应该也可以用 <code class="language-plaintext highlighter-rouge">lipo</code> 来合成不同平台下的 <code class="language-plaintext highlighter-rouge">.a</code> 链接库。</p>
+
+<h3 id="使用">使用</h3>
+
+<p>和静态链接库类似，需要 <code class="language-plaintext highlighter-rouge">-I</code> 包含 <code class="language-plaintext highlighter-rouge">.swiftmodule</code> 所在目录， <code class="language-plaintext highlighter-rouge">-L</code> 包含 <code class="language-plaintext highlighter-rouge">.a</code> 所在目录。</p>
+
+<p>如果动态链接库和静态链接库两者同时存在，可以依靠不同目录来区分。</p>
+
+<h2 id="你丫闲的">你丫闲的！</h2>
+
+<p>可能不少人要群嘲，你这意义是啥。你丫闲的。</p>
+
+<p>其实在分发 library 的时候，很多时候我们需要二进制分发，希望别人可以方便地使用。这种情况下，静态链接更佳（虽然新的 iOS 8 支持动态链接，但是看起来是基于 Framework 的，略复杂些。）</p>
+
+<p>甚至我们可以用 <code class="language-plaintext highlighter-rouge">lipo</code> 创建全平台可用的静态链接库。多赞。</p>
+
+<h2 id="补充">补充</h2>
+
+<p>多个 Swift 文件可以分别编译为 <code class="language-plaintext highlighter-rouge">.o</code> 然后用 <code class="language-plaintext highlighter-rouge">ar</code> 合并。</p>
+
+<p>对于 CocoaPods ，也许可以按照这个逻辑将 Swift 模块暴露出去。需要多加一个参数 <code class="language-plaintext highlighter-rouge">-emit-objc-header</code> （以及 <code class="language-plaintext highlighter-rouge">-emit-objc-header-path</code>）即可。</p>
+
+<h2 id="参考文献">参考文献</h2>
+
+<ul>
+  <li>我的另一篇 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a></li>
+</ul>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/25/write-swift-module-with-swift-cont.html" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont.html';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont.html';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
