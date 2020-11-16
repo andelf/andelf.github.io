@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Swift 运算符重载、自定义运算符 | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Swift 运算符重载、自定义运算符" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="挖坑先。其实是ibooks书最后的参考手册部分。 这里将手册相关内容都搬运了过来。:)" />
+<meta property="og:description" content="挖坑先。其实是ibooks书最后的参考手册部分。 这里将手册相关内容都搬运了过来。:)" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/06/swift-operator-overload/" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/06/swift-operator-overload/" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-06T10:28:02+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Swift 运算符重载、自定义运算符" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/06/swift-operator-overload/","headline":"Swift 运算符重载、自定义运算符","dateModified":"2014-06-06T10:28:02+08:00","datePublished":"2014-06-06T10:28:02+08:00","description":"挖坑先。其实是ibooks书最后的参考手册部分。 这里将手册相关内容都搬运了过来。:)","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/06/swift-operator-overload/"},"@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Swift 运算符重载、自定义运算符</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-06T10:28:02+08:00" itemprop="datePublished">Jun 6, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>挖坑先。其实是ibooks书最后的参考手册部分。
+这里将手册相关内容都搬运了过来。:)</p>
+
+<p>Swift 对运算符重载的控制很类似 Haskell，而不是 C 系列。如下：</p>
+
+<ul>
+  <li>支持自定义运算符 <code class="language-plaintext highlighter-rouge">/ = - + * % &lt; &gt; ! &amp; | ^ . ~</code> 的任意组合。可以脑洞大开创造颜文字。</li>
+  <li>支持前缀（例如默认的 <code class="language-plaintext highlighter-rouge">~，！，++, --</code> )，后缀（后置的 <code class="language-plaintext highlighter-rouge">++, --</code>)，中缀（<code class="language-plaintext highlighter-rouge">* /</code> 等等）运算符。</li>
+  <li>支持自定义优先级。</li>
+</ul>
+
+<p>运算符重载通过函数定义来完成，其实运算符就是一个一元函数，或者是二元函数。</p>
+
+<p>所以那个传的很神的例子 numbers.sort(&lt;) 不算什么，说到底就是个比较函数而已。（来自Haskell的同学基本可以忽略这些内容了，这些太熟悉了）</p>
+
+<h2 id="关键字">关键字</h2>
+
+<p>首先介绍用到的关键字，不得不说，Swift的关键字和Swift前男友一样多。</p>
+
+<ul>
+  <li>operator</li>
+  <li>prefix 前缀运算符，比如 （取正+、取负- 、自增++、自减–）</li>
+  <li>postfix 后缀运算符，比如（自增++、自减–），这两可以前缀也可以后缀</li>
+  <li>infix 中缀，最常见二元运算</li>
+  <li>precedence 优先级的意思，取值 0~255 ，纯数字，不可以带符号，下划线，指数e/p 表示</li>
+  <li>associativity 结合性，可以是 left, right, 或者 none</li>
+</ul>
+
+<p>还有用到的属性，就是以 @ 开头的，这个理论上不算是关键字啊。别叫错了。（不过其实无所谓怎么叫，圈里有太多太多的人纠结于简单的定义为一个定义的名字争面红耳赤其实都说的一个意思。名字真的是很次要的东西，用英语吧）</p>
+
+<ul>
+  <li>@prefix</li>
+  <li>@postfix</li>
+  <li>@infix</li>
+  <li>@assignment 表示运算符具有“赋值”副作用，比如 <code class="language-plaintext highlighter-rouge">++, +=</code> 这样。</li>
+</ul>
+
+<p>先来个最简单的，假设我们有</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>struct Point {
+    var x: Int
+    var y: Int
+}
+let p = Point(x: 100, y: 200)
+</code></pre></div></div>
+
+<h2 id="前缀运算符">前缀运算符</h2>
+<p>来个不靠谱的，假设我要执行 -p 这个操作。由于 “-“ 已经是定义好了的运算符（减法），直接实现运算即可：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@prefix func - (pt: Point) -&gt; Point {
+    return Point(x: -pt.x, y: -pt.y)
+}
+println(-p) // 看起来高大上
+</code></pre></div></div>
+
+<p>@prefix  属性表示这个 - 运算作为前缀运算符处理，相当于取负。</p>
+
+<h2 id="中缀运算符">中缀运算符</h2>
+<p>这么一来，接下来的需求就是两个点之和，“+“ 加法。同理 “+“已经定义，不需要再次定义。直接实现它</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@infix func + (pt0: Point, pt1: Point) -&gt; Point {
+    return Point(x: pt0.x + pt1.x, y: pt0.y + pt1.y)
+}
+</code></pre></div></div>
+
+<p>可以在 Playground 里输入 p + p 看看结果。</p>
+
+<p>有了 p + p，直接实现乘法是不是更好呢？乘以一个 Int。这里 “*” 操作的两边就不是同个类型了。需要注意。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@infix func * (pt: Point, scale: Int) -&gt; Point {
+    return Point(x: pt.x * scale, y: pt.y * scale )
+}
+</code></pre></div></div>
+
+<p>输入 p * 3 查看效果，然后输入 3 * p 发现出错，所以运算符左右两边的顺序是很重要的。（来自Python的同学可能会知道 Py 的运算符重载的左右类型是有一个尝试顺序的， <code class="language-plaintext highlighter-rouge">__mul__, __rmul__</code> 等等）</p>
+
+<h2 id="后缀运算符">后缀运算符</h2>
+<p>假设，我们的应用里，需要经常计算点到原点(0,0) 的距离，我们“发明”个新运算好了，我们就选一个 “~!”， 来个后缀的，期望 “p~!” 取得点到原点的距离。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>operator postfix ~! {} // 定义新运算符
+@postfix func ~! (pt: Point) -&gt; Double {
+    return sqrt(NSNumber.convertFromIntegerLiteral(pt.x * pt.x + pt.y * pt.y).doubleValue)
+}
+</code></pre></div></div>
+
+<p>平方根算得略纠结。。。忽略好了。反正暂时这么可以调用。 然后输入 <code class="language-plaintext highlighter-rouge">p~!</code> 获得距离。</p>
+
+<h2 id="自定义中缀运算符">自定义中缀运算符</h2>
+<p>前面基本已经介绍了怎么重载运算符，怎么实现。以及简单介绍了后缀运算符的自定义。</p>
+
+<p>实际上中缀运算符（二元运算）牵扯到的优先级和结合性问题还是挺纠结的。要比前缀后缀复杂得多，当然重载就不涉及，因为是系统默认的优先级。</p>
+
+<p>默认的系统自带的我搬运到后面。</p>
+
+<p>定义中缀运算符首先要制定结合型和优先级。</p>
+
+<p>假设计算两个点之间的距离</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>operator infix &lt;~&gt; {
+    precedence 250 // 0~255 的一个值，具体多少请参考附录的列表
+    associativity left // 或者right, none
+}
+@infix func &lt;~&gt; (pt0: Point, pt1: Point) -&gt; Double {
+    return .... // x 之差平方 +  y 之差平方，然后开放
+}
+</code></pre></div></div>
+
+<h2 id="带赋值的运算符">带赋值的运算符</h2>
+<p>前面说了一堆，其实忽略了一些特殊的情况，比如 “+=”, “++”, 它们的特点是，会修改原有的操作数，有赋值副作用。实际上实现起来大同小异。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@prefix @assignment func ++ (inout pt: Point) -&gt; Point {
+    pt.x += 1
+    pt.y += 1
+    return pt
+}
+</code></pre></div></div>
+
+<p>这里起作用的是 @assignment 属性，和 inout 关键字。</p>
+
+<p>对于 “+=” 二元操作，第一个操作数需要标记为 inout。类似。大家自己研究好了。</p>
+
+<h2 id="附录">附录</h2>
+<p>从手册里搬运下优先级和结合性：</p>
+
+<p>级别 0~255</p>
+
+<ul>
+  <li>Exponentiative (No associativity, precedence level 160)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">&lt;&lt; Bitwise left shift</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&gt;&gt; Bitwise right shift</code></li>
+    </ul>
+  </li>
+  <li>Multiplicative (Left associative, precedence level 150)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">* Multiply</code></li>
+      <li><code class="language-plaintext highlighter-rouge">/ Divide</code></li>
+      <li><code class="language-plaintext highlighter-rouge">% Remainder</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&amp;* Multiply, ignoring overflow</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&amp;/ Divide, ignoring overflow</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&amp;% Remainder, ignoring overflow</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&amp; Bitwise AND</code></li>
+    </ul>
+  </li>
+  <li>Additive (Left associative, precedence level 140)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">+ Add</code></li>
+      <li><code class="language-plaintext highlighter-rouge">- Subtract</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&amp;+ Add with overflow</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&amp;- Subtract with overflow</code></li>
+      <li><code class="language-plaintext highlighter-rouge">| Bitwise OR</code></li>
+      <li><code class="language-plaintext highlighter-rouge">^ Bitwise XOR</code></li>
+    </ul>
+  </li>
+  <li>Range (No associativity, precedence level 135)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">.. Half-closed range</code></li>
+      <li><code class="language-plaintext highlighter-rouge">... Closed range</code></li>
+    </ul>
+  </li>
+  <li>Cast (No associativity, precedence level 132)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">is Type check</code></li>
+      <li><code class="language-plaintext highlighter-rouge">as Type cast</code></li>
+    </ul>
+  </li>
+  <li>Comparative (No associativity, precedence level 130)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">&lt; Less than</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&lt;= Less than or equal</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&gt; Greater than</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&gt;= Greater than or equal</code></li>
+      <li><code class="language-plaintext highlighter-rouge">== Equal</code></li>
+      <li><code class="language-plaintext highlighter-rouge">!= Not equal</code></li>
+      <li><code class="language-plaintext highlighter-rouge">=== Identical</code></li>
+      <li><code class="language-plaintext highlighter-rouge">!== Not identical</code></li>
+      <li><code class="language-plaintext highlighter-rouge">~= Pattern match</code></li>
+    </ul>
+  </li>
+  <li>Conjunctive (Left associative, precedence level 120)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">&amp;&amp; Logical AND</code></li>
+    </ul>
+  </li>
+  <li>Disjunctive (Left associative, precedence level 110)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">|| Logical OR</code></li>
+    </ul>
+  </li>
+  <li>Ternary Conditional (Right associative, precedence level 100)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">?: Ternary conditional</code></li>
+    </ul>
+  </li>
+  <li>Assignment (Right associative, precedence level 90)
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">= Assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">*= Multiply and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">/= Divide and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">%= Remainder and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">+= Add and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">-= Subtract and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&lt;&lt;= Left bit shift and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&gt;&gt;= Right bit shift and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&amp;= Bitwise AND and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">^= Bitwise XOR and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">|= Bitwise OR and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">&amp;&amp;= Logical AND and assign</code></li>
+      <li><code class="language-plaintext highlighter-rouge">||= Logical OR and assign</code></li>
+    </ul>
+  </li>
+</ul>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/06/swift-operator-overload/';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/06/swift-operator-overload/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/06/swift-operator-overload/" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/06/swift-operator-overload/';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/06/swift-operator-overload/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

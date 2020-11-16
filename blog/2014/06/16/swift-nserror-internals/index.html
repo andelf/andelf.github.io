@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Swift NSError Internals（解析 Swift 对 NSError 操作） | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Swift NSError Internals（解析 Swift 对 NSError 操作）" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="声明： 原创发现，原创内容。转载注明我或者 SwiftChina . weibo" />
+<meta property="og:description" content="声明： 原创发现，原创内容。转载注明我或者 SwiftChina . weibo" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/16/swift-nserror-internals/" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/16/swift-nserror-internals/" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-06-16T14:45:15+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Swift NSError Internals（解析 Swift 对 NSError 操作）" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/06/16/swift-nserror-internals/","headline":"Swift NSError Internals（解析 Swift 对 NSError 操作）","dateModified":"2014-06-16T14:45:15+08:00","datePublished":"2014-06-16T14:45:15+08:00","description":"声明： 原创发现，原创内容。转载注明我或者 SwiftChina . weibo","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/16/swift-nserror-internals/"},"@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Swift NSError Internals（解析 Swift 对 NSError 操作）</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-06-16T14:45:15+08:00" itemprop="datePublished">Jun 16, 2014
+      </time></p><p>Tags: swift</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>声明： 原创发现，原创内容。转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
+
+<p>其中基础部分借鉴了 WWDC 407 部分的介绍。</p>
+
+<p>相关的分析主要基于我 dump 出的 Swift 标准库声明代码，位于 <a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a>。</p>
+
+<h2 id="引子">引子</h2>
+
+<p>WWDC 407 中简单提到了 NSError 在 Swift 中的处理方法，说<code class="language-plaintext highlighter-rouge">NSErrorPointer is Swift’s version of NSError **</code>，其中大概内容是：</p>
+
+<ul>
+  <li>Foundation 的所有函数中的 <code class="language-plaintext highlighter-rouge">NSError **</code> 都被对应为 Swift 中的 <code class="language-plaintext highlighter-rouge">NSErrorPointer</code> (自定义函数也应如此)</li>
+  <li>调用时候使用下面的方式：
+    <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSError?</span>
+<span class="kt">foobar</span><span class="o">(</span><span class="kt">....</span><span class="o">,</span> <span class="kt">error:</span> <span class="kt">&amp;error</span><span class="o">)</span>
+</code></pre></div>    </div>
+  </li>
+  <li>这里一定要用 <code class="language-plaintext highlighter-rouge">var</code>，只有 var 才有引用的概念，才可以作为左值</li>
+  <li>定义时（重载一些带 NSError 参数的函数）(注意其中的 <code class="language-plaintext highlighter-rouge">.memory</code> 部分。)：
+    <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">override</span> <span class="n">func</span> <span class="nf">contentsForType</span><span class="o">(</span><span class="n">typeName</span><span class="k">:</span> <span class="kt">String!</span><span class="o">,</span> <span class="n">error</span><span class="k">:</span> <span class="kt">NSErrorPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">AnyObject</span><span class="o">!</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="nf">cannotProduceContentsForType</span><span class="o">(</span><span class="n">typeName</span><span class="o">)</span> <span class="o">{</span> <span class="k">if</span> <span class="n">error</span> <span class="o">{</span>
+      <span class="nv">error</span><span class="o">.</span><span class="py">memory</span> <span class="k">=</span> <span class="nc">NSError</span><span class="o">(</span><span class="n">domain</span><span class="k">:</span> <span class="kt">domain</span><span class="o">,</span> <span class="n">code</span><span class="k">:</span> <span class="kt">code</span><span class="o">,</span> <span class="n">userInfo</span><span class="k">:</span> <span class="err">[</span><span class="kt">:</span><span class="err">]</span><span class="o">)</span> <span class="o">}</span>
+  <span class="k">return</span> <span class="n">nil</span> <span class="o">}</span>
+  <span class="c1">// ...</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>到这里，基本怎么在 Swift 使用 <code class="language-plaintext highlighter-rouge">NSError</code> 已经足够了。但是本着探究妈蛋 Swift 到底藏起了多少黑魔法的伟(er)大(bi)精神，我继续分析下这里面的槽点。</p>
+
+<h2 id="这不科学">这不科学！</h2>
+
+<p>我们知道 Swift 是强类型语言。类型不同怎么能在一起？直接出错才对。</p>
+
+<p>当然也可能是之前提到过的“隐式类型转换”，所以这里探索下 <code class="language-plaintext highlighter-rouge">NSError</code> 和 <code class="language-plaintext highlighter-rouge">NSErrorPointer</code> 的关系，到底是如何实现了 Objective-C 中的 <code class="language-plaintext highlighter-rouge">NSError **</code>。</p>
+
+<p>而且有一个逆天的地方是，<code class="language-plaintext highlighter-rouge">NSErrorPointer</code> 没有被标记为 <code class="language-plaintext highlighter-rouge">inout</code>，但传递参数时候需要传递 <code class="language-plaintext highlighter-rouge">NSError</code> 的引用。</p>
+
+<h2 id="上代码">上代码</h2>
+
+<p>这里给出 Swift 中 <code class="language-plaintext highlighter-rouge">NSError</code>、<code class="language-plaintext highlighter-rouge">NSErrorPointer</code> 及相关类型的声明代码。(部分）</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@objc</span><span class="o">(</span><span class="nc">NSError</span><span class="o">)</span> <span class="k">class</span> <span class="nc">NSError</span> <span class="k">:</span> <span class="kt">NSObject</span><span class="o">,</span> <span class="nc">NSCopying</span><span class="o">,</span> <span class="nc">NSSecureCoding</span><span class="o">,</span> <span class="nc">NSCoding</span> <span class="o">{</span>
+  <span class="nd">@objc</span><span class="o">(</span><span class="n">initWithDomain</span><span class="k">:</span><span class="kt">code:userInfo:</span><span class="o">)</span> <span class="nf">init</span><span class="o">(</span><span class="n">domain</span><span class="k">:</span> <span class="kt">String!</span><span class="o">,</span> <span class="n">code</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">userInfo</span> <span class="n">dict</span><span class="k">:</span> <span class="kt">NSDictionary!</span><span class="o">)</span>
+  <span class="nd">@objc</span><span class="o">(</span><span class="n">errorWithDomain</span><span class="k">:</span><span class="kt">code:userInfo:</span><span class="o">)</span> <span class="k">class</span> <span class="nc">func</span> <span class="nf">errorWithDomain</span><span class="o">(</span><span class="n">domain</span><span class="k">:</span> <span class="kt">String!</span><span class="o">,</span> <span class="n">code</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">userInfo</span> <span class="n">dict</span><span class="k">:</span> <span class="kt">NSDictionary!</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Self</span><span class="o">!</span>
+  <span class="nd">@objc</span> <span class="k">var</span> <span class="n">domain</span><span class="k">:</span> <span class="kt">String!</span> <span class="o">{</span>
+    <span class="kt">@objc</span><span class="o">(</span><span class="kt">domain</span><span class="o">)</span> <span class="kt">get</span> <span class="o">{}</span>
+  <span class="o">}</span>
+  <span class="kt">@objc</span><span class="o">(</span><span class="kt">init</span><span class="o">)</span> <span class="kt">convenience</span> <span class="kt">init</span><span class="o">()</span>
+  <span class="kt">....</span>
+<span class="o">}</span>
+
+<span class="n">typealias</span> <span class="nc">NSErrorPointer</span> <span class="k">=</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="nc">NSError</span><span class="o">?&gt;</span>
+
+<span class="n">struct</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="k">:</span> <span class="kt">Equatable</span><span class="o">,</span> <span class="nc">LogicValue</span> <span class="o">{</span>
+  <span class="n">let</span> <span class="n">value</span><span class="k">:</span> <span class="kt">RawPointer</span>
+  <span class="nd">@transparent</span> <span class="nf">init</span><span class="o">(</span><span class="k">_</span> <span class="n">value</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span>
+  <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_get</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">RawPointer</span>
+  <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_set</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">T</span>
+  <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion</span><span class="o">(</span><span class="n">inout</span> <span class="n">autoreleasingTemp</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
+  <span class="k">var</span> <span class="nc">_isNull</span><span class="k">:</span> <span class="kt">Bool</span> <span class="o">{</span>
+    <span class="kt">@transparent</span> <span class="kt">get</span> <span class="o">{}</span>
+  <span class="o">}</span>
+  <span class="kt">@transparent</span> <span class="kt">func</span> <span class="kt">getLogicValue</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">Bool</span>
+  <span class="k">var</span> <span class="n">memory</span><span class="k">:</span> <span class="kt">T</span> <span class="o">{</span>
+    <span class="kt">@transparent</span> <span class="kt">get</span> <span class="o">{}</span>
+    <span class="kt">@transparent</span> <span class="kt">set</span> <span class="o">{}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="分析">分析</h2>
+
+<p>由以上代码可以知道，<code class="language-plaintext highlighter-rouge">NSErrorPointer</code> 实际上是 <code class="language-plaintext highlighter-rouge">AutoreleasingUnsafePointer&lt;Optional&lt;NSError&gt;&gt;</code> 类型（这里我顺便展开了 <code class="language-plaintext highlighter-rouge">Type?</code>），
+<code class="language-plaintext highlighter-rouge">AutoreleasingUnsafePointer&lt;T&gt;</code> 封装了一个 <code class="language-plaintext highlighter-rouge">RawPointer</code>，发挥想象力，差不多知道它就是个 <code class="language-plaintext highlighter-rouge">void *</code>，指向类型 <code class="language-plaintext highlighter-rouge">T</code>。在本例中，指向 <code class="language-plaintext highlighter-rouge">NSError?</code>。</p>
+
+<p>一般情况下 Swift 的 <code class="language-plaintext highlighter-rouge">NSError!</code> 被用于对应 Objective-C 的 <code class="language-plaintext highlighter-rouge">NSError *</code>， 一层指针，可 nil. 所以这里，两层指针算是对应上了（一层 RawPointer, 一层靠语言本身的特性实现，这里暂时不考虑 <code class="language-plaintext highlighter-rouge">Type!</code> 和 <code class="language-plaintext highlighter-rouge">Type?</code> 的差异性，使用时候多注意就可以）。</p>
+
+<p>然后就是棘手的问题，这里的类型转换是如何实现的？这里没有看到标准的隐式类型转换。但是有 <code class="language-plaintext highlighter-rouge">__writeback_conversion*</code> 一系列 static 函数。应该是他们起到了转换的作用（再次说明，Swift 是强类型语言，所以必然这样的特性有黑魔法）。</p>
+
+<p>从名字和标准库的定义看，这三个函数应该是同时起作用，用于表述三个类型的关联关系。我写了个例子。</p>
+
+<h3 id="示例代码">示例代码</h3>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">struct</span> <span class="nc">Foobar</span> <span class="o">{</span>
+    <span class="k">var</span> <span class="k">val:</span> <span class="kt">Int</span>
+
+    <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_get</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Int</span> <span class="o">{</span>
+        <span class="nf">println</span><span class="o">(</span><span class="s">"location 1"</span><span class="o">)</span>
+        <span class="k">if</span> <span class="n">let</span> <span class="n">v</span> <span class="k">=</span> <span class="nv">x</span><span class="o">.</span><span class="py">toInt</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">v</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="o">}</span>
+
+    <span class="o">}</span>
+    <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_set</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">String</span> <span class="o">{</span>
+        <span class="nf">println</span><span class="o">(</span><span class="s">"location 2"</span><span class="o">)</span>
+        <span class="k">return</span> <span class="nf">toString</span><span class="o">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">10000</span><span class="o">)</span>
+    <span class="o">}</span>
+    <span class="nd">@transparent</span> <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion</span><span class="o">(</span><span class="n">inout</span> <span class="n">temp</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Foobar</span> <span class="o">{</span>
+        <span class="nf">println</span><span class="o">(</span><span class="s">"location 3"</span><span class="o">)</span>
+        <span class="k">return</span> <span class="nc">Foobar</span><span class="o">(</span><span class="k">val:</span> <span class="kt">temp</span><span class="o">)</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+<span class="n">func</span> <span class="nf">test_foobar</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">Foobar</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nf">dump</span><span class="o">(</span><span class="n">v</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="err">"</span><span class="kt">dump</span> <span class="kt">from</span> <span class="kt">test_foobar</span><span class="err">"</span><span class="o">)</span>
+<span class="o">}</span>
+
+<span class="k">var</span> <span class="n">word</span> <span class="k">=</span> <span class="s">"9527"</span>
+<span class="nf">test_foobar</span><span class="o">(&amp;</span><span class="n">word</span><span class="o">)</span>
+<span class="nf">dump</span><span class="o">(</span><span class="n">word</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="err">"</span><span class="kt">word</span><span class="err">"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>如上，代码输出是：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>location 1
+location 3
+▿ dump from test_foobar: V5trans6Foobar (has 1 child)
+  - val: 9527
+location 2
+- word: 19527
+</code></pre></div></div>
+
+<p>这三个函数在一次隐式调用中，全部都用到了，调用顺序如上。看起来隐藏在背后的关系明了了一些，流程大概是：</p>
+
+<ul>
+  <li>用 <code class="language-plaintext highlighter-rouge">word</code> 调用 <code class="language-plaintext highlighter-rouge">Foobar.__writeback_conversion_get</code>，获得一个 <code class="language-plaintext highlighter-rouge">Int</code></li>
+  <li>用 <code class="language-plaintext highlighter-rouge">Int</code> 调用 <code class="language-plaintext highlighter-rouge">Foobar.__writeback_conversion</code>，构造了一个 <code class="language-plaintext highlighter-rouge">Foobar</code> 对象</li>
+  <li>将 <code class="language-plaintext highlighter-rouge">Foobar</code> 交给 <code class="language-plaintext highlighter-rouge">test_foobar</code> 函数内部处理</li>
+  <li>函数逻辑结束后，调用 <code class="language-plaintext highlighter-rouge">Foobar.__writeback_conversion_set</code>，获得字符串，赋值给 <code class="language-plaintext highlighter-rouge">word</code></li>
+</ul>
+
+<p>我返回到 <code class="language-plaintext highlighter-rouge">NSError</code> 说。</p>
+
+<h3 id="回到-nserror-说">回到 NSError 说</h3>
+
+<p>最简删节版代码：</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// T = NSError? = Optional&lt;NSError&gt;</span>
+<span class="n">struct</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+  <span class="n">let</span> <span class="n">value</span><span class="k">:</span> <span class="kt">RawPointer</span>
+  <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_get</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">RawPointer</span>
+  <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion_set</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">T</span>
+  <span class="n">static</span> <span class="n">func</span> <span class="nc">__writeback_conversion</span><span class="o">(</span><span class="n">inout</span> <span class="n">autoreleasingTemp</span><span class="k">:</span> <span class="kt">RawPointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">AutoreleasingUnsafePointer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
+  <span class="o">...</span>
+  <span class="k">var</span> <span class="n">memory</span><span class="k">:</span> <span class="kt">T</span> <span class="o">{</span> <span class="kt">get</span> <span class="kt">set</span> <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>当一个函数接受 <code class="language-plaintext highlighter-rouge">AutoreleasingUnsafePointer&lt;T&gt;</code> 作为参数的时候，我们可以直接传递 T 的引用 <code class="language-plaintext highlighter-rouge">&amp;T</code>，然后整个流程自动转换为</p>
+
+<ul>
+  <li>用该引用参数调用 <code class="language-plaintext highlighter-rouge">__writeback_conversion_get</code> 获得一个 <code class="language-plaintext highlighter-rouge">RawPointer</code></li>
+  <li>调用 <code class="language-plaintext highlighter-rouge">__writeback_conversion</code> 获得一个 <code class="language-plaintext highlighter-rouge">AutoreleasingUnsafePointer&lt;T&gt;</code> 对象</li>
+  <li>将这个对象交给函数内部处里，调用相关方法</li>
+  <li>函数返回时，调用 <code class="language-plaintext highlighter-rouge">__writeback_conversion_set</code>，然后将结果赋值给一开始的引用参数，类型 <code class="language-plaintext highlighter-rouge">&amp;T</code> 的那个。</li>
+</ul>
+
+<p>如果是 <code class="language-plaintext highlighter-rouge">NSError</code> 的情况, 情况如下：</p>
+
+<ul>
+  <li>某库函数接受 <code class="language-plaintext highlighter-rouge">NSErrorPointer</code> 作为参数，我们直接传递 <code class="language-plaintext highlighter-rouge">NSError?</code> 的引用 <code class="language-plaintext highlighter-rouge">&amp;error</code></li>
+  <li><code class="language-plaintext highlighter-rouge">error</code> 作为参数调用 <code class="language-plaintext highlighter-rouge">__writeback_conversion_get</code>， 获得 <code class="language-plaintext highlighter-rouge">RawPointer</code></li>
+  <li>用这个 <code class="language-plaintext highlighter-rouge">RawPointer</code> 调用 <code class="language-plaintext highlighter-rouge">__writeback_conversion</code>，获得一个 <code class="language-plaintext highlighter-rouge">NSErrorPointer</code> 对象</li>
+  <li>函数进行相关处理。对于 NSError 来说，这里一般是 Foundation 代码或者是 override 后的代码，在出错或者异常时访问 <code class="language-plaintext highlighter-rouge">.memory</code>，设置相应的错误</li>
+  <li>函数返回。用之前的 <code class="language-plaintext highlighter-rouge">RawPointer</code> 调用 <code class="language-plaintext highlighter-rouge">__writeback_conversion_set</code>，获得 <code class="language-plaintext highlighter-rouge">NSError?</code> 然后赋值给引用 error</li>
+  <li>接下来代码中可以对 error 进行判断，处理异常</li>
+</ul>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">RawPointer</code> 之前我们已经讨论过，是指针，在整个过程中值不变，指针指向的内存，就是 <code class="language-plaintext highlighter-rouge">.memory</code> 属性操作的部分，才是可变的部分，不属于 <code class="language-plaintext highlighter-rouge">AutoreleasingUnsafePointer&lt;T&gt;</code> 的成员访问控制范围，所以这就是为什么函数参数中的 <code class="language-plaintext highlighter-rouge">NSErrorPointer</code> 为什么没有标记为 <code class="language-plaintext highlighter-rouge">inout</code> 的原因。</p>
+
+<h2 id="总结">总结</h2>
+
+<p>这三个 static 函数合起来组成了整体功能。我觉得可以把这个功能叫做“引用的隐式类型转换”或者”隐式引用类型转换”。</p>
+
+<p>当然，它的强大之处在于用隐藏了二重指针的细节，同时这个特性也可以有其他作用。比如。。。（我没想好）</p>
+
+<h2 id="参考文献">参考文献</h2>
+
+<ul>
+  <li>WWDC 407</li>
+  <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
+  <li><a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">隐式类型转换</a></li>
+</ul>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/16/swift-nserror-internals/';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/16/swift-nserror-internals/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/06/16/swift-nserror-internals/" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/06/16/swift-nserror-internals/';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/06/16/swift-nserror-internals/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

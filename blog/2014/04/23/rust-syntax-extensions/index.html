@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Rust Syntax Extensions | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Rust Syntax Extensions" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="All rust ASTs are in syntax::ast. And extensions are in syntax::ext." />
+<meta property="og:description" content="All rust ASTs are in syntax::ast. And extensions are in syntax::ext." />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-04-23T23:44:43+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Rust Syntax Extensions" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/","headline":"Rust Syntax Extensions","dateModified":"2014-04-23T23:44:43+08:00","datePublished":"2014-04-23T23:44:43+08:00","description":"All rust ASTs are in syntax::ast. And extensions are in syntax::ext.","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/"},"@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Rust Syntax Extensions</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2014-04-23T23:44:43+08:00" itemprop="datePublished">Apr 23, 2014
+      </time></p><p>Tags: rust</p></p>
+
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>All rust ASTs are in <code class="language-plaintext highlighter-rouge">syntax::ast</code>. And extensions are in
+<code class="language-plaintext highlighter-rouge">syntax::ext</code>.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#![feature(macro_registrar,</span> <span class="nd">managed_boxes)]</span><span class="p">;</span>
+
+<span class="k">extern</span> <span class="n">crate</span> <span class="n">syntax</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="nn">syntax</span><span class="p">::</span><span class="n">ast</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">syntax</span><span class="p">::</span><span class="nn">ast</span><span class="p">::</span><span class="n">Name</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">syntax</span><span class="p">::</span><span class="nn">ext</span><span class="p">::</span><span class="nn">base</span><span class="p">::</span><span class="n">SyntaxExtension</span><span class="p">;</span>
+
+<span class="nd">#[macro_registrar]</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">macro_registrar</span><span class="p">(</span><span class="n">register</span><span class="p">:</span> <span class="p">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="p">|);</span>
+</code></pre></div></div>
+
+<p>Managed boxes, the <code class="language-plaintext highlighter-rouge">@-pointer</code> is still used in rust compiler, so it
+is essential to enable this feature.</p>
+
+<p>where the doc says:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/// A name is a part of an identifier, representing a string or</span>
+<span class="n">gensym</span><span class="py">. It</span><span class="nv">'s</span> <span class="n">the</span> <span class="n">result</span> <span class="n">of</span> <span class="n">interning</span><span class="err">.</span>
+<span class="c">/// created by token::intern()</span>
+<span class="k">type</span> <span class="n">Name</span> <span class="o">=</span> <span class="nb">u32</span><span class="p">;</span>
+
+<span class="c">/// An enum representing the different kinds of syntax extensions.</span>
+<span class="k">pub</span> <span class="k">enum</span> <span class="n">SyntaxExtension</span> <span class="p">{</span>
+    <span class="c">/// A syntax extension that is attached to an item and creates new items</span>
+    <span class="c">/// based upon it.</span>
+    <span class="c">///</span>
+    <span class="c">/// `#[deriving(...)]` is an `ItemDecorator`.</span>
+    <span class="nf">ItemDecorator</span><span class="p">(</span><span class="n">ItemDecorator</span><span class="p">),</span>
+
+    <span class="c">/// A syntax extension that is attached to an item and modifies it</span>
+    <span class="c">/// in-place.</span>
+    <span class="nf">ItemModifier</span><span class="p">(</span><span class="n">ItemModifier</span><span class="p">),</span>
+
+    <span class="c">/// A normal, function-like syntax extension.</span>
+    <span class="c">///</span>
+    <span class="c">/// `bytes!` is a `NormalTT`.</span>
+    <span class="nf">NormalTT</span><span class="p">(</span><span class="o">~</span><span class="n">MacroExpander</span><span class="p">:</span><span class="nv">'static</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
+
+    <span class="c">/// A function-like syntax extension that has an extra ident before</span>
+    <span class="c">/// the block.</span>
+    <span class="c">///</span>
+    <span class="c">/// `macro_rules!` is an `IdentTT`.</span>
+    <span class="nf">IdentTT</span><span class="p">(</span><span class="o">~</span><span class="n">IdentMacroExpander</span><span class="p">:</span><span class="nv">'static</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Span</span><span class="o">&gt;</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">ItemDecorator</span> <span class="o">=</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">Span</span><span class="p">,</span> <span class="o">@</span><span class="n">MetaItem</span><span class="p">,</span> <span class="o">@</span><span class="n">Item</span><span class="p">,</span> <span class="p">|</span><span class="o">@</span><span class="n">Item</span><span class="p">|);</span>
+<span class="k">type</span> <span class="n">ItemModifier</span> <span class="o">=</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">Span</span><span class="p">,</span> <span class="o">@</span><span class="n">MetaItem</span><span class="p">,</span> <span class="o">@</span><span class="n">Item</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">@</span><span class="n">Item</span><span class="p">;</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">MacroExpander</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">ecx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">token_tree</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">TokenTree</span><span class="p">])</span> <span class="k">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">IdentMacroExpander</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">expand</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">cx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">ExtCtxt</span><span class="p">,</span> <span class="n">sp</span><span class="p">:</span> <span class="n">Span</span><span class="p">,</span> <span class="n">ident</span><span class="p">:</span> <span class="n">Ident</span><span class="p">,</span> <span class="n">token_tree</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">TokenTree</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">~</span><span class="n">MacResult</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/// The result of a macro expansion. The return values of the various</span>
+<span class="c">/// methods are spliced into the AST at the callsite of the macro (or</span>
+<span class="c">/// just into the compiler's internal macro table, for `make_def`).</span>
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">MacResult</span> <span class="p">{</span>
+    <span class="c">/// Define a new macro.</span>
+    <span class="k">fn</span> <span class="nf">make_def</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">MacroDef</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="nb">None</span>
+    <span class="p">}</span>
+    <span class="c">/// Create an expression.</span>
+    <span class="k">fn</span> <span class="nf">make_expr</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;@</span><span class="nn">ast</span><span class="p">::</span><span class="n">Expr</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="nb">None</span>
+    <span class="p">}</span>
+    <span class="c">/// Create zero or more items.</span>
+    <span class="k">fn</span> <span class="nf">make_items</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">SmallVector</span><span class="o">&lt;@</span><span class="nn">ast</span><span class="p">::</span><span class="n">Item</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+        <span class="nb">None</span>
+    <span class="p">}</span>
+
+    <span class="c">/// Create a statement.</span>
+    <span class="c">///</span>
+    <span class="c">/// By default this attempts to create an expression statement,</span>
+    <span class="c">/// returning None if that fails.</span>
+    <span class="k">fn</span> <span class="nf">make_stmt</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;@</span><span class="nn">ast</span><span class="p">::</span><span class="n">Stmt</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="k">self</span><span class="nf">.make_expr</span><span class="p">()</span>
+            <span class="nf">.map</span><span class="p">(|</span><span class="n">e</span><span class="p">|</span> <span class="o">@</span><span class="nn">codemap</span><span class="p">::</span><span class="nf">respan</span><span class="p">(</span><span class="n">e</span><span class="py">.span</span><span class="p">,</span> <span class="nn">ast</span><span class="p">::</span><span class="nf">StmtExpr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nn">ast</span><span class="p">::</span><span class="n">DUMMY_NODE_ID</span><span class="p">)))</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="how-to-call">How to call</h2>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">syntax</span><span class="p">::</span><span class="nn">parse</span><span class="p">::</span><span class="n">token</span><span class="p">;</span>
+
+<span class="nd">#[macro_registrar]</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">registrar</span><span class="p">(</span><span class="n">register</span><span class="p">:</span> <span class="p">|</span><span class="n">Name</span><span class="p">,</span> <span class="n">SyntaxExtension</span><span class="p">|)</span> <span class="p">{</span>
+    <span class="nf">register</span><span class="p">(</span><span class="nn">token</span><span class="p">::</span><span class="nf">intern</span><span class="p">(</span><span class="s">"your_ext_name"</span><span class="p">),</span> <span class="n">your_extension</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Note: <code class="language-plaintext highlighter-rouge">registrar</code> is not <code class="language-plaintext highlighter-rouge">register</code>.</p>
+
+<p>How to create each part:</p>
+
+<p><code class="language-plaintext highlighter-rouge">Name</code> is generated from
+<code class="language-plaintext highlighter-rouge">syntax::parse::token::intern()</code>.</p>
+
+<p>For different SyntaxExtension Enum, write the function, and wrap in Enum constructor.</p>
+
+<h3 id="itemdecorator">ItemDecorator</h3>
+
+<p><code class="language-plaintext highlighter-rouge">src/libsyntax/ext/deriving/mod.rs</code>. The
+<code class="language-plaintext highlighter-rouge">#[deriving(...)</code>.</p>
+
+<p>To make items from an existing item.</p>
+
+<h3 id="itemmodifier">ItemModifier</h3>
+
+<p><code class="language-plaintext highlighter-rouge">src/test/auxiliary/macro_crate_test.rs</code></p>
+
+<p>Modify existing item.</p>
+
+<h3 id="normaltt">NormalTT</h3>
+
+<p>Builtin sample in: <code class="language-plaintext highlighter-rouge">src/libsyntax/ext/base.rs</code> and sub dirs.
+Normal <code class="language-plaintext highlighter-rouge">macro_name!(...)</code> call.</p>
+
+<h3 id="identtt">IdentTT</h3>
+
+<p>Builtin sample in: <code class="language-plaintext highlighter-rouge">src/libsyntax/ext/tt/macro_rules.rs</code>, <code class="language-plaintext highlighter-rouge">pub fn add_new_extension</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>macro_name! ident(
+    whatever here...
+)
+</code></pre></div></div>
+
+<h2 id="aux">Aux</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">quote</code> feature.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#![feature(quote, phase)]
+</code></pre></div></div>
+
+<p>This enables <code class="language-plaintext highlighter-rouge">quote_expr!(ExtCtxt, [Code])</code>, <code class="language-plaintext highlighter-rouge">quote_tokens!</code>,
+<code class="language-plaintext highlighter-rouge">quote_item!</code>, <code class="language-plaintext highlighter-rouge">quote_pat!</code>, <code class="language-plaintext highlighter-rouge">quote_stmt!</code>, <code class="language-plaintext highlighter-rouge">quote_ty!</code> macros,
+and generates corresponding ast type.</p>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2014/04/23/rust-syntax-extensions/" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/';
+      this.page.identifier = 'https://andelf.github.io/blog/2014/04/23/rust-syntax-extensions/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
