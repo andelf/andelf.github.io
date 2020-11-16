@@ -32,7 +32,7 @@ theme: minima
 plugins:
   - jekyll-feed
 
-# permalink: ":categories/:year/:month/:day/:title/"
+permalink: ":categories/:year/:month/:day/:title/"
 
 # Exclude from processing.
 # The following items will not be processed, by default.
