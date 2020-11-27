@@ -13,11 +13,18 @@ layout: default
       {%- if page.author -%}
       • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card"
           itemprop="name">{{ page.author }}</span></span>
-      {%- endif -%}</p>
-    {%- if page.tags -%}
-      <p>Tags: {{ page.tags | join: ', ' }}</p>
-    {%- endif -%}</p>
+      {%- endif -%}
+      {%- if page.tags -%}
+      • <span>Tags: {{ page.tags | join: ', ' }}</span>
+      {%- endif -%}
+    </p>
 
+    {%- if page.image -%}
+    <p>
+      <img src="{{ page.image}}" alt="thumbnail" height="200px" />
+      <hr />
+    </p>
+    {%- endif -%}
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
