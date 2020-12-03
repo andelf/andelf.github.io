@@ -131,6 +131,14 @@ table td { border: 1px solid #e8e8e8; }
 .post-link { display: block; font-size: 24px; }
 
 /** Posts */
+.post h1.post-title::before { content: "# "; }
+
+.post h2::before { content: "## "; }
+
+.post h3::before { content: "### "; }
+
+.post h4::before { content: "#### "; }
+
 .post-header { margin-bottom: 30px; }
 
 .post-title { font-size: 42px; letter-spacing: -1px; line-height: 1; }
