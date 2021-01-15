@@ -22,11 +22,14 @@ layout: default
     {%- if page.image -%}
     <p>
       <img src="{{ page.image}}" alt="thumbnail" height="200px" />
-      <hr />
     </p>
+    <hr />
     {%- endif -%}
+    <div class="table-of-contents">
+      {% toc %}
+    </div>
+    <hr />
   </header>
-
   <div class="post-content e-content" itemprop="articleBody">
     {{ content }}
   </div>
