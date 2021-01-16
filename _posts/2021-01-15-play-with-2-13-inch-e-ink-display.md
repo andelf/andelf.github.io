@@ -414,7 +414,7 @@ void setup() {
 
 效果大概是(忘记拍照了，这里是另外一个开源字体 Sarasa):
 
-![Chicken soup]](https://user-images.githubusercontent.com/72891/104816620-5b2ce500-5857-11eb-92fe-2dbd3add8eda.jpg)
+![Chicken soup](https://user-images.githubusercontent.com/72891/104816620-5b2ce500-5857-11eb-92fe-2dbd3add8eda.jpg)
 
 是的，毒鸡汤。至此中文字体搞定，其他 CJK 字体同理。
 
