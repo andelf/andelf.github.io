@@ -710,7 +710,7 @@ brew <span class="nb">install </span>libraqm
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>VS[0A-HL] = 01
 VS[0A-LH] = 10
 
-# 其他为 00
+# 其他情况为 00
 </code></pre></div></div>
 
 <p>手册中有介绍 VS 格式:</p>
@@ -718,6 +718,9 @@ VS[0A-LH] = 10
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00–VSS
 01–VSH
 10–VSL
+
+分别是三种电压输出级别，其中 VSS 与顶版 VCOM 相等。相当于无电场存在。
+VSH, VSL 分别会导致是两种不同的电场方向。
 </code></pre></div></div>
 
 <p>所以解读 phase0A 的配置即:</p>

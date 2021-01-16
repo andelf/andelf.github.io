@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2021-01-17T00:05:54+08:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Play with 2.13 inch E-Ink display</title><link href="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" rel="alternate" type="text/html" title="Play with 2.13 inch E-Ink display" /><published>2021-01-15T01:24:00+08:00</published><updated>2021-01-15T01:24:00+08:00</updated><id>https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display</id><content type="html" xml:base="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/">&lt;p&gt;故事从买屏幕说起。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2021-01-17T00:18:04+08:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Play with 2.13 inch E-Ink display</title><link href="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" rel="alternate" type="text/html" title="Play with 2.13 inch E-Ink display" /><published>2021-01-15T01:24:00+08:00</published><updated>2021-01-15T01:24:00+08:00</updated><id>https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display</id><content type="html" xml:base="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/">&lt;p&gt;故事从买屏幕说起。&lt;/p&gt;
 
 &lt;p&gt;无聊逛咸鱼，发现有便宜的电子墨水屏，这玩意正常价格大几十，而咸鱼一片 2.13 寸模块只需要 15 块钱人民币。&lt;/p&gt;
 
@@ -618,7 +618,7 @@ brew &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;libraqm
 &lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;VS[0A-HL] = 01
 VS[0A-LH] = 10
 
-# 其他为 00
+# 其他情况为 00
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;手册中有介绍 VS 格式:&lt;/p&gt;
@@ -626,6 +626,9 @@ VS[0A-LH] = 10
 &lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;00–VSS
 01–VSH
 10–VSL
+
+分别是三种电压输出级别，其中 VSS 与顶版 VCOM 相等。相当于无电场存在。
+VSH, VSL 分别会导致是两种不同的电场方向。
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;所以解读 phase0A 的配置即:&lt;/p&gt;
