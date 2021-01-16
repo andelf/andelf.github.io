@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2021-01-16T23:51:47+08:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Play with 2.13 inch E-Ink display</title><link href="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" rel="alternate" type="text/html" title="Play with 2.13 inch E-Ink display" /><published>2021-01-15T01:24:00+08:00</published><updated>2021-01-15T01:24:00+08:00</updated><id>https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display</id><content type="html" xml:base="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/">&lt;p&gt;故事从买屏幕说起。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2021-01-16T23:55:49+08:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Play with 2.13 inch E-Ink display</title><link href="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" rel="alternate" type="text/html" title="Play with 2.13 inch E-Ink display" /><published>2021-01-15T01:24:00+08:00</published><updated>2021-01-15T01:24:00+08:00</updated><id>https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display</id><content type="html" xml:base="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/">&lt;p&gt;故事从买屏幕说起。&lt;/p&gt;
 
 &lt;p&gt;无聊逛咸鱼，发现有便宜的电子墨水屏，这玩意正常价格大几十，而咸鱼一片 2.13 寸模块只需要 15 块钱人民币。&lt;/p&gt;
 
@@ -434,13 +434,17 @@ brew &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;libraqm
 &lt;span class=&quot;c1&quot;&gt;// ...&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;效果大概是:&lt;/p&gt;
+&lt;p&gt;效果大概是(忘记拍照了，这里是另外一个开源字体 Sarasa):&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/72891/104683643-4a368380-5732-11eb-9711-39846547dee2.jpg&quot; alt=&quot;1203877657&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;是的，毒鸡汤。至此中文字体搞定，其他 CJK 字体同理。&lt;/p&gt;
 
 &lt;p&gt;而英文字体就更简单了，参考其他驱动中的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;font*&lt;/code&gt; 文件即可。字型生成代码略改即可使用。&lt;/p&gt;
+
+&lt;p&gt;具体制作中可以混合中英文大小字体，还可以选择例如数码管字体等方案，完成布局。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/72891/104816434-21a7aa00-5856-11eb-9dd3-dc05255c8cdb.jpg&quot; alt=&quot;Mixed Font&quot; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;其他显示需求&quot;&gt;其他显示需求&lt;/h2&gt;
 
