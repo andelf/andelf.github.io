@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2021-01-16T23:55:49+08:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Play with 2.13 inch E-Ink display</title><link href="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" rel="alternate" type="text/html" title="Play with 2.13 inch E-Ink display" /><published>2021-01-15T01:24:00+08:00</published><updated>2021-01-15T01:24:00+08:00</updated><id>https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display</id><content type="html" xml:base="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/">&lt;p&gt;故事从买屏幕说起。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2021-01-17T00:00:24+08:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Play with 2.13 inch E-Ink display</title><link href="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" rel="alternate" type="text/html" title="Play with 2.13 inch E-Ink display" /><published>2021-01-15T01:24:00+08:00</published><updated>2021-01-15T01:24:00+08:00</updated><id>https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display</id><content type="html" xml:base="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/">&lt;p&gt;故事从买屏幕说起。&lt;/p&gt;
 
 &lt;p&gt;无聊逛咸鱼，发现有便宜的电子墨水屏，这玩意正常价格大几十，而咸鱼一片 2.13 寸模块只需要 15 块钱人民币。&lt;/p&gt;
 
@@ -522,9 +522,9 @@ brew &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;libraqm
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;首先以 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;EPD_2IN13_PART&lt;/code&gt; 方式重新初始化屏幕（不用清屏），然后就通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Paint_ClearWindows&lt;/code&gt; 清除需要局部更新的矩形区域，
-之后就可以使用各种绘图绘字符函数填写屏幕的这部分。&lt;/p&gt;
+之后就可以使用各种绘图绘字符函数填写屏幕的这部分。最后调用 Display 上屏。&lt;/p&gt;
 
-&lt;p&gt;局部刷新的效果因屏幕体质不同各异，经常会遇到残影特别严重的时候。也可以学习电纸书，局部刷新&lt;/p&gt;
+&lt;p&gt;局部刷新的效果因屏幕体质不同各异，经常会遇到残影特别严重的时候。做小制作的时候也可以学习电纸书，局部刷新多次后全局刷新一次。&lt;/p&gt;
 
 &lt;h2 id=&quot;再看显示原理&quot;&gt;再看显示原理&lt;/h2&gt;
 
