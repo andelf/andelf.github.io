@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Play with 2.13 inch E-Ink display | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Play with 2.13 inch E-Ink display" />
+<meta name="author" content="andelf" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="故事从买屏幕说起。" />
+<meta property="og:description" content="故事从买屏幕说起。" />
+<link rel="canonical" href="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" />
+<meta property="og:url" content="https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:image" content="https://user-images.githubusercontent.com/72891/104635824-6825c900-56dd-11eb-8caa-d5eb00d11f70.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-15T01:24:00+08:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://user-images.githubusercontent.com/72891/104635824-6825c900-56dd-11eb-8caa-d5eb00d11f70.jpg" />
+<meta property="twitter:title" content="Play with 2.13 inch E-Ink display" />
+<script type="application/ld+json">
+{"url":"https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/","author":{"@type":"Person","name":"andelf"},"image":"https://user-images.githubusercontent.com/72891/104635824-6825c900-56dd-11eb-8caa-d5eb00d11f70.jpg","headline":"Play with 2.13 inch E-Ink display","dateModified":"2021-01-15T01:24:00+08:00","datePublished":"2021-01-15T01:24:00+08:00","description":"故事从买屏幕说起。","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Play with 2.13 inch E-Ink display</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-01-15T01:24:00+08:00" itemprop="datePublished">Jan 15, 2021
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card"
+          itemprop="name">andelf</span></span>• <span>Tags: embedded, epd</span></p><p>
+      <img src="https://user-images.githubusercontent.com/72891/104635824-6825c900-56dd-11eb-8caa-d5eb00d11f70.jpg" alt="thumbnail" height="200px" />
+    </p>
+    <hr /><div class="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#背景">背景</a></li>
+<li class="toc-entry toc-h2"><a href="#准备开搞">准备开搞</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#esp8266">ESP8266</a></li>
+<li class="toc-entry toc-h3"><a href="#屏幕官方例程">屏幕官方例程</a></li>
+<li class="toc-entry toc-h3"><a href="#end-of-get-start">End of get start</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#中文显示">中文显示</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#官方驱动字库格式">官方驱动字库格式</a></li>
+<li class="toc-entry toc-h3"><a href="#生成字库">生成字库</a></li>
+<li class="toc-entry toc-h3"><a href="#使用字库">使用字库</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#其他显示需求">其他显示需求</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#图片显示">图片显示</a></li>
+<li class="toc-entry toc-h3"><a href="#局部刷新">局部刷新</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#再看显示原理">再看显示原理</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#lut">LUT</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#idea">Idea</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h3"><a href="#framebuffer">framebuffer</a></li>
+<li class="toc-entry toc-h3"><a href="#next">Next</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#参考">参考</a></li>
+</ul>
+    </div>
+    <hr />
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>故事从买屏幕说起。</p>
+
+<p>无聊逛咸鱼，发现有便宜的电子墨水屏，这玩意正常价格大几十，而咸鱼一片 2.13 寸模块只需要 15 块钱人民币。</p>
+
+<p>是的，还等啥，先来几片凑个包邮。</p>
+
+<p>了解到之所以这么便宜，是因为实际上是拆机屏，拆的是电子价签。来自一茬又一茬倒闭的超市和便利店。</p>
+
+<h2 id="背景">背景</h2>
+
+<p>电子墨水屏，也叫 E-ink, 墨水屏（瓶），电子纸，也简写为 EPD(Electronic Paper Display)。</p>
+
+<p>和你用来压泡面的 Kindle 的屏幕是一个东西。只不过你的 Kindle 屏幕更大素质更高，而超市价签要小很多，相对低成本。</p>
+
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Electronic_paper_%28Side_view_of_Electrophoretic_display%29_in_svg.svg/2560px-Electronic_paper_%28Side_view_of_Electrophoretic_display%29_in_svg.svg.png" alt="E-Ink technology" /></p>
+
+<p>如上来自维基，原理一目了然。</p>
+
+<p>不需要扯什么 gate 什么的，每个像素是一个小胶囊，顶部是公共 \(V_{com}\) 电压，透明。
+底面是驱动芯片在屏幕每一行每一列像素的输出电压，可正可负（相对于 \(V_{com}\)），胶囊内部是对电场方向有反应的带电颜色微粒。
+不同电压不同时长作用下，胶囊顶部上的微粒分布情况不同，肉眼看到的像素深浅就不同。</p>
+
+<p>屏幕的驱动芯片，和我们常见的 IC 芯片那种黑色块带引脚是不同的，屏幕驱动芯片一般和屏幕一起封装，
+对应屏幕的行列有输出。对外暴露接口，物理上一般是排线。</p>
+
+<h2 id="准备开搞">准备开搞</h2>
+
+<p>屏幕模块到手。显示“微雪电子”，那当然是不可能的，这只是因为默认用了微雪的示例代码出厂测试。
+墨水屏的特点就是断电画面驻留，也可以说保持显示状态不需要供电。</p>
+
+<p><img src="https://user-images.githubusercontent.com/72891/104638297-f5b6e800-56e0-11eb-93d6-0bc0fde0d475.jpg" alt="Boards" /></p>
+
+<p>合影是一只凑单的 STM32F4 板子（本例未用到），一只 ESP8266（就准备用它来驱动屏幕了），和屏幕模块（主角）。</p>
+
+<p>一共需要八根线驱动。熟悉的 SPI + CS + DC 式，和多数 SPI 接口的 LCD / TFT-LCD 屏幕接口类似。</p>
+
+<p>不同的是多了一个 BUSY pin，这是墨水屏特有的输出信号，表示屏幕正在刷新，其他操作需要 MCU 延后。</p>
+
+<p>告知该模块兼容微雪 2.13 寸黑白屏幕 v1 版。参数如下:</p>
+
+<ul>
+  <li>尺寸： 2.13 inch</li>
+  <li>外形尺寸（裸屏）：59.2mm × 29.2mm × 1.05mm</li>
+  <li>显示尺寸：48.55mm × 23.71mm</li>
+  <li>工作电压：3.3V/5V</li>
+  <li>通信接口：SPI</li>
+  <li>点距：0.194*0.194</li>
+  <li>分辨率：250*122</li>
+  <li>显示颜色：黑、白</li>
+  <li>灰度等级：2</li>
+  <li>局部刷新 ：0.3s</li>
+  <li>全局刷新 ：2s</li>
+  <li>刷新功耗 ： 26.4mW(typ.)</li>
+  <li>待机功耗 ：&lt;=0.017mW</li>
+</ul>
+
+<p>查询模块手册，得知该显示屏驱动芯片是 IL3895, 来自 Good Display(大连佳显)。
+屏幕排线上有型号 HINK-E0213A04-G01(HINK-E0213-G01).</p>
+
+<h3 id="esp8266">ESP8266</h3>
+
+<p>ESP8266 算是较推荐的墨水屏之友，IO 接口不多但够用，带 WiFi 功能, 适合做这类显示屏小制作。
+可以轻易找到各类天气时钟等代码。</p>
+
+<p>推荐编程环境 Arduino. 省事。需要安装 <a href="https://github.com/esp8266/Arduino">ESP8266 Board Support 库</a>.</p>
+
+<p>我这里的 ESP8266 板子是一只 NodeMCU DevKit 兼容板。最普通不过，但比较麻烦的是它的管脚标签和标准的 ESP8266 GPIO
+之间有一个映射关系。</p>
+
+<p><img src="https://user-images.githubusercontent.com/72891/104639665-a2de3000-56e2-11eb-9396-04cf946880bd.png" alt="NodeMCU GPIOs" />
+(ref: <a href="https://www.electronicwings.com/nodemcu/nodemcu-gpio-with-arduino-ide">https://www.electronicwings.com/nodemcu/nodemcu-gpio-with-arduino-ide</a>)</p>
+
+<p>搞清楚映射关系，写代码就不会错了。</p>
+
+<p>官方有出售专门的 ESP8266 驱动板，集成了 ESP8266, 只需要按照相同的接线，即可使用官方例程。</p>
+
+<p>接线方式:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>EPD board</th>
+      <th style="text-align: right">NodeMCU pin</th>
+      <th style="text-align: right">ESP8266 pin</th>
+      <th style="text-align: right">description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BUSY</td>
+      <td style="text-align: right">D1</td>
+      <td style="text-align: right">GPIO5</td>
+      <td style="text-align: right">屏幕刷新忙</td>
+    </tr>
+    <tr>
+      <td>RES/RST</td>
+      <td style="text-align: right">D4</td>
+      <td style="text-align: right">2</td>
+      <td style="text-align: right">复位</td>
+    </tr>
+    <tr>
+      <td>DC</td>
+      <td style="text-align: right">D2</td>
+      <td style="text-align: right">4</td>
+      <td style="text-align: right">Data/Command 信号</td>
+    </tr>
+    <tr>
+      <td>CS</td>
+      <td style="text-align: right">D8</td>
+      <td style="text-align: right">15</td>
+      <td style="text-align: right">片选</td>
+    </tr>
+    <tr>
+      <td>CLK/SCK</td>
+      <td style="text-align: right">D5</td>
+      <td style="text-align: right">14</td>
+      <td style="text-align: right">SPI 时钟</td>
+    </tr>
+    <tr>
+      <td>DIN/SDA</td>
+      <td style="text-align: right">D7</td>
+      <td style="text-align: right">13</td>
+      <td style="text-align: right">SPI MOSI</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>常识 VCC = 3.3V, GND 接地。</p>
+
+<h3 id="屏幕官方例程">屏幕官方例程</h3>
+
+<p>虽然不是官方正版，只是个拆机屏模块，但好在屏幕型号一致，全兼容微雪官方例程。</p>
+
+<ul>
+  <li><a href="https://www.waveshare.net/wiki/E-Paper_ESP8266_Driver_Board">官方 ESP8266 驱动板及例程</a></li>
+</ul>
+
+<p>官方例程解压后子目录复制到 Arduino libraries 目录。</p>
+
+<p>然后就可以直接从 Arduino 的 File-&gt;Examples 菜单打开例程。</p>
+
+<p>例程压缩包中的 <code class="language-plaintext highlighter-rouge">src/</code>, <code class="language-plaintext highlighter-rouge">extras/</code> 目录，其实就是官方驱动，所有的不同型号屏幕的例程，都依赖驱动库。</p>
+
+<p>该款屏幕的例程是 <code class="language-plaintext highlighter-rouge">waveshare-e-Paper/epd2in13-demo</code>.</p>
+
+<p>设备选择 NodeMCU 或 Generic EPS8266, 编译上传例程。</p>
+
+<p>屏幕噌噌闪动几下，清屏后，开始执行例程。</p>
+
+<p><img src="https://user-images.githubusercontent.com/72891/104642461-e4bca580-56e5-11eb-9a8f-ea2c7a38da22.jpg" alt="Official Demo" /></p>
+
+<p>屏幕右下角的时间显示，秒位在不停变动。</p>
+
+<p>例程中可以看到基础绘图，中英文数字显示，时间显示（局部刷新功能）。照着改改可以整出不少好玩的。
+再加上 ESP8266 的 WiFi 功能，想象力足够。</p>
+
+<h3 id="end-of-get-start">End of get start</h3>
+
+<p>至此，屏幕跑通。画画图，改改文字，皆大欢喜。🤪</p>
+
+<hr />
+
+<p>以下是干货部分。需要知识预备:</p>
+
+<ul>
+  <li>二进制位运算知识</li>
+  <li>数字电子基础</li>
+  <li>电路基础</li>
+  <li>计算机图形学基础概念</li>
+</ul>
+
+<h2 id="中文显示">中文显示</h2>
+
+<p>看到例程中直接有中文显示语句，暗爽不是？</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Paint_DrawString_CN</span><span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s">"你好abc"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Font12CN</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">,</span> <span class="n">WHITE</span><span class="p">);</span>
+<span class="n">Paint_DrawString_CN</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="s">"**电子"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Font24CN</span><span class="p">,</span> <span class="n">WHITE</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>于是改成“你好世界”，然而只见“你好”不见“世界”。</p>
+
+<p>是的，官方例程（驱动）里没有完整字库，只有测试时候屏幕上出现的那几个汉字。所以需要加字库！</p>
+
+<p>我们能接触到的绝大多数屏幕，都是点阵屏。
+所谓字库，就是字符编码到图形象素点的映射。所以这里要增加缺失的字型，怎么整？</p>
+
+<p>先看看官方怎么实现的。</p>
+
+<p>当然，字库还有其他意思，在手机维修界，字库也指 ROM 芯片。
+这是历史遗留问题了，当年字库都存在专门的芯片里。
+字库和字库芯片在很多场合不区分。这里叫字库，其实是字模，即汉字的模型，对应的二进制数据。</p>
+
+<h3 id="官方驱动字库格式">官方驱动字库格式</h3>
+
+<p>找到驱动目录 <code class="language-plaintext highlighter-rouge">~/Documents/Arduino/libraries/esp8266-waveshare-epd</code>.</p>
+
+<p>在 <code class="language-plaintext highlighter-rouge">src/</code> 目录下，找到若干 <code class="language-plaintext highlighter-rouge">font*.cpp</code>, <code class="language-plaintext highlighter-rouge">font*.h</code> 文件就是字库了。</p>
+
+<p>例如 <code class="language-plaintext highlighter-rouge">font12CN</code> 字体，微软雅黑 12:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="n">CH_CN</span> <span class="n">Font12CN_Table</span><span class="p">[]</span> <span class="o">=</span>
+<span class="p">{</span>
+    <span class="cm">/*--  文字:  你  --*/</span>
+    <span class="cm">/*--  微软雅黑12;  此字体下对应的点阵为：宽x高=16x21   --*/</span>
+    <span class="p">{</span><span class="s">"你"</span><span class="p">,</span>
+    <span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x1D</span><span class="p">,</span><span class="mh">0xC0</span><span class="p">,</span><span class="mh">0x1D</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0x07</span><span class="p">,</span>
+    <span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x7E</span><span class="p">,</span><span class="mh">0x76</span><span class="p">,</span><span class="mh">0xF8</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0xFB</span><span class="p">,</span><span class="mh">0xFE</span><span class="p">,</span><span class="mh">0xFB</span><span class="p">,</span><span class="mh">0xFE</span><span class="p">,</span><span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x3E</span><span class="p">,</span><span class="mh">0x73</span><span class="p">,</span>
+    <span class="mh">0x38</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0x38</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">},</span>
+    <span class="c1">// ...</span>
+    <span class="p">{</span><span class="s">"A"</span><span class="p">,</span>
+    <span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x0E</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span>
+    <span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x71</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x7F</span><span class="p">,</span><span class="mh">0xC0</span><span class="p">,</span><span class="mh">0x71</span><span class="p">,</span><span class="mh">0xC0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span>
+    <span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">},</span>
+<span class="p">};</span>
+
+<span class="n">cFONT</span> <span class="n">Font12CN</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="n">Font12CN_Table</span><span class="p">,</span>
+  <span class="k">sizeof</span><span class="p">(</span><span class="n">Font12CN_Table</span><span class="p">)</span><span class="o">/</span><span class="k">sizeof</span><span class="p">(</span><span class="n">CH_CN</span><span class="p">),</span>  <span class="cm">/*size of table*/</span>
+  <span class="mi">11</span><span class="p">,</span> <span class="cm">/* ASCII Width */</span>
+  <span class="mi">16</span><span class="p">,</span> <span class="cm">/* Width */</span>
+  <span class="mi">21</span><span class="p">,</span> <span class="cm">/* Height */</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>明显看到中文字库分两部分，一部分是字型表 <code class="language-plaintext highlighter-rouge">Font12CN_Table</code>, 一部分是配置结构体 <code class="language-plaintext highlighter-rouge">Font12CN</code>.
+字型表即字的象素点二进制表示。因为中文字符较多，为节省空间字库只有例程所需汉字，
+所以每条记录第一个元素是中文汉字，用于索引。
+而对于英文字库来说，字符是连续的，且总体占用空间较小，一般使用连续字节块表示。</p>
+
+<p>从配置结构我们可以得知，该字型宽 16 位，高 21 位，即两个字节表示一行象素，一共 21 行。
+我们可以写个脚本展示下:</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">char</span> <span class="o">=</span> <span class="p">[</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x1D</span><span class="p">,</span><span class="mh">0xC0</span><span class="p">,</span><span class="mh">0x1D</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0x07</span><span class="p">,</span>
+    <span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x7E</span><span class="p">,</span><span class="mh">0x76</span><span class="p">,</span><span class="mh">0xF8</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0xFB</span><span class="p">,</span><span class="mh">0xFE</span><span class="p">,</span><span class="mh">0xFB</span><span class="p">,</span><span class="mh">0xFE</span><span class="p">,</span><span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x3E</span><span class="p">,</span><span class="mh">0x73</span><span class="p">,</span>
+    <span class="mh">0x38</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0x38</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">]</span>
+<span class="c1"># group by 2 -&gt; to 0-1 -&gt; padding with 0
+</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s">"%08d%08d"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">l</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">r</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]))</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">char</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">char</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">])]</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'0'</span><span class="p">,</span> <span class="s">'.'</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'1'</span><span class="p">,</span> <span class="s">'*'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>得到命令行下输出:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>................
+................
+................
+................
+...***.***......
+...***.**.......
+..***.**********
+..***.**.....***
+..******.***.***
+.******..***.**.
+*****....***....
+*****.*********.
+*****.*********.
+..******.***.***
+..******.***.***
+..*****..***..**
+..***....***....
+..***....***....
+..***.*****.....
+................
+................
+</code></pre></div></div>
+
+<p>一个汉字被解析了出来，以点阵的方式展示。上方和下方的 0, 用于行间距。
+在实际应用中可以省去，节约空间。</p>
+
+<p>而配置中的 ASCII Width 11 表示该中文字体中的 ASCII 字符宽度。因为半角全角的关系，
+中文字体中的半角英文字符(ASCII)相对来说宽度都不足一字，为了显示效果，不留过多字间距，
+丢弃多余位不用，所以这里单独有一个配置项。</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">char</span> <span class="o">=</span> <span class="p">[</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x0E</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span>
+     <span class="p">...:</span>     <span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x71</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x7F</span><span class="p">,</span><span class="mh">0xC0</span><span class="p">,</span><span class="mh">0x71</span><span class="p">,</span><span class="mh">0xC0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span>
+     <span class="p">...:</span>     <span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">]</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s">"%08d%08d"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">l</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">r</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]))</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">char</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">char</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">])]</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'0'</span><span class="p">,</span> <span class="s">'.'</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'1'</span><span class="p">,</span> <span class="s">'*'</span><span class="p">))</span>
+
+<span class="c1"># outputs:
+</span><span class="s">"""
+................
+................
+................
+................
+................
+....***.........
+...*****........
+...*****........
+...*****........
+..***.***.......
+..***.***.......
+.***...**.......
+.*********......
+.***...***......
+***.....***.....
+***.....***.....
+***.....***.....
+................
+................
+................
+................
+"""</span>
+</code></pre></div></div>
+
+<h3 id="生成字库">生成字库</h3>
+
+<p>搞明白了原理和格式，接下来就是生成所需的字库了。网上有非常多的 Windows 下小工具可以做。
+但我这么肝，就自己写了。代码来自之前给 TFT-LCD 写的抠字模小脚本儿。</p>
+
+<p>原理很简单，用 <code class="language-plaintext highlighter-rouge">Pillow/PIL</code> 即可。先把需要的字画在图片上，然后读取象素点，移位生成对于字节表示。
+最后最好直接生成 C 代码，就万事大吉。</p>
+
+<p>而字体选择，一般使用点阵字体而非矢量字体，矢量字体在渲染的时候边缘都是带灰阶的，
+如果忽略灰阶直接二值化，会导致最终字型锯齿严重，丑。</p>
+
+<p>为了方便处理，这里选用开源的等宽字体<a href="http://wenq.org/wqy2/index.cgi?Unibit">文泉驿点阵字体 Unibit</a>.
+以中文点阵最常见的 16x16 输出。正好两个字节宽，16 行高，一个汉字 32 字节。
+英文字符也正好是中文字符宽度的一半。</p>
+
+<p>当然你可以随便从系统找个中文字体。需要注意的是，为了在黑白（无灰度）屏幕上达到最好效果，需要位图字体(bitmap font, raster font, pixel font),
+否则矢量字体在渲染的过程中会有灰阶边缘，最终屏幕效果锯齿明显。</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装依赖</span>
+
+pip3 <span class="nb">install </span>Pillow
+
+<span class="c"># 用于字体缩放的依赖库</span>
+brew <span class="nb">install </span>libraqm
+</code></pre></div></div>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageDraw</span><span class="p">,</span> <span class="n">ImageFont</span>
+<span class="kn">import</span> <span class="nn">PIL.features</span>
+
+<span class="c1"># brew install libraqm
+</span><span class="k">assert</span> <span class="n">PIL</span><span class="p">.</span><span class="n">features</span><span class="p">.</span><span class="n">check</span><span class="p">(</span><span class="s">'raqm'</span><span class="p">),</span> <span class="s">"libraqm required"</span>
+
+<span class="c1"># 画布大小
+</span><span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">320</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+
+<span class="c1"># 黑白格式
+</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="s">'1'</span>
+<span class="n">BG</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">FG</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># Y offset, 多数字体有自带行间距，可以用此参数消除行间距
+</span><span class="n">YOFF</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># or -1
+</span>
+
+<span class="n">CHARS</span> <span class="o">=</span> <span class="s">"晴天卧槽可以了！你好世界最怕你一生碌碌无为，还安慰自己平凡可贵。雾霾"</span>
+<span class="n">CHARS</span> <span class="o">=</span> <span class="s">''</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">CHARS</span><span class="p">)))</span>
+
+<span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="n">FORMAT</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">BG</span><span class="p">)</span>
+
+<span class="n">font</span> <span class="o">=</span> <span class="n">ImageFont</span><span class="p">.</span><span class="n">truetype</span><span class="p">(</span><span class="s">"Unibit.ttf"</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="p">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+
+<span class="c1"># 代码段用于检查字体渲染
+# draw.text((0, YOFF), CHARS, font=font, fill=FG, language='zh-CN')
+# im.save('font.png')
+# im.show()
+</span>
+<span class="n">draw</span><span class="p">.</span><span class="n">rectangle</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="n">BG</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">CHARS</span><span class="p">):</span>
+    <span class="n">charmap</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">draw</span><span class="p">.</span><span class="n">text</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">YOFF</span><span class="p">),</span> <span class="n">c</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">FG</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16</span><span class="p">):</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">im</span><span class="p">.</span><span class="n">getpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+
+        <span class="n">charmap</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="n">charmap</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span>
+
+    <span class="n">draw</span><span class="p">.</span><span class="n">rectangle</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="n">BG</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"{"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">''</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'"{}", {}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s">', '</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="s">"0x%02x"</span> <span class="o">%</span> <span class="n">c</span><span class="p">,</span> <span class="n">charmap</span><span class="p">))),</span> <span class="n">end</span><span class="o">=</span><span class="s">""</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"},"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>直接输出 C 代码片段:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="s">"一"</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xfe</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">},</span>
+<span class="p">{</span><span class="s">"生"</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x3f</span><span class="p">,</span> <span class="mh">0xfc</span><span class="p">,</span> <span class="mh">0x21</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x81</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x3f</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xfe</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">},</span>
+<span class="p">{</span><span class="s">"碌"</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x21</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x78</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x4b</span><span class="p">,</span> <span class="mh">0xfe</span><span class="p">,</span> <span class="mh">0xc8</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">,</span> <span class="mh">0x4a</span><span class="p">,</span> <span class="mh">0x22</span><span class="p">,</span> <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0x74</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0xa8</span><span class="p">,</span> <span class="mh">0x79</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x4a</span><span class="p">,</span> <span class="mh">0x22</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0xa0</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">},</span>
+<span class="p">{</span><span class="s">"碌"</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x21</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x78</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x4b</span><span class="p">,</span> <span class="mh">0xfe</span><span class="p">,</span> <span class="mh">0xc8</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">,</span> <span class="mh">0x4a</span><span class="p">,</span> <span class="mh">0x22</span><span class="p">,</span> <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0x74</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0xa8</span><span class="p">,</span> <span class="mh">0x79</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x4a</span><span class="p">,</span> <span class="mh">0x22</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0xa0</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">},</span>
+<span class="p">{</span><span class="s">"无"</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x3f</span><span class="p">,</span> <span class="mh">0xf0</span><span class="p">,</span> <span class="mh">0x02</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x02</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x02</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x02</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x7f</span><span class="p">,</span> <span class="mh">0xfc</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="mh">0x84</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">,</span> <span class="mh">0x84</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mh">0x7c</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">},</span>
+<span class="p">{</span><span class="s">"为"</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x21</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x7f</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0x02</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x02</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x02</span><span class="p">,</span> <span class="mh">0x88</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mh">0x50</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0x20</span><span class="p">},</span>
+</code></pre></div></div>
+
+<h3 id="使用字库">使用字库</h3>
+
+<p>要想使用字体，我们需要新建一个字体 <code class="language-plaintext highlighter-rouge">.h</code> 文件，就叫 <code class="language-plaintext highlighter-rouge">ch_font.h</code>，在项目目录即可，不需要修改驱动库:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="cp">#include "fonts.h"
+</span>
+<span class="k">const</span> <span class="n">CH_CN</span> <span class="n">Font16CN_Table</span><span class="p">[]</span> <span class="o">=</span>
+<span class="p">{</span>
+    <span class="p">{</span><span class="s">"一"</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xfe</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">},</span>
+    <span class="p">{</span><span class="s">"生"</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x3f</span><span class="p">,</span> <span class="mh">0xfc</span><span class="p">,</span> <span class="mh">0x21</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x41</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x81</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x3f</span><span class="p">,</span> <span class="mh">0xf8</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xfe</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">},</span>
+    <span class="c1">// ... 这里写入剩余字型</span>
+<span class="p">};</span>
+
+<span class="n">cFONT</span> <span class="n">Font16CN</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="n">Font16CN_Table</span><span class="p">,</span>
+  <span class="k">sizeof</span><span class="p">(</span><span class="n">Font16CN_Table</span><span class="p">)</span><span class="o">/</span><span class="k">sizeof</span><span class="p">(</span><span class="n">CH_CN</span><span class="p">),</span>  <span class="cm">/*size of table*/</span>
+  <span class="mi">8</span><span class="p">,</span> <span class="cm">/* ASCII Width */</span>
+  <span class="mi">16</span><span class="p">,</span> <span class="cm">/* Width */</span>
+  <span class="mi">16</span><span class="p">,</span> <span class="cm">/* Height */</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>使用:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
+<span class="cp">#include "cn_font.h"
+</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// ...</span>
+    <span class="n">Paint_DrawString_CN</span><span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="s">"卧槽可以了！"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Font16CN</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">,</span> <span class="n">WHITE</span><span class="p">);</span>
+
+    <span class="n">EPD_2IN13_Display</span><span class="p">(</span><span class="n">BlackImage</span><span class="p">);</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+
+<span class="c1">// ...</span>
+</code></pre></div></div>
+
+<p>效果大概是:</p>
+
+<p><img src="https://user-images.githubusercontent.com/72891/104683643-4a368380-5732-11eb-9711-39846547dee2.jpg" alt="1203877657" /></p>
+
+<p>是的，毒鸡汤。至此中文字体搞定，其他 CJK 字体同理。</p>
+
+<p>而英文字体就更简单了，参考其他驱动中的 <code class="language-plaintext highlighter-rouge">font*</code> 文件即可。字型生成代码略改即可使用。</p>
+
+<h2 id="其他显示需求">其他显示需求</h2>
+
+<h3 id="图片显示">图片显示</h3>
+
+<p>墨水屏最烂大街的应用，大概就是天气时钟了，各式各样，各种尺寸。</p>
+
+<p>显示文字信息的事情，上面我们已经通过自定义字库搞定了，
+发挥想象力可以搞出诸如数码管字体，手写字体，等各种适合在墨水屏上实现的显示效果。</p>
+
+<p>但问题来了，我想搞个天气图标符号显示，比如，<a href="http://www.weather.com.cn/">中国天气网</a> 那样的。</p>
+
+<p><img src="https://user-images.githubusercontent.com/72891/104684474-165c5d80-5734-11eb-8850-9216e07a9dca.png" alt="weather" /></p>
+
+<p>官方例程里其实有全屏图片显示例子，可以看到相关的调用函数 <code class="language-plaintext highlighter-rouge">Paint_DrawBitMap</code>。
+同时驱动库里也提供了 <code class="language-plaintext highlighter-rouge">Paint_DrawImage(buf, x_start, y_start, img_width, img_height)</code>
+函数用于在任意位置显示任意大小图片。</p>
+
+<p>看一眼驱动库里 <code class="language-plaintext highlighter-rouge">Paint_DrawImage</code> 代码，好像哪里不对，只支持宽度象素是 8 倍数的图片。
+改也简单，用 <code class="language-plaintext highlighter-rouge">Paint_SetPixel</code> 函数替换即可，简单的位运算。</p>
+
+<p>现在问题是怎么生成一张用于显示的图片。其实和上面的字库非常类似，就是用二进制位去映射象素点。
+然后生成 C 数组。甚至核心代码逻辑也差不多。</p>
+
+<p>需要注意的是图片只能是黑白二值图。为方便库函数识别，也提前将图片宽度处理成 8 的整数倍。</p>
+
+<p>图源，就取天气网那堆图标，原图是用 CSS offset 方式显示的，也就是所有图标在一张图片上，需要切下。</p>
+
+<p>完整代码见 <a href="https://gist.github.com/andelf/acb0d317eef5d0cc8b7d53d4133c09c2">gist: crop-blue30.py</a>.
+这里贴要点</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># RGBA 到 RGB 的转换
+</span><span class="n">pix</span> <span class="o">=</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="n">getpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+<span class="n">BG</span> <span class="o">=</span> <span class="mi">255</span> <span class="c1"># 背景是白色
+</span><span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">BG</span> <span class="o">*</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">//</span> <span class="mi">255</span>
+<span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">BG</span> <span class="o">*</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">//</span> <span class="mi">255</span>
+<span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">BG</span> <span class="o">*</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">//</span> <span class="mi">255</span>
+<span class="n">a</span> <span class="o">=</span> <span class="mi">255</span> <span class="c1"># alpha 通道置空，不透明度
+</span>
+<span class="n">im1</span><span class="p">.</span><span class="n">putpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 图像二值化,
+</span><span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="n">resize</span><span class="p">((</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="n">Image</span><span class="p">.</span><span class="n">LANCZOS</span><span class="p">)</span>
+<span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="nb">filter</span><span class="p">(</span><span class="n">ImageFilter</span><span class="p">.</span><span class="n">SHARPEN</span><span class="p">)</span>
+<span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="n">convert</span><span class="p">(</span><span class="s">'1'</span><span class="p">,</span> <span class="n">dither</span><span class="o">=</span><span class="n">Image</span><span class="p">.</span><span class="n">NONE</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>当然，你要是用 ImageMagick 或者 Photoshop 也一样可以。</p>
+
+<p>然后把生成的二进制装入 C <code class="language-plaintext highlighter-rouge">uint8_t[]</code> 即可。</p>
+
+<p>显示一个太阳:</p>
+
+<p><img src="https://user-images.githubusercontent.com/72891/104686101-84565400-5737-11eb-9bf5-4e0347e1eb28.png" alt="image" /></p>
+
+<p>因为二值化和缩放的关系，象素周围略有点腐蚀的感觉。
+效果还行，考虑考虑界面元素布局，做个天气时钟足够了。</p>
+
+<h3 id="局部刷新">局部刷新</h3>
+
+<p>正常情况下在显示文字和图案的时候屏幕会连续从最黑到最白来回闪动几下，参考显示原理，
+这里是为了避免残留墨水粒子影响显示效果，即消除残影的影响。
+有使用过 Kindle 的同学对这点会比较清楚，一般是翻页若干次全部刷新一次。</p>
+
+<p>官方例程中右下角有个时间显示，用到了局部刷新技术:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">EPD_2IN13_Init</span><span class="p">(</span><span class="n">EPD_2IN13_PART</span><span class="p">);</span>
+<span class="n">Paint_SelectImage</span><span class="p">(</span><span class="n">BlackImage</span><span class="p">);</span>
+<span class="c1">// ...</span>
+<span class="n">Paint_ClearWindows</span><span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">140</span> <span class="o">+</span> <span class="n">Font20</span><span class="p">.</span><span class="n">Width</span> <span class="o">*</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">90</span> <span class="o">+</span> <span class="n">Font20</span><span class="p">.</span><span class="n">Height</span><span class="p">,</span> <span class="n">WHITE</span><span class="p">);</span>
+<span class="n">Paint_DrawTime</span><span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sPaint_time</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Font20</span><span class="p">,</span> <span class="n">WHITE</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>
+
+<span class="n">EPD_2IN13_Display</span><span class="p">(</span><span class="n">BlackImage</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>首先以 <code class="language-plaintext highlighter-rouge">EPD_2IN13_PART</code> 方式重新初始化屏幕（不用清屏），然后就通过 <code class="language-plaintext highlighter-rouge">Paint_ClearWindows</code> 清除需要局部更新的矩形区域，
+之后就可以使用各种绘图绘字符函数填写屏幕的这部分。</p>
+
+<p>局部刷新的效果因屏幕体质不同各异，经常会遇到残影特别严重的时候。也可以学习电纸书，局部刷新</p>
+
+<h2 id="再看显示原理">再看显示原理</h2>
+
+<p>以上，基本介绍完了墨水屏的常见功能。已满足绝大部分需求。</p>
+
+<p>回头再看显示原理，有了一开始介绍的小胶囊阵列结构，驱动怎么通过搞定显示的呢？这里以 2.13 寸显示屏的驱动 IC IL3895 为例。</p>
+
+<h3 id="lut">LUT</h3>
+
+<p>LUT, 即 Waveform Look Up Table(LUT), 是很多介绍电子墨水驱动文章的离不开的话题。</p>
+
+<p>所谓的 LUT 功能，其实是驱动芯片的“可编程驱动电压波形”功能。即通过若干寄存器字节，
+设置像素在不同状态转换情况下使用的底板电压高低的时序。该设置全局有效，针对全屏幕的任何一个像素的变动。
+整个波形通过更新屏幕指令(MasterActivation = 0x20, Activate Display Update Sequence)触发，
+此过程中 BUSY 信号有效，更新逻辑完成后, BUSY 信号结束。</p>
+
+<p>例如数据手册中:</p>
+
+<p><img src="https://user-images.githubusercontent.com/72891/104814031-a63efc00-5847-11eb-8fd4-8595a69ad1eb.png" alt="image" /></p>
+
+<p>IL3895 芯片支持 10 个 phase 的波形，分别是 phase0A phase0B phase1A phase1B phase2A phase2B phase3A phase3B phase4A phase4B,
+其中每个 phase 可以指定维持状态的时间周期数 TP.
+每两个波形可以设置一个重复次数 RP.
+在每个 phase, 都可以指定像素底板电压 VS 高低。不同电压级别驱动颜色微粒向不同方向运动，维持不同的时间，最终实现像素的黑白变化。</p>
+
+<p>图表右侧的 XY=LL, XY=LH, … 表示不同的像素值变动情形。例如 HL 表示像素从白色变动到黑色, LL 表示像素在此次刷新中值没有变化。</p>
+
+<p>以上的所有配置项按照固定格式，最终形成了 LUT 表，可以通过命令设置:</p>
+
+<p><img src="https://user-images.githubusercontent.com/72891/104814577-b1475b80-584a-11eb-9cf5-3dcc9b559bf5.png" alt="image" /></p>
+
+<p>而例程中的 <code class="language-plaintext highlighter-rouge">EPD_2IN13_Init(EPD_2IN13_FULL/PART)</code>, 其中最重要也是唯一的区别就是 FULL 和 PART 初始化时使用的 LUT 表不同。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">EPD_2IN13_lut_full_update</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mh">0x22</span><span class="p">,</span> <span class="mh">0x55</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0x55</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0x55</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span>
+    <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span>
+    <span class="mh">0x1E</span><span class="p">,</span> <span class="mh">0x1E</span><span class="p">,</span> <span class="mh">0x1E</span><span class="p">,</span> <span class="mh">0x1E</span><span class="p">,</span> <span class="mh">0x1E</span><span class="p">,</span> <span class="mh">0x1E</span><span class="p">,</span> <span class="mh">0x1E</span><span class="p">,</span> <span class="mh">0x1E</span><span class="p">,</span>
+    <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span>
+<span class="p">};</span>
+
+<span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">EPD_2IN13_lut_partial_update</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mh">0x18</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span>
+    <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span>
+    <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span>
+    <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>初始化后，每次显示更新，都会执行对应的 LUT 表时序。也就是说，全局刷新情况下的屏幕从全黑到全白好几次清空屏幕的动作，
+就定义在这个 FULL 对应的 LUT 中。有兴趣的小伙伴可以解析下 <code class="language-plaintext highlighter-rouge">EPD_2IN13_lut_full_update</code>.</p>
+
+<p>正因为有了 LUT 定义，屏幕以 <code class="language-plaintext highlighter-rouge">EPD_2IN13_PART</code> 方式初始化时，新显示内容不再需要全屏刷新后再显示，直接在原始状态进行绘制。</p>
+
+<p>这里以 <code class="language-plaintext highlighter-rouge">EPD_2IN13_lut_partial_update</code> 为例介绍下实际 LUT 执行时候发生的动作。简单得多，以至于整个表只有 3 个非空字节，
+对应 phase0A, phase0B, 其余 phase 设置因对应的 TP(period) 为 0, 不生效。所以只有两个 phase 的波形。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/// LUT for partial update.</span>
+<span class="nd">#[rustfmt::skip]</span>
+<span class="k">pub</span> <span class="k">const</span> <span class="n">LUT_PARTIAL_UPDATE</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="mi">30</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c">// VS, voltage in phase n</span>
+    <span class="c">// &lt;&lt;VS[0A-HH]:2/binary, VS[0A-HL]:2/binary, VS[0A-LH]:2/binary, VS[0A-LL]:2/binary&gt;&gt;</span>
+    <span class="c">// &lt;&lt;VS[0B-HH]:2/binary, VS[0B-HL]:2/binary, VS[0B-LH]:2/binary, VS[0B-LL]:2/binary&gt;&gt;</span>
+    <span class="c">// HL: white to black</span>
+    <span class="c">// LH: black to white</span>
+    <span class="c">// e.g. 0x18 = 0b00_01_10_00</span>
+    <span class="mi">0x18</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c">// phase 0</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c">// phase 1</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c">// phase 4</span>
+    <span class="c">// padding</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
+    <span class="c">// RP, repeat counter, 0 to 63, 0 means run time = 1</span>
+    <span class="c">// TP, phase period, 0 to 31</span>
+    <span class="c">// &lt;&lt;RP[0]_L:3/binary, TP[0A]:5/binary&gt;&gt;</span>
+    <span class="c">// &lt;&lt;RP[0]_H:3/binary, TP[0B]:5/binary&gt;&gt;</span>
+    <span class="mi">0x0F</span><span class="p">,</span> <span class="mi">0x01</span><span class="p">,</span> <span class="c">// phase 0</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c">// phase 4</span>
+    <span class="c">// padding</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span>
+<span class="p">];</span>
+</code></pre></div></div>
+
+<p>如上，改写为 Rust 代码，加入详细注释，注释混搭假 Erlang 语法。</p>
+
+<p>先看 VS 部分，即驱动电压部分。<code class="language-plaintext highlighter-rouge">0x18 = 0b00_01_10_00</code>, 按照格式拆出:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>VS[0A-HL] = 01
+VS[0A-LH] = 10
+
+# 其他为 00
+</code></pre></div></div>
+
+<p>手册中有介绍 VS 格式:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00–VSS
+01–VSH
+10–VSL
+</code></pre></div></div>
+
+<p>所以解读 phase0A 的配置即:</p>
+
+<ul>
+  <li>当像素点从白转黑时(HL), \(V_{pixel}\) 电压为 VSH</li>
+  <li>当象素点从黑转白时(LH), \(V_{pixel}\) 电压为 VSL</li>
+  <li>其他情况下，\(V_{pixel}\) 电压为 VSS, 由芯片手册可知, VSS = VCOM, 相当于无变化</li>
+</ul>
+
+<p>再来看 RP, TP 部分。需要将字节的高地位组合:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x0F = 0b000_01111
+0x01 = 0b000_00001
+
+所以得到
+RP[0] = 0b000_000 = 0
+TP[0A] = 0b01111 = 15
+TP[0B] = 0b00001 = 1
+</code></pre></div></div>
+
+<p>如上提到, TP 为 0 时表示该 phrase 无效，所以上面说只有 phase0A, phase0B 两个 phase 有效。
+RP = 0 是表示重复 1 次。</p>
+
+<p>总结以上那么该 LUT 的逻辑是:</p>
+
+<ul>
+  <li>当像素点从白转黑时(HL), \(V_{pixel}\) 电压为 VSH, 持续 15 个周期，随后转 VSS, 持续一个周期</li>
+  <li>当象素点从黑转白时(LH), \(V_{pixel}\) 电压为 VSL, 持续 15 个周期，随后转 VSS, 持续一个周期</li>
+  <li>其他情况下，恒为 VSS</li>
+  <li>以上逻辑执行 1 次</li>
+  <li>单个周期文档中介绍时长为 \(T_{FRAME}\)</li>
+</ul>
+
+<p>所以似乎明了，所谓局部刷新，就是在像素点不变的时候，不做任何操作。
+在像素翻转的情况下，执行一次给电压操作，随后静置少量时间。</p>
+
+<p>而全刷新，可以很明显看到，前几个周期都是全置黑全置白的统一操作，为的是清屏。
+之后才是处理不同像素状态变更的波形。</p>
+
+<h4 id="idea">Idea</h4>
+
+<p>持续电压 15 个周期，那么少一点会怎么样？</p>
+
+<p>测试发现这样出图效果没那么黑，甚至是灰色。</p>
+
+<p>所以似乎就有了在黑白墨水屏上实现灰度显示的方案。这里的黑白墨水屏，特指驱动手册中单个像素为 1 位的屏幕。即 1bpp(bit per pixel).</p>
+
+<p>本文题头图，即为测试效果。</p>
+
+<p>灰度显示的内容，另开坑讲。</p>
+
+<h3 id="framebuffer">framebuffer</h3>
+
+<blockquote>
+  <p>A framebuffer (frame buffer, or sometimes framestore) is a portion of random-access memory (RAM) containing a bitmap that drives a video display.
+It is a memory buffer containing data representing all the pixels in a complete video frame. – Wikipedia</p>
+</blockquote>
+
+<p>回到例程，可以看到屏幕初始化调用大概是:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">EPD_2IN13_Init</span><span class="p">(</span><span class="n">EPD_2IN13_FULL</span><span class="o">/</span><span class="n">PART</span><span class="p">);</span>
+<span class="n">EPD_2IN13_Clear</span><span class="p">();</span>
+
+<span class="n">UBYTE</span> <span class="o">*</span><span class="n">BlackImage</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(...);</span>
+<span class="n">Paint_NewImage</span><span class="p">(</span><span class="n">BlackImage</span><span class="p">,</span> <span class="n">EPD_2IN13_WIDTH</span><span class="p">,</span> <span class="n">EPD_2IN13_HEIGHT</span><span class="p">,</span> <span class="mi">270</span><span class="p">,</span> <span class="n">WHITE</span><span class="p">);</span>
+<span class="n">Paint_SelectImage</span><span class="p">(</span><span class="n">BlackImage</span><span class="p">);</span>
+
+<span class="c1">// ...</span>
+
+<span class="n">EPD_2IN13_Display</span><span class="p">(</span><span class="n">BlackImage</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>阅读对应函数得知，这里创建了一个 <code class="language-plaintext highlighter-rouge">BlackImage</code> 字节数组做墨水屏的 framebuffer. 所有的绘图操作都只对这个 framebuffer 进行，
+不和设备进行交互，直到调用 Display 才会进行实际的设备交互。</p>
+
+<h3 id="next">Next</h3>
+
+<p>之后抽时间写写灰度显示相关的折腾过程。</p>
+
+<p>和 Rust embedded-grahics 驱动的情况。</p>
+
+<h2 id="参考">参考</h2>
+
+<ul>
+  <li>Waveshare 官方 store, <a href="https://www.waveshare.com/wiki/2.13inch_e-Paper_HAT">wiki</a></li>
+  <li><a href="https://www.e-paper-display.com/download_detail/downloadsId=538.html">IL3895 数据手册</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/E_Ink">Wikipedia: E-Ink</a></li>
+</ul>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/';
+      this.page.identifier = 'https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2021/01/15/play-with-2-13-inch-e-ink-display/" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/';
+      this.page.identifier = 'https://andelf.github.io/blog/2021/01/15/play-with-2-13-inch-e-ink-display/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+  });
+</script>
+<script
+  type="text/javascript"
+  async
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+></script>
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
