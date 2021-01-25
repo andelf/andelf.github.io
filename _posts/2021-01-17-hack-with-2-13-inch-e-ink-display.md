@@ -108,10 +108,6 @@ Spectra 三色
 ACeP 全彩色, 单像素有 4 个粒子系统, 同出版业 CYMK 颜色标准
 ref: https://www.eink.com/color-technology.html
 
-## 致谢
-
-- QQ 群 桌面电纸屏天气预报技术交流 556951885 管理员 索马里的海贼
-
 ## 三色屏幕
 
 HINK-E0213A30-A0
