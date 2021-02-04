@@ -11,6 +11,7 @@ tags:
   - rust
 usemathjax: true
 toc: true
+published: false
 ---
 
 [上回]({% post_url 2021-01-15-play-with-2-13-inch-e-ink-display %}) 说起淘了几个二手拆机墨水屏。
@@ -37,7 +38,7 @@ toc: true
 测试发现，两种方法均可。但第一种因为屏幕素质不同的关系，会在灰阶过渡的边缘产生一条明显的线，
 近距离观察比较明显。另外该方法刷新过程中色块逐渐从白色出现，不够自然。
 
-这里以第二种方法介绍如何搞定灰阶显示。很容易想到，如果将 15 周期细分到不同程度，可以实现 2~4 bpp. 
+这里以第二种方法介绍如何搞定灰阶显示。很容易想到，如果将 15 周期细分到不同程度，可以实现 2~4 bpp.
 这里以 2bpp 为例，即一个象素有 4 级灰阶。
 
 ### 复习 LUT
@@ -47,11 +48,11 @@ toc: true
 > `<<VS[0A-HH]:2/binary, VS[0A-HL]:2/binary, VS[0A-LH]:2/binary, VS[0A-LL]:2/binary>>``
 >
 > 先看 VS 部分，即驱动电压部分。`0x18 = 0b00_01_10_00`, 按照格式拆出:
-> 
+>
 > ```text
 > VS[0A-HL] = 01
 > VS[0A-LH] = 10
-> 
+>
 > # 其他情况为 00
 > ```
 >
@@ -68,7 +69,7 @@ toc: true
 - 加深灰阶，对应 LL, 即从黑到更黑，需要继续加电压 VSH 向更黑转
 - 不加深灰阶，对应 LH, 不需要处理，用 VSS
 
-所以 ``VS[0A] = 0b00_01_00_01 = 0x11``. 即，只处理白转黑，和黑转更黑两种情况，其他情况均无变化。
+所以 `VS[0A] = 0b00_01_00_01 = 0x11`. 即，只处理白转黑，和黑转更黑两种情况，其他情况均无变化。
 整个 LUT 需要第一个 phase, 所以其他字节均为 0, 简单。
 
 再看 RP, TP 部分:
@@ -83,7 +84,6 @@ toc: true
 > ```
 
 `RP = 0` 不需要变动, `TP[0A]` 此时按 2bpp 灰阶叠加需求减半得到 `TP[0A] = 0xF >> 1 = 0x7`.
-
 
 ### 灰度屏
 
@@ -220,12 +220,95 @@ const LUT: [u8; 70] = [
 
 无比耗时。
 
-| 屏幕型号      | 屏幕排线编号      | 尺寸  | 分辨率  | 驱动 IC    | 描述               |
-| :------------ | :---------------- | :---- | :------ | :--------- | :----------------- |
-|               | HINK-E0213A04-G01 | 2in13 | 250x122 | IL3895     | 黑白, 价签拆机     |
-|               | HINK-E0213A30-A0  | 2in13 | 212x104 | SSD1675    | 红黑白, 价签拆机   |
-| GDEH0213B72/3 | HINK-E0213A22-A0  | 2in13 | 250x122 | SSD1675(B) | 黑白, 官方 v2, EOL |
-| GDEH0213Z19   | HINK-E0213A20-A2  | 2in13 | 212x104 | UC8151D    | 红黑白, 官方 b     |
-|               | WFT0213CZ16       | 2in13 | 212×104 |            | 黄黑白, 官方 c     |
-|               | WFT0213CZ16LW     | 2in13 | 212x104 |            | 黑白, 柔性, 官方 d |
-| GDEH042Z96/21 | HINK-E042A13-A0   | 4in2  | 400x300 | SSD1619    | 红黑白, 价签拆机   |
+| 屏幕型号      | 屏幕排线编号      | 尺寸  | 分辨率  | 驱动 IC  | 描述               |
+| :------------ | :---------------- | :---- | :------ | :------- | :----------------- |
+|               | HINK-E0213A04-G01 | 2in13 | 250x122 | IL3895   | 黑白, 价签拆机     |
+|               | HINK-E0213A30-A0  | 2in13 | 212x104 | SSD1675A | 红黑白, 价签拆机   |
+| GDEH0213B72/3 | HINK-E0213A22-A0  | 2in13 | 250x122 | SSD1675B | 黑白, 官方 v2, EOL |
+| GDEH0213Z19   | HINK-E0213A20-A2  | 2in13 | 212x104 | UC8151D  | 红黑白, 官方 b     |
+|               | WFT0213CZ16       | 2in13 | 212×104 |          | 黄黑白, 官方 c     |
+|               | WFT0213CZ16LW     | 2in13 | 212x104 |          | 黑白, 柔性, 官方 d |
+| GDEH042Z96/21 | HINK-E042A13-A0   | 4in2  | 400x300 | SSD1619  | 红黑白, 价签拆机   |
+|               |                   | 2in13 | 212x104 | IL0373F  | 红黑白             |
+|               |                   | 1in54 | 200x200 | IL3829   | 黑白               |
+|               |                   | 2in9  | 296x128 | IL3820   | 黑白               |
+
+注 SSD1675A 和 SSD1675B 的 LUT 表长度不同。
+
+Holitech(江西合力泰), screen from E-ink.
+
+| FPC_label     | size  | resolution | IC                       | Description |
+| ------------- | ----- | ---------- | ---                      | ----------- |
+| HINK-E042A03  | 4in2  | 400x300    |                          | b/w         |
+| HINK-E029A01  | 2in9  | 296x128    |                          | b/w         |
+| HINK-E0213A01 | 2in13 | 250x122    |                          | b/w         |
+| HINK-E0154A05 | 1in54 | 200x200    |                          | b/w         |
+|               | 7in4  | 800x480    |                          | b/w/r       |
+| HINK-E042A07  | 4in2  | 400x300    |                          | b/w/r       |
+| HINK-E029A10  | 2in9  | 296x128    |                          | b/w/r       |
+| HINK-E0213A07 | 2in13 | 212x104    |                          | b/w/r       |
+| HINK-E0154A07 | 1in54 | 152x152    |                          | b/w/r       |
+|               |       |            |                          |             |
+| HINK-E0213A50 |       | 250x122    |                          | b/w         |
+| HINK-E042A01  |       | 400×300    | SSD1608, SSD1618, SC5608 | 1bpp        |
+|               |       |            |                          |             |
+
+- ref: http://www.holitech.net/en/product/p12/index.html
+- ref: https://www.holitech-europe.com/products/electronic-paper-displays
+- ref: https://www.trs-star.com/en/products-en/displays/display-details/e-paper-displays
+- ref: https://www.trs-star.com/project_files/dokumente/produktuebersicht/holitech_product_overview.pdf
+
+
+上游：电子墨水屏膜量产厂家台湾元太 E-ink，市场份额高达 95%
+
+中游：电子纸显示屏制造企业(因不好分辨，含销售)
+
+- 东方科脉(DKE) -
+- 合力泰(HINK)
+- 无锡威峰(WF)
+- 大连佳显，使用 WFT, HINK，不生产
+- 清越光电(昆山维信诺科技有限公司已更名为苏州清越光电科技股份有限公司)
+- 广州奥翼(OPM)
+- 更多... (https://m.panelook.com/company_yp_list_cn.php?op=list&ac=supplier&topid=1&secid=73&subid=74)
+
+| Name             | EN Name   | Symbol Prefix | URL                                             |
+| :--------------- | :-------- | :------------ | :---------------------------------------------- |
+| 东方科脉         | DKE       | DEPG          | https://china-epaper.com/                       |
+| 合力泰           | Holitech  | HINK          | http://www.holitech.net/                        |
+| 无锡威峰         | Weifeng   | WF            | http://www.wf-tech.com/                         |
+| 盛辉电子（国际） | ThingWell | TINK          | http://www.lcdmaker.com/CN/E_paper_Display.html |
+| 广州奥翼         | OED       | OPM           | http://www.oedtech.com/                         |
+
+下游：ESL 系统解决方案提供商
+
+- 汉朔科技 Hanshow
+- 杭州智控
+- 南京子午创力
+- 杭州升腾智能 Suntown
+- 深圳英伦科技
+- 苏州汉朗光电 Halation
+- 杭州中瑞思创
+
+| Module   | Resolution | Driver IC |
+| -------- | ---------- | --------- |
+| DEPG0154 | 152x152    | SSD1680Z8 |
+| DEPG0154 | 152x152    | UC8251D   |
+| DEPG0154 | 152x152    | UC8251D   |
+| DEPG0213 | 212x104    | SSD1680   |
+| DEPG0213 | 212x104    | UC8251D   |
+| DEPG0213 | 250x122    | SSD1680Z8 |
+
+- ref: https://solisdisplay.com/dke-e-paper/
+- ref: https://china-epaper.com/download/
+
+| FPC_label | size  | resolution | IC  | Description |
+| --------- | ----- | ---------- | --- | ----------- |
+| E0213A22  | 2in13 | 250x122    |     | b/w/r       |
+| E0213A50  | 2in13 | 250x122    |     | b/w         |
+| E0154A44  | 1in54 | 200x200    |     | b/w/r       |
+| E0154A45  | 1in54 | 200x200    |     | b/w         |
+| E042A09   | 4in2  | 400x300    |     | b/w         |
+| E043A13   | 4in2  | 400x300    |     | b/w/r       |
+|           |       |            |     |             |
+
+ref: http://www.einkcn.com/spec/
