@@ -731,7 +731,7 @@ VSH, VSL 分别会导致是两种不同的电场方向。
   <li>其他情况下，\(V_{pixel}\) 电压为 VSS, 由芯片手册可知, VSS = VCOM, 相当于无变化</li>
 </ul>
 
-<p>再来看 RP, TP 部分。需要将字节的高地位组合:</p>
+<p>再来看 RP, TP 部分。需要将字节的高低位组合:</p>
 
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x0F = 0b000_01111
 0x01 = 0b000_00001
@@ -796,6 +796,11 @@ It is a memory buffer containing data representing all the pixels in a complete 
 
 <p>阅读对应函数得知，这里创建了一个 <code class="language-plaintext highlighter-rouge">BlackImage</code> 字节数组做墨水屏的 framebuffer. 所有的绘图操作都只对这个 framebuffer 进行，
 不和设备进行交互，直到调用 Display 才会进行实际的设备交互。</p>
+
+<p>framebuffer 在 Display 被调用时，按照驱动芯片所设定的方向，比如按行，按列的方式，
+一个个字节被从 MCU 传输到驱动芯片的内部的“显存”中，随后执行 LUT 更新逻辑。
+驱动芯片会对比像素点的当前状态和目标状态，执行对应的 LH, HL, LL, HH 波形。
+最终像素出现在屏幕上，完成显示。</p>
 
 <h3 id="next">Next</h3>
 
