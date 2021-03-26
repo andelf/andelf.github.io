@@ -9,15 +9,15 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="声明： 转载注明我或者 SwiftChina . weibo" />
 <meta property="og:description" content="声明： 转载注明我或者 SwiftChina . weibo" />
-<link rel="canonical" href="https://andelf.github.io/blog/2014/06/15/swift-and-c-interop/" />
-<meta property="og:url" content="https://andelf.github.io/blog/2014/06/15/swift-and-c-interop/" />
+<link rel="canonical" href="https://andelf.github.io/blog/2014/06/14/swift-and-c-interop/" />
+<meta property="og:url" content="https://andelf.github.io/blog/2014/06/14/swift-and-c-interop/" />
 <meta property="og:site_name" content="猫·仁波切" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2014-06-15T00:11:44+08:00" />
+<meta property="article:published_time" content="2014-06-14T16:11:44+00:00" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Swift and C Interop(简析Swift和C的交互)" />
 <script type="application/ld+json">
-{"url":"https://andelf.github.io/blog/2014/06/15/swift-and-c-interop/","headline":"Swift and C Interop(简析Swift和C的交互)","dateModified":"2014-06-15T00:11:44+08:00","datePublished":"2014-06-15T00:11:44+08:00","description":"声明： 转载注明我或者 SwiftChina . weibo","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/15/swift-and-c-interop/"},"@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","description":"声明： 转载注明我或者 SwiftChina . weibo","headline":"Swift and C Interop(简析Swift和C的交互)","dateModified":"2014-06-14T16:11:44+00:00","datePublished":"2014-06-14T16:11:44+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/14/swift-and-c-interop/"},"url":"https://andelf.github.io/blog/2014/06/14/swift-and-c-interop/","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -42,7 +42,7 @@
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Swift and C Interop(简析Swift和C的交互)</h1>
     <p class="post-meta">
-      <time class="dt-published" datetime="2014-06-15T00:11:44+08:00" itemprop="datePublished">Jun 15, 2014
+      <time class="dt-published" datetime="2014-06-14T16:11:44+00:00" itemprop="datePublished">Jun 14, 2014
       </time>• <span>Tags: swift</span></p><div class="table-of-contents">
       
     </div>
@@ -299,41 +299,9 @@ _TFV5hello4Rectg9subscriptFOS_9DirectionSi ---&gt; hello.Rect.subscript.getter (
 <p>仔细理解上面的简简单单四行编译过程说明，你就明白为什么 .swfit 和 .c 可以互相调用了。其中两个 Header 文件起到了媒介的作用，一个将 .c/.m 文件中的定义暴露给 Swift，另一个将 .swift 中的定义暴露给 .c/.m 。</p>
 
   </div>
-
-  <div id="disqus_thread"></div>
-  <script>
-    var disqus_config = function () {
-      this.page.url = 'https://andelf.github.io/blog/2014/06/15/swift-and-c-interop/';
-      this.page.identifier = 'https://andelf.github.io/blog/2014/06/15/swift-and-c-interop/';
-    };
-    (function() {
-      var d = document, s = d.createElement('script');
-      s.src = 'https://andelf.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', +new Date());
-      (d.head || d.body).appendChild(s);
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
-
-<a class="u-url" href="/blog/2014/06/15/swift-and-c-interop/" hidden></a>
+<a class="u-url" href="/blog/2014/06/14/swift-and-c-interop/" hidden></a>
 </article>
 
-
-
-  <div id="disqus_thread"></div>
-  <script>
-    var disqus_config = function () {
-      this.page.url = 'https://andelf.github.io/blog/2014/06/15/swift-and-c-interop/';
-      this.page.identifier = 'https://andelf.github.io/blog/2014/06/15/swift-and-c-interop/';
-    };
-    (function() {
-      var d = document, s = d.createElement('script');
-      s.src = 'https://andelf.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', +new Date());
-      (d.head || d.body).appendChild(s);
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 
 
 

@@ -13,11 +13,11 @@
 <meta property="og:url" content="https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/" />
 <meta property="og:site_name" content="猫·仁波切" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2014-06-23T20:15:39+08:00" />
+<meta property="article:published_time" content="2014-06-23T12:15:39+00:00" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Use CocoaPods with Swift (在 Swift 中使用 CocoaPods）" />
 <script type="application/ld+json">
-{"url":"https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/","headline":"Use CocoaPods with Swift (在 Swift 中使用 CocoaPods）","dateModified":"2014-06-23T20:15:39+08:00","datePublished":"2014-06-23T20:15:39+08:00","description":"声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. weibo","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/"},"@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","description":"声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. weibo","headline":"Use CocoaPods with Swift (在 Swift 中使用 CocoaPods）","dateModified":"2014-06-23T12:15:39+00:00","datePublished":"2014-06-23T12:15:39+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/"},"url":"https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -42,7 +42,7 @@
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Use CocoaPods with Swift (在 Swift 中使用 CocoaPods） </h1>
     <p class="post-meta">
-      <time class="dt-published" datetime="2014-06-23T20:15:39+08:00" itemprop="datePublished">Jun 23, 2014
+      <time class="dt-published" datetime="2014-06-23T12:15:39+00:00" itemprop="datePublished">Jun 23, 2014
       </time>• <span>Tags: swift</span></p><div class="table-of-contents">
       
     </div>
@@ -59,7 +59,7 @@
 
 <blockquote>
   <p>CocoaPods is the dependency manager for Objective-C projects.
-It has thousands of libraries and can help you scale your projects elegantly. <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote">1</a></sup></p>
+It has thousands of libraries and can help you scale your projects elegantly. <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></p>
 </blockquote>
 
 <p>从介绍看，它是主要给 Objective-C 项目用的，但是我们可以很容易地混合 Objective-C 和 Swift 到同个项目，从而利用大量的 CocoaPods 库和 Swift 漂亮舒服的语法。</p>
@@ -72,7 +72,7 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
 
 <h3 id="安装">安装</h3>
 
-<p>系统默认安装，可以参考其他教程<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote">2</a></sup> 。在命令行下执行。</p>
+<p>系统默认安装，可以参考其他教程<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> 。在命令行下执行。</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo gem install cocoapods
 </code></pre></div></div>
@@ -94,7 +94,7 @@ pod
 
 <h3 id="使用">使用</h3>
 
-<p>假设我们已经有个项目，叫 ProjName ，需要使用一些注明的 CocoaPods 库，比如 AFNetworking<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote">3</a></sup>.</p>
+<p>假设我们已经有个项目，叫 ProjName ，需要使用一些注明的 CocoaPods 库，比如 AFNetworking<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>.</p>
 
 <p>首先，命令行 cd 到我们的项目目录，一般 ls 命令会看到如下几个文件夹：</p>
 
@@ -139,7 +139,7 @@ pod "AFNetworking", "~&gt; 2.0"
             <span class="o">})</span>
 </code></pre></div></div>
 
-<p>这里直接抄了 JakeLin 的 SwiftWeather 代码<sup id="fnref:5" role="doc-noteref"><a href="#fn:5" class="footnote">4</a></sup>，就一小段，希望他不会打我。</p>
+<p>这里直接抄了 JakeLin 的 SwiftWeather 代码<sup id="fnref:5" role="doc-noteref"><a href="#fn:5" class="footnote" rel="footnote">4</a></sup>，就一小段，希望他不会打我。</p>
 
 <h4 id="swift-坑爹了">Swift 坑爹了</h4>
 
@@ -151,7 +151,7 @@ pod "AFNetworking", "~&gt; 2.0"
 
 <h4 id="继续">继续</h4>
 
-<p>之前简单介绍过和  Objective-C 交互的内容<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote">5</a></sup>，大家可以去围观。</p>
+<p>之前简单介绍过和  Objective-C 交互的内容<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">5</a></sup>，大家可以去围观。</p>
 
 <p>一般说来，你在 Swift 项目新建 Objective-C 类的时候，直接弹出是否创建 Bridge Header 的窗口，点 YES 就是了，这时候一般多出来个 <code class="language-plaintext highlighter-rouge">ProjectName-Bridging-Header.h</code> 。然后删掉这个类， Bridging Header 头文件还在。</p>
 
@@ -244,41 +244,9 @@ module </span><span class="si">#{</span><span class="n">normalized_pod_name</spa
 </div>
 
   </div>
-
-  <div id="disqus_thread"></div>
-  <script>
-    var disqus_config = function () {
-      this.page.url = 'https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/';
-      this.page.identifier = 'https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/';
-    };
-    (function() {
-      var d = document, s = d.createElement('script');
-      s.src = 'https://andelf.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', +new Date());
-      (d.head || d.body).appendChild(s);
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
-
 <a class="u-url" href="/blog/2014/06/23/use-cocoapods-with-swift/" hidden></a>
 </article>
 
-
-
-  <div id="disqus_thread"></div>
-  <script>
-    var disqus_config = function () {
-      this.page.url = 'https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/';
-      this.page.identifier = 'https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/';
-    };
-    (function() {
-      var d = document, s = d.createElement('script');
-      s.src = 'https://andelf.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', +new Date());
-      (d.head || d.body).appendChild(s);
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 
 
 

@@ -13,11 +13,11 @@
 <meta property="og:url" content="https://andelf.github.io/blog/2014/06/19/modules-for-swift/" />
 <meta property="og:site_name" content="猫·仁波切" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2014-06-19T15:14:31+08:00" />
+<meta property="article:published_time" content="2014-06-19T07:14:31+00:00" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Module System of Swift (简析 Swift 的模块系统)" />
 <script type="application/ld+json">
-{"url":"https://andelf.github.io/blog/2014/06/19/modules-for-swift/","headline":"Module System of Swift (简析 Swift 的模块系统)","dateModified":"2014-06-19T15:14:31+08:00","datePublished":"2014-06-19T15:14:31+08:00","description":"声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/19/modules-for-swift/"},"@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","description":"声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo","headline":"Module System of Swift (简析 Swift 的模块系统)","dateModified":"2014-06-19T07:14:31+00:00","datePublished":"2014-06-19T07:14:31+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2014/06/19/modules-for-swift/"},"url":"https://andelf.github.io/blog/2014/06/19/modules-for-swift/","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -42,7 +42,7 @@
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Module System of Swift (简析 Swift 的模块系统)</h1>
     <p class="post-meta">
-      <time class="dt-published" datetime="2014-06-19T15:14:31+08:00" itemprop="datePublished">Jun 19, 2014
+      <time class="dt-published" datetime="2014-06-19T07:14:31+00:00" itemprop="datePublished">Jun 19, 2014
       </time>• <span>Tags: swift</span></p><div class="table-of-contents">
       
     </div>
@@ -79,7 +79,7 @@
 
 <p>在 Xcode 目录寻找相关信息，最后目标锁定到了一个特殊的文件名 <code class="language-plaintext highlighter-rouge">module.map</code>。</p>
 
-<p>原来这个文件叫 Module map(这个名字还真是缺乏想象力)，属于 llvm 的 Module 系统。本来是用来颠覆传统的 C/C++/Objc 中的 <code class="language-plaintext highlighter-rouge">#include</code> 和 <code class="language-plaintext highlighter-rouge">#import</code>。最早在 2012 年 11 月的 LLVM DevMeeting 中由 Apple 的 Doug Gregor 提出 <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote">1</a></sup>。相关内容 CSDN 也有文章介绍，不过是直译版，没有提出自己见解 <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote">2</a></sup>。</p>
+<p>原来这个文件叫 Module map(这个名字还真是缺乏想象力)，属于 llvm 的 Module 系统。本来是用来颠覆传统的 C/C++/Objc 中的 <code class="language-plaintext highlighter-rouge">#include</code> 和 <code class="language-plaintext highlighter-rouge">#import</code>。最早在 2012 年 11 月的 LLVM DevMeeting 中由 Apple 的 Doug Gregor 提出 <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>。相关内容 CSDN 也有文章介绍，不过是直译版，没有提出自己见解 <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>。</p>
 
 <h3 id="关于-llvm-module-系统">关于 llvm Module 系统</h3>
 
@@ -101,7 +101,7 @@
 
 <p><code class="language-plaintext highlighter-rouge">module.map</code> 文件就是对一个框架，一个库的所有头文件的结构化描述。通过这个描述，桥接了新语言特性和老的头文件。默认文件名是 <code class="language-plaintext highlighter-rouge">module.modulemap</code>，<code class="language-plaintext highlighter-rouge">module.map</code> 其实是为了兼容老标准，不过现在 Xcode 里的还都是这个文件名，相信以后会改成新名字。</p>
 
-<p>文件的内容以 <code class="language-plaintext highlighter-rouge">Module Map Language</code> 描述，大概语法我从 llvm 官方文档 <sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote">3</a></sup> 摘录一段，大家体会一下：</p>
+<p>文件的内容以 <code class="language-plaintext highlighter-rouge">Module Map Language</code> 描述，大概语法我从 llvm 官方文档 <sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup> 摘录一段，大家体会一下：</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module MyLib {
   explicit module A {
@@ -118,7 +118,7 @@
 
 <p>类似上面的语法，描述了 <code class="language-plaintext highlighter-rouge">MyLib</code>、<code class="language-plaintext highlighter-rouge">MyLib.A</code>、<code class="language-plaintext highlighter-rouge">MyLib.B</code> 这样的模块结构。</p>
 
-<p>官方文档 <sup id="fnref:3:1" role="doc-noteref"><a href="#fn:3" class="footnote">3</a></sup> 中有更多相关内容，可以描述框架，描述系统头文件，控制导出的范围，描述依赖关系，链接参数等等。这里不多叙述，举个 libcurl 的例子：</p>
+<p>官方文档 <sup id="fnref:3:1" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup> 中有更多相关内容，可以描述框架，描述系统头文件，控制导出的范围，描述依赖关系，链接参数等等。这里不多叙述，举个 libcurl 的例子：</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module curl [system] [extern_c] {
     header "/usr/include/curl/curl.h"
@@ -306,7 +306,7 @@ swiftFoundation
 
 <h2 id="结论">结论</h2>
 
-<p>LLVM Module 作为 Apple 提出的特性，已经被 Swift 完全采用，直接在它基础上建立了自己的模块系统。我相信它会影响到我们处理第三方库的方式方法。相信不久就会有相关工具基于它来管理依赖关系，比如老的 cocoapods<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote">4</a></sup> 可以加入新特性。</p>
+<p>LLVM Module 作为 Apple 提出的特性，已经被 Swift 完全采用，直接在它基础上建立了自己的模块系统。我相信它会影响到我们处理第三方库的方式方法。相信不久就会有相关工具基于它来管理依赖关系，比如老的 cocoapods<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">4</a></sup> 可以加入新特性。</p>
 
 <p>用 Swift 写模块目前并没有很好的 IDE 支持，所以不是很方便。基于猜测验证，上面的方法可以实现在 Swift 里 import Swift 模块，方法和结果看起来完全和官方模块相同。</p>
 
@@ -332,41 +332,9 @@ swiftFoundation
 </div>
 
   </div>
-
-  <div id="disqus_thread"></div>
-  <script>
-    var disqus_config = function () {
-      this.page.url = 'https://andelf.github.io/blog/2014/06/19/modules-for-swift/';
-      this.page.identifier = 'https://andelf.github.io/blog/2014/06/19/modules-for-swift/';
-    };
-    (function() {
-      var d = document, s = d.createElement('script');
-      s.src = 'https://andelf.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', +new Date());
-      (d.head || d.body).appendChild(s);
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
-
 <a class="u-url" href="/blog/2014/06/19/modules-for-swift/" hidden></a>
 </article>
 
-
-
-  <div id="disqus_thread"></div>
-  <script>
-    var disqus_config = function () {
-      this.page.url = 'https://andelf.github.io/blog/2014/06/19/modules-for-swift/';
-      this.page.identifier = 'https://andelf.github.io/blog/2014/06/19/modules-for-swift/';
-    };
-    (function() {
-      var d = document, s = d.createElement('script');
-      s.src = 'https://andelf.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', +new Date());
-      (d.head || d.body).appendChild(s);
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 
 
 
