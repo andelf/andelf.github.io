@@ -1,0 +1,29 @@
+name: Publish Site
+
+on:
+  push:
+    branches:
+      - source
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+
+    - name: Setup node
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.0
+
+    - run: bundle install
+    - run: bundle exec jekyll build
+
+    - name: Publish
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./_site
+        publish_branch: master
