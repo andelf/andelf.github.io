@@ -2,7 +2,7 @@
 <html lang="en"><head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Rust Pattern Match(Rust中的模式匹配) | 猫·仁波切</title>
 <meta name="generator" content="Jekyll v4.1.1" />
 <meta property="og:title" content="Rust Pattern Match(Rust中的模式匹配)" />
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Rust Pattern Match(Rust中的模式匹配)" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","description":"模式匹配","headline":"Rust Pattern Match(Rust中的模式匹配)","dateModified":"2016-03-22T15:35:19+00:00","datePublished":"2016-03-22T15:35:19+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2016/03/22/rust-pattern-match/"},"url":"https://andelf.github.io/blog/2016/03/22/rust-pattern-match/","@context":"https://schema.org"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2016-03-22T15:35:19+00:00","datePublished":"2016-03-22T15:35:19+00:00","description":"模式匹配","headline":"Rust Pattern Match(Rust中的模式匹配)","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2016/03/22/rust-pattern-match/"},"url":"https://andelf.github.io/blog/2016/03/22/rust-pattern-match/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -70,7 +70,7 @@
     <span class="mi">1</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"one"</span><span class="p">),</span>
     <span class="mi">2</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"two"</span><span class="p">),</span>
     <span class="mi">3</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"three"</span><span class="p">),</span>
-    <span class="mi">_</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"anything"</span><span class="p">),</span>
+    <span class="n">_</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"anything"</span><span class="p">),</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -89,7 +89,7 @@
 <span class="k">match</span> <span class="n">x</span> <span class="p">{</span>
     <span class="mi">1</span> <span class="p">|</span> <span class="mi">2</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"one or two"</span><span class="p">),</span>
     <span class="mi">3</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"three"</span><span class="p">),</span>
-    <span class="mi">_</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"anything"</span><span class="p">),</span>
+    <span class="n">_</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"anything"</span><span class="p">),</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -128,52 +128,52 @@
 <span class="p">}</span>
 
 <span class="k">pub</span> <span class="k">enum</span> <span class="n">PatKind</span> <span class="p">{</span>
-    <span class="c">/// Represents a wildcard pattern (`_`)</span>
-    <span class="c">/// 表示通配，下划线</span>
+    <span class="cd">/// Represents a wildcard pattern (`_`)</span>
+    <span class="cd">/// 表示通配，下划线</span>
     <span class="n">Wild</span><span class="p">,</span>
 
-    <span class="c">/// A `PatKind::Ident` may either be a new bound variable,</span>
-    <span class="c">/// or a unit struct/variant pattern, or a const pattern (in the last two cases</span>
-    <span class="c">/// the third field must be `None`).</span>
-    <span class="c">///</span>
-    <span class="c">/// In the unit or const pattern case, the parser can't determine</span>
-    <span class="c">/// which it is. The resolver determines this, and</span>
-    <span class="c">/// records this pattern's `NodeId` in an auxiliary</span>
-    <span class="c">/// set (of "PatIdents that refer to unit patterns or constants").</span>
+    <span class="cd">/// A `PatKind::Ident` may either be a new bound variable,</span>
+    <span class="cd">/// or a unit struct/variant pattern, or a const pattern (in the last two cases</span>
+    <span class="cd">/// the third field must be `None`).</span>
+    <span class="cd">///</span>
+    <span class="cd">/// In the unit or const pattern case, the parser can't determine</span>
+    <span class="cd">/// which it is. The resolver determines this, and</span>
+    <span class="cd">/// records this pattern's `NodeId` in an auxiliary</span>
+    <span class="cd">/// set (of "PatIdents that refer to unit patterns or constants").</span>
     <span class="nf">Ident</span><span class="p">(</span><span class="n">BindingMode</span><span class="p">,</span> <span class="n">SpannedIdent</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
 
-    <span class="c">/// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.</span>
-    <span class="c">/// The `bool` is `true` in the presence of a `..`.</span>
+    <span class="cd">/// A struct or struct variant pattern, e.g. `Variant {x, y, ..}`.</span>
+    <span class="cd">/// The `bool` is `true` in the presence of a `..`.</span>
     <span class="nf">Struct</span><span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Spanned</span><span class="o">&lt;</span><span class="n">FieldPat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span>
 
-    <span class="c">/// A tuple struct/variant pattern `Variant(x, y, z)`.</span>
-    <span class="c">/// "None" means a `Variant(..)` pattern where we don't bind the fields to names.</span>
+    <span class="cd">/// A tuple struct/variant pattern `Variant(x, y, z)`.</span>
+    <span class="cd">/// "None" means a `Variant(..)` pattern where we don't bind the fields to names.</span>
     <span class="nf">TupleStruct</span><span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;&gt;</span><span class="p">),</span>
 
-    <span class="c">/// A path pattern.</span>
-    <span class="c">/// Such pattern can be resolved to a unit struct/variant or a constant.</span>
+    <span class="cd">/// A path pattern.</span>
+    <span class="cd">/// Such pattern can be resolved to a unit struct/variant or a constant.</span>
     <span class="nf">Path</span><span class="p">(</span><span class="n">Path</span><span class="p">),</span>
 
-    <span class="c">/// An associated const named using the qualified path `&lt;T&gt;::CONST` or</span>
-    <span class="c">/// `&lt;T as Trait&gt;::CONST`. Associated consts from inherent impls can be</span>
-    <span class="c">/// referred to as simply `T::CONST`, in which case they will end up as</span>
-    <span class="c">/// PatKind::Path, and the resolver will have to sort that out.</span>
+    <span class="cd">/// An associated const named using the qualified path `&lt;T&gt;::CONST` or</span>
+    <span class="cd">/// `&lt;T as Trait&gt;::CONST`. Associated consts from inherent impls can be</span>
+    <span class="cd">/// referred to as simply `T::CONST`, in which case they will end up as</span>
+    <span class="cd">/// PatKind::Path, and the resolver will have to sort that out.</span>
     <span class="nf">QPath</span><span class="p">(</span><span class="n">QSelf</span><span class="p">,</span> <span class="n">Path</span><span class="p">),</span>
 
-    <span class="c">/// A tuple pattern `(a, b)`</span>
+    <span class="cd">/// A tuple pattern `(a, b)`</span>
     <span class="nf">Tup</span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
-    <span class="c">/// A `box` pattern</span>
+    <span class="cd">/// A `box` pattern</span>
     <span class="nf">Box</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;</span><span class="p">),</span>
-    <span class="c">/// A reference pattern, e.g. `&amp;mut (a, b)`</span>
+    <span class="cd">/// A reference pattern, e.g. `&amp;mut (a, b)`</span>
     <span class="nf">Ref</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Mutability</span><span class="p">),</span>
-    <span class="c">/// A literal</span>
+    <span class="cd">/// A literal</span>
     <span class="nf">Lit</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">),</span>
-    <span class="c">/// A range pattern, e.g. `1...2`</span>
+    <span class="cd">/// A range pattern, e.g. `1...2`</span>
     <span class="nf">Range</span><span class="p">(</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">P</span><span class="o">&lt;</span><span class="n">Expr</span><span class="o">&gt;</span><span class="p">),</span>
-    <span class="c">/// `[a, b, ..i, y, z]` is represented as:</span>
-    <span class="c">///     `PatKind::Vec(box [a, b], Some(i), box [y, z])`</span>
+    <span class="cd">/// `[a, b, ..i, y, z]` is represented as:</span>
+    <span class="cd">///     `PatKind::Vec(box [a, b], Some(i), box [y, z])`</span>
     <span class="nf">Vec</span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&lt;</span><span class="n">Pat</span><span class="o">&gt;&gt;</span><span class="p">),</span>
-    <span class="c">/// A macro pattern; pre-expansion</span>
+    <span class="cd">/// A macro pattern; pre-expansion</span>
     <span class="nf">Mac</span><span class="p">(</span><span class="n">Mac</span><span class="p">),</span>
 <span class="p">}</span>
 </code></pre></div></div>

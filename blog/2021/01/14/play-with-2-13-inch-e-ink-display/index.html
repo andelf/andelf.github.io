@@ -2,7 +2,7 @@
 <html lang="en"><head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Play with 2.13 inch E-Ink display | 猫·仁波切</title>
 <meta name="generator" content="Jekyll v4.1.1" />
 <meta property="og:title" content="Play with 2.13 inch E-Ink display" />
@@ -20,7 +20,7 @@
 <meta property="twitter:image" content="https://user-images.githubusercontent.com/72891/104635824-6825c900-56dd-11eb-8caa-d5eb00d11f70.jpg" />
 <meta property="twitter:title" content="Play with 2.13 inch E-Ink display" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","image":"https://user-images.githubusercontent.com/72891/104635824-6825c900-56dd-11eb-8caa-d5eb00d11f70.jpg","description":"故事从买屏幕说起。","headline":"Play with 2.13 inch E-Ink display","dateModified":"2021-01-14T17:24:00+00:00","datePublished":"2021-01-14T17:24:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display/"},"url":"https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display/","author":{"@type":"Person","name":"andelf"},"@context":"https://schema.org"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2021-01-14T17:24:00+00:00","datePublished":"2021-01-14T17:24:00+00:00","description":"故事从买屏幕说起。","headline":"Play with 2.13 inch E-Ink display","image":"https://user-images.githubusercontent.com/72891/104635824-6825c900-56dd-11eb-8caa-d5eb00d11f70.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display/"},"url":"https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -491,7 +491,7 @@ brew <span class="nb">install </span>libraqm
 <p>要想使用字体，我们需要新建一个字体 <code class="language-plaintext highlighter-rouge">.h</code> 文件，就叫 <code class="language-plaintext highlighter-rouge">ch_font.h</code>，在项目目录即可，不需要修改驱动库:</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-<span class="cp">#include "fonts.h"
+<span class="cp">#include</span> <span class="cpf">"fonts.h"</span><span class="cp">
 </span>
 <span class="k">const</span> <span class="n">CH_CN</span> <span class="n">Font16CN_Table</span><span class="p">[]</span> <span class="o">=</span>
 <span class="p">{</span>
@@ -512,7 +512,7 @@ brew <span class="nb">install </span>libraqm
 <p>使用:</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
-<span class="cp">#include "cn_font.h"
+<span class="cp">#include</span> <span class="cpf">"cn_font.h"</span><span class="cp">
 </span>
 
 <span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
@@ -673,32 +673,32 @@ brew <span class="nb">install </span>libraqm
 <p>这里以 <code class="language-plaintext highlighter-rouge">EPD_2IN13_lut_partial_update</code> 为例介绍下实际 LUT 执行时候发生的动作。简单得多，以至于整个表只有 3 个非空字节，
 对应 phase0A, phase0B, 其余 phase 设置因对应的 TP(period) 为 0, 不生效。所以只有两个 phase 的波形。</p>
 
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/// LUT for partial update.</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">/// LUT for partial update.</span>
 <span class="nd">#[rustfmt::skip]</span>
 <span class="k">pub</span> <span class="k">const</span> <span class="n">LUT_PARTIAL_UPDATE</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="mi">30</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="c">// VS, voltage in phase n</span>
-    <span class="c">// &lt;&lt;VS[0A-HH]:2/binary, VS[0A-HL]:2/binary, VS[0A-LH]:2/binary, VS[0A-LL]:2/binary&gt;&gt;</span>
-    <span class="c">// &lt;&lt;VS[0B-HH]:2/binary, VS[0B-HL]:2/binary, VS[0B-LH]:2/binary, VS[0B-LL]:2/binary&gt;&gt;</span>
-    <span class="c">// HL: white to black</span>
-    <span class="c">// LH: black to white</span>
-    <span class="c">// e.g. 0x18 = 0b00_01_10_00</span>
-    <span class="mi">0x18</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c">// phase 0</span>
-    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c">// phase 1</span>
+    <span class="c1">// VS, voltage in phase n</span>
+    <span class="c1">// &lt;&lt;VS[0A-HH]:2/binary, VS[0A-HL]:2/binary, VS[0A-LH]:2/binary, VS[0A-LL]:2/binary&gt;&gt;</span>
+    <span class="c1">// &lt;&lt;VS[0B-HH]:2/binary, VS[0B-HL]:2/binary, VS[0B-LH]:2/binary, VS[0B-LL]:2/binary&gt;&gt;</span>
+    <span class="c1">// HL: white to black</span>
+    <span class="c1">// LH: black to white</span>
+    <span class="c1">// e.g. 0x18 = 0b00_01_10_00</span>
+    <span class="mi">0x18</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c1">// phase 0</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c1">// phase 1</span>
     <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
     <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
-    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c">// phase 4</span>
-    <span class="c">// padding</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c1">// phase 4</span>
+    <span class="c1">// padding</span>
     <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
-    <span class="c">// RP, repeat counter, 0 to 63, 0 means run time = 1</span>
-    <span class="c">// TP, phase period, 0 to 31</span>
-    <span class="c">// &lt;&lt;RP[0]_L:3/binary, TP[0A]:5/binary&gt;&gt;</span>
-    <span class="c">// &lt;&lt;RP[0]_H:3/binary, TP[0B]:5/binary&gt;&gt;</span>
-    <span class="mi">0x0F</span><span class="p">,</span> <span class="mi">0x01</span><span class="p">,</span> <span class="c">// phase 0</span>
+    <span class="c1">// RP, repeat counter, 0 to 63, 0 means run time = 1</span>
+    <span class="c1">// TP, phase period, 0 to 31</span>
+    <span class="c1">// &lt;&lt;RP[0]_L:3/binary, TP[0A]:5/binary&gt;&gt;</span>
+    <span class="c1">// &lt;&lt;RP[0]_H:3/binary, TP[0B]:5/binary&gt;&gt;</span>
+    <span class="mi">0x0F</span><span class="p">,</span> <span class="mi">0x01</span><span class="p">,</span> <span class="c1">// phase 0</span>
     <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
     <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
     <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span>
-    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c">// phase 4</span>
-    <span class="c">// padding</span>
+    <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="c1">// phase 4</span>
+    <span class="c1">// padding</span>
     <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span>
 <span class="p">];</span>
 </code></pre></div></div>

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输 | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" />
+<meta name="author" content="andelf" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 “STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)”." />
+<meta property="og:description" content="之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 “STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)”." />
+<link rel="canonical" href="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" />
+<meta property="og:url" content="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:image" content="https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-01-23T04:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png" />
+<meta property="twitter:title" content="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2023-01-23T04:00:00+00:00","datePublished":"2023-01-23T04:00:00+00:00","description":"之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 “STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)”.","headline":"使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输","image":"https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"},"url":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2023-01-23T04:00:00+00:00" itemprop="datePublished">Jan 23, 2023
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card"
+          itemprop="name">andelf</span></span>• <span>Tags: embedded, stm32, embassy, rust, lora</span></p><p>
+      <img src="https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png" alt="thumbnail" height="200px" />
+    </p>
+    <hr /><div class="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#介绍">介绍</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#开发板介绍">开发板介绍</a></li>
+<li class="toc-entry toc-h3"><a href="#预备知识">预备知识</a></li>
+<li class="toc-entry toc-h3"><a href="#软件环境准备">软件环境准备</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#从-blinky-开始-embassy-应用开发">从 Blinky 开始 Embassy 应用开发</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#创建项目---初始化-rust-嵌入式项目模板">创建项目 - 初始化 Rust 嵌入式项目模板</a></li>
+<li class="toc-entry toc-h3"><a href="#blinky-点灯---初识-rust-embassy">Blinky 点灯 - 初识 Rust Embassy</a></li>
+<li class="toc-entry toc-h3"><a href="#uart-打印---时钟和外设初始化">UART 打印 - 时钟和外设初始化</a></li>
+<li class="toc-entry toc-h3"><a href="#i2c-访问-bmp280">I2C 访问 BMP280</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#硬件准备">硬件准备</a></li>
+<li class="toc-entry toc-h4"><a href="#bmp280-访问">BMP280 访问</a></li>
+<li class="toc-entry toc-h4"><a href="#代码实现">代码实现</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#lora-传感器数据传输">LoRa 传感器数据传输</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#硬件准备-1">硬件准备</a></li>
+<li class="toc-entry toc-h3"><a href="#射频开关-radioswitch">射频开关 RadioSwitch</a></li>
+<li class="toc-entry toc-h3"><a href="#lora-数据报文定义">LoRa 数据报文定义</a></li>
+<li class="toc-entry toc-h3"><a href="#subghz-初始化">SubGhz 初始化</a></li>
+<li class="toc-entry toc-h3"><a href="#subghz-发送端">SubGhz 发送端</a></li>
+<li class="toc-entry toc-h3"><a href="#subghz-接收端">SubGhz 接收端</a></li>
+<li class="toc-entry toc-h3"><a href="#运行结果">运行结果</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#总结">总结</a></li>
+<li class="toc-entry toc-h2"><a href="#参考资料">参考资料</a></li>
+</ul>
+    </div>
+    <hr />
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 “<a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>”.</p>
+
+<p>本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输.
+过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.</p>
+
+<p>门槛率高, 还是从点灯开始搞起.</p>
+
+<p>最终相关代码位于 <a href="https://github.com/andelf/lm401-pro-kit">Github: andelf/lm401-pro-kit</a>.</p>
+
+<h2 id="介绍">介绍</h2>
+
+<p>快递于 [[2023-01-08]] 收到, 里面的评估板, 天线, 数据线均是两份, 方便开发使用.</p>
+
+<h3 id="开发板介绍">开发板介绍</h3>
+
+<p>LM401-Pro-Kit 是基于 STM32WLE5CBU6 的 Lora 评估板. 支持 SubGHz 无线传输.
+LM401 模组内嵌高性能 MCU 芯片 STM32WLE5CBU6, 芯片内部集成了 SX1262.
+开发板板载 ST-Link(上传下载程序, UART 转 USB).
+ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模块.
+开发板提供了若干 LED 状态灯, 复位按钮和一个用户按钮.</p>
+
+<p>日常屯的(吃灰)板子也有大几十上百了, 拿到新板子, 需要查资料, 看手册, 电路图, 读例程, 找到一些核心信息,
+其中一些信息可能需要读例程的 C 代码库才能获得, 这里列出整理的部分:</p>
+
+<ul>
+  <li>MCU: STM32WLE5CBU6
+    <ul>
+      <li>架构: Cortex-M4</li>
+      <li>主频: 48MHz, <strong>通过 MSI 提供</strong></li>
+      <li>FLASH 128K，RAM 48K</li>
+      <li>核心外设: SX1262 via SPI3</li>
+    </ul>
+  </li>
+  <li>LM401: CN470-510MHZ</li>
+  <li>板载
+    <ul>
+      <li>ST-Link 下载器</li>
+      <li>用户按钮 PA0</li>
+      <li>LED blue PB5, green PB4, yellow PB3</li>
+      <li>射频开关:
+        <ul>
+          <li>FE_CTRL1 PB0</li>
+          <li>FE_CTRL2 PA15, LM401 未使用</li>
+          <li>FE_CTRL3 PA8</li>
+        </ul>
+      </li>
+      <li>UART RX/TX
+        <ul>
+          <li>PA2 TXD, USART2_TX, LPUART1_TX</li>
+          <li>PA3 RXD, USART2_RX, LPUART1_RX</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="预备知识">预备知识</h3>
+
+<ul>
+  <li>对 Rust 的基础了解</li>
+  <li>对 STM32 的基础了解</li>
+</ul>
+
+<p>使用 Rust 嵌入式开发大概大概有如下几层(只是粗略分类, 实际项目使用中, 可能会混合使用):</p>
+
+<ul>
+  <li>直接使用 PAC 库操作寄存器, PAC 库通过 <code class="language-plaintext highlighter-rouge">svd2rust</code> 工具从 <code class="language-plaintext highlighter-rouge">.svd</code> 文件生成</li>
+  <li>使用 HAL 库, 例如 stm32f4xx-hal, stm32l0xx-hal, stm32wlxx-hal 等, 融合 <code class="language-plaintext highlighter-rouge">embedded-hal</code> 生态</li>
+  <li>使用 Rust 嵌入式框架, 例如 embassy</li>
+</ul>
+
+<p>Embassy 框架是基于 Rust 语言的嵌入式异步框架.
+考虑到相关框架还在开发中, 本文的代码仓库使用的是最新的 embassy master 分支. Commit hash 为 <code class="language-plaintext highlighter-rouge">f98ba4ebac192e81c46933c0dc1dfb2d907cd532</code>, 通过 <code class="language-plaintext highlighter-rouge">Cargo.toml</code> 中设置依赖 <code class="language-plaintext highlighter-rouge">path</code> 的方式引入.
+其他可选方案还可有 <code class="language-plaintext highlighter-rouge">git submodule</code> 或 直接 <code class="language-plaintext highlighter-rouge">git</code> 依赖远程版本等.</p>
+
+<p>绕开 C HAL/BSP 库开发, 是需要踩不少坑的, 例如, RCC 时钟初始化, 需要查阅 BSP 代码才能确认, 48MHz
+主时钟通过 MSI range11 获得, 而 embassy 对应 MCU 的示例代码使用的是 HSE, 这些都给 Rust
+嵌入式开发带来一定的门槛.</p>
+
+<h3 id="软件环境准备">软件环境准备</h3>
+
+<p>安装 Rust 工具链, 本文使用 rustup nightly. 请参考 https://rustup.rs/ .</p>
+
+<p>安装 Rust <code class="language-plaintext highlighter-rouge">thumbv7em-none-eabi</code> target, 对应 Cortex-M4:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rustup target add thumbv7em-none-eabi
+</code></pre></div></div>
+
+<p>安装 Rust 嵌入式开发烧录/运行工具 <code class="language-plaintext highlighter-rouge">probe-run</code>, 也可以使用 OpenOCD 或其他烧录工具:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cargo install probe-run
+</code></pre></div></div>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>probe-run <span class="nt">--list-chips</span> | <span class="nb">grep </span>STM32WL
+<span class="go">STM32WL Series
+        STM32WLE5J8Ix
+        STM32WLE5JBIx
+        STM32WLE5JCIx
+        STM32WL55JCIx
+</span></code></pre></div></div>
+
+<p>检查发现支持列表没有 STM32WLE5CBU6, 不过可以拿 STM32WLE5JCIx 替代, 问题不大.</p>
+
+<p>安装任意串口调试工具, 这里我使用 <code class="language-plaintext highlighter-rouge">picocom</code>. 其他可以使用的替代有 <a href="https://www.putty.org/">PuTTy</a>,
+<a href="https://ttssh2.osdn.jp/index.html.en">Teraterm</a> 等等.</p>
+
+<p>通过 USB 数据线连接开发板, 通过 <code class="language-plaintext highlighter-rouge">picocom</code> 连接串口, 通过 <code class="language-plaintext highlighter-rouge">probe-run</code> 烧录程序.</p>
+
+<p>测试连接</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>lsusb
+<span class="go">Bus 001 Device 008: ID 0483:374b STMicroelectronics STM32 STLink  Serial: xxxx
+</span></code></pre></div></div>
+
+<h2 id="从-blinky-开始-embassy-应用开发">从 Blinky 开始 Embassy 应用开发</h2>
+
+<p>考虑到从初识 Rust 嵌入式开发直接跨越到 LoRa 无线传输门槛较高, 我们从简单的点灯例子开始:</p>
+
+<h3 id="创建项目---初始化-rust-嵌入式项目模板">创建项目 - 初始化 Rust 嵌入式项目模板</h3>
+
+<p>我们直接依赖 embassy 的 master 分支进行开发, 为方便调试, 直接 clone 到本地用相对路径引入依赖:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git@github.com:embassy-rs/embassy.git
+<span class="c"># or</span>
+git clone https://github.com/embassy-rs/embassy.git
+
+<span class="c"># 在同层目录直接创建我们的项目, 起板子名就可以. 相当于一个 BSP 模板可以扩充</span>
+
+cargo new <span class="nt">--lib</span> lm401-pro-kit
+
+<span class="c"># 进入项目目录, 以下命令均在此执行</span>
+<span class="nb">cd </span>lm401-pro-kit
+</code></pre></div></div>
+
+<p>Rust 嵌入式项目的初始设置需要请参考项目代码</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.cargo/config.toml</code>
+    <ul>
+      <li>设置编译器 target 到 <code class="language-plaintext highlighter-rouge">thumbv7em-none-eabi</code></li>
+      <li>设置 <code class="language-plaintext highlighter-rouge">cargo run</code> 的执行方式为调用 <code class="language-plaintext highlighter-rouge">probe-run ...</code></li>
+      <li>
+        <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "probe-run --chip STM32WLE5JCIx"
+
+[build]
+target = "thumbv7em-none-eabi"
+</code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">build.rs</code>
+    <ul>
+      <li>设置 <code class="language-plaintext highlighter-rouge">link.x</code>/<code class="language-plaintext highlighter-rouge">memory.x</code> 链接过程中所用配置, 编译过程中由 embassy 自动按照芯片选择生成</li>
+      <li>添加 <code class="language-plaintext highlighter-rouge">defmt</code> 链接参数支持</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">Cargo.toml</code>
+    <ul>
+      <li>添加 <code class="language-plaintext highlighter-rouge">embassy</code> 相关依赖, 并通过 <code class="language-plaintext highlighter-rouge">features</code> 设置相关参数</li>
+      <li>添加项目依赖, defmt, cortex-m 相关等</li>
+      <li>设置编译参数 <code class="language-plaintext highlighter-rouge">opt-level = "z"</code>, 最小化编译二进制大小</li>
+      <li>
+        <div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># part of Cargo.toml</span>
+<span class="nn">[dependencies]</span>
+<span class="c"># ...</span>
+<span class="nn">embassy-stm32</span> <span class="o">=</span> <span class="p">{</span> <span class="py">version</span> <span class="p">=</span> <span class="s">"0.1.0"</span><span class="p">,</span> <span class="py">path</span> <span class="p">=</span> <span class="s">"../embassy/embassy-stm32"</span><span class="p">,</span> <span class="py">features</span> <span class="p">=</span> <span class="p">[</span>
+    <span class="s">"nightly"</span><span class="p">,</span>
+    <span class="s">"defmt"</span><span class="p">,</span>
+    <span class="s">"stm32wle5cb"</span><span class="p">,</span>
+    <span class="s">"time-driver-any"</span><span class="p">,</span>
+    <span class="s">"memory-x"</span><span class="p">,</span>
+    <span class="s">"subghz"</span><span class="p">,</span>
+    <span class="s">"unstable-pac"</span><span class="p">,</span>
+    <span class="s">"exti"</span><span class="p">,</span>
+<span class="p">]</span> <span class="p">}</span>
+<span class="c"># ...</span>
+<span class="nn">[profile.dev]</span>
+<span class="py">opt-level</span> <span class="p">=</span> <span class="s">"z"</span> <span class="c"># Optimize for size.</span>
+
+<span class="nn">[profile.release]</span>
+<span class="py">lto</span> <span class="p">=</span> <span class="kc">true</span>
+<span class="py">opt-level</span> <span class="p">=</span> <span class="s">"z"</span> <span class="c"># Optimize for size.</span>
+</code></pre></div>        </div>
+      </li>
+      <li>defmt 是一个非常好用的 Rust 嵌入式调试打印, 对 STM32(ST-Link) 有很好的支持.</li>
+      <li><code class="language-plaintext highlighter-rouge">stm32wle5cb</code> 用于选择 STM32WLE5CBU6 的芯片配置, <code class="language-plaintext highlighter-rouge">subghz</code> 用于选择 SubGHz 驱动.</li>
+      <li><code class="language-plaintext highlighter-rouge">memory-x</code> 自动生成链接所需的 <code class="language-plaintext highlighter-rouge">memory.x</code> 文件(FLASH, SRAM 的大小和内存位置).</li>
+    </ul>
+  </li>
+  <li>未避免编译报错, 还需要清空 <code class="language-plaintext highlighter-rouge">src/lib.rs</code> 项目初始文件, 用 <code class="language-plaintext highlighter-rouge">#![no_std]</code> 替代</li>
+</ul>
+
+<p>几乎所有的 Rust 嵌入式项目都是 <code class="language-plaintext highlighter-rouge">no_std</code> 的, 这意味着无法简单地使用所有带内存分配类型.
+本例中, 我们使用 <code class="language-plaintext highlighter-rouge">heapless</code> crate 中提供的栈分配类型来替代 <code class="language-plaintext highlighter-rouge">String</code>.</p>
+
+<p>注意到, 创建项目时候使用了 <code class="language-plaintext highlighter-rouge">cargo new --lib</code>, 相当于我们创建的是一个 library 项目.
+这不需要担心, <code class="language-plaintext highlighter-rouge">cargo run</code> 会自动识别 <code class="language-plaintext highlighter-rouge">src/bin/xxx.rs</code> 为 “可执行” 二进制目标.
+通过 <code class="language-plaintext highlighter-rouge">cargo run --bin xxx</code> 即可运行对应程序.
+也可以通过 <code class="language-plaintext highlighter-rouge">examples/xxx.rs</code> 的方法管理多个可执行二进制目标.</p>
+
+<h3 id="blinky-点灯---初识-rust-embassy">Blinky 点灯 - 初识 Rust Embassy</h3>
+
+<p>我们先通过一个最简单的闪灯例子来熟悉 Rust Embassy 的使用.
+创建 <code class="language-plaintext highlighter-rouge">src/bin/blinky.rs</code>.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// blinky.rs</span>
+<span class="nd">#![no_std]</span>
+<span class="nd">#![no_main]</span>
+<span class="nd">#![feature(type_alias_impl_trait)]</span>
+
+<span class="k">use</span> <span class="nn">defmt</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">embassy_executor</span><span class="p">::</span><span class="n">Spawner</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">gpio</span><span class="p">::{</span><span class="n">Level</span><span class="p">,</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Speed</span><span class="p">};</span>
+<span class="k">use</span> <span class="nn">embassy_time</span><span class="p">::{</span><span class="n">Duration</span><span class="p">,</span> <span class="n">Timer</span><span class="p">};</span>
+<span class="k">use</span> <span class="p">{</span><span class="n">defmt_rtt</span> <span class="k">as</span> <span class="n">_</span><span class="p">,</span> <span class="n">panic_probe</span> <span class="k">as</span> <span class="n">_</span><span class="p">};</span>
+
+<span class="nd">#[embassy_executor::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">(</span><span class="n">_spawner</span><span class="p">:</span> <span class="n">Spawner</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">p</span> <span class="o">=</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nf">init</span><span class="p">(</span><span class="nn">Default</span><span class="p">::</span><span class="nf">default</span><span class="p">());</span>
+    <span class="nd">info!</span><span class="p">(</span><span class="s">"Hello World!"</span><span class="p">);</span>
+
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">led</span> <span class="o">=</span> <span class="nn">Output</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">p</span><span class="py">.PB4</span><span class="p">,</span> <span class="nn">Level</span><span class="p">::</span><span class="n">High</span><span class="p">,</span> <span class="nn">Speed</span><span class="p">::</span><span class="n">Low</span><span class="p">);</span>
+
+    <span class="k">loop</span> <span class="p">{</span>
+        <span class="nd">info!</span><span class="p">(</span><span class="s">"high"</span><span class="p">);</span>
+        <span class="n">led</span><span class="nf">.set_high</span><span class="p">();</span>
+        <span class="nn">Timer</span><span class="p">::</span><span class="nf">after</span><span class="p">(</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_millis</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span><span class="k">.await</span><span class="p">;</span>
+
+        <span class="nd">info!</span><span class="p">(</span><span class="s">"low"</span><span class="p">);</span>
+        <span class="n">led</span><span class="nf">.set_low</span><span class="p">();</span>
+        <span class="nn">Timer</span><span class="p">::</span><span class="nf">after</span><span class="p">(</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_millis</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span><span class="k">.await</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">#![no_main]</code> 用于告诉 Rust 编译器, 我们不使用 Rust 提供的 <code class="language-plaintext highlighter-rouge">main</code> 函数做程序入口.
+<code class="language-plaintext highlighter-rouge">#[embassy_executor::main]</code> 是一个宏, 用于包装 <code class="language-plaintext highlighter-rouge">async fn main()</code> 函数,
+由 embassy-executor 提供了一个 futures runtime, 所以可以使用 <code class="language-plaintext highlighter-rouge">async</code> 和 <code class="language-plaintext highlighter-rouge">await</code> 语法.
+底层实现中, <code class="language-plaintext highlighter-rouge">.await</code> 通过 STM32 的 WFE/SEV 等待指令和中断唤醒指令实现, 实现了程序逻辑在等待时候的低功耗.
+<code class="language-plaintext highlighter-rouge">Spawner</code> 还可以用来启动其他 <code class="language-plaintext highlighter-rouge">async fn</code> 函数, 实现了多任务的功能.</p>
+
+<p><code class="language-plaintext highlighter-rouge">#![feature(type_alias_impl_trait)]</code> 在 embassy 中被广泛使用, 需要开启.
+Embassy 中经常能看到形如 <code class="language-plaintext highlighter-rouge">irq: impl Peripheral&lt;P = T::Interrupt&gt; + 'd</code> 的类型签名.</p>
+
+<p><code class="language-plaintext highlighter-rouge">let p = embassy_stm32::init(Default::default());</code> 直接初始化了所有的外设, 并返回一个 <code class="language-plaintext highlighter-rouge">Peripherals</code> 对象.
+通过 Rust 的 move 语义保证不同外设使用之间不会出现竞争.</p>
+
+<p><code class="language-plaintext highlighter-rouge">let mut led = Output::new(p.PB4, Level::High, Speed::Low);</code> 创建了一个 <code class="language-plaintext highlighter-rouge">Output</code> 对象, 用于控制 PB4 引脚.
+<code class="language-plaintext highlighter-rouge">Output</code> 对象是一个 <code class="language-plaintext highlighter-rouge">Pin</code> 的 trait, 通过 <code class="language-plaintext highlighter-rouge">set_high</code> 和 <code class="language-plaintext highlighter-rouge">set_low</code> 方法可以控制引脚电平.
+这里会自动完成对 GPIOB PB4 的所有初始化和设置.</p>
+
+<p><code class="language-plaintext highlighter-rouge">info!</code>, <code class="language-plaintext highlighter-rouge">warn!</code> 等都是 <code class="language-plaintext highlighter-rouge">defmt</code> 的宏, 用于通过 ST-Link 提供的 Debug 通道打印调试信息. 强烈推荐使用,
+否则嵌入式开发中, 只能用串口打印信息.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Timer::after(Duration::from_millis(1000)).await</code> 是一个异步等待 1 秒的方法, 通过 <code class="language-plaintext highlighter-rouge">embassy-time</code> crate 实现.
+在 <code class="language-plaintext highlighter-rouge">Cargo.toml</code> 中的 <code class="language-plaintext highlighter-rouge">time-driver-any</code> feature 选择了任意可用 timer 实现, 默认是 TIM2, 由 embassy-stm32
+提供给 <code class="language-plaintext highlighter-rouge">embassy-time</code>.</p>
+
+<p>确保板子连接正常, 直接运行:</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>cargo run <span class="nt">--bin</span> blinky
+<span class="go">    Finished dev [optimized + debuginfo] target(s) in 0.32s
+     Running `probe-run --chip STM32WLE5JCIx target/thumbv7em-none-eabi/debug/blinky`
+(HOST) INFO  flashing program (14 pages / 14.00 KiB)
+(HOST) INFO  success!
+────────────────────────────────────────────────────────────────────────────────
+0.000000 DEBUG rcc: Clocks { sys: Hertz(4000000), apb1: Hertz(4000000), apb1_tim: Hertz(4000000), apb2: Hertz(4000000), apb2_tim: Hertz(4000000), apb3: Hertz(4000000), ahb1: Hertz(4000000), ahb2: Hertz(4000000), ahb3: Hertz(4000000) }
+└─ embassy_stm32::rcc::set_freqs @ ./embassy/embassy-stm32/src/fmt.rs:125
+0.000113 INFO  Hello World!
+</span><span class="gp">└─ blinky::____embassy_main_task::{async_fn#</span>0<span class="o">}</span> @ src/bin/blinky.rs:14
+<span class="go">0.000552 INFO  high
+</span><span class="gp">└─ blinky::____embassy_main_task::{async_fn#</span>0<span class="o">}</span> @ src/bin/blinky.rs:19
+<span class="go">1.001157 INFO  low
+</span><span class="gp">└─ blinky::____embassy_main_task::{async_fn#</span>0<span class="o">}</span> @ src/bin/blinky.rs:23
+<span class="go">2.001811 INFO  high
+</span></code></pre></div></div>
+
+<ul>
+  <li>二进制编译成功后, 由 <code class="language-plaintext highlighter-rouge">probe-run</code> 烧录到 MCU 并执行, 持续获取 defmt 打印信息</li>
+  <li><code class="language-plaintext highlighter-rouge">rcc: Clocks</code> 调试时钟信息由 <code class="language-plaintext highlighter-rouge">embassy-stm32</code> 库 <code class="language-plaintext highlighter-rouge">embassy_stm32::rcc::set_freqs</code> 打印</li>
+  <li>所有 defmt 打印内容在 <code class="language-plaintext highlighter-rouge">cargo run</code> dev 模式下均附加了代码行, 非常方便</li>
+  <li>defmt 打印内容均带有时间戳, 该时间戳由 STM32 SYSTICK 提供(所以如果使用了 SYSTICK, 有可能导致时间戳异常)</li>
+  <li>最终的 <code class="language-plaintext highlighter-rouge">main</code> 函数显示为 <code class="language-plaintext highlighter-rouge">blinky::____embassy_main_task::{async_fn#0}</code>, 由 <code class="language-plaintext highlighter-rouge">#[embassy_executor::main]</code> 宏生成</li>
+</ul>
+
+<h3 id="uart-打印---时钟和外设初始化">UART 打印 - 时钟和外设初始化</h3>
+
+<p>defmt 固然方便, 但很多时候依然需要用到 UART, 通过串口获取调试信息或收集数据.
+LM401-Pro-Kit 正好通过 ST-Link 提供了到 USART2 的访问.</p>
+
+<p>Blinky 例子中, 由 defmt 调试信息可知, 我们使用的系统时钟只有 4MHz, 但 STM32WL 的最大时钟频率是 48MHz.
+所以需要通过初始化 <code class="language-plaintext highlighter-rouge">init()</code> 方法设置时钟参数:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// sys clk init, with LSI support</span>
+<span class="k">let</span> <span class="k">mut</span> <span class="n">config</span> <span class="o">=</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">Config</span><span class="p">::</span><span class="nf">default</span><span class="p">();</span>
+<span class="n">config</span><span class="py">.rcc.enable_lsi</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+<span class="n">config</span><span class="py">.rcc.mux</span> <span class="o">=</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">rcc</span><span class="p">::</span><span class="nn">ClockSrc</span><span class="p">::</span><span class="nf">MSI</span><span class="p">(</span><span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">rcc</span><span class="p">::</span><span class="nn">MSIRange</span><span class="p">::</span><span class="n">Range11</span><span class="p">);</span> <span class="c1">// 48MHz</span>
+<span class="k">let</span> <span class="n">p</span> <span class="o">=</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nf">init</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Embassy UART 使用非常简单, 可以单独用 UartTx/UartRx 只初始发送/接收部分.
+这里是一个发送 Hello world 和 MCU 内部 “时间” 的简单示例:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// USART2 tx</span>
+<span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">dma</span><span class="p">::</span><span class="n">NoDma</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">usart</span><span class="p">::</span><span class="n">UartTx</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">embassy_time</span><span class="p">::</span><span class="n">Instant</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">heapless</span><span class="p">::</span><span class="nb">String</span><span class="p">;</span>
+
+<span class="c1">// Default: 115200 8N1</span>
+<span class="k">let</span> <span class="k">mut</span> <span class="n">usart</span> <span class="o">=</span> <span class="nn">UartTx</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">p</span><span class="py">.USART2</span><span class="p">,</span> <span class="n">p</span><span class="py">.PA2</span><span class="p">,</span> <span class="n">NoDma</span><span class="p">,</span> <span class="nn">Default</span><span class="p">::</span><span class="nf">default</span><span class="p">());</span>
+
+<span class="k">let</span> <span class="k">mut</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">String</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">i</span> <span class="o">=</span> <span class="nn">Instant</span><span class="p">::</span><span class="nf">now</span><span class="p">();</span>
+<span class="nn">core</span><span class="p">::</span><span class="nd">write!</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s">"Hello world, device time: {}</span><span class="se">\r\n</span><span class="s">"</span><span class="p">,</span> <span class="n">i</span><span class="nf">.as_millis</span><span class="p">())</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="n">usart</span><span class="nf">.blocking_write</span><span class="p">(</span><span class="n">msg</span><span class="nf">.as_bytes</span><span class="p">())</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="n">msg</span><span class="nf">.clear</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">UartTx</code> 初始化时需要传入 <code class="language-plaintext highlighter-rouge">USART2</code>, <code class="language-plaintext highlighter-rouge">PA2</code>, 分别对应 USART2 外设和 TX 引脚,
+DMA 通道是可选的. 默认串口参数是 115200 8N1. 外设初始化会自动处理对应引脚的 AF 设置.</p>
+
+<p>串口打印需要字符串拼接格式化, 由于 <code class="language-plaintext highlighter-rouge">no_std</code>, 标准库的 <code class="language-plaintext highlighter-rouge">String</code> 类型不可用,
+这里使用 <code class="language-plaintext highlighter-rouge">heapless::String</code>, 初始化时候需要指定分配大小.
+<code class="language-plaintext highlighter-rouge">core::write!</code> 即标准库中的 <code class="language-plaintext highlighter-rouge">write!</code>, <code class="language-plaintext highlighter-rouge">core::</code> 前缀是为了避免和 <code class="language-plaintext highlighter-rouge">defmt::write!</code> 名字冲突.</p>
+
+<p>完整代码请参考 <a href="https://github.com/andelf/lm401-pro-kit">代码仓库</a>.</p>
+
+<p>执行代码确认, 可以看到系统时钟被正确设置为 48MHz.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>cargo run <span class="nt">--bin</span> uart
+<span class="go">0.000000 DEBUG rcc: Clocks { sys: Hertz(48000000), apb1: Hertz(48000000), apb1_tim: Hertz(48000000), apb2: Hertz(48000000), apb2_tim: Hertz(48000000), apb3: Hertz(48000000), ahb1: Hertz(48000000), ahb2: Hertz(48000000), ahb3: Hertz(48000000) }
+└─ embassy_stm32::rcc::set_freqs @ /Users/mono/Elec/embassy/embassy-stm32/src/fmt.rs:125
+0.000011 INFO  Hello World!
+</span><span class="gp">└─ uart::____embassy_main_task::{async_fn#</span>0<span class="o">}</span> @ src/bin/uart.rs:21
+<span class="go">0.000064 INFO  tick
+</span></code></pre></div></div>
+
+<p>在另一命令行打开串口监视工具, 查看串口输出:</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>picocom <span class="nt">-b</span> 115200 /dev/tty.usbmodem11103
+<span class="go">Hello world, device time: 1000
+Hello world, device time: 3002
+Hello world, device time: 5005
+Hello world, device time: 7008
+Hello world, device time: 9011
+Hello world, device time: 11013
+</span><span class="c">....
+</span></code></pre></div></div>
+
+<h3 id="i2c-访问-bmp280">I2C 访问 BMP280</h3>
+
+<h4 id="硬件准备">硬件准备</h4>
+
+<ul>
+  <li>BMP280 传感器模块 1 个</li>
+  <li>杜邦线若干根, 用于连接传感器模块和开发板</li>
+</ul>
+
+<p>BMP280 是来自 Bosch 的气压传感器, 通过 I2C 接口读取气压和温度数据,
+所以需要在板子上找到未被占用的 I2C SCL/SDA 引脚资源, 通过查阅芯片手册, 最后选择了
+I2C2, SCL pin PA12, SDA pin PA11.
+开发板上一排跳线帽正好提供了 VCC, GND.</p>
+
+<p>接线:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+--------+          VCC GND
+| BMP280 |           |   |
+|      VCC&gt;----------+   |
+|      GND&gt;--------------+
+| [.]  SCL&gt;--------------------&gt;PA12
+|      SDA&gt;--------------------&gt;PA11
+|        |          (LM401-Pro-Kit)
++--------+
+</code></pre></div></div>
+
+<h4 id="bmp280-访问">BMP280 访问</h4>
+
+<p>Rust Embassy 完美兼容 <code class="language-plaintext highlighter-rouge">embedded-hal</code> 相关生态, 相关外设类型均支持对应的 <code class="language-plaintext highlighter-rouge">embedded-hal</code> trait,</p>
+
+<p>考虑到 BMP280 的使用略微复杂, 需要初始化, 读取校准数据, 测量后还需要通过校准数据计算最终测量结果.
+所以 BMP280 直接寻找对应驱动即可. 但 Rust 嵌入式生态有个问题, 弃坑项目太多. 寻找第三方依赖时候需要注意阅读代码,
+查看依赖版本, 必要时更新.</p>
+
+<p>这么说, 其实是之前我有个弃坑项目里面有个 BME280 驱动库, BME280 和 BMP280 基本兼容, 只是多了湿度测量.
+驱动代码使用 <code class="language-plaintext highlighter-rouge">embedded-hal</code> 提供的 trait 类型访问设备, 完成传感器初始化和测量.
+稍微改了改, 直接 Copy <a href="https://github.com/andelf/embedded-drivers/blob/master/src/bme280.rs">embedded-drivers: bme280.rs</a>
+到项目 <code class="language-plaintext highlighter-rouge">src/</code> 下使用即可.</p>
+
+<p>修改 <code class="language-plaintext highlighter-rouge">src/lib.rs</code> 增加:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">mod</span> <span class="n">bme280</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="代码实现">代码实现</h4>
+
+<p>创建 BMP280 传感器项目 <code class="language-plaintext highlighter-rouge">src/bin/i2c-bmp280.rs</code>. 完整代码请参考 <a href="https://github.com/andelf/lm401-pro-kit">代码仓库</a>, 以下只选择关键部分介绍.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// BMP280 init</span>
+<span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">i2c</span><span class="p">::</span><span class="n">I2c</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="n">interrupt</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="n">Hertz</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">embassy_time</span><span class="p">::</span><span class="n">Delay</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">lm401_pro_kit</span><span class="p">::</span><span class="nn">bme280</span><span class="p">::</span><span class="n">BME280</span><span class="p">;</span>
+
+<span class="k">let</span> <span class="n">irq</span> <span class="o">=</span> <span class="nn">interrupt</span><span class="p">::</span><span class="nd">take!</span><span class="p">(</span><span class="n">I2C2_EV</span><span class="p">);</span>
+<span class="k">let</span> <span class="n">i2c</span> <span class="o">=</span> <span class="nn">I2c</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span>
+    <span class="n">p</span><span class="py">.I2C2</span><span class="p">,</span>
+    <span class="n">p</span><span class="py">.PA12</span><span class="p">,</span>
+    <span class="n">p</span><span class="py">.PA11</span><span class="p">,</span>
+    <span class="n">irq</span><span class="p">,</span>
+    <span class="n">NoDma</span><span class="p">,</span>
+    <span class="n">NoDma</span><span class="p">,</span>
+    <span class="nf">Hertz</span><span class="p">(</span><span class="mi">100_000</span><span class="p">),</span>
+    <span class="nn">Default</span><span class="p">::</span><span class="nf">default</span><span class="p">(),</span>
+<span class="p">);</span>
+
+<span class="k">let</span> <span class="k">mut</span> <span class="n">delay</span> <span class="o">=</span> <span class="n">Delay</span><span class="p">;</span>
+
+<span class="k">let</span> <span class="k">mut</span> <span class="n">bmp280</span> <span class="o">=</span> <span class="nn">BME280</span><span class="p">::</span><span class="nf">new_primary</span><span class="p">(</span><span class="n">i2c</span><span class="p">);</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">bmp280</span><span class="nf">.init</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">delay</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>Embassy 中访问设备时, 一般会需要中断, 虽然理论上阻塞访问外设时不需要中断.
+但是为了保证接口的一致性, 一般都会要求提供中断参数. <code class="language-plaintext highlighter-rouge">interrupt::take!</code> 用于获取对应中断对象.</p>
+
+<p><code class="language-plaintext highlighter-rouge">BME280::new_primary</code> 直接使用设备主地址 <code class="language-plaintext highlighter-rouge">0x76</code> 访问 I2C 总线上的 BMP280.</p>
+
+<p>初始化设备时候由于需要软复位, 需要传递 <code class="language-plaintext highlighter-rouge">Delay</code> 对象, 用于延时(<code class="language-plaintext highlighter-rouge">delay_ms</code>).
+默认的 <code class="language-plaintext highlighter-rouge">embassy_time::Delay</code> 使用循环比较 “设备当前时间” 的方法实现.</p>
+
+<p><code class="language-plaintext highlighter-rouge">unwrap!</code> 宏由 <code class="language-plaintext highlighter-rouge">defmt</code> 提供, 等价于 <code class="language-plaintext highlighter-rouge">.unwrap()</code> 调用, 但是会在 panic 时候通过 defmt 打印信息.</p>
+
+<p>完成设备初始化后, 可以访问传感器信息:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">raw</span> <span class="o">=</span> <span class="nd">unwrap!</span><span class="p">(</span><span class="n">bmp280</span><span class="nf">.measure</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">delay</span><span class="p">));</span>
+<span class="nd">info!</span><span class="p">(</span><span class="s">"BMP280: {:?}"</span><span class="p">,</span> <span class="n">raw</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>传感器执行测量时候, 按照手册, 依然需要延时, 所以也同样需要传递 <code class="language-plaintext highlighter-rouge">Delay</code> 对象.
+<code class="language-plaintext highlighter-rouge">BME280::measure</code> 方法返回 <code class="language-plaintext highlighter-rouge">Measurements</code> 类型, 为了方便调试使用, 用 derive macro 增加了 defmt 支持,
+可以直接做格式化参数:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Debug,</span> <span class="nd">defmt::Format)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Measurements</span> <span class="p">{</span>
+    <span class="cd">/// temperature in degrees celsius</span>
+    <span class="k">pub</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span>
+    <span class="cd">/// pressure in pascals</span>
+    <span class="k">pub</span> <span class="n">pressure</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span>
+    <span class="cd">/// percent relative humidity (`0` with BMP280)</span>
+    <span class="k">pub</span> <span class="n">humidity</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>执行代码:</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>cargo run <span class="nt">--bin</span> i2c-bmp280
+<span class="go">0.000011 INFO  I2C BMP280 demo!
+</span><span class="gp">└─ i2c_bmp280::____embassy_main_task::{async_fn#</span>0<span class="o">}</span> @ src/bin/i2c-bmp280.rs:23
+<span class="go">0.009314 INFO  measure tick
+</span><span class="gp">└─ i2c_bmp280::____embassy_main_task::{async_fn#</span>0<span class="o">}</span> @ src/bin/i2c-bmp280.rs:45
+<span class="go">0.051652 INFO  BMP280: Measurements { temperature: 23.689554, pressure: 88391.13, humidity: 0.0 }
+</span><span class="gp">└─ i2c_bmp280::____embassy_main_task::{async_fn#</span>0<span class="o">}</span> @ src/bin/i2c-bmp280.rs:48
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">temperature: 23.689554, pressure: 88391.13</code> 传感器数据正常.</p>
+
+<h2 id="lora-传感器数据传输">LoRa 传感器数据传输</h2>
+
+<p>LoRa 是一种无线传输协议, 适合长距离(km), 少量数据传输. 尤其适合传感器数据.
+因为手头没有 LoRaWAN 基站, 所以暂时没法测试 LoRaWAN.
+这里使用 LoRa 调制模式点对点传输 BMP280 传感器数据.</p>
+
+<p>详细实现请参考 <a href="https://github.com/andelf/lm401-pro-kit">代码仓库</a> 里的 <code class="language-plaintext highlighter-rouge">src/bin/subghz-bmp280-tx.rs</code> 和 <code class="language-plaintext highlighter-rouge">src/bin/subghz-bmp280-rx.rs</code>.</p>
+
+<h3 id="硬件准备-1">硬件准备</h3>
+
+<p>LM401-Pro-Kit x2, 天线, 数据线.</p>
+
+<p>其中一个开发板作为传感器采集端, 按照上一示例链接到 BMP280 传感器模块, 另一个作为接收端, 两个开发板之间通过 LoRa 无线传输数据.
+接收端通过 UART 与电脑连接, 通过串口调试工具查看传感器数据.(实际上也可以直接通过 ST-Link + defmt 获取数据)</p>
+
+<h3 id="射频开关-radioswitch">射频开关 RadioSwitch</h3>
+
+<p>使用开发板射频功能, 需要处理射频开关逻辑. 相关逻辑从 BSP C 代码获得. 可以直接作为 BSP 的工具类型, 写入到 <code class="language-plaintext highlighter-rouge">src/lib.rs</code> 中:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::{</span>
+    <span class="nn">gpio</span><span class="p">::{</span><span class="n">AnyPin</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">Output</span><span class="p">,</span> <span class="nb">Pin</span><span class="p">,</span> <span class="n">Speed</span><span class="p">},</span>
+    <span class="nn">peripherals</span><span class="p">::{</span><span class="n">PA15</span><span class="p">,</span> <span class="n">PA8</span><span class="p">,</span> <span class="n">PB0</span><span class="p">},</span>
+<span class="p">};</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">RadioSwitch</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">ctrl1</span><span class="p">:</span> <span class="n">Output</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">AnyPin</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">ctrl2</span><span class="p">:</span> <span class="n">Output</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">AnyPin</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">ctrl3</span><span class="p">:</span> <span class="n">Output</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">AnyPin</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">RadioSwitch</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">new_from_pins</span><span class="p">(</span><span class="n">ctrl1</span><span class="p">:</span> <span class="n">PB0</span><span class="p">,</span> <span class="n">ctrl2</span><span class="p">:</span> <span class="n">PA15</span><span class="p">,</span> <span class="n">ctrl3</span><span class="p">:</span> <span class="n">PA8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+        <span class="k">Self</span> <span class="p">{</span>
+            <span class="n">ctrl1</span><span class="p">:</span> <span class="nn">Output</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ctrl1</span><span class="nf">.degrade</span><span class="p">(),</span> <span class="nn">Level</span><span class="p">::</span><span class="n">Low</span><span class="p">,</span> <span class="nn">Speed</span><span class="p">::</span><span class="n">VeryHigh</span><span class="p">),</span>
+            <span class="n">ctrl2</span><span class="p">:</span> <span class="nn">Output</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ctrl2</span><span class="nf">.degrade</span><span class="p">(),</span> <span class="nn">Level</span><span class="p">::</span><span class="n">Low</span><span class="p">,</span> <span class="nn">Speed</span><span class="p">::</span><span class="n">VeryHigh</span><span class="p">),</span>
+            <span class="n">ctrl3</span><span class="p">:</span> <span class="nn">Output</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">ctrl3</span><span class="nf">.degrade</span><span class="p">(),</span> <span class="nn">Level</span><span class="p">::</span><span class="n">Low</span><span class="p">,</span> <span class="nn">Speed</span><span class="p">::</span><span class="n">VeryHigh</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">new</span><span class="p">(</span>
+        <span class="n">ctrl1</span><span class="p">:</span> <span class="n">Output</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">AnyPin</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="n">ctrl2</span><span class="p">:</span> <span class="n">Output</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">AnyPin</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="n">ctrl3</span><span class="p">:</span> <span class="n">Output</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">AnyPin</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+        <span class="k">Self</span> <span class="p">{</span>
+            <span class="n">ctrl1</span><span class="p">,</span>
+            <span class="n">ctrl2</span><span class="p">,</span>
+            <span class="n">ctrl3</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">set_off</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.ctrl3</span><span class="nf">.set_low</span><span class="p">();</span>
+        <span class="k">self</span><span class="py">.ctrl1</span><span class="nf">.set_low</span><span class="p">();</span>
+        <span class="k">self</span><span class="py">.ctrl2</span><span class="nf">.set_low</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="nn">embassy_lora</span><span class="p">::</span><span class="nn">stm32wl</span><span class="p">::</span><span class="n">RadioSwitch</span> <span class="k">for</span> <span class="n">RadioSwitch</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">set_rx</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.ctrl3</span><span class="nf">.set_low</span><span class="p">();</span>
+        <span class="k">self</span><span class="py">.ctrl1</span><span class="nf">.set_high</span><span class="p">();</span>
+        <span class="k">self</span><span class="py">.ctrl2</span><span class="nf">.set_low</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">fn</span> <span class="nf">set_tx</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.ctrl3</span><span class="nf">.set_high</span><span class="p">();</span>
+        <span class="k">self</span><span class="py">.ctrl1</span><span class="nf">.set_low</span><span class="p">();</span>
+        <span class="k">self</span><span class="py">.ctrl2</span><span class="nf">.set_low</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>非常简单的 GPIO 操作, GPIO 的强类型 <code class="language-plaintext highlighter-rouge">PAn</code>/<code class="language-plaintext highlighter-rouge">PBn</code>/.. 可以通过 <code class="language-plaintext highlighter-rouge">.degrade()</code> 方法转换为 <code class="language-plaintext highlighter-rouge">AnyPin</code> 类型,
+方便使用.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">rfs</span> <span class="o">=</span> <span class="nn">lm401_pro_kit</span><span class="p">::</span><span class="nn">RadioSwitch</span><span class="p">::</span><span class="nf">new_from_pins</span><span class="p">(</span><span class="n">p</span><span class="py">.PB0</span><span class="p">,</span> <span class="n">p</span><span class="py">.PA15</span><span class="p">,</span> <span class="n">p</span><span class="py">.PA8</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="lora-数据报文定义">LoRa 数据报文定义</h3>
+
+<p>为简单展示, 传感器节点只负责发送, 接受节点只接受 LoRa 报文, 不回传 ACK 信号.</p>
+
+<p>报文格式为 24 字节:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>头</td>
+      <td>设备地址</td>
+      <td>设备时间戳</td>
+      <td>温度</td>
+      <td>大气压</td>
+      <td>checksum</td>
+    </tr>
+    <tr>
+      <td>b”MM”</td>
+      <td>u32</td>
+      <td>u64</td>
+      <td>f32</td>
+      <td>f32</td>
+      <td>u16</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>其中设备地址使用 STM32 系列的 chip id 实现, 保证一定的唯一性:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Device ID in STM32L4/STM32WL microcontrollers</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">chip_id</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="mi">3</span><span class="p">]</span> <span class="p">{</span>
+    <span class="k">unsafe</span> <span class="p">{</span>
+        <span class="p">[</span>
+            <span class="nn">core</span><span class="p">::</span><span class="nn">ptr</span><span class="p">::</span><span class="nf">read_volatile</span><span class="p">(</span><span class="mi">0x1FFF7590</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u32</span><span class="p">),</span>
+            <span class="nn">core</span><span class="p">::</span><span class="nn">ptr</span><span class="p">::</span><span class="nf">read_volatile</span><span class="p">(</span><span class="mi">0x1FFF7594</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u32</span><span class="p">),</span>
+            <span class="nn">core</span><span class="p">::</span><span class="nn">ptr</span><span class="p">::</span><span class="nf">read_volatile</span><span class="p">(</span><span class="mi">0x1FFF7598</span> <span class="k">as</span> <span class="o">*</span><span class="k">const</span> <span class="nb">u32</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">chip_id</span> <span class="o">=</span> <span class="nf">chip_id</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">dev_addr</span> <span class="o">=</span> <span class="n">chip_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">^</span> <span class="n">chip_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">^</span> <span class="n">chip_id</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</code></pre></div></div>
+
+<p>设备时间戳直接读取 <code class="language-plaintext highlighter-rouge">Instant::now()</code> 并转为 millis. 保证每个数据报文的差异性.
+<code class="language-plaintext highlighter-rouge">checksum</code> 校验和字段通过计算 <code class="language-plaintext highlighter-rouge">[2..22]</code> 所有字节之和得到.
+所有数据字段均按照大端序列化(BigEndian).</p>
+
+<h3 id="subghz-初始化">SubGhz 初始化</h3>
+
+<p>LM401 的射频功能由 STM32WLE5 内置的 SX1262 提供, 设备内部通过 SPI3(SUBGHZSPI) 访问.
+SX1262 初始化需要较多参数, 且发送端接收端若干参数需要一致.</p>
+
+<p>这里选用 490.500MHz, LoRa SF7,  4/5 编码率, 125kHz 带宽, 24 字节数据长度.
+接收端和发送端设置一致.</p>
+
+<p>参数定义:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">subghz</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="n">DATA_LEN</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">24_u8</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">PREAMBLE_LEN</span><span class="p">:</span> <span class="nb">u16</span> <span class="o">=</span> <span class="mi">0x8</span> <span class="o">*</span> <span class="mi">4</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="n">RF_FREQ</span><span class="p">:</span> <span class="n">RfFreq</span> <span class="o">=</span> <span class="nn">RfFreq</span><span class="p">::</span><span class="nf">from_frequency</span><span class="p">(</span><span class="mi">490_500_000</span><span class="p">);</span>
+
+<span class="k">const</span> <span class="n">TX_BUF_OFFSET</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">RX_BUF_OFFSET</span><span class="p">:</span> <span class="nb">u8</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">LORA_PACKET_PARAMS</span><span class="p">:</span> <span class="n">LoRaPacketParams</span> <span class="o">=</span> <span class="nn">LoRaPacketParams</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
+    <span class="nf">.set_crc_en</span><span class="p">(</span><span class="k">true</span><span class="p">)</span>
+    <span class="nf">.set_preamble_len</span><span class="p">(</span><span class="n">PREAMBLE_LEN</span><span class="p">)</span>
+    <span class="nf">.set_payload_len</span><span class="p">(</span><span class="n">DATA_LEN</span><span class="p">)</span>
+    <span class="nf">.set_invert_iq</span><span class="p">(</span><span class="k">false</span><span class="p">)</span>
+    <span class="nf">.set_header_type</span><span class="p">(</span><span class="nn">HeaderType</span><span class="p">::</span><span class="n">Fixed</span><span class="p">);</span>
+
+<span class="c1">// SF7, Bandwidth 125 kHz, 4/5 coding rate, low data rate optimization</span>
+<span class="k">const</span> <span class="n">LORA_MOD_PARAMS</span><span class="p">:</span> <span class="n">LoRaModParams</span> <span class="o">=</span> <span class="nn">LoRaModParams</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
+    <span class="nf">.set_bw</span><span class="p">(</span><span class="nn">LoRaBandwidth</span><span class="p">::</span><span class="n">Bw125</span><span class="p">)</span>
+    <span class="nf">.set_cr</span><span class="p">(</span><span class="nn">CodingRate</span><span class="p">::</span><span class="n">Cr45</span><span class="p">)</span>
+    <span class="nf">.set_ldro_en</span><span class="p">(</span><span class="k">true</span><span class="p">)</span>
+    <span class="nf">.set_sf</span><span class="p">(</span><span class="nn">SpreadingFactor</span><span class="p">::</span><span class="n">Sf7</span><span class="p">);</span>
+
+<span class="c1">// see table 35 "PA optimal setting and operating modes"</span>
+<span class="k">const</span> <span class="n">PA_CONFIG</span><span class="p">:</span> <span class="n">PaConfig</span> <span class="o">=</span> <span class="nn">PaConfig</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
+    <span class="nf">.set_pa_duty_cycle</span><span class="p">(</span><span class="mi">0x4</span><span class="p">)</span>
+    <span class="nf">.set_hp_max</span><span class="p">(</span><span class="mi">0x7</span><span class="p">)</span>
+    <span class="nf">.set_pa</span><span class="p">(</span><span class="nn">PaSel</span><span class="p">::</span><span class="n">Hp</span><span class="p">);</span>
+
+<span class="k">const</span> <span class="n">TX_PARAMS</span><span class="p">:</span> <span class="n">TxParams</span> <span class="o">=</span> <span class="nn">TxParams</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
+    <span class="nf">.set_power</span><span class="p">(</span><span class="mi">0x16</span><span class="p">)</span> <span class="c1">// +22dB</span>
+    <span class="nf">.set_ramp_time</span><span class="p">(</span><span class="nn">RampTime</span><span class="p">::</span><span class="n">Micros200</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>设备初始化, 部分内容从 BSP C 代码转换得到:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">radio</span> <span class="o">=</span> <span class="nn">SubGhz</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">p</span><span class="py">.SUBGHZSPI</span><span class="p">,</span> <span class="n">NoDma</span><span class="p">,</span> <span class="n">NoDma</span><span class="p">);</span>
+
+<span class="c1">// from demo code: Radio_SMPS_Set</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_smps_clock_det_en</span><span class="p">(</span><span class="kc">true</span><span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_smps_drv</span><span class="p">(</span><span class="nn">SmpsDrv</span><span class="p">::</span><span class="n">Milli40</span><span class="p">));</span>
+
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_standby</span><span class="p">(</span><span class="nn">StandbyClk</span><span class="p">::</span><span class="nb">Rc</span><span class="p">));</span>
+
+<span class="c1">// in XO mode, set internal capacitor (from 0x00 to 0x2F starting 11.2pF with 0.47pF steps)</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_hse_in_trim</span><span class="p">(</span><span class="nn">HseTrim</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="mi">0x20</span><span class="p">)));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_hse_out_trim</span><span class="p">(</span><span class="nn">HseTrim</span><span class="p">::</span><span class="nf">from_raw</span><span class="p">(</span><span class="mi">0x20</span><span class="p">)));</span>
+
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_regulator_mode</span><span class="p">(</span><span class="nn">RegMode</span><span class="p">::</span><span class="n">Smps</span><span class="p">));</span> <span class="c1">// Use DCDC</span>
+
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_buffer_base_address</span><span class="p">(</span><span class="n">TX_BUF_OFFSET</span><span class="p">,</span> <span class="n">RX_BUF_OFFSET</span><span class="p">));</span>
+
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_pa_config</span><span class="p">(</span><span class="o">&amp;</span><span class="n">PA_CONFIG</span><span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_pa_ocp</span><span class="p">(</span><span class="nn">Ocp</span><span class="p">::</span><span class="n">Max60m</span><span class="p">));</span> <span class="c1">// current max</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_tx_params</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TX_PARAMS</span><span class="p">));</span>
+
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_packet_type</span><span class="p">(</span><span class="nn">PacketType</span><span class="p">::</span><span class="n">LoRa</span><span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_lora_sync_word</span><span class="p">(</span><span class="nn">LoRaSyncWord</span><span class="p">::</span><span class="n">Public</span><span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_lora_mod_params</span><span class="p">(</span><span class="o">&amp;</span><span class="n">LORA_MOD_PARAMS</span><span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_lora_packet_params</span><span class="p">(</span><span class="o">&amp;</span><span class="n">LORA_PACKET_PARAMS</span><span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.calibrate_image</span><span class="p">(</span><span class="nn">CalibrateImage</span><span class="p">::</span><span class="n">ISM_470_510</span><span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_rf_frequency</span><span class="p">(</span><span class="o">&amp;</span><span class="n">RF_FREQ</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>中断信号量处理, 由于发送接收循环需要涉及到中断处理, 这里直接用 <code class="language-plaintext highlighter-rouge">Signal</code> 类型的信号量处理中断:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">embassy_sync</span><span class="p">::</span><span class="nn">blocking_mutex</span><span class="p">::</span><span class="nn">raw</span><span class="p">::</span><span class="n">CriticalSectionRawMutex</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">embassy_sync</span><span class="p">::</span><span class="nn">signal</span><span class="p">::</span><span class="n">Signal</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="n">IRQ_SIGNAL</span><span class="p">:</span> <span class="n">Signal</span><span class="o">&lt;</span><span class="n">CriticalSectionRawMutex</span><span class="p">,</span> <span class="p">()</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Signal</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">radio_irq</span> <span class="o">=</span> <span class="nn">interrupt</span><span class="p">::</span><span class="nd">take!</span><span class="p">(</span><span class="n">SUBGHZ_RADIO</span><span class="p">);</span>
+<span class="n">radio_irq</span><span class="nf">.set_handler</span><span class="p">(|</span><span class="n">_</span><span class="p">|</span> <span class="p">{</span>
+    <span class="n">IRQ_SIGNAL</span><span class="nf">.signal</span><span class="p">(());</span>
+    <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">interrupt</span><span class="p">::</span><span class="nn">SUBGHZ_RADIO</span><span class="p">::</span><span class="nf">steal</span><span class="p">()</span> <span class="p">}</span><span class="nf">.disable</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>这样, 在 <code class="language-plaintext highlighter-rouge">async fn main()</code> 中使用 <code class="language-plaintext highlighter-rouge">IRQ_SIGNAL.wait().await</code> 就可以随时等待中断信号量.</p>
+
+<h3 id="subghz-发送端">SubGhz 发送端</h3>
+
+<p>首先拼接报文, 这里直接手动拼接组合字节:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">payload</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0u8</span><span class="p">;</span> <span class="mi">24</span><span class="p">];</span>
+<span class="k">let</span> <span class="n">now</span> <span class="o">=</span> <span class="nn">Instant</span><span class="p">::</span><span class="nf">now</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">measurements</span> <span class="o">=</span> <span class="nd">unwrap!</span><span class="p">(</span><span class="n">bmp280</span><span class="nf">.measure</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">delay</span><span class="p">));</span>
+
+<span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="sc">b'M'</span><span class="p">;</span>
+<span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">b'M'</span><span class="p">;</span>
+
+<span class="n">payload</span><span class="p">[</span><span class="mi">2</span><span class="o">..</span><span class="mi">6</span><span class="p">]</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="n">dev_addr</span><span class="nf">.to_be_bytes</span><span class="p">()</span><span class="nf">.as_slice</span><span class="p">());</span>
+<span class="n">payload</span><span class="p">[</span><span class="mi">6</span><span class="o">..</span><span class="mi">14</span><span class="p">]</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="n">now</span><span class="nf">.as_millis</span><span class="p">()</span><span class="nf">.to_be_bytes</span><span class="p">()</span><span class="nf">.as_slice</span><span class="p">());</span>
+<span class="n">payload</span><span class="p">[</span><span class="mi">14</span><span class="o">..</span><span class="mi">18</span><span class="p">]</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="n">measurements</span><span class="py">.temperature</span><span class="nf">.to_be_bytes</span><span class="p">()</span><span class="nf">.as_slice</span><span class="p">());</span>
+<span class="n">payload</span><span class="p">[</span><span class="mi">18</span><span class="o">..</span><span class="mi">22</span><span class="p">]</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="n">measurements</span><span class="py">.pressure</span><span class="nf">.to_be_bytes</span><span class="p">()</span><span class="nf">.as_slice</span><span class="p">());</span>
+<span class="k">let</span> <span class="n">checksum</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="mi">2</span><span class="o">..</span><span class="mi">22</span><span class="p">]</span>
+    <span class="nf">.iter</span><span class="p">()</span>
+    <span class="nf">.fold</span><span class="p">(</span><span class="mi">0u16</span><span class="p">,</span> <span class="p">|</span><span class="n">acc</span><span class="p">,</span> <span class="n">x</span><span class="p">|</span> <span class="n">acc</span><span class="nf">.wrapping_add</span><span class="p">(</span><span class="o">*</span><span class="n">x</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">));</span>
+<span class="nd">info!</span><span class="p">(</span><span class="s">"checksum: {:04x}"</span><span class="p">,</span> <span class="n">checksum</span><span class="p">);</span>
+<span class="n">payload</span><span class="p">[</span><span class="mi">22</span><span class="o">..</span><span class="mi">24</span><span class="p">]</span><span class="nf">.copy_from_slice</span><span class="p">(</span><span class="n">checksum</span><span class="nf">.to_be_bytes</span><span class="p">()</span><span class="nf">.as_slice</span><span class="p">());</span>
+</code></pre></div></div>
+
+<p>然后开始发送:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rfs</span><span class="nf">.set_tx</span><span class="p">();</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_irq_cfg</span><span class="p">(</span><span class="o">&amp;</span><span class="nn">CfgIrq</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span><span class="nf">.irq_enable_all</span><span class="p">(</span><span class="nn">Irq</span><span class="p">::</span><span class="n">TxDone</span><span class="p">)));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.write_buffer</span><span class="p">(</span><span class="n">TX_BUF_OFFSET</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">payload</span><span class="p">[</span><span class="o">..</span><span class="p">]));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_tx</span><span class="p">(</span><span class="nn">Timeout</span><span class="p">::</span><span class="n">DISABLED</span><span class="p">));</span>
+
+<span class="n">radio_irq</span><span class="nf">.enable</span><span class="p">();</span>
+<span class="n">IRQ_SIGNAL</span><span class="nf">.wait</span><span class="p">()</span><span class="k">.await</span><span class="p">;</span>
+<span class="n">rfs</span><span class="nf">.set_off</span><span class="p">();</span>
+
+<span class="k">let</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">irq_status</span><span class="p">)</span> <span class="o">=</span> <span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.irq_status</span><span class="p">());</span>
+<span class="k">if</span> <span class="n">irq_status</span> <span class="o">&amp;</span> <span class="nn">Irq</span><span class="p">::</span><span class="n">TxDone</span><span class="nf">.mask</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="nn">defmt</span><span class="p">::</span><span class="nd">info!</span><span class="p">(</span><span class="s">"TX done"</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.clear_irq_status</span><span class="p">(</span><span class="n">irq_status</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>总结起来发送过程需要如下步骤:</p>
+
+<ul>
+  <li>打开射频发送开关</li>
+  <li>设置中断, 开启 <code class="language-plaintext highlighter-rouge">TxDone</code></li>
+  <li>写入数据 buffer</li>
+  <li>开始发送, 不使用 <code class="language-plaintext highlighter-rouge">Timeout</code></li>
+  <li>开启中断</li>
+  <li>等待中断信号量</li>
+  <li>关闭射频开关</li>
+  <li>检查中断状态</li>
+  <li>清理中断状态</li>
+</ul>
+
+<h3 id="subghz-接收端">SubGhz 接收端</h3>
+
+<p>这里是接收端逻辑, <code class="language-plaintext highlighter-rouge">src/bin/subghz-bmp280-rx.rs</code>, 其中配置部分和发送端相同:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">buf</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0u8</span><span class="p">;</span> <span class="mi">256</span><span class="p">];</span>
+
+<span class="n">rfs</span><span class="nf">.set_rx</span><span class="p">();</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_irq_cfg</span><span class="p">(</span>
+    <span class="o">&amp;</span><span class="nn">CfgIrq</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
+        <span class="nf">.irq_enable_all</span><span class="p">(</span><span class="nn">Irq</span><span class="p">::</span><span class="n">RxDone</span><span class="p">)</span>
+        <span class="nf">.irq_enable_all</span><span class="p">(</span><span class="nn">Irq</span><span class="p">::</span><span class="n">Timeout</span><span class="p">)</span>
+        <span class="nf">.irq_enable_all</span><span class="p">(</span><span class="nn">Irq</span><span class="p">::</span><span class="nb">Err</span><span class="p">)</span>
+<span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.read_buffer</span><span class="p">(</span><span class="n">RX_BUF_OFFSET</span><span class="p">,</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">buf</span><span class="p">));</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.set_rx</span><span class="p">(</span><span class="nn">Timeout</span><span class="p">::</span><span class="nf">from_duration_sat</span><span class="p">(</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_millis</span><span class="p">(</span><span class="mi">5000</span><span class="p">))));</span>
+
+<span class="n">radio_irq</span><span class="nf">.unpend</span><span class="p">();</span>
+<span class="n">radio_irq</span><span class="nf">.enable</span><span class="p">();</span>
+
+<span class="n">IRQ_SIGNAL</span><span class="nf">.wait</span><span class="p">()</span><span class="k">.await</span><span class="p">;</span>
+<span class="n">led_rx</span><span class="nf">.set_low</span><span class="p">();</span>
+<span class="k">let</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">irq_status</span><span class="p">)</span> <span class="o">=</span> <span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.irq_status</span><span class="p">());</span>
+<span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.clear_irq_status</span><span class="p">(</span><span class="n">irq_status</span><span class="p">));</span>
+
+<span class="k">if</span> <span class="n">irq_status</span> <span class="o">&amp;</span> <span class="nn">Irq</span><span class="p">::</span><span class="n">RxDone</span><span class="nf">.mask</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="p">(</span><span class="n">_st</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span> <span class="o">=</span> <span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.rx_buffer_status</span><span class="p">());</span>
+    <span class="k">let</span> <span class="n">packet_status</span> <span class="o">=</span> <span class="nd">unwrap!</span><span class="p">(</span><span class="n">radio</span><span class="nf">.lora_packet_status</span><span class="p">());</span>
+    <span class="k">let</span> <span class="n">rssi</span> <span class="o">=</span> <span class="n">packet_status</span><span class="nf">.rssi_pkt</span><span class="p">()</span><span class="nf">.to_integer</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">snr</span> <span class="o">=</span> <span class="n">packet_status</span><span class="nf">.snr_pkt</span><span class="p">()</span><span class="nf">.to_integer</span><span class="p">();</span>
+    <span class="nd">info!</span><span class="p">(</span>
+        <span class="s">"RX done: rssi={}dBm snr={}dB len={} offset={}"</span><span class="p">,</span>
+        <span class="n">rssi</span><span class="p">,</span> <span class="n">snr</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">offset</span>
+    <span class="p">);</span>
+    <span class="k">let</span> <span class="n">payload</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">buf</span><span class="p">[</span><span class="n">offset</span> <span class="k">as</span> <span class="nb">usize</span><span class="o">..</span><span class="n">offset</span> <span class="k">as</span> <span class="nb">usize</span> <span class="o">+</span> <span class="n">len</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">];</span>
+    <span class="c1">// Parse payload here</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>发送步骤如下:</p>
+
+<ul>
+  <li>打开射频接收开关</li>
+  <li>设置中断, 开启 <code class="language-plaintext highlighter-rouge">RxDone</code>, <code class="language-plaintext highlighter-rouge">Timeout</code>, <code class="language-plaintext highlighter-rouge">Err</code></li>
+  <li>设置读入 buffer</li>
+  <li>开始接收, 这里使用 <code class="language-plaintext highlighter-rouge">Timeout</code> 5 秒</li>
+  <li>清理未处理中断状态, 否则会有观察到空中断</li>
+  <li>开启中断</li>
+  <li>等待中断信号量</li>
+  <li>检查中断状态, 清理中断状态</li>
+  <li>通过 <code class="language-plaintext highlighter-rouge">rx_buffer_status</code> 获取 buffer 状态</li>
+  <li>通过 <code class="language-plaintext highlighter-rouge">lora_packet_status</code> 获取报文 rssi, snr 信息</li>
+</ul>
+
+<h3 id="运行结果">运行结果</h3>
+
+<p>发送端上电之后, 每2秒采集一次传感器数据并发送.</p>
+
+<p>接收端上电之后, 持续接收数据并同时打印在 defmt 调试和串口输出.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; cargo run --bin subghz-bmp280-rx --release
+1.226162 INFO  begin rx...
+3.292868 INFO  RX done: rssi=-42dBm snr=14dB len=24 offset=0
+3.292969 DEBUG got BMP280 node raw=[0x4d, 0x4d, 0x72, 0x2e, 0x67, 0x28, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x58, 0x3a, 0x41, 0xad, 0x10, 0xa2, 0x47, 0xac, 0x8c, 0x2a, 0x5, 0xa]
+3.293173 INFO  dev addr=722e6728 dev tick=22586 temp=21.633121'C pressure=883.4433hPa
+3.299479 INFO  stats: Stats { status: Status { mode: Ok(StandbyRc), cmd: Ok(Avaliable) }, pkt_rx: 2, pkt_crc: 0, pkt_len_or_hdr_err: 0, ty: LoRaStats }
+3.299622 INFO  begin rx...
+</code></pre></div></div>
+
+<h2 id="总结">总结</h2>
+
+<p>Rust Embassy 是一个非常好的嵌入式 Rust 开发框架, 通过它可以快速开发嵌入式应用.
+Rust Embassy 把 <code class="language-plaintext highlighter-rouge">async</code>, <code class="language-plaintext highlighter-rouge">await</code> 关键字带到了 Rust 嵌入式开发中, 其还有丰富的多任务支持,
+多种同步元语支持. 通过它们, 我们可以很方便的开发多任务应用.</p>
+
+<p>但它依然是一个很早期的框架, 还不够完善, 例如目前在 STM32WL 上缺乏 ADC 支持.
+文档不够丰富, 部分库函数会随着开发进度有所变更, 给维护项目带来不小的困难.</p>
+
+<p>在开发过程中, 往往能看到 move 语义, ownership, 类型系统等 Rust 的特性, 虽然这些特性在嵌入式开发中并不是必须的, 但是它们确实能带来更好的开发体验. 例如保证对设备资源的唯一访问所有权. 通过类型安全的寄存器访问避免 C 语言中错误的寄存器访问.
+通过类型保证设备和对应引脚的初始化状态匹配.</p>
+
+<p>Rust Embassy 隐藏了大部分嵌入式设备细节, 开发者不需要过多的关注设备初始化细节, 应用代码短小.</p>
+
+<p>实际使用过程中, 也遇到了一些坑, 例如在写一个 PWM 例子时候,
+<code class="language-plaintext highlighter-rouge">embassy_time::Delay</code> 怎么都不工作, 添加了若干 debug 打印之后才发现,
+<code class="language-plaintext highlighter-rouge">embassy_time::Delay</code> 内部使用 <code class="language-plaintext highlighter-rouge">embassy_time::Instant</code> 实现, 默认情况下会使用 <code class="language-plaintext highlighter-rouge">TIM2</code>.
+而选择的 PWM 输出 pin 正好是 <code class="language-plaintext highlighter-rouge">TIM2_CH2</code>, 两者互相干扰, 导致 <code class="language-plaintext highlighter-rouge">Delay</code> 不工作.
+目前类型系统还不能保证 <code class="language-plaintext highlighter-rouge">Delay</code> 和 <code class="language-plaintext highlighter-rouge">Pwm</code> 不会使用同一个 <code class="language-plaintext highlighter-rouge">TIM</code> 设备.
+最终的解决方法是使用 <code class="language-plaintext highlighter-rouge">cortex_m::delay::Delay</code>, 这是一个基于 SYSTICK 的实现.</p>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li><a href="https://github.com/embassy-rs/embassy">Github: Embassy</a></li>
+  <li><a href="https://embassy.dev/book/dev/index.html">Embassy Documentation</a></li>
+  <li><a href="https://apollolabsblog.hashnode.dev/embedded-rust-embassy-gpio-button-controlled-blinking">Embedded Rust &amp; Embassy 系列教程</a></li>
+  <li><a href="https://www.st.com/resource/en/datasheet/STM32WLE5.pdf">STM32WLE5.pdf</a></li>
+</ul>
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/';
+      this.page.identifier = 'https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/';
+      this.page.identifier = 'https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+  });
+</script>
+<script
+  type="text/javascript"
+  async
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+></script>
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
