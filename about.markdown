@@ -12,4 +12,4 @@ Personal Note.
 
 微博已死。
 
-[Twitter](http://twitter.com/andelf)
+[Twitter](https://twitter.com/andelf)
