@@ -16,7 +16,8 @@ toc: true
 published: true
 ---
 
-之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 "[STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)](https://mbb.eet-china.com/evaluating/product-106.html)".
+之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 [STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)](https://mbb.eet-china.com/evaluating/product-106.html), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz
+有不错的支持, 所以打算用这套技术栈进行开发尝试.
 
 本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输.
 过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.
@@ -785,6 +786,17 @@ if irq_status & Irq::RxDone.mask() != 0 {
 3.299622 INFO  begin rx...
 ```
 
+串口输出, CSV 格式:
+
+```
+> picocom -b 115200 /dev/tty.usbmodem11203
+addr=722e6728,rssi=-44,snr=14,temperature=16.304043,pressure=87621.96
+addr=722e6728,rssi=-44,snr=14,temperature=16.306524,pressure=87621.96
+addr=722e6728,rssi=-44,snr=13,temperature=16.309006,pressure=87621.83
+addr=722e6728,rssi=-45,snr=13,temperature=16.311487,pressure=87621.81
+addr=722e6728,rssi=-45,snr=13,temperature=16.313969,pressure=87621.66
+```
+
 ## 总结
 
 Rust Embassy 是一个非常好的嵌入式 Rust 开发框架, 通过它可以快速开发嵌入式应用.
@@ -794,8 +806,9 @@ Rust Embassy 把 `async`, `await` 关键字带到了 Rust 嵌入式开发中, �
 但它依然是一个很早期的框架, 还不够完善, 例如目前在 STM32WL 上缺乏 ADC 支持.
 文档不够丰富, 部分库函数会随着开发进度有所变更, 给维护项目带来不小的困难.
 
-在开发过程中, 往往能看到 move 语义, ownership, 类型系统等 Rust 的特性, 虽然这些特性在嵌入式开发中并不是必须的, 但是它们确实能带来更好的开发体验. 例如保证对设备资源的唯一访问所有权. 通过类型安全的寄存器访问避免 C 语言中错误的寄存器访问.
-通过类型保证设备和对应引脚的初始化状态匹配.
+在开发过程中, 往往能看到 move 语义, ownership, 类型系统等 Rust 的特性, 虽然这些特性在嵌入式开发中并不是必须的, 但是它们确实能带来更好的开发体验. 例如 move/borrow 保证对设备资源的唯一访问所有权.
+通过类型安全的寄存器类型访问避免 C 语言中错误的寄存器访问, 经过 Rust 编译器优化后, 和 C 中的 bit mask 写法是等价的.
+通过 "associated types" 保证设备和对应引脚的状态匹配.
 
 Rust Embassy 隐藏了大部分嵌入式设备细节, 开发者不需要过多的关注设备初始化细节, 应用代码短小.
 
@@ -805,6 +818,10 @@ Rust Embassy 隐藏了大部分嵌入式设备细节, 开发者不需要过多�
 而选择的 PWM 输出 pin 正好是 `TIM2_CH2`, 两者互相干扰, 导致 `Delay` 不工作.
 目前类型系统还不能保证 `Delay` 和 `Pwm` 不会使用同一个 `TIM` 设备.
 最终的解决方法是使用 `cortex_m::delay::Delay`, 这是一个基于 SYSTICK 的实现.
+
+本位未介绍 Embassy 的多任务功能,
+在代码仓库里有一个简单的按钮控制闪灯频率的例子 `src/bin/button-control-blinky.rs`.
+多任务的时候需要有 `.await` 调用让出时间片.
 
 ## 参考资料
 
