@@ -8,8 +8,8 @@
 <meta property="og:title" content="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" />
 <meta name="author" content="andelf" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 “STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)”." />
-<meta property="og:description" content="之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 “STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)”." />
+<meta name="description" content="之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试." />
+<meta property="og:description" content="之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试." />
 <link rel="canonical" href="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" />
 <meta property="og:url" content="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" />
 <meta property="og:site_name" content="猫·仁波切" />
@@ -20,7 +20,7 @@
 <meta property="twitter:image" content="https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png" />
 <meta property="twitter:title" content="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2023-01-23T04:00:00+00:00","datePublished":"2023-01-23T04:00:00+00:00","description":"之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 “STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)”.","headline":"使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输","image":"https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"},"url":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2023-01-23T04:00:00+00:00","datePublished":"2023-01-23T04:00:00+00:00","description":"之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.","headline":"使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输","image":"https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"},"url":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -91,7 +91,8 @@
     <hr />
   </header>
   <div class="post-content e-content" itemprop="articleBody">
-    <p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 “<a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>”.</p>
+    <p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 <a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>, 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz
+有不错的支持, 所以打算用这套技术栈进行开发尝试.</p>
 
 <p>本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输.
 过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.</p>
@@ -893,6 +894,16 @@ SX1262 初始化需要较多参数, 且发送端接收端若干参数需要一�
 3.299622 INFO  begin rx...
 </code></pre></div></div>
 
+<p>串口输出, CSV 格式:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; picocom -b 115200 /dev/tty.usbmodem11203
+addr=722e6728,rssi=-44,snr=14,temperature=16.304043,pressure=87621.96
+addr=722e6728,rssi=-44,snr=14,temperature=16.306524,pressure=87621.96
+addr=722e6728,rssi=-44,snr=13,temperature=16.309006,pressure=87621.83
+addr=722e6728,rssi=-45,snr=13,temperature=16.311487,pressure=87621.81
+addr=722e6728,rssi=-45,snr=13,temperature=16.313969,pressure=87621.66
+</code></pre></div></div>
+
 <h2 id="总结">总结</h2>
 
 <p>Rust Embassy 是一个非常好的嵌入式 Rust 开发框架, 通过它可以快速开发嵌入式应用.
@@ -902,8 +913,9 @@ Rust Embassy 把 <code class="language-plaintext highlighter-rouge">async</code>
 <p>但它依然是一个很早期的框架, 还不够完善, 例如目前在 STM32WL 上缺乏 ADC 支持.
 文档不够丰富, 部分库函数会随着开发进度有所变更, 给维护项目带来不小的困难.</p>
 
-<p>在开发过程中, 往往能看到 move 语义, ownership, 类型系统等 Rust 的特性, 虽然这些特性在嵌入式开发中并不是必须的, 但是它们确实能带来更好的开发体验. 例如保证对设备资源的唯一访问所有权. 通过类型安全的寄存器访问避免 C 语言中错误的寄存器访问.
-通过类型保证设备和对应引脚的初始化状态匹配.</p>
+<p>在开发过程中, 往往能看到 move 语义, ownership, 类型系统等 Rust 的特性, 虽然这些特性在嵌入式开发中并不是必须的, 但是它们确实能带来更好的开发体验. 例如 move/borrow 保证对设备资源的唯一访问所有权.
+通过类型安全的寄存器类型访问避免 C 语言中错误的寄存器访问, 经过 Rust 编译器优化后, 和 C 中的 bit mask 写法是等价的.
+通过 “associated types” 保证设备和对应引脚的状态匹配.</p>
 
 <p>Rust Embassy 隐藏了大部分嵌入式设备细节, 开发者不需要过多的关注设备初始化细节, 应用代码短小.</p>
 
@@ -913,6 +925,10 @@ Rust Embassy 把 <code class="language-plaintext highlighter-rouge">async</code>
 而选择的 PWM 输出 pin 正好是 <code class="language-plaintext highlighter-rouge">TIM2_CH2</code>, 两者互相干扰, 导致 <code class="language-plaintext highlighter-rouge">Delay</code> 不工作.
 目前类型系统还不能保证 <code class="language-plaintext highlighter-rouge">Delay</code> 和 <code class="language-plaintext highlighter-rouge">Pwm</code> 不会使用同一个 <code class="language-plaintext highlighter-rouge">TIM</code> 设备.
 最终的解决方法是使用 <code class="language-plaintext highlighter-rouge">cortex_m::delay::Delay</code>, 这是一个基于 SYSTICK 的实现.</p>
+
+<p>本位未介绍 Embassy 的多任务功能,
+在代码仓库里有一个简单的按钮控制闪灯频率的例子 <code class="language-plaintext highlighter-rouge">src/bin/button-control-blinky.rs</code>.
+多任务的时候需要有 <code class="language-plaintext highlighter-rouge">.await</code> 调用让出时间片.</p>
 
 <h2 id="参考资料">参考资料</h2>
 
