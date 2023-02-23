@@ -1,8 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-01-24T02:18:31+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输</title><link href="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" rel="alternate" type="text/html" title="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" /><published>2023-01-23T04:00:00+00:00</published><updated>2023-01-23T04:00:00+00:00</updated><id>https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy</id><content type="html" xml:base="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"><![CDATA[<p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 <a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>, 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz
-有不错的支持, 所以打算用这套技术栈进行开发尝试.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-02-23T12:07:37+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输</title><link href="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" rel="alternate" type="text/html" title="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" /><published>2023-01-23T04:00:00+00:00</published><updated>2023-01-23T04:00:00+00:00</updated><id>https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy</id><content type="html" xml:base="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"><![CDATA[<p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 <a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>, 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.</p>
 
-<p>本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输.
-过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.</p>
+<p>本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输. 过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.</p>
 
 <p>门槛率高, 还是从点灯开始搞起.</p>
 
@@ -14,14 +12,9 @@
 
 <h3 id="开发板介绍">开发板介绍</h3>
 
-<p>LM401-Pro-Kit 是基于 STM32WLE5CBU6 的 Lora 评估板. 支持 SubGHz 无线传输.
-LM401 模组内嵌高性能 MCU 芯片 STM32WLE5CBU6, 芯片内部集成了 SX1262.
-开发板板载 ST-Link(上传下载程序, UART 转 USB).
-ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模块.
-开发板提供了若干 LED 状态灯, 复位按钮和一个用户按钮.</p>
+<p>LM401-Pro-Kit 是基于 STM32WLE5CBU6 的 Lora 评估板. 支持 SubGHz 无线传输. LM401 模组内嵌高性能 MCU 芯片 STM32WLE5CBU6, 芯片内部集成了 SX1262. 开发板板载 ST-Link(上传下载程序, UART 转 USB). ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模块. 开发板提供了若干 LED 状态灯, 复位按钮和一个用户按钮.</p>
 
-<p>日常屯的(吃灰)板子也有大几十上百了, 拿到新板子, 需要查资料, 看手册, 电路图, 读例程, 找到一些核心信息,
-其中一些信息可能需要读例程的 C 代码库才能获得, 这里列出整理的部分:</p>
+<p>日常屯的(吃灰)板子也有大几十上百了, 拿到新板子, 需要查资料, 看手册, 电路图, 读例程, 找到一些核心信息, 其中一些信息可能需要读例程的 C 代码库才能获得, 这里列出整理的部分:</p>
 
 <ul>
   <li>MCU: STM32WLE5CBU6
@@ -70,13 +63,9 @@ ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模�
   <li>使用 Rust 嵌入式框架, 例如 embassy</li>
 </ul>
 
-<p>Embassy 框架是基于 Rust 语言的嵌入式异步框架.
-考虑到相关框架还在开发中, 本文的代码仓库使用的是最新的 embassy master 分支. Commit hash 为 <code class="language-plaintext highlighter-rouge">f98ba4ebac192e81c46933c0dc1dfb2d907cd532</code>, 通过 <code class="language-plaintext highlighter-rouge">Cargo.toml</code> 中设置依赖 <code class="language-plaintext highlighter-rouge">path</code> 的方式引入.
-其他可选方案还可有 <code class="language-plaintext highlighter-rouge">git submodule</code> 或 直接 <code class="language-plaintext highlighter-rouge">git</code> 依赖远程版本等.</p>
+<p>Embassy 框架是基于 Rust 语言的嵌入式异步框架. 考虑到相关框架还在开发中, 本文的代码仓库使用的是最新的 embassy master 分支. Commit hash 为 <code class="language-plaintext highlighter-rouge">f98ba4ebac192e81c46933c0dc1dfb2d907cd532</code>, 通过 <code class="language-plaintext highlighter-rouge">Cargo.toml</code> 中设置依赖 <code class="language-plaintext highlighter-rouge">path</code> 的方式引入. 其他可选方案还可有 <code class="language-plaintext highlighter-rouge">git submodule</code> 或 直接 <code class="language-plaintext highlighter-rouge">git</code> 依赖远程版本等.</p>
 
-<p>绕开 C HAL/BSP 库开发, 是需要踩不少坑的, 例如, RCC 时钟初始化, 需要查阅 BSP 代码才能确认, 48MHz
-主时钟通过 MSI range11 获得, 而 embassy 对应 MCU 的示例代码使用的是 HSE, 这些都给 Rust
-嵌入式开发带来一定的门槛.</p>
+<p>绕开 C HAL/BSP 库开发, 是需要踩不少坑的, 例如, RCC 时钟初始化, 需要查阅 BSP 代码才能确认, 48MHz 主时钟通过 MSI range11 获得, 而 embassy 对应 MCU 的示例代码使用的是 HSE, 这些都给 Rust 嵌入式开发带来一定的门槛.</p>
 
 <h3 id="软件环境准备">软件环境准备</h3>
 
@@ -89,10 +78,9 @@ ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模�
 
 <p>安装 Rust 嵌入式开发烧录/运行工具 <code class="language-plaintext highlighter-rouge">probe-run</code>, 也可以使用 OpenOCD 或其他烧录工具:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cargo install probe-run
-</code></pre></div></div>
-
-<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>probe-run <span class="nt">--list-chips</span> | <span class="nb">grep </span>STM32WL
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>cargo <span class="nb">install </span>probe-run
+<span class="go">...(install log)
+</span><span class="gp">&gt;</span><span class="w"> </span>probe-run <span class="nt">--list-chips</span> | <span class="nb">grep </span>STM32WL
 <span class="go">STM32WL Series
         STM32WLE5J8Ix
         STM32WLE5JBIx
@@ -102,8 +90,7 @@ ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模�
 
 <p>检查发现支持列表没有 STM32WLE5CBU6, 不过可以拿 STM32WLE5JCIx 替代, 问题不大.</p>
 
-<p>安装任意串口调试工具, 这里我使用 <code class="language-plaintext highlighter-rouge">picocom</code>. 其他可以使用的替代有 <a href="https://www.putty.org/">PuTTy</a>,
-<a href="https://ttssh2.osdn.jp/index.html.en">Teraterm</a> 等等.</p>
+<p>安装任意串口调试工具, 这里我使用 <code class="language-plaintext highlighter-rouge">picocom</code>. 其他可以使用的替代有 <a href="https://www.putty.org/">PuTTy</a>, <a href="https://ttssh2.osdn.jp/index.html.en">Teraterm</a> 等等.</p>
 
 <p>通过 USB 数据线连接开发板, 通过 <code class="language-plaintext highlighter-rouge">picocom</code> 连接串口, 通过 <code class="language-plaintext highlighter-rouge">probe-run</code> 烧录程序.</p>
 
@@ -192,18 +179,13 @@ target = "thumbv7em-none-eabi"
   <li>未避免编译报错, 还需要清空 <code class="language-plaintext highlighter-rouge">src/lib.rs</code> 项目初始文件, 用 <code class="language-plaintext highlighter-rouge">#![no_std]</code> 替代</li>
 </ul>
 
-<p>几乎所有的 Rust 嵌入式项目都是 <code class="language-plaintext highlighter-rouge">no_std</code> 的, 这意味着无法简单地使用所有带内存分配类型.
-本例中, 我们使用 <code class="language-plaintext highlighter-rouge">heapless</code> crate 中提供的栈分配类型来替代 <code class="language-plaintext highlighter-rouge">String</code>.</p>
+<p>几乎所有的 Rust 嵌入式项目都是 <code class="language-plaintext highlighter-rouge">no_std</code> 的, 这意味着无法简单地使用所有带内存分配类型. 本例中, 我们使用 <code class="language-plaintext highlighter-rouge">heapless</code> crate 中提供的栈分配类型来替代 <code class="language-plaintext highlighter-rouge">String</code>.</p>
 
-<p>注意到, 创建项目时候使用了 <code class="language-plaintext highlighter-rouge">cargo new --lib</code>, 相当于我们创建的是一个 library 项目.
-这不需要担心, <code class="language-plaintext highlighter-rouge">cargo run</code> 会自动识别 <code class="language-plaintext highlighter-rouge">src/bin/xxx.rs</code> 为 “可执行” 二进制目标.
-通过 <code class="language-plaintext highlighter-rouge">cargo run --bin xxx</code> 即可运行对应程序.
-也可以通过 <code class="language-plaintext highlighter-rouge">examples/xxx.rs</code> 的方法管理多个可执行二进制目标.</p>
+<p>注意到, 创建项目时候使用了 <code class="language-plaintext highlighter-rouge">cargo new --lib</code>, 相当于我们创建的是一个 library 项目. 这不需要担心, <code class="language-plaintext highlighter-rouge">cargo run</code> 会自动识别 <code class="language-plaintext highlighter-rouge">src/bin/xxx.rs</code> 为 “可执行” 二进制目标. 通过 <code class="language-plaintext highlighter-rouge">cargo run --bin xxx</code> 即可运行对应程序. 也可以通过 <code class="language-plaintext highlighter-rouge">examples/xxx.rs</code> 的方法管理多个可执行二进制目标.</p>
 
 <h3 id="blinky-点灯---初识-rust-embassy">Blinky 点灯 - 初识 Rust Embassy</h3>
 
-<p>我们先通过一个最简单的闪灯例子来熟悉 Rust Embassy 的使用.
-创建 <code class="language-plaintext highlighter-rouge">src/bin/blinky.rs</code>.</p>
+<p>我们先通过一个最简单的闪灯例子来熟悉 Rust Embassy 的使用. 创建 <code class="language-plaintext highlighter-rouge">src/bin/blinky.rs</code>.</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// blinky.rs</span>
 <span class="nd">#![no_std]</span>
@@ -235,28 +217,20 @@ target = "thumbv7em-none-eabi"
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="language-plaintext highlighter-rouge">#![no_main]</code> 用于告诉 Rust 编译器, 我们不使用 Rust 提供的 <code class="language-plaintext highlighter-rouge">main</code> 函数做程序入口.
-<code class="language-plaintext highlighter-rouge">#[embassy_executor::main]</code> 是一个宏, 用于包装 <code class="language-plaintext highlighter-rouge">async fn main()</code> 函数,
-由 embassy-executor 提供了一个 futures runtime, 所以可以使用 <code class="language-plaintext highlighter-rouge">async</code> 和 <code class="language-plaintext highlighter-rouge">await</code> 语法.
-底层实现中, <code class="language-plaintext highlighter-rouge">.await</code> 通过 STM32 的 WFE/SEV 等待指令和中断唤醒指令实现, 实现了程序逻辑在等待时候的低功耗.
+<p><code class="language-plaintext highlighter-rouge">#![no_main]</code> 用于告诉 Rust 编译器, 我们不使用 Rust 提供的 <code class="language-plaintext highlighter-rouge">main</code> 函数做程序入口. <code class="language-plaintext highlighter-rouge">#[embassy_executor::main]</code> 是一个宏, 用于包装 <code class="language-plaintext highlighter-rouge">async fn main()</code> 函数, 由 embassy-executor 提供了一个 futures runtime, 所以可以使用 <code class="language-plaintext highlighter-rouge">async</code> 和 <code class="language-plaintext highlighter-rouge">await</code> 语法. 底层实现中, <code class="language-plaintext highlighter-rouge">.await</code> 通过 STM32 的 WFE/SEV 等待指令和中断唤醒指令实现, 实现了程序逻辑在等待时候的低功耗.
 <code class="language-plaintext highlighter-rouge">Spawner</code> 还可以用来启动其他 <code class="language-plaintext highlighter-rouge">async fn</code> 函数, 实现了多任务的功能.</p>
 
-<p><code class="language-plaintext highlighter-rouge">#![feature(type_alias_impl_trait)]</code> 在 embassy 中被广泛使用, 需要开启.
-Embassy 中经常能看到形如 <code class="language-plaintext highlighter-rouge">irq: impl Peripheral&lt;P = T::Interrupt&gt; + 'd</code> 的类型签名.</p>
+<p><code class="language-plaintext highlighter-rouge">#![feature(type_alias_impl_trait)]</code> 在 embassy 中被广泛使用, 需要开启. Embassy 中经常能看到形如 <code class="language-plaintext highlighter-rouge">irq: impl Peripheral&lt;P = T::Interrupt&gt; + 'd</code> 的类型签名.</p>
 
 <p><code class="language-plaintext highlighter-rouge">let p = embassy_stm32::init(Default::default());</code> 直接初始化了所有的外设, 并返回一个 <code class="language-plaintext highlighter-rouge">Peripherals</code> 对象.
 通过 Rust 的 move 语义保证不同外设使用之间不会出现竞争.</p>
 
 <p><code class="language-plaintext highlighter-rouge">let mut led = Output::new(p.PB4, Level::High, Speed::Low);</code> 创建了一个 <code class="language-plaintext highlighter-rouge">Output</code> 对象, 用于控制 PB4 引脚.
-<code class="language-plaintext highlighter-rouge">Output</code> 对象是一个 <code class="language-plaintext highlighter-rouge">Pin</code> 的 trait, 通过 <code class="language-plaintext highlighter-rouge">set_high</code> 和 <code class="language-plaintext highlighter-rouge">set_low</code> 方法可以控制引脚电平.
-这里会自动完成对 GPIOB PB4 的所有初始化和设置.</p>
+<code class="language-plaintext highlighter-rouge">Output</code> 对象是一个 <code class="language-plaintext highlighter-rouge">Pin</code> 的 trait, 通过 <code class="language-plaintext highlighter-rouge">set_high</code> 和 <code class="language-plaintext highlighter-rouge">set_low</code> 方法可以控制引脚电平. 这里会自动完成对 GPIOB PB4 的所有初始化和设置, 包括外设时钟使能, 状态设置等.</p>
 
-<p><code class="language-plaintext highlighter-rouge">info!</code>, <code class="language-plaintext highlighter-rouge">warn!</code> 等都是 <code class="language-plaintext highlighter-rouge">defmt</code> 的宏, 用于通过 ST-Link 提供的 Debug 通道打印调试信息. 强烈推荐使用,
-否则嵌入式开发中, 只能用串口打印信息.</p>
+<p><code class="language-plaintext highlighter-rouge">info!</code>, <code class="language-plaintext highlighter-rouge">warn!</code> 等都是 <code class="language-plaintext highlighter-rouge">defmt</code> 的宏, 用于通过 ST-Link 提供的 Debug 通道打印调试信息. 强烈推荐使用, 否则嵌入式开发中, 只能用串口打印信息.</p>
 
-<p><code class="language-plaintext highlighter-rouge">Timer::after(Duration::from_millis(1000)).await</code> 是一个异步等待 1 秒的方法, 通过 <code class="language-plaintext highlighter-rouge">embassy-time</code> crate 实现.
-在 <code class="language-plaintext highlighter-rouge">Cargo.toml</code> 中的 <code class="language-plaintext highlighter-rouge">time-driver-any</code> feature 选择了任意可用 timer 实现, 默认是 TIM2, 由 embassy-stm32
-提供给 <code class="language-plaintext highlighter-rouge">embassy-time</code>.</p>
+<p><code class="language-plaintext highlighter-rouge">Timer::after(Duration::from_millis(1000)).await</code> 是一个异步等待 1 秒的方法, 通过 <code class="language-plaintext highlighter-rouge">embassy-time</code> crate 实现. 在 <code class="language-plaintext highlighter-rouge">Cargo.toml</code> 中的 <code class="language-plaintext highlighter-rouge">time-driver-any</code> feature 选择了任意可用 timer 实现, 默认是 TIM2, 由 embassy-stm32 提供给 <code class="language-plaintext highlighter-rouge">embassy-time</code>.</p>
 
 <p>确保板子连接正常, 直接运行:</p>
 
@@ -287,11 +261,9 @@ Embassy 中经常能看到形如 <code class="language-plaintext highlighter-rou
 
 <h3 id="uart-打印---时钟和外设初始化">UART 打印 - 时钟和外设初始化</h3>
 
-<p>defmt 固然方便, 但很多时候依然需要用到 UART, 通过串口获取调试信息或收集数据.
-LM401-Pro-Kit 正好通过 ST-Link 提供了到 USART2 的访问.</p>
+<p>defmt 固然方便, 但很多时候依然需要用到 UART, 通过串口获取调试信息或收集数据. LM401-Pro-Kit 正好通过 ST-Link 提供了到 USART2 的访问.</p>
 
-<p>Blinky 例子中, 由 defmt 调试信息可知, 我们使用的系统时钟只有 4MHz, 但 STM32WL 的最大时钟频率是 48MHz.
-所以需要通过初始化 <code class="language-plaintext highlighter-rouge">init()</code> 方法设置时钟参数:</p>
+<p>Blinky 例子中, 由 defmt 调试信息可知, 我们使用的系统时钟只有 4MHz, 但 STM32WL 的最大时钟频率是 48MHz. 所以需要通过初始化 <code class="language-plaintext highlighter-rouge">init()</code> 方法设置时钟参数:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// sys clk init, with LSI support</span>
 <span class="k">let</span> <span class="k">mut</span> <span class="n">config</span> <span class="o">=</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">Config</span><span class="p">::</span><span class="nf">default</span><span class="p">();</span>
@@ -300,8 +272,7 @@ LM401-Pro-Kit 正好通过 ST-Link 提供了到 USART2 的访问.</p>
 <span class="k">let</span> <span class="n">p</span> <span class="o">=</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nf">init</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
 </code></pre></div></div>
 
-<p>Embassy UART 使用非常简单, 可以单独用 UartTx/UartRx 只初始发送/接收部分.
-这里是一个发送 Hello world 和 MCU 内部 “时间” 的简单示例:</p>
+<p>Embassy UART 使用非常简单, 可以单独用 UartTx/UartRx 只初始发送/接收部分. 这里是一个发送 Hello world 和 MCU 内部 “时间” 的简单示例:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// USART2 tx</span>
 <span class="k">use</span> <span class="nn">embassy_stm32</span><span class="p">::</span><span class="nn">dma</span><span class="p">::</span><span class="n">NoDma</span><span class="p">;</span>
@@ -319,12 +290,9 @@ LM401-Pro-Kit 正好通过 ST-Link 提供了到 USART2 的访问.</p>
 <span class="n">msg</span><span class="nf">.clear</span><span class="p">();</span>
 </code></pre></div></div>
 
-<p><code class="language-plaintext highlighter-rouge">UartTx</code> 初始化时需要传入 <code class="language-plaintext highlighter-rouge">USART2</code>, <code class="language-plaintext highlighter-rouge">PA2</code>, 分别对应 USART2 外设和 TX 引脚,
-DMA 通道是可选的. 默认串口参数是 115200 8N1. 外设初始化会自动处理对应引脚的 AF 设置.</p>
+<p><code class="language-plaintext highlighter-rouge">UartTx</code> 初始化时需要传入 <code class="language-plaintext highlighter-rouge">USART2</code>, <code class="language-plaintext highlighter-rouge">PA2</code>, 分别对应 USART2 外设和 TX 引脚, DMA 通道是可选的. 默认串口参数是 115200 8N1. 外设初始化会自动处理对应引脚的 AF 设置.</p>
 
-<p>串口打印需要字符串拼接格式化, 由于 <code class="language-plaintext highlighter-rouge">no_std</code>, 标准库的 <code class="language-plaintext highlighter-rouge">String</code> 类型不可用,
-这里使用 <code class="language-plaintext highlighter-rouge">heapless::String</code>, 初始化时候需要指定分配大小.
-<code class="language-plaintext highlighter-rouge">core::write!</code> 即标准库中的 <code class="language-plaintext highlighter-rouge">write!</code>, <code class="language-plaintext highlighter-rouge">core::</code> 前缀是为了避免和 <code class="language-plaintext highlighter-rouge">defmt::write!</code> 名字冲突.</p>
+<p>串口打印需要字符串拼接格式化, 由于 <code class="language-plaintext highlighter-rouge">no_std</code>, 标准库的 <code class="language-plaintext highlighter-rouge">String</code> 类型不可用, 这里使用 <code class="language-plaintext highlighter-rouge">heapless::String</code>, 初始化时候需要指定分配大小. <code class="language-plaintext highlighter-rouge">core::write!</code> 即标准库中的 <code class="language-plaintext highlighter-rouge">write!</code>, <code class="language-plaintext highlighter-rouge">core::</code> 前缀是为了避免和 <code class="language-plaintext highlighter-rouge">defmt::write!</code> 名字冲突.</p>
 
 <p>完整代码请参考 <a href="https://github.com/andelf/lm401-pro-kit">代码仓库</a>.</p>
 
@@ -359,10 +327,7 @@ Hello world, device time: 11013
   <li>杜邦线若干根, 用于连接传感器模块和开发板</li>
 </ul>
 
-<p>BMP280 是来自 Bosch 的气压传感器, 通过 I2C 接口读取气压和温度数据,
-所以需要在板子上找到未被占用的 I2C SCL/SDA 引脚资源, 通过查阅芯片手册, 最后选择了
-I2C2, SCL pin PA12, SDA pin PA11.
-开发板上一排跳线帽正好提供了 VCC, GND.</p>
+<p>BMP280 是来自 Bosch 的气压传感器, 通过 I2C 接口读取气压和温度数据, 所以需要在板子上找到未被占用的 I2C SCL/SDA 引脚资源, 通过查阅芯片手册, 最后选择了空闲的 I2C2, SCL pin PA12, SDA pin PA11. 开发板上一排跳线帽正好提供了 VCC, GND.</p>
 
 <p>接线:</p>
 
@@ -380,14 +345,9 @@ I2C2, SCL pin PA12, SDA pin PA11.
 
 <p>Rust Embassy 完美兼容 <code class="language-plaintext highlighter-rouge">embedded-hal</code> 相关生态, 相关外设类型均支持对应的 <code class="language-plaintext highlighter-rouge">embedded-hal</code> trait,</p>
 
-<p>考虑到 BMP280 的使用略微复杂, 需要初始化, 读取校准数据, 测量后还需要通过校准数据计算最终测量结果.
-所以 BMP280 直接寻找对应驱动即可. 但 Rust 嵌入式生态有个问题, 弃坑项目太多. 寻找第三方依赖时候需要注意阅读代码,
-查看依赖版本, 必要时更新.</p>
+<p>考虑到 BMP280 的使用略微复杂, 需要初始化, 读取校准数据, 测量后还需要通过校准数据计算最终测量结果. 所以 BMP280 直接寻找对应驱动即可. 但 Rust 嵌入式生态有个问题, 弃坑项目太多. 寻找第三方依赖时候需要注意阅读代码, 查看依赖版本, 必要时更新.</p>
 
-<p>这么说, 其实是之前我有个弃坑项目里面有个 BME280 驱动库, BME280 和 BMP280 基本兼容, 只是多了湿度测量.
-驱动代码使用 <code class="language-plaintext highlighter-rouge">embedded-hal</code> 提供的 trait 类型访问设备, 完成传感器初始化和测量.
-稍微改了改, 直接 Copy <a href="https://github.com/andelf/embedded-drivers/blob/master/src/bme280.rs">embedded-drivers: bme280.rs</a>
-到项目 <code class="language-plaintext highlighter-rouge">src/</code> 下使用即可.</p>
+<p>这么说, 其实是之前我有个弃坑项目里面有个 BME280 驱动库, BME280 和 BMP280 基本兼容, 只是多了湿度测量. 驱动代码使用 <code class="language-plaintext highlighter-rouge">embedded-hal</code> 提供的 trait 类型访问设备, 完成传感器初始化和测量. 稍微改了改, 直接 Copy <a href="https://github.com/andelf/embedded-drivers/blob/master/src/bme280.rs">embedded-drivers: bme280.rs</a> 到项目 <code class="language-plaintext highlighter-rouge">src/</code> 下使用即可.</p>
 
 <p>修改 <code class="language-plaintext highlighter-rouge">src/lib.rs</code> 增加:</p>
 
@@ -440,8 +400,7 @@ I2C2, SCL pin PA12, SDA pin PA11.
 </code></pre></div></div>
 
 <p>传感器执行测量时候, 按照手册, 依然需要延时, 所以也同样需要传递 <code class="language-plaintext highlighter-rouge">Delay</code> 对象.
-<code class="language-plaintext highlighter-rouge">BME280::measure</code> 方法返回 <code class="language-plaintext highlighter-rouge">Measurements</code> 类型, 为了方便调试使用, 用 derive macro 增加了 defmt 支持,
-可以直接做格式化参数:</p>
+<code class="language-plaintext highlighter-rouge">BME280::measure</code> 方法返回 <code class="language-plaintext highlighter-rouge">Measurements</code> 类型, 为了方便调试使用, 用 derive macro 增加了 defmt 支持, 可以直接做格式化参数:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Debug,</span> <span class="nd">defmt::Format)]</span>
 <span class="k">pub</span> <span class="k">struct</span> <span class="n">Measurements</span> <span class="p">{</span>
@@ -469,9 +428,7 @@ I2C2, SCL pin PA12, SDA pin PA11.
 
 <h2 id="lora-传感器数据传输">LoRa 传感器数据传输</h2>
 
-<p>LoRa 是一种无线传输协议, 适合长距离(km), 少量数据传输. 尤其适合传感器数据.
-因为手头没有 LoRaWAN 基站, 所以暂时没法测试 LoRaWAN.
-这里使用 LoRa 调制模式点对点传输 BMP280 传感器数据.</p>
+<p>LoRa 是一种无线传输协议, 适合长距离(km), 少量数据传输. 尤其适合传感器数据. 因为手头没有 LoRaWAN 基站, 所以暂时没法测试 LoRaWAN. 这里使用 LoRa 调制模式点对点传输 BMP280 传感器数据.</p>
 
 <p>详细实现请参考 <a href="https://github.com/andelf/lm401-pro-kit">代码仓库</a> 里的 <code class="language-plaintext highlighter-rouge">src/bin/subghz-bmp280-tx.rs</code> 和 <code class="language-plaintext highlighter-rouge">src/bin/subghz-bmp280-rx.rs</code>.</p>
 
@@ -479,8 +436,7 @@ I2C2, SCL pin PA12, SDA pin PA11.
 
 <p>LM401-Pro-Kit x2, 天线, 数据线.</p>
 
-<p>其中一个开发板作为传感器采集端, 按照上一示例链接到 BMP280 传感器模块, 另一个作为接收端, 两个开发板之间通过 LoRa 无线传输数据.
-接收端通过 UART 与电脑连接, 通过串口调试工具查看传感器数据.(实际上也可以直接通过 ST-Link + defmt 获取数据)</p>
+<p>其中一个开发板作为传感器采集端, 按照上一示例链接到 BMP280 传感器模块, 另一个作为接收端, 两个开发板之间通过 LoRa 无线传输数据. 接收端通过 UART 与电脑连接, 通过串口调试工具查看传感器数据.(实际上也可以直接通过 ST-Link + defmt 获取数据)</p>
 
 <h3 id="射频开关-radioswitch">射频开关 RadioSwitch</h3>
 
@@ -536,8 +492,7 @@ I2C2, SCL pin PA12, SDA pin PA11.
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>非常简单的 GPIO 操作, GPIO 的强类型 <code class="language-plaintext highlighter-rouge">PAn</code>/<code class="language-plaintext highlighter-rouge">PBn</code>/.. 可以通过 <code class="language-plaintext highlighter-rouge">.degrade()</code> 方法转换为 <code class="language-plaintext highlighter-rouge">AnyPin</code> 类型,
-方便使用.</p>
+<p>非常简单的 GPIO 操作, GPIO 的强类型 <code class="language-plaintext highlighter-rouge">PAn</code>/<code class="language-plaintext highlighter-rouge">PBn</code>/.. 可以通过 <code class="language-plaintext highlighter-rouge">.degrade()</code> 方法转换为 <code class="language-plaintext highlighter-rouge">AnyPin</code> 类型, 方便使用.</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">rfs</span> <span class="o">=</span> <span class="nn">lm401_pro_kit</span><span class="p">::</span><span class="nn">RadioSwitch</span><span class="p">::</span><span class="nf">new_from_pins</span><span class="p">(</span><span class="n">p</span><span class="py">.PB0</span><span class="p">,</span> <span class="n">p</span><span class="py">.PA15</span><span class="p">,</span> <span class="n">p</span><span class="py">.PA8</span><span class="p">);</span>
 </code></pre></div></div>
@@ -586,17 +541,13 @@ I2C2, SCL pin PA12, SDA pin PA11.
 <span class="k">let</span> <span class="n">dev_addr</span> <span class="o">=</span> <span class="n">chip_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">^</span> <span class="n">chip_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">^</span> <span class="n">chip_id</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
 </code></pre></div></div>
 
-<p>设备时间戳直接读取 <code class="language-plaintext highlighter-rouge">Instant::now()</code> 并转为 millis. 保证每个数据报文的差异性.
-<code class="language-plaintext highlighter-rouge">checksum</code> 校验和字段通过计算 <code class="language-plaintext highlighter-rouge">[2..22]</code> 所有字节之和得到.
-所有数据字段均按照大端序列化(BigEndian).</p>
+<p>设备时间戳直接读取 <code class="language-plaintext highlighter-rouge">Instant::now()</code> 并转为 millis. 保证每个数据报文的差异性. <code class="language-plaintext highlighter-rouge">checksum</code> 校验和字段通过计算 <code class="language-plaintext highlighter-rouge">[2..22]</code> 所有字节之和得到. 所有数据字段均按照大端序列化(BigEndian).</p>
 
 <h3 id="subghz-初始化">SubGhz 初始化</h3>
 
-<p>LM401 的射频功能由 STM32WLE5 内置的 SX1262 提供, 设备内部通过 SPI3(SUBGHZSPI) 访问.
-SX1262 初始化需要较多参数, 且发送端接收端若干参数需要一致.</p>
+<p>LM401 的射频功能由 STM32WLE5 内置的 SX1262 提供, 设备内部通过 SPI3(SUBGHZSPI) 访问. SX1262 初始化需要较多参数, 且发送端接收端若干参数需要一致.</p>
 
-<p>这里选用 490.500MHz, LoRa SF7,  4/5 编码率, 125kHz 带宽, 24 字节数据长度.
-接收端和发送端设置一致.</p>
+<p>这里选用 490.500MHz, LoRa SF7,  4/5 编码率, 125kHz 带宽, 24 字节数据长度. 接收端和发送端设置一致.</p>
 
 <p>参数定义:</p>
 
@@ -792,30 +743,29 @@ SX1262 初始化需要较多参数, 且发送端接收端若干参数需要一�
 
 <p>接收端上电之后, 持续接收数据并同时打印在 defmt 调试和串口输出.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; cargo run --bin subghz-bmp280-rx --release
-1.226162 INFO  begin rx...
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>cargo run <span class="nt">--bin</span> subghz-bmp280-rx <span class="nt">--release</span>
+<span class="go">1.226162 INFO  begin rx...
 3.292868 INFO  RX done: rssi=-42dBm snr=14dB len=24 offset=0
 3.292969 DEBUG got BMP280 node raw=[0x4d, 0x4d, 0x72, 0x2e, 0x67, 0x28, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x58, 0x3a, 0x41, 0xad, 0x10, 0xa2, 0x47, 0xac, 0x8c, 0x2a, 0x5, 0xa]
 3.293173 INFO  dev addr=722e6728 dev tick=22586 temp=21.633121'C pressure=883.4433hPa
 3.299479 INFO  stats: Stats { status: Status { mode: Ok(StandbyRc), cmd: Ok(Avaliable) }, pkt_rx: 2, pkt_crc: 0, pkt_len_or_hdr_err: 0, ty: LoRaStats }
 3.299622 INFO  begin rx...
-</code></pre></div></div>
+</span></code></pre></div></div>
 
 <p>串口输出, CSV 格式:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; picocom -b 115200 /dev/tty.usbmodem11203
-addr=722e6728,rssi=-44,snr=14,temperature=16.304043,pressure=87621.96
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>picocom <span class="nt">-b</span> 115200 /dev/tty.usbmodem11203
+<span class="go">addr=722e6728,rssi=-44,snr=14,temperature=16.304043,pressure=87621.96
 addr=722e6728,rssi=-44,snr=14,temperature=16.306524,pressure=87621.96
 addr=722e6728,rssi=-44,snr=13,temperature=16.309006,pressure=87621.83
 addr=722e6728,rssi=-45,snr=13,temperature=16.311487,pressure=87621.81
 addr=722e6728,rssi=-45,snr=13,temperature=16.313969,pressure=87621.66
-</code></pre></div></div>
+</span></code></pre></div></div>
 
 <h2 id="总结">总结</h2>
 
 <p>Rust Embassy 是一个非常好的嵌入式 Rust 开发框架, 通过它可以快速开发嵌入式应用.
-Rust Embassy 把 <code class="language-plaintext highlighter-rouge">async</code>, <code class="language-plaintext highlighter-rouge">await</code> 关键字带到了 Rust 嵌入式开发中, 其还有丰富的多任务支持,
-多种同步元语支持. 通过它们, 我们可以很方便的开发多任务应用.</p>
+Rust Embassy 把 <code class="language-plaintext highlighter-rouge">async</code>, <code class="language-plaintext highlighter-rouge">await</code> 关键字带到了 Rust 嵌入式开发中, 其还有丰富的多任务支持, 多种同步元语支持. 通过它们, 我们可以很方便的开发多任务应用.</p>
 
 <p>但它依然是一个很早期的框架, 还不够完善, 例如目前在 STM32WL 上缺乏 ADC 支持.
 文档不够丰富, 部分库函数会随着开发进度有所变更, 给维护项目带来不小的困难.</p>
@@ -826,15 +776,12 @@ Rust Embassy 把 <code class="language-plaintext highlighter-rouge">async</code>
 
 <p>Rust Embassy 隐藏了大部分嵌入式设备细节, 开发者不需要过多的关注设备初始化细节, 应用代码短小.</p>
 
-<p>实际使用过程中, 也遇到了一些坑, 例如在写一个 PWM 例子时候,
-<code class="language-plaintext highlighter-rouge">embassy_time::Delay</code> 怎么都不工作, 添加了若干 debug 打印之后才发现,
-<code class="language-plaintext highlighter-rouge">embassy_time::Delay</code> 内部使用 <code class="language-plaintext highlighter-rouge">embassy_time::Instant</code> 实现, 默认情况下会使用 <code class="language-plaintext highlighter-rouge">TIM2</code>.
+<p>实际使用过程中, 也遇到了一些坑, 例如在写一个 PWM 例子时候, <code class="language-plaintext highlighter-rouge">embassy_time::Delay</code> 怎么都不工作, 添加了若干 debug 打印之后才发现, <code class="language-plaintext highlighter-rouge">embassy_time::Delay</code> 内部使用 <code class="language-plaintext highlighter-rouge">embassy_time::Instant</code> 实现, 默认情况下会使用 <code class="language-plaintext highlighter-rouge">TIM2</code>.
 而选择的 PWM 输出 pin 正好是 <code class="language-plaintext highlighter-rouge">TIM2_CH2</code>, 两者互相干扰, 导致 <code class="language-plaintext highlighter-rouge">Delay</code> 不工作.
 目前类型系统还不能保证 <code class="language-plaintext highlighter-rouge">Delay</code> 和 <code class="language-plaintext highlighter-rouge">Pwm</code> 不会使用同一个 <code class="language-plaintext highlighter-rouge">TIM</code> 设备.
 最终的解决方法是使用 <code class="language-plaintext highlighter-rouge">cortex_m::delay::Delay</code>, 这是一个基于 SYSTICK 的实现.</p>
 
-<p>本位未介绍 Embassy 的多任务功能,
-在代码仓库里有一个简单的按钮控制闪灯频率的例子 <code class="language-plaintext highlighter-rouge">src/bin/button-control-blinky.rs</code>.
+<p>本位未介绍 Embassy 的多任务功能, 在代码仓库里有一个简单的按钮控制闪灯频率的例子 <code class="language-plaintext highlighter-rouge">src/bin/button-control-blinky.rs</code>.
 多任务的时候需要有 <code class="language-plaintext highlighter-rouge">.await</code> 调用让出时间片.</p>
 
 <h2 id="参考资料">参考资料</h2>
