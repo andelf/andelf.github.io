@@ -16,11 +16,9 @@ toc: true
 published: true
 ---
 
-之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 [STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)](https://mbb.eet-china.com/evaluating/product-106.html), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz
-有不错的支持, 所以打算用这套技术栈进行开发尝试.
+之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 [STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)](https://mbb.eet-china.com/evaluating/product-106.html), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.
 
-本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输.
-过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.
+本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输. 过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.
 
 门槛率高, 还是从点灯开始搞起.
 
@@ -32,14 +30,9 @@ published: true
 
 ### 开发板介绍
 
-LM401-Pro-Kit 是基于 STM32WLE5CBU6 的 Lora 评估板. 支持 SubGHz 无线传输.
-LM401 模组内嵌高性能 MCU 芯片 STM32WLE5CBU6, 芯片内部集成了 SX1262.
-开发板板载 ST-Link(上传下载程序, UART 转 USB).
-ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模块.
-开发板提供了若干 LED 状态灯, 复位按钮和一个用户按钮.
+LM401-Pro-Kit 是基于 STM32WLE5CBU6 的 Lora 评估板. 支持 SubGHz 无线传输. LM401 模组内嵌高性能 MCU 芯片 STM32WLE5CBU6, 芯片内部集成了 SX1262. 开发板板载 ST-Link(上传下载程序, UART 转 USB). ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模块. 开发板提供了若干 LED 状态灯, 复位按钮和一个用户按钮.
 
-日常屯的(吃灰)板子也有大几十上百了, 拿到新板子, 需要查资料, 看手册, 电路图, 读例程, 找到一些核心信息,
-其中一些信息可能需要读例程的 C 代码库才能获得, 这里列出整理的部分:
+日常屯的(吃灰)板子也有大几十上百了, 拿到新板子, 需要查资料, 看手册, 电路图, 读例程, 找到一些核心信息, 其中一些信息可能需要读例程的 C 代码库才能获得, 这里列出整理的部分:
 
 - MCU: STM32WLE5CBU6
   - 架构: Cortex-M4
@@ -70,13 +63,9 @@ ST-Link 通过跳线帽和模块核心部分连接, 方便单独供电使用模�
 - 使用 HAL 库, 例如 stm32f4xx-hal, stm32l0xx-hal, stm32wlxx-hal 等, 融合 `embedded-hal` 生态
 - 使用 Rust 嵌入式框架, 例如 embassy
 
-Embassy 框架是基于 Rust 语言的嵌入式异步框架.
-考虑到相关框架还在开发中, 本文的代码仓库使用的是最新的 embassy master 分支. Commit hash 为 `f98ba4ebac192e81c46933c0dc1dfb2d907cd532`, 通过 `Cargo.toml` 中设置依赖 `path` 的方式引入.
-其他可选方案还可有 `git submodule` 或 直接 `git` 依赖远程版本等.
+Embassy 框架是基于 Rust 语言的嵌入式异步框架. 考虑到相关框架还在开发中, 本文的代码仓库使用的是最新的 embassy master 分支. Commit hash 为 `f98ba4ebac192e81c46933c0dc1dfb2d907cd532`, 通过 `Cargo.toml` 中设置依赖 `path` 的方式引入. 其他可选方案还可有 `git submodule` 或 直接 `git` 依赖远程版本等.
 
-绕开 C HAL/BSP 库开发, 是需要踩不少坑的, 例如, RCC 时钟初始化, 需要查阅 BSP 代码才能确认, 48MHz
-主时钟通过 MSI range11 获得, 而 embassy 对应 MCU 的示例代码使用的是 HSE, 这些都给 Rust
-嵌入式开发带来一定的门槛.
+绕开 C HAL/BSP 库开发, 是需要踩不少坑的, 例如, RCC 时钟初始化, 需要查阅 BSP 代码才能确认, 48MHz 主时钟通过 MSI range11 获得, 而 embassy 对应 MCU 的示例代码使用的是 HSE, 这些都给 Rust 嵌入式开发带来一定的门槛.
 
 ### 软件环境准备
 
@@ -88,10 +77,10 @@ Embassy 框架是基于 Rust 语言的嵌入式异步框架.
 
 安装 Rust 嵌入式开发烧录/运行工具 `probe-run`, 也可以使用 OpenOCD 或其他烧录工具:
 
-    cargo install probe-run
-
 ```console
-$ probe-run --list-chips | grep STM32WL
+> cargo install probe-run
+...(install log)
+> probe-run --list-chips | grep STM32WL
 STM32WL Series
         STM32WLE5J8Ix
         STM32WLE5JBIx
@@ -101,8 +90,7 @@ STM32WL Series
 
 检查发现支持列表没有 STM32WLE5CBU6, 不过可以拿 STM32WLE5JCIx 替代, 问题不大.
 
-安装任意串口调试工具, 这里我使用 `picocom`. 其他可以使用的替代有 [PuTTy](https://www.putty.org/),
-[Teraterm](https://ttssh2.osdn.jp/index.html.en) 等等.
+安装任意串口调试工具, 这里我使用 `picocom`. 其他可以使用的替代有 [PuTTy](https://www.putty.org/), [Teraterm](https://ttssh2.osdn.jp/index.html.en) 等等.
 
 通过 USB 数据线连接开发板, 通过 `picocom` 连接串口, 通过 `probe-run` 烧录程序.
 
@@ -181,18 +169,13 @@ Rust 嵌入式项目的初始设置需要请参考项目代码
   - `memory-x` 自动生成链接所需的 `memory.x` 文件(FLASH, SRAM 的大小和内存位置).
 - 未避免编译报错, 还需要清空 `src/lib.rs` 项目初始文件, 用 `#![no_std]` 替代
 
-几乎所有的 Rust 嵌入式项目都是 `no_std` 的, 这意味着无法简单地使用所有带内存分配类型.
-本例中, 我们使用 `heapless` crate 中提供的栈分配类型来替代 `String`.
+几乎所有的 Rust 嵌入式项目都是 `no_std` 的, 这意味着无法简单地使用所有带内存分配类型. 本例中, 我们使用 `heapless` crate 中提供的栈分配类型来替代 `String`.
 
-注意到, 创建项目时候使用了 `cargo new --lib`, 相当于我们创建的是一个 library 项目.
-这不需要担心, `cargo run` 会自动识别 `src/bin/xxx.rs` 为 "可执行" 二进制目标.
-通过 `cargo run --bin xxx` 即可运行对应程序.
-也可以通过 `examples/xxx.rs` 的方法管理多个可执行二进制目标.
+注意到, 创建项目时候使用了 `cargo new --lib`, 相当于我们创建的是一个 library 项目. 这不需要担心, `cargo run` 会自动识别 `src/bin/xxx.rs` 为 "可执行" 二进制目标. 通过 `cargo run --bin xxx` 即可运行对应程序. 也可以通过 `examples/xxx.rs` 的方法管理多个可执行二进制目标.
 
 ### Blinky 点灯 - 初识 Rust Embassy
 
-我们先通过一个最简单的闪灯例子来熟悉 Rust Embassy 的使用.
-创建 `src/bin/blinky.rs`.
+我们先通过一个最简单的闪灯例子来熟悉 Rust Embassy 的使用. 创建 `src/bin/blinky.rs`.
 
 ```rust
 // blinky.rs
@@ -225,28 +208,20 @@ async fn main(_spawner: Spawner) {
 }
 ```
 
-`#![no_main]` 用于告诉 Rust 编译器, 我们不使用 Rust 提供的 `main` 函数做程序入口.
-`#[embassy_executor::main]` 是一个宏, 用于包装 `async fn main()` 函数,
-由 embassy-executor 提供了一个 futures runtime, 所以可以使用 `async` 和 `await` 语法.
-底层实现中, `.await` 通过 STM32 的 WFE/SEV 等待指令和中断唤醒指令实现, 实现了程序逻辑在等待时候的低功耗.
+`#![no_main]` 用于告诉 Rust 编译器, 我们不使用 Rust 提供的 `main` 函数做程序入口. `#[embassy_executor::main]` 是一个宏, 用于包装 `async fn main()` 函数, 由 embassy-executor 提供了一个 futures runtime, 所以可以使用 `async` 和 `await` 语法. 底层实现中, `.await` 通过 STM32 的 WFE/SEV 等待指令和中断唤醒指令实现, 实现了程序逻辑在等待时候的低功耗.
 `Spawner` 还可以用来启动其他 `async fn` 函数, 实现了多任务的功能.
 
-`#![feature(type_alias_impl_trait)]` 在 embassy 中被广泛使用, 需要开启.
-Embassy 中经常能看到形如 `irq: impl Peripheral<P = T::Interrupt> + 'd` 的类型签名.
+`#![feature(type_alias_impl_trait)]` 在 embassy 中被广泛使用, 需要开启. Embassy 中经常能看到形如 `irq: impl Peripheral<P = T::Interrupt> + 'd` 的类型签名.
 
 `let p = embassy_stm32::init(Default::default());` 直接初始化了所有的外设, 并返回一个 `Peripherals` 对象.
 通过 Rust 的 move 语义保证不同外设使用之间不会出现竞争.
 
 `let mut led = Output::new(p.PB4, Level::High, Speed::Low);` 创建了一个 `Output` 对象, 用于控制 PB4 引脚.
-`Output` 对象是一个 `Pin` 的 trait, 通过 `set_high` 和 `set_low` 方法可以控制引脚电平.
-这里会自动完成对 GPIOB PB4 的所有初始化和设置.
+`Output` 对象是一个 `Pin` 的 trait, 通过 `set_high` 和 `set_low` 方法可以控制引脚电平. 这里会自动完成对 GPIOB PB4 的所有初始化和设置, 包括外设时钟使能, 状态设置等.
 
-`info!`, `warn!` 等都是 `defmt` 的宏, 用于通过 ST-Link 提供的 Debug 通道打印调试信息. 强烈推荐使用,
-否则嵌入式开发中, 只能用串口打印信息.
+`info!`, `warn!` 等都是 `defmt` 的宏, 用于通过 ST-Link 提供的 Debug 通道打印调试信息. 强烈推荐使用, 否则嵌入式开发中, 只能用串口打印信息.
 
-`Timer::after(Duration::from_millis(1000)).await` 是一个异步等待 1 秒的方法, 通过 `embassy-time` crate 实现.
-在 `Cargo.toml` 中的 `time-driver-any` feature 选择了任意可用 timer 实现, 默认是 TIM2, 由 embassy-stm32
-提供给 `embassy-time`.
+`Timer::after(Duration::from_millis(1000)).await` 是一个异步等待 1 秒的方法, 通过 `embassy-time` crate 实现. 在 `Cargo.toml` 中的 `time-driver-any` feature 选择了任意可用 timer 实现, 默认是 TIM2, 由 embassy-stm32 提供给 `embassy-time`.
 
 确保板子连接正常, 直接运行:
 
@@ -276,11 +251,9 @@ Embassy 中经常能看到形如 `irq: impl Peripheral<P = T::Interrupt> + 'd` �
 
 ### UART 打印 - 时钟和外设初始化
 
-defmt 固然方便, 但很多时候依然需要用到 UART, 通过串口获取调试信息或收集数据.
-LM401-Pro-Kit 正好通过 ST-Link 提供了到 USART2 的访问.
+defmt 固然方便, 但很多时候依然需要用到 UART, 通过串口获取调试信息或收集数据. LM401-Pro-Kit 正好通过 ST-Link 提供了到 USART2 的访问.
 
-Blinky 例子中, 由 defmt 调试信息可知, 我们使用的系统时钟只有 4MHz, 但 STM32WL 的最大时钟频率是 48MHz.
-所以需要通过初始化 `init()` 方法设置时钟参数:
+Blinky 例子中, 由 defmt 调试信息可知, 我们使用的系统时钟只有 4MHz, 但 STM32WL 的最大时钟频率是 48MHz. 所以需要通过初始化 `init()` 方法设置时钟参数:
 
 ```rust
 // sys clk init, with LSI support
@@ -290,8 +263,7 @@ config.rcc.mux = embassy_stm32::rcc::ClockSrc::MSI(embassy_stm32::rcc::MSIRange:
 let p = embassy_stm32::init(config);
 ```
 
-Embassy UART 使用非常简单, 可以单独用 UartTx/UartRx 只初始发送/接收部分.
-这里是一个发送 Hello world 和 MCU 内部 "时间" 的简单示例:
+Embassy UART 使用非常简单, 可以单独用 UartTx/UartRx 只初始发送/接收部分. 这里是一个发送 Hello world 和 MCU 内部 "时间" 的简单示例:
 
 ```rust
 // USART2 tx
@@ -310,12 +282,9 @@ usart.blocking_write(msg.as_bytes()).unwrap();
 msg.clear();
 ```
 
-`UartTx` 初始化时需要传入 `USART2`, `PA2`, 分别对应 USART2 外设和 TX 引脚,
-DMA 通道是可选的. 默认串口参数是 115200 8N1. 外设初始化会自动处理对应引脚的 AF 设置.
+`UartTx` 初始化时需要传入 `USART2`, `PA2`, 分别对应 USART2 外设和 TX 引脚, DMA 通道是可选的. 默认串口参数是 115200 8N1. 外设初始化会自动处理对应引脚的 AF 设置.
 
-串口打印需要字符串拼接格式化, 由于 `no_std`, 标准库的 `String` 类型不可用,
-这里使用 `heapless::String`, 初始化时候需要指定分配大小.
-`core::write!` 即标准库中的 `write!`, `core::` 前缀是为了避免和 `defmt::write!` 名字冲突.
+串口打印需要字符串拼接格式化, 由于 `no_std`, 标准库的 `String` 类型不可用, 这里使用 `heapless::String`, 初始化时候需要指定分配大小. `core::write!` 即标准库中的 `write!`, `core::` 前缀是为了避免和 `defmt::write!` 名字冲突.
 
 完整代码请参考 [代码仓库](https://github.com/andelf/lm401-pro-kit).
 
@@ -350,10 +319,7 @@ Hello world, device time: 11013
 - BMP280 传感器模块 1 个
 - 杜邦线若干根, 用于连接传感器模块和开发板
 
-BMP280 是来自 Bosch 的气压传感器, 通过 I2C 接口读取气压和温度数据,
-所以需要在板子上找到未被占用的 I2C SCL/SDA 引脚资源, 通过查阅芯片手册, 最后选择了
-I2C2, SCL pin PA12, SDA pin PA11.
-开发板上一排跳线帽正好提供了 VCC, GND.
+BMP280 是来自 Bosch 的气压传感器, 通过 I2C 接口读取气压和温度数据, 所以需要在板子上找到未被占用的 I2C SCL/SDA 引脚资源, 通过查阅芯片手册, 最后选择了空闲的 I2C2, SCL pin PA12, SDA pin PA11. 开发板上一排跳线帽正好提供了 VCC, GND.
 
 接线:
 
@@ -372,14 +338,9 @@ I2C2, SCL pin PA12, SDA pin PA11.
 
 Rust Embassy 完美兼容 `embedded-hal` 相关生态, 相关外设类型均支持对应的 `embedded-hal` trait,
 
-考虑到 BMP280 的使用略微复杂, 需要初始化, 读取校准数据, 测量后还需要通过校准数据计算最终测量结果.
-所以 BMP280 直接寻找对应驱动即可. 但 Rust 嵌入式生态有个问题, 弃坑项目太多. 寻找第三方依赖时候需要注意阅读代码,
-查看依赖版本, 必要时更新.
+考虑到 BMP280 的使用略微复杂, 需要初始化, 读取校准数据, 测量后还需要通过校准数据计算最终测量结果. 所以 BMP280 直接寻找对应驱动即可. 但 Rust 嵌入式生态有个问题, 弃坑项目太多. 寻找第三方依赖时候需要注意阅读代码, 查看依赖版本, 必要时更新.
 
-这么说, 其实是之前我有个弃坑项目里面有个 BME280 驱动库, BME280 和 BMP280 基本兼容, 只是多了湿度测量.
-驱动代码使用 `embedded-hal` 提供的 trait 类型访问设备, 完成传感器初始化和测量.
-稍微改了改, 直接 Copy [embedded-drivers: bme280.rs](https://github.com/andelf/embedded-drivers/blob/master/src/bme280.rs)
-到项目 `src/` 下使用即可.
+这么说, 其实是之前我有个弃坑项目里面有个 BME280 驱动库, BME280 和 BMP280 基本兼容, 只是多了湿度测量. 驱动代码使用 `embedded-hal` 提供的 trait 类型访问设备, 完成传感器初始化和测量. 稍微改了改, 直接 Copy [embedded-drivers: bme280.rs](https://github.com/andelf/embedded-drivers/blob/master/src/bme280.rs) 到项目 `src/` 下使用即可.
 
 修改 `src/lib.rs` 增加:
 
@@ -435,8 +396,7 @@ info!("BMP280: {:?}", raw);
 ```
 
 传感器执行测量时候, 按照手册, 依然需要延时, 所以也同样需要传递 `Delay` 对象.
-`BME280::measure` 方法返回 `Measurements` 类型, 为了方便调试使用, 用 derive macro 增加了 defmt 支持,
-可以直接做格式化参数:
+`BME280::measure` 方法返回 `Measurements` 类型, 为了方便调试使用, 用 derive macro 增加了 defmt 支持, 可以直接做格式化参数:
 
 ```rust
 #[derive(Debug, defmt::Format)]
@@ -466,9 +426,7 @@ pub struct Measurements {
 
 ## LoRa 传感器数据传输
 
-LoRa 是一种无线传输协议, 适合长距离(km), 少量数据传输. 尤其适合传感器数据.
-因为手头没有 LoRaWAN 基站, 所以暂时没法测试 LoRaWAN.
-这里使用 LoRa 调制模式点对点传输 BMP280 传感器数据.
+LoRa 是一种无线传输协议, 适合长距离(km), 少量数据传输. 尤其适合传感器数据. 因为手头没有 LoRaWAN 基站, 所以暂时没法测试 LoRaWAN. 这里使用 LoRa 调制模式点对点传输 BMP280 传感器数据.
 
 详细实现请参考 [代码仓库](https://github.com/andelf/lm401-pro-kit) 里的 `src/bin/subghz-bmp280-tx.rs` 和 `src/bin/subghz-bmp280-rx.rs`.
 
@@ -476,8 +434,7 @@ LoRa 是一种无线传输协议, 适合长距离(km), 少量数据传输. 尤�
 
 LM401-Pro-Kit x2, 天线, 数据线.
 
-其中一个开发板作为传感器采集端, 按照上一示例链接到 BMP280 传感器模块, 另一个作为接收端, 两个开发板之间通过 LoRa 无线传输数据.
-接收端通过 UART 与电脑连接, 通过串口调试工具查看传感器数据.(实际上也可以直接通过 ST-Link + defmt 获取数据)
+其中一个开发板作为传感器采集端, 按照上一示例链接到 BMP280 传感器模块, 另一个作为接收端, 两个开发板之间通过 LoRa 无线传输数据. 接收端通过 UART 与电脑连接, 通过串口调试工具查看传感器数据.(实际上也可以直接通过 ST-Link + defmt 获取数据)
 
 ### 射频开关 RadioSwitch
 
@@ -534,8 +491,7 @@ impl<'a> embassy_lora::stm32wl::RadioSwitch for RadioSwitch<'a> {
 }
 ```
 
-非常简单的 GPIO 操作, GPIO 的强类型 `PAn`/`PBn`/.. 可以通过 `.degrade()` 方法转换为 `AnyPin` 类型,
-方便使用.
+非常简单的 GPIO 操作, GPIO 的强类型 `PAn`/`PBn`/.. 可以通过 `.degrade()` 方法转换为 `AnyPin` 类型, 方便使用.
 
 ```rust
 let mut rfs = lm401_pro_kit::RadioSwitch::new_from_pins(p.PB0, p.PA15, p.PA8);
@@ -568,17 +524,13 @@ let chip_id = chip_id();
 let dev_addr = chip_id[0] ^ chip_id[1] ^ chip_id[2];
 ```
 
-设备时间戳直接读取 `Instant::now()` 并转为 millis. 保证每个数据报文的差异性.
-`checksum` 校验和字段通过计算 `[2..22]` 所有字节之和得到.
-所有数据字段均按照大端序列化(BigEndian).
+设备时间戳直接读取 `Instant::now()` 并转为 millis. 保证每个数据报文的差异性. `checksum` 校验和字段通过计算 `[2..22]` 所有字节之和得到. 所有数据字段均按照大端序列化(BigEndian).
 
 ### SubGhz 初始化
 
-LM401 的射频功能由 STM32WLE5 内置的 SX1262 提供, 设备内部通过 SPI3(SUBGHZSPI) 访问.
-SX1262 初始化需要较多参数, 且发送端接收端若干参数需要一致.
+LM401 的射频功能由 STM32WLE5 内置的 SX1262 提供, 设备内部通过 SPI3(SUBGHZSPI) 访问. SX1262 初始化需要较多参数, 且发送端接收端若干参数需要一致.
 
-这里选用 490.500MHz, LoRa SF7,  4/5 编码率, 125kHz 带宽, 24 字节数据长度.
-接收端和发送端设置一致.
+这里选用 490.500MHz, LoRa SF7,  4/5 编码率, 125kHz 带宽, 24 字节数据长度. 接收端和发送端设置一致.
 
 参数定义:
 
@@ -776,7 +728,7 @@ if irq_status & Irq::RxDone.mask() != 0 {
 
 接收端上电之后, 持续接收数据并同时打印在 defmt 调试和串口输出.
 
-```
+```console
 > cargo run --bin subghz-bmp280-rx --release
 1.226162 INFO  begin rx...
 3.292868 INFO  RX done: rssi=-42dBm snr=14dB len=24 offset=0
@@ -788,7 +740,7 @@ if irq_status & Irq::RxDone.mask() != 0 {
 
 串口输出, CSV 格式:
 
-```
+```console
 > picocom -b 115200 /dev/tty.usbmodem11203
 addr=722e6728,rssi=-44,snr=14,temperature=16.304043,pressure=87621.96
 addr=722e6728,rssi=-44,snr=14,temperature=16.306524,pressure=87621.96
@@ -800,8 +752,7 @@ addr=722e6728,rssi=-45,snr=13,temperature=16.313969,pressure=87621.66
 ## 总结
 
 Rust Embassy 是一个非常好的嵌入式 Rust 开发框架, 通过它可以快速开发嵌入式应用.
-Rust Embassy 把 `async`, `await` 关键字带到了 Rust 嵌入式开发中, 其还有丰富的多任务支持,
-多种同步元语支持. 通过它们, 我们可以很方便的开发多任务应用.
+Rust Embassy 把 `async`, `await` 关键字带到了 Rust 嵌入式开发中, 其还有丰富的多任务支持, 多种同步元语支持. 通过它们, 我们可以很方便的开发多任务应用.
 
 但它依然是一个很早期的框架, 还不够完善, 例如目前在 STM32WL 上缺乏 ADC 支持.
 文档不够丰富, 部分库函数会随着开发进度有所变更, 给维护项目带来不小的困难.
@@ -812,15 +763,12 @@ Rust Embassy 把 `async`, `await` 关键字带到了 Rust 嵌入式开发中, �
 
 Rust Embassy 隐藏了大部分嵌入式设备细节, 开发者不需要过多的关注设备初始化细节, 应用代码短小.
 
-实际使用过程中, 也遇到了一些坑, 例如在写一个 PWM 例子时候,
-`embassy_time::Delay` 怎么都不工作, 添加了若干 debug 打印之后才发现,
-`embassy_time::Delay` 内部使用 `embassy_time::Instant` 实现, 默认情况下会使用 `TIM2`.
+实际使用过程中, 也遇到了一些坑, 例如在写一个 PWM 例子时候, `embassy_time::Delay` 怎么都不工作, 添加了若干 debug 打印之后才发现, `embassy_time::Delay` 内部使用 `embassy_time::Instant` 实现, 默认情况下会使用 `TIM2`.
 而选择的 PWM 输出 pin 正好是 `TIM2_CH2`, 两者互相干扰, 导致 `Delay` 不工作.
 目前类型系统还不能保证 `Delay` 和 `Pwm` 不会使用同一个 `TIM` 设备.
 最终的解决方法是使用 `cortex_m::delay::Delay`, 这是一个基于 SYSTICK 的实现.
 
-本位未介绍 Embassy 的多任务功能,
-在代码仓库里有一个简单的按钮控制闪灯频率的例子 `src/bin/button-control-blinky.rs`.
+本位未介绍 Embassy 的多任务功能, 在代码仓库里有一个简单的按钮控制闪灯频率的例子 `src/bin/button-control-blinky.rs`.
 多任务的时候需要有 `.await` 调用让出时间片.
 
 ## 参考资料
