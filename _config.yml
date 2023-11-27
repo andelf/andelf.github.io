@@ -24,7 +24,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   会研发的PM才是好OP.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://andelf.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: andelf
+twitter_username: 0c125dd8ac23b21
 github_username:  andelf
 
 # Build settings
