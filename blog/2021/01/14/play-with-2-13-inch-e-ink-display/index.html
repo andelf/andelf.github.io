@@ -4,7 +4,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Play with 2.13 inch E-Ink display | 猫·仁波切</title>
-<meta name="generator" content="Jekyll v4.1.1" />
+<meta name="generator" content="Jekyll v4.3.2" />
 <meta property="og:title" content="Play with 2.13 inch E-Ink display" />
 <meta name="author" content="andelf" />
 <meta property="og:locale" content="en_US" />
@@ -326,9 +326,9 @@
     <span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x7E</span><span class="p">,</span><span class="mh">0x76</span><span class="p">,</span><span class="mh">0xF8</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0xFB</span><span class="p">,</span><span class="mh">0xFE</span><span class="p">,</span><span class="mh">0xFB</span><span class="p">,</span><span class="mh">0xFE</span><span class="p">,</span><span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x3F</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x3E</span><span class="p">,</span><span class="mh">0x73</span><span class="p">,</span>
     <span class="mh">0x38</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0x38</span><span class="p">,</span><span class="mh">0x70</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">]</span>
 <span class="c1"># group by 2 -&gt; to 0-1 -&gt; padding with 0
-</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s">"%08d%08d"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">l</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">r</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]))</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">char</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">char</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">])]</span>
+</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">%08d%08d</span><span class="sh">"</span> <span class="o">%</span> <span class="p">(</span><span class="nf">int</span><span class="p">(</span><span class="nf">bin</span><span class="p">(</span><span class="n">l</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]),</span> <span class="nf">int</span><span class="p">(</span><span class="nf">bin</span><span class="p">(</span><span class="n">r</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]))</span> <span class="nf">for </span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">)</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">char</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">char</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">])]</span>
 
-<span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'0'</span><span class="p">,</span> <span class="s">'.'</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'1'</span><span class="p">,</span> <span class="s">'*'</span><span class="p">))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="se">\n</span><span class="sh">'</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">lines</span><span class="p">).</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">0</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">.</span><span class="sh">'</span><span class="p">).</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">1</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">*</span><span class="sh">'</span><span class="p">))</span>
 </code></pre></div></div>
 
 <p>得到命令行下输出:</p>
@@ -366,34 +366,34 @@
 <div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">char</span> <span class="o">=</span> <span class="p">[</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x0E</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span>
      <span class="p">...:</span>     <span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x3B</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x71</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span><span class="mh">0x7F</span><span class="p">,</span><span class="mh">0xC0</span><span class="p">,</span><span class="mh">0x71</span><span class="p">,</span><span class="mh">0xC0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span>
      <span class="p">...:</span>     <span class="mh">0xE0</span><span class="p">,</span><span class="mh">0xE0</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">]</span>
-<span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s">"%08d%08d"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">l</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">r</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]))</span> <span class="k">for</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">char</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">char</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">])]</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">%08d%08d</span><span class="sh">"</span> <span class="o">%</span> <span class="p">(</span><span class="nf">int</span><span class="p">(</span><span class="nf">bin</span><span class="p">(</span><span class="n">l</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]),</span> <span class="nf">int</span><span class="p">(</span><span class="nf">bin</span><span class="p">(</span><span class="n">r</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]))</span> <span class="nf">for </span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">)</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">char</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">char</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">])]</span>
 
-<span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'0'</span><span class="p">,</span> <span class="s">'.'</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'1'</span><span class="p">,</span> <span class="s">'*'</span><span class="p">))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="se">\n</span><span class="sh">'</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">lines</span><span class="p">).</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">0</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">.</span><span class="sh">'</span><span class="p">).</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">1</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">*</span><span class="sh">'</span><span class="p">))</span>
 
 <span class="c1"># outputs:
-</span><span class="s">"""
-................
-................
-................
-................
-................
-....***.........
-...*****........
-...*****........
-...*****........
-..***.***.......
-..***.***.......
-.***...**.......
-.*********......
-.***...***......
-***.....***.....
-***.....***.....
-***.....***.....
-................
-................
-................
-................
-"""</span>
+</span><span class="sh">"""</span><span class="s">
+</span><span class="gp">...</span><span class="p">..........</span><span class="bp">...</span>
+<span class="p">.............</span><span class="bp">...</span>
+<span class="p">.............</span><span class="bp">...</span>
+<span class="p">.............</span><span class="bp">...</span>
+<span class="p">.............</span><span class="bp">...</span>
+<span class="p">....</span><span class="o">***</span><span class="p">......</span><span class="bp">...</span>
+<span class="p">...</span><span class="o">*****</span><span class="p">.....</span><span class="bp">...</span>
+<span class="p">...</span><span class="o">*****</span><span class="p">.....</span><span class="bp">...</span>
+<span class="p">...</span><span class="o">*****</span><span class="p">.....</span><span class="bp">...</span>
+<span class="p">..</span><span class="o">***</span><span class="p">.</span><span class="o">***</span><span class="p">....</span><span class="bp">...</span>
+<span class="p">..</span><span class="o">***</span><span class="p">.</span><span class="o">***</span><span class="p">....</span><span class="bp">...</span>
+<span class="p">.</span><span class="o">***</span><span class="p">...</span><span class="o">**</span><span class="p">....</span><span class="bp">...</span>
+<span class="p">.</span><span class="o">*********</span><span class="p">...</span><span class="bp">...</span>
+<span class="p">.</span><span class="o">***</span><span class="p">...</span><span class="o">***</span><span class="p">...</span><span class="bp">...</span>
+<span class="o">***</span><span class="p">.....</span><span class="o">***</span><span class="p">..</span><span class="bp">...</span>
+<span class="o">***</span><span class="p">.....</span><span class="o">***</span><span class="p">..</span><span class="bp">...</span>
+<span class="o">***</span><span class="p">.....</span><span class="o">***</span><span class="p">..</span><span class="bp">...</span>
+<span class="p">.............</span><span class="bp">...</span>
+<span class="p">.............</span><span class="bp">...</span>
+<span class="p">.............</span><span class="bp">...</span>
+<span class="p">.............</span><span class="bp">...</span>
+<span class="sh">"""</span>
 </code></pre></div></div>
 
 <h3 id="生成字库">生成字库</h3>
@@ -422,17 +422,17 @@ pip3 <span class="nb">install </span>Pillow
 brew <span class="nb">install </span>libraqm
 </code></pre></div></div>
 
-<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageDraw</span><span class="p">,</span> <span class="n">ImageFont</span>
-<span class="kn">import</span> <span class="nn">PIL.features</span>
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageDraw</span><span class="p">,</span> <span class="n">ImageFont</span>
+<span class="kn">import</span> <span class="n">PIL.features</span>
 
 <span class="c1"># brew install libraqm
-</span><span class="k">assert</span> <span class="n">PIL</span><span class="p">.</span><span class="n">features</span><span class="p">.</span><span class="n">check</span><span class="p">(</span><span class="s">'raqm'</span><span class="p">),</span> <span class="s">"libraqm required"</span>
+</span><span class="k">assert</span> <span class="n">PIL</span><span class="p">.</span><span class="n">features</span><span class="p">.</span><span class="nf">check</span><span class="p">(</span><span class="sh">'</span><span class="s">raqm</span><span class="sh">'</span><span class="p">),</span> <span class="sh">"</span><span class="s">libraqm required</span><span class="sh">"</span>
 
 <span class="c1"># 画布大小
 </span><span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">320</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
 
 <span class="c1"># 黑白格式
-</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="s">'1'</span>
+</span><span class="n">FORMAT</span> <span class="o">=</span> <span class="sh">'</span><span class="s">1</span><span class="sh">'</span>
 <span class="n">BG</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">FG</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -440,40 +440,40 @@ brew <span class="nb">install </span>libraqm
 </span><span class="n">YOFF</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># or -1
 </span>
 
-<span class="n">CHARS</span> <span class="o">=</span> <span class="s">"晴天卧槽可以了！你好世界最怕你一生碌碌无为，还安慰自己平凡可贵。雾霾"</span>
-<span class="n">CHARS</span> <span class="o">=</span> <span class="s">''</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">CHARS</span><span class="p">)))</span>
+<span class="n">CHARS</span> <span class="o">=</span> <span class="sh">"</span><span class="s">晴天卧槽可以了！你好世界最怕你一生碌碌无为，还安慰自己平凡可贵。雾霾</span><span class="sh">"</span>
+<span class="n">CHARS</span> <span class="o">=</span> <span class="sh">''</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="nf">set</span><span class="p">(</span><span class="n">CHARS</span><span class="p">)))</span>
 
-<span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="n">FORMAT</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">BG</span><span class="p">)</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">FORMAT</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">BG</span><span class="p">)</span>
 
-<span class="n">font</span> <span class="o">=</span> <span class="n">ImageFont</span><span class="p">.</span><span class="n">truetype</span><span class="p">(</span><span class="s">"Unibit.ttf"</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">font</span> <span class="o">=</span> <span class="n">ImageFont</span><span class="p">.</span><span class="nf">truetype</span><span class="p">(</span><span class="sh">"</span><span class="s">Unibit.ttf</span><span class="sh">"</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 
-<span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="p">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+<span class="n">draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="p">.</span><span class="nc">Draw</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
 
 <span class="c1"># 代码段用于检查字体渲染
 # draw.text((0, YOFF), CHARS, font=font, fill=FG, language='zh-CN')
 # im.save('font.png')
 # im.show()
 </span>
-<span class="n">draw</span><span class="p">.</span><span class="n">rectangle</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="n">BG</span><span class="p">)</span>
+<span class="n">draw</span><span class="p">.</span><span class="nf">rectangle</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="n">BG</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">CHARS</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">CHARS</span><span class="p">):</span>
     <span class="n">charmap</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">draw</span><span class="p">.</span><span class="n">text</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">YOFF</span><span class="p">),</span> <span class="n">c</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">FG</span><span class="p">)</span>
+    <span class="n">draw</span><span class="p">.</span><span class="nf">text</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">YOFF</span><span class="p">),</span> <span class="n">c</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">FG</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
         <span class="n">v</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16</span><span class="p">):</span>
-            <span class="n">b</span> <span class="o">=</span> <span class="n">im</span><span class="p">.</span><span class="n">getpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16</span><span class="p">):</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">im</span><span class="p">.</span><span class="nf">getpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
             <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
 
-        <span class="n">charmap</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
-        <span class="n">charmap</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span>
+        <span class="n">charmap</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">v</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="n">charmap</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span>
 
-    <span class="n">draw</span><span class="p">.</span><span class="n">rectangle</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="n">BG</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"{"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">''</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">'"{}", {}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s">', '</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="s">"0x%02x"</span> <span class="o">%</span> <span class="n">c</span><span class="p">,</span> <span class="n">charmap</span><span class="p">))),</span> <span class="n">end</span><span class="o">=</span><span class="s">""</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"},"</span><span class="p">)</span>
+    <span class="n">draw</span><span class="p">.</span><span class="nf">rectangle</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="n">BG</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">{</span><span class="sh">"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="sh">''</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">'"</span><span class="s">{}</span><span class="sh">"</span><span class="s">, {}</span><span class="sh">'</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="sh">'</span><span class="s">, </span><span class="sh">'</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="sh">"</span><span class="s">0x%02x</span><span class="sh">"</span> <span class="o">%</span> <span class="n">c</span><span class="p">,</span> <span class="n">charmap</span><span class="p">))),</span> <span class="n">end</span><span class="o">=</span><span class="sh">""</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">},</span><span class="sh">"</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>直接输出 C 代码片段:</p>
@@ -569,20 +569,20 @@ brew <span class="nb">install </span>libraqm
 这里贴要点</p>
 
 <div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># RGBA 到 RGB 的转换
-</span><span class="n">pix</span> <span class="o">=</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="n">getpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+</span><span class="n">pix</span> <span class="o">=</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="nf">getpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
 <span class="n">BG</span> <span class="o">=</span> <span class="mi">255</span> <span class="c1"># 背景是白色
 </span><span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">BG</span> <span class="o">*</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">//</span> <span class="mi">255</span>
 <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">BG</span> <span class="o">*</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">//</span> <span class="mi">255</span>
 <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">BG</span> <span class="o">*</span> <span class="p">(</span><span class="mi">255</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">//</span> <span class="mi">255</span>
 <span class="n">a</span> <span class="o">=</span> <span class="mi">255</span> <span class="c1"># alpha 通道置空，不透明度
 </span>
-<span class="n">im1</span><span class="p">.</span><span class="n">putpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
+<span class="n">im1</span><span class="p">.</span><span class="nf">putpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
 </code></pre></div></div>
 
 <div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 图像二值化,
-</span><span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="n">resize</span><span class="p">((</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="n">Image</span><span class="p">.</span><span class="n">LANCZOS</span><span class="p">)</span>
-<span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="nb">filter</span><span class="p">(</span><span class="n">ImageFilter</span><span class="p">.</span><span class="n">SHARPEN</span><span class="p">)</span>
-<span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="n">convert</span><span class="p">(</span><span class="s">'1'</span><span class="p">,</span> <span class="n">dither</span><span class="o">=</span><span class="n">Image</span><span class="p">.</span><span class="n">NONE</span><span class="p">)</span>
+</span><span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="nf">resize</span><span class="p">((</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="n">Image</span><span class="p">.</span><span class="n">LANCZOS</span><span class="p">)</span>
+<span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="n">ImageFilter</span><span class="p">.</span><span class="n">SHARPEN</span><span class="p">)</span>
+<span class="n">im1</span> <span class="o">=</span> <span class="n">im1</span><span class="p">.</span><span class="nf">convert</span><span class="p">(</span><span class="sh">'</span><span class="s">1</span><span class="sh">'</span><span class="p">,</span> <span class="n">dither</span><span class="o">=</span><span class="n">Image</span><span class="p">.</span><span class="n">NONE</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>当然，你要是用 ImageMagick 或者 Photoshop 也一样可以。</p>
@@ -882,7 +882,7 @@ It is a memory buffer containing data representing all the pixels in a complete 
           <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
       </div>
 
-      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">andelf</span></a></li></ul>
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/0c125dd8ac23b21"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">0c125dd8ac23b21</span></a></li></ul>
 </div>
 
       <div class="footer-col footer-col-3">
