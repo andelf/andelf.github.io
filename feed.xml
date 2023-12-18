@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-12-18T09:21:20+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL</title><link href="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/" rel="alternate" type="text/html" title="10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL" /><published>2023-12-17T11:54:00+00:00</published><updated>2023-12-17T11:54:00+00:00</updated><id>https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl</id><content type="html" xml:base="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/"><![CDATA[<p>书接很久以前的 <a href="/blog/2021/01/14/play-with-2-13-inch-e-ink-display/">这里</a>.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-12-18T09:52:44+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL</title><link href="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/" rel="alternate" type="text/html" title="10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL" /><published>2023-12-17T11:54:00+00:00</published><updated>2023-12-17T11:54:00+00:00</updated><id>https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl</id><content type="html" xml:base="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/"><![CDATA[<p>书接很久以前的 <a href="/blog/2021/01/14/play-with-2-13-inch-e-ink-display/">这里</a>.
 最近机缘巧合又收了一个 10.2 寸的黑白红墨水屏价签. 很新, 屏幕保护膜都没撕, 又可见倒闭的公司库存.</p>
 
 <p><img src="/assets/esl-10in2.jpeg" alt="ESL 10in2" /></p>
@@ -558,7 +558,7 @@ UCxxxx 系列的驱动 IC, 也会直接提供 Partial Update 的相关命令.
 其中若干技术可以混用, 例如局部刷新 + 灰度显示, 局部刷新 + 三色显示等等.
 屏幕也可以在不同状态下重新初始化, 最终实现的效果, 取决于你的想象力.</p>
 
-<p>原理有了, 剩下的就是点子了. 之前做了一个 <a href="https://www.bing.com/images/create">Bing Image Crator</a>
+<p>原理有了, 剩下的就是点子了. 之前做了一个 <a href="https://www.bing.com/images/create">Bing Image Creator</a>
 加随机每日诗词的小工具. 效果还不错, 但一堆粗糙脚本未整理.</p>
 
 <p>一些可能用到的技术再提一遍:</p>
