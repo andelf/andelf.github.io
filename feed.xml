@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-12-18T05:54:16+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL</title><link href="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/" rel="alternate" type="text/html" title="10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL" /><published>2023-12-17T11:54:00+00:00</published><updated>2023-12-17T11:54:00+00:00</updated><id>https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl</id><content type="html" xml:base="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/"><![CDATA[<p>书接很久以前的 <a href="/blog/2021/01/14/play-with-2-13-inch-e-ink-display/">这里</a>.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-12-18T05:55:13+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL</title><link href="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/" rel="alternate" type="text/html" title="10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL" /><published>2023-12-17T11:54:00+00:00</published><updated>2023-12-17T11:54:00+00:00</updated><id>https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl</id><content type="html" xml:base="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/"><![CDATA[<p>书接很久以前的 <a href="/blog/2021/01/14/play-with-2-13-inch-e-ink-display/">这里</a>.
 最近机缘巧合又收了一个 10.2 寸的黑白红墨水屏价签. 很新, 屏幕保护膜都没撕, 又可见倒闭的公司库存.</p>
 
 <p><img src="/assets/esl-10in2.jpeg" alt="ESL 10in2" /></p>
@@ -282,7 +282,8 @@
 
 <p>可见, 这里其实是有新旧 AB 转换的概念的, 实测发现在 Display Mode 2 下,
 0x24 B/W RAM 表示当前(目标/NEW)显示状态, 0x26 Red RAM 则是上一(OLD)状态.
-那么看起来就可以实现快速刷新了. 只需要我们在写入新内容到 NEW RAM 同时, 把旧内容写入 OLD RAM, 就可以实现快速刷新了.</p>
+那么看起来就可以实现快速刷新了. 只需要我们在写入新内容到 NEW RAM 同时, 把旧内容写入 OLD RAM.
+驱动 IC 将自动使用 OLD/NEW 信息执行对应的波形, 完成像素位的状态转换.</p>
 
 <p>那么是不是有种方法可以让驱动 IC 自动完成这个过程呢? 答案是肯定的. 这个功能在不同驱动 IC 的叫法不同,
 比如在 UCxxxx 系列手册中, 叫做 N2OCP (New to Old Copy), 在 SSD1677 中, 叫做 “RAM ping-pong”.</p>
