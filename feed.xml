@@ -1,4 +1,583 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-11-28T17:21:12+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输</title><link href="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" rel="alternate" type="text/html" title="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" /><published>2023-01-23T04:00:00+00:00</published><updated>2023-01-23T04:00:00+00:00</updated><id>https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy</id><content type="html" xml:base="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"><![CDATA[<p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 <a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>, 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-12-18T05:24:25+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">10.2 寸黑白红三色墨水屏价签 - 10.2 inch 3-Color ESL</title><link href="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/" rel="alternate" type="text/html" title="10.2 寸黑白红三色墨水屏价签 - 10.2 inch 3-Color ESL" /><published>2023-12-17T11:54:00+00:00</published><updated>2023-12-17T11:54:00+00:00</updated><id>https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl</id><content type="html" xml:base="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/"><![CDATA[<p>书接很久以前的 <a href="/blog/2021/01/14/play-with-2-13-inch-e-ink-display/">这里</a>.
+最近机缘巧合又收了一个 10.2 寸的黑白红墨水屏价签. 很新, 屏幕保护膜都没撕, 又可见倒闭的公司库存.</p>
+
+<p><img src="/assets/esl-10in2.jpeg" alt="ESL 10in2" /></p>
+
+<p>可惜后盖上的贴纸已经撕掉了, 不知道是哪家公司的. 先拆拆看.</p>
+
+<h2 id="拆解">拆解</h2>
+
+<p>目前市面上大大小小价签很多种, 拆解价签的方法大同小异. 拆价签翻车的案例太多, 尤其大屏幕, 一旦翻车就是一顿外卖的损失.
+所以拆解前一定要做好功课, 了解屏幕的结构, 以及拆解的方法.
+卡扣一般会特别紧, 需要较薄的刀片, 但又不能太薄, 否则可能会受伤. 比如这个:</p>
+
+<p><img src="/assets/esl-10in2-toolkit.jpeg" alt="ESL Teardown Toolkit" /></p>
+
+<p>另外加上软质塑料片, 这玩意文具店很多, 用来拆解屏幕背面和 PCB 的双面胶.</p>
+
+<p><img src="/assets/esl-10in2-back.jpeg" alt="ESL Back Remoted" /></p>
+
+<p>撬开后电池盖, 注意卡扣位置. 然后取掉电池. 方便之后取出 PCB.</p>
+
+<p>然后就是拆卡扣, 从屏幕背面的一个开口处开始, 用刀片, 慢慢撬一圈卡扣,
+注意不要伤到自己和屏幕边缘.</p>
+
+<p><img src="/assets/esl-10in2-teardown-1.jpeg" alt="ESL Back Teardown Start" /></p>
+
+<p><img src="/assets/esl-10in2-teardown-2.jpeg" alt="ESL Back Teardown Knot Removed" /></p>
+
+<p><img src="/assets/esl-10in2-teardown-3.jpeg" alt="ESL Back Teardown Removing Tape" /></p>
+
+<p>卡扣分离后, 这时候可以用软质塑料片, 伸进去, 慢慢拆开 PCB 和后盖的双面胶.</p>
+
+<p>PCB 也是用双面胶贴在屏幕背后的, 这一步是最容易翻车的, 一定要慢慢来. 塑料片伸进去横向推, 一点一点的推开 PCB 和背板的双面胶.</p>
+
+<p><img src="/assets/esl-10in2-teardown-4.jpeg" alt="ESL Back Teardown PCB Removed 1" /></p>
+
+<p><img src="/assets/esl-10in2-teardown-5.jpeg" alt="ESL Back Teardown PCB Removed 2" /></p>
+
+<p>PCB 丝印: Endor Telink1020 2021-07-22 change U5, 可见这是 BLOZI(保资) 的价签. 但是在今天, 他家官网都是挂的.
+难道价签厂家也倒闭了…</p>
+
+<p>24pin 屏幕排线丝印: HINK-E102A01-A1, 搜索可以找到全网唯一参考资料<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>, 虽然是个 CSDN, 但提供了不少线索,
+里面说明了驱动 IC 是 SSD1677, 微雪 3in7 也使用了相同驱动 IC, 但那是一个黑白屏幕.</p>
+
+<h2 id="驱动">驱动</h2>
+
+<p>拆解完成后就可以尝试驱动了. 一般来说, 24pin 就是 AIO(All-In-One) 串口屏了, 驱动版都是通用的.
+这里随便找了一个驱动板(咸鱼), 使用 RPi Pico(RP2040 MCU) 来驱动. 开发框架使用 Rust <a href="https://embassy.dev/">embassy</a>.</p>
+
+<p>Rust embedded-graphics 提供了非常方便的 Framebuffer API(注意, 没有屏幕旋转支持).</p>
+
+<p>传统情况下, 我们只需要实现一个 <code class="language-plaintext highlighter-rouge">Display</code> trait, 就可以使用 embedded-graphics 的各种绘图 API 了.
+但这里, 我们再抽象一级, 直接预留一个 <code class="language-plaintext highlighter-rouge">update_frame(raw: &amp;[u8])</code> 接口, 直接接收 <code class="language-plaintext highlighter-rouge">Framebuffer::data()</code> 作为参数.
+这是在经历了 <a href="https://github.com/embedded-drivers/epd">epd</a> 项目之后, 尝试七八种屏幕之后发现最合适最通用的方法.</p>
+
+<p>先写个骨架, 一切 SPI 串口 EPD 都可以这样搞, 唯一需要注意的是部分驱动 IC 的 BUSY 使用反逻辑:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">EPD10in2</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">spi</span><span class="p">:</span> <span class="n">Spi</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">SPI0</span><span class="p">,</span> <span class="n">Blocking</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">dc</span><span class="p">:</span> <span class="n">Output</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">AnyPin</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">busy</span><span class="p">:</span> <span class="n">Input</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">AnyPin</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">EPD10in2</span><span class="o">&lt;</span><span class="nv">'_</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">send_command</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.dc</span><span class="nf">.set_low</span><span class="p">();</span>
+        <span class="k">self</span><span class="py">.spi</span><span class="nf">.blocking_write</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="n">cmd</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+    <span class="k">fn</span> <span class="nf">send_data</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.dc</span><span class="nf">.set_high</span><span class="p">();</span>
+        <span class="k">self</span><span class="py">.spi</span><span class="nf">.blocking_write</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">fn</span> <span class="nf">send_command_data</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="nb">u8</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">);</span>
+        <span class="k">self</span><span class="nf">.send_data</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">busy_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">loop</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="k">self</span><span class="py">.busy</span><span class="nf">.is_low</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nd">info!</span><span class="p">(</span><span class="s">"busy out"</span><span class="p">);</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// ...</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">init</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_frame</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">])</span> <span class="p">{}</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">refresh</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="bwr-驱动---三色">BWR 驱动 - 三色</h3>
+
+<p>微雪驱动使用了自定义黑白 LUT 和 4 阶灰度的 LUT 来驱动, 但个人经验是, 自定义 LUT 方法不适合三色 BWR 屏幕.
+除非确定 LUT 来自厂家调教.
+三色屏幕建议使用出厂的 OTP LUT(One-time-programming LUT). 这样可以保证屏幕的寿命, 也直接使用厂商调教过的颜色效果.
+否则电子墨水屏在 LUT 表错误的情况下, 极容易永久性损坏, 例如我手头有若干永久性残影的屏幕.</p>
+
+<p>当然, 的确是可以自己调教三色 LUT 逻辑, 相关论文有不少, 例如 Zeng, W.; Yi, Z.; Zhou, X.; Zhao, Y.; Feng, H.; Yang, J.; Liu, L.; Chi, F.; Zhang, C.; Zhou, G. Design of Driving Waveform for Shortening Red Particles Response Time in Three-Color Electrophoretic Displays. Micromachines 2021, 12, 578. <a href="https://doi.org/10.3390/mi12050578">https://doi.org/10.3390/mi12050578</a>. 请沿着引文链自行探索.</p>
+
+<p>一般来说, 三色墨水屏在墨囊黑白粒子之外额外加入了第三种颜色的粒子, 例如红色, 黄色.
+彩色粒子的带电量和粘度(粒子物理运动特性)和黑色粒子可以通过较弱电压区分.
+驱动过程大概是: 清屏, 激活(让黑色和彩色粒子尽可能分层而不是黏在一起), 然后利用较弱电压, 使得彩色粒子在屏幕上浮动, 形成彩色图像.</p>
+
+<p>通读 SSD1677 的数据手册, 对照微雪的驱动代码, 找到核心修改点. 几乎所有 EPD 驱动 IC 的手册都是极其含糊,
+这个也不例外. 其中一些关键词, 可能是需要你通读过其他同类型驱动 IC 才能理解.</p>
+
+<p><img src="/assets/ssd1677-lut-mapping.jpeg" alt="SSD1677 LUT Mapping" /></p>
+
+<p>SSD1677 有如上两种模式, 一种是 BWR 三色, 一种是黑白两色. 按照不同方式使用 LUT.</p>
+
+<p><img src="/assets/ssd1677-cmd-display-ctrl-2.jpeg" alt="SSD1677 Display Update Control 2" /></p>
+
+<!-- ![SSD1677 Load WS OTP](/assets/ssd1677-cmd-load-ws-otp.jpeg) -->
+
+<p><img src="/assets/ssd1677-cmd-write-display-option.jpeg" alt="SSD1677 Write Display Option" /></p>
+
+<p>这两个含糊的 Command 描述文档, 隐藏了 BWR 驱动的细节.</p>
+
+<ul>
+  <li>Display Mode 1 即 BWR 三色模式, Display Mode 2 为黑白模式</li>
+  <li>Display Update Control 2 命令的 0x99 和 0x91 分别可以加载不同模式的 OTP LUT
+    <ul>
+      <li>0xC7, 0xCF 决定了最终刷新使用的 Display Mode</li>
+    </ul>
+  </li>
+  <li>Write Display Option 命令中设置了 WS(LUT) 不同时间片对应的 Display Mode</li>
+</ul>
+
+<p>那么这里, 我们直接加载 Display Mode 1 的 OTP LUT, 然后使用 Display Update Control 2(with Display Mode 1) 命令刷新.</p>
+
+<p>由此修改 <code class="language-plaintext highlighter-rouge">init()</code> 函数:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">init</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x12</span><span class="p">);</span> <span class="c1">// Soft reset</span>
+        <span class="n">Delay</span><span class="nf">.delay_ms</span><span class="p">(</span><span class="mi">20_u32</span><span class="p">);</span>
+
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x46</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0xF7</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.busy_wait</span><span class="p">();</span>
+
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x47</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0xF7</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.busy_wait</span><span class="p">();</span>
+
+        <span class="c1">// Driver output control</span>
+        <span class="c1">// 0x27F = 639</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x01</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x7F</span><span class="p">,</span> <span class="mi">0x02</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">]);</span>
+
+        <span class="c1">// set gate voltage</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x03</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">]);</span>
+        <span class="c1">// set source voltage</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x04</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x41</span><span class="p">,</span> <span class="mi">0xA8</span><span class="p">,</span> <span class="mi">0x32</span><span class="p">]);</span> <span class="c1">// POR</span>
+
+        <span class="c1">// set data entry sequence</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x11</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x03</span><span class="p">]);</span>
+
+        <span class="c1">// set border</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x3C</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x03</span><span class="p">]);</span>
+
+        <span class="c1">// set booster strength</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x0C</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0xAE</span><span class="p">,</span> <span class="mi">0xC7</span><span class="p">,</span> <span class="mi">0xC3</span><span class="p">,</span> <span class="mi">0xC0</span><span class="p">,</span> <span class="mi">0xC0</span><span class="p">]);</span>
+
+        <span class="c1">// set internal sensor on</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x18</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x80</span><span class="p">]);</span>
+
+        <span class="c1">// set vcom value</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x2C</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x44</span><span class="p">]);</span>
+
+        <span class="c1">// setting X direction start/end position of RAM</span>
+        <span class="c1">// 640 -&gt; 639 =&gt; 0x27F</span>
+        <span class="c1">// 960 -&gt; 959 =&gt; 0x3BF</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x44</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0xBF</span><span class="p">,</span> <span class="mi">0x03</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x45</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x7F</span><span class="p">,</span> <span class="mi">0x02</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x4E</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x4F</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">]);</span>
+
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x37</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">;</span> <span class="mi">10</span><span class="p">]);</span> <span class="c1">// Use Mode 1 !!!</span>
+
+        <span class="c1">// Load Waveform !!!</span>
+        <span class="c1">// 0x91, Load LUT with Mode 1</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x22</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x91</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x20</span><span class="p">);</span>
+        <span class="k">self</span><span class="nf">.busy_wait</span><span class="p">();</span>
+
+        <span class="c1">// Display Update Control 2</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x22</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0xCF</span><span class="p">]);</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>除了屏幕大小设定的修改, 最核心的用 <code class="language-plaintext highlighter-rouge">!!!</code> 标注.</p>
+
+<p>补齐写 RAM 函数和屏幕刷新函数:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_bw_frame</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">])</span> <span class="p">{</span>
+        <span class="c1">// self.send_command_data(0x4E, &amp;[0x00, 0x00]);</span>
+        <span class="c1">// self.send_command_data(0x4F, &amp;[0x00, 0x00]);</span>
+
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x24</span><span class="p">);</span>
+        <span class="k">self</span><span class="nf">.send_data</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">update_red_frame</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">])</span> <span class="p">{</span>
+        <span class="c1">// self.send_command_data(0x4E, &amp;[0x00, 0x00]);</span>
+        <span class="c1">// self.send_command_data(0x4F, &amp;[0x00, 0x00]);</span>
+
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x26</span><span class="p">);</span>
+        <span class="k">self</span><span class="nf">.send_data</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">refresh</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">delay</span> <span class="o">=</span> <span class="n">Delay</span><span class="p">;</span>
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x20</span><span class="p">);</span> <span class="c1">// Master activation</span>
+        <span class="n">delay</span><span class="nf">.delay_ms</span><span class="p">(</span><span class="mi">100_u32</span><span class="p">);</span> <span class="c1">//must</span>
+        <span class="k">self</span><span class="nf">.busy_wait</span><span class="p">();</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>在屏幕大小正确设定的前提下, 0x4E/0x4F(RAM 当前 X/Y) 可以只写一次, 之后就不需要了, 自动增长.</p>
+
+<p>为了测试效果, 我们找一张 LLM 生成的图. 由于屏幕是 960x640, 而一般 LLM 生成的图是正方形, 需要进行缩放.
+这里可以使用 Context Aware Image Resizing(CAIR) 算法, 或者传统直接缩放.</p>
+
+<p>考虑到我们的屏幕只有三种颜色, 无法体现图片的丰富彩色和灰度细节, 需要使用抖动 (Diffusion Dithering) 来模拟灰度.
+然后提取 BW frame 和 Red frame, 分别写 RAM. 相关任务可以通过 ImageMagick 完成:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>convert ~/Downloads/_34f9c9ae-d1c2-47a9-ab55-089ffc7cb626.jpeg <span class="nt">-size</span> 960x640 <span class="nt">-dither</span> FloydSteinberg <span class="nt">-remap</span> 3color.gif out.gif
+</code></pre></div></div>
+
+<p>这里 <code class="language-plaintext highlighter-rouge">3color.gif</code> 是只包含红黑白三色的索引色图, 用来提供调色板. <code class="language-plaintext highlighter-rouge">out.gif</code> 是经过抖动处理的图片.</p>
+
+<p>之前突然想到, Rust 的过程宏不就是在编译期执行的吗? 于是就写了个过程宏, 用来自动加载图片, 提取 BW/Red frame.
+项目在 <a href="https://github.com/andelf/text-image">text-image</a>.</p>
+
+<p>全部刷新大概需要 20 秒左右, 最终效果如下:</p>
+
+<p><img src="/assets/esl-10in2-bwr.jpeg" alt="BWR Image with Dithering" /></p>
+
+<h3 id="bw-驱动---黑白双色">BW 驱动 - 黑白双色</h3>
+
+<p>通过前面的描述, 其实大家都会发现, 首先 SSD1677 本身就支持三色和双色驱动两种模式,
+且三色屏幕的彩色粒子和黑色粒子如果一同处理, 那完全是可以把三色屏幕当做双色屏幕来驱动的.</p>
+
+<p>方法1: 依然使用三色模式, 只不过 RED RAM 永远置空. 这是最简单的, 不需要修改任何代码, 但需要忍受长大 20 秒的刷新时间.</p>
+
+<p>方法2: 启用驱动 IC 的双色模式?</p>
+
+<p>这里主要介绍双色模式, 它的好处是, 刷新速度可以调教到更快, 并且有可能支持灰度显示, 以及快速局部刷新.
+黑白双色模式最主要的是驱动像素到新的状态, 需要拿到前一状态和目标状态, 然后执行对应的波形. 这需要驱动 IC 有对应的支持.</p>
+
+<p>这里是驱动 IC 手册中含糊没有介绍清楚的部分:</p>
+
+<p><img src="/assets/ssd1677-lut.jpeg" alt="SSD1677 LUT" /></p>
+
+<p>可见 LUT 表和 [上一篇文章]((/blog/2021/01/14/play-with-2-13-inch-e-ink-display/) 中的类似, 但似乎缺乏核心的 “AB” 概念? 其实不然.
+我们大致按照 Display Mode 1 整理得到格式是:</p>
+
+<ul>
+  <li>VS - L0(LUT0) - for BLACK</li>
+  <li>VS - L1(LUT1) - for WHITE</li>
+  <li>VS - L2(LUT2) - for RED (R=1, B/W=0)</li>
+  <li>VS - L3(LUT3) - for RED (R=1, B/W=1), LUT3=LUT2</li>
+  <li>VS - L4(LUT4) - reserved</li>
+  <li>TP / RP - time period / repeat</li>
+  <li>FR - Frame Rate</li>
+</ul>
+
+<p>而按照 Display Mode 2, 经过测试, 发现 LUT 是:</p>
+
+<ul>
+  <li>VS - L0(LUT0) - Black to Black</li>
+  <li>VS - L1(LUT1) - Black to White</li>
+  <li>VS - L2(LUT2) - White to Black</li>
+  <li>VS - L3(LUT3) - White to White</li>
+  <li>(其他部分一致)</li>
+</ul>
+
+<p>可见, 这里其实是有新旧 AB 转换的概念的, 实测发现在 Display Mode 2 下,
+0x24 B/W RAM 表示当前(目标/NEW)显示状态, 0x26 Red RAM 则是上一(OLD)状态.
+那么看起来就可以实现快速刷新了. 只需要我们在写入 NEW RAM 时, 同时写入 OLD RAM, 就可以实现快速刷新了.</p>
+
+<p>那么是不是有种方法可以让驱动 IC 自动完成这个过程呢? 答案是肯定的. 这个功能在不同驱动 IC 的叫法不同,
+比如在 UCxxxx 系列手册中, 叫做 N2OCP (New to Old Copy), 在 SSD1677 中, 叫做 “RAM ping-pong”.</p>
+
+<p>翻看上面 0x37 Write Display Option 命令的 <code class="language-plaintext highlighter-rouge">F[6]</code> 位, 可以看到 “RAM Ping-Pong for Display Mode 2” 的描述.
+且同时告知, 只有 Display Mode 2(黑白双色) 支持这个功能.</p>
+
+<p>简单对 <code class="language-plaintext highlighter-rouge">init()</code> 函数做修改, 这里只贴出修改的部分:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">init</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// ....</span>
+
+        <span class="c1">// Display Option</span>
+        <span class="nd">#[rustfmt::skip]</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x37</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span>
+            <span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0xFF</span><span class="p">,</span> <span class="c1">//B</span>
+            <span class="mi">0xFF</span><span class="p">,</span> <span class="c1">//C</span>
+            <span class="mi">0xFF</span><span class="p">,</span> <span class="c1">//D</span>
+            <span class="mi">0xFF</span><span class="p">,</span> <span class="c1">//E</span>
+            <span class="c1">// 0x0F, RAM ping-pong disable</span>
+            <span class="c1">// 0x4F, RAM ping-pong enable</span>
+            <span class="mi">0x4F</span><span class="p">,</span> <span class="c1">//F, RAM ping-pong enable. only in Display Mode 2</span>
+            <span class="mi">0xFF</span><span class="p">,</span> <span class="c1">//G</span>
+            <span class="mi">0xFF</span><span class="p">,</span> <span class="c1">//H</span>
+            <span class="mi">0xFF</span><span class="p">,</span> <span class="c1">//I</span>
+            <span class="mi">0xFF</span><span class="p">,</span> <span class="c1">//J</span>
+        <span class="p">]);</span> <span class="c1">// MODE 2</span>
+
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x22</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x99</span><span class="p">]);</span> <span class="c1">// Load LUT with Mode 2</span>
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x20</span><span class="p">);</span>
+        <span class="k">self</span><span class="nf">.busy_wait</span><span class="p">();</span>
+
+        <span class="c1">// Display Update Control 2</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x22</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0xCF</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>废话不多说, 我们编写一张快速刷新的波形, 前置条件是需要屏幕是纯白的, 也就是刚刚清屏后的状态. 这可以通过 OTP LUT 实现.
+这里只关注我们需要的黑色和白色状态.</p>
+
+<ul>
+  <li>对于 Black to Black 和  White to White, 什么都不做</li>
+  <li>Black to White, 加 VSL 电压, 若干周期</li>
+  <li>White to Black, 加 VSH 电压, 若干周期</li>
+</ul>
+
+<p>经过测试, 我们得到了如下 LUT, 简洁到惊人. <code class="language-plaintext highlighter-rouge">0x0F</code> 是个人测试的值, 即 15 个周期. RP=0 表示只重复一次.
+相关内容和上一篇文章介绍的大同小异.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">configure_partial_update</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nd">#[rustfmt::skip]</span>
+        <span class="k">const</span> <span class="n">LUT</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">[</span>
+            <span class="mi">0b00_00_00_00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT0, B2B</span>
+            <span class="mi">0b10_00_00_00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT1, B2W</span>
+            <span class="mi">0b01_00_00_00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT2, W2B</span>
+            <span class="mi">0b00_00_00_00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT3, W2W</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT5, reserved</span>
+            <span class="c1">// TP[xA, xB, xC, xD], RP</span>
+            <span class="mi">0x0F</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//7</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//9</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="c1">// FR</span>
+            <span class="mi">0x22</span><span class="p">,</span><span class="mi">0x22</span><span class="p">,</span><span class="mi">0x22</span><span class="p">,</span><span class="mi">0x22</span><span class="p">,</span><span class="mi">0x22</span>
+        <span class="p">];</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x32</span><span class="p">,</span> <span class="n">LUT</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>而此时只需要写入 0x24 B/W RAM, 就可实现快速刷新, 实测大概 1s 左右即可完成刷屏. 且无闪动.</p>
+
+<h3 id="bw-驱动---灰度大法">BW 驱动 - 灰度大法</h3>
+
+<p>看着 0x0F 这个时间周期值, 是不是手痒. 没错, 我们可以尝试调整这个值, 从而实现灰度显示.
+灰度显示对于阅读器类应用意义重大, 适量字体的抗锯齿渲染, 以及图片的灰度显示, 都可以大大提升用户体验.</p>
+
+<p>这里假设我们需要实现 16 级别灰度, 正好对应 0x0F.</p>
+
+<ul>
+  <li>可以刷屏 16 次, 每次刷入 1/16 的灰度层次, 朴素但是可行</li>
+  <li>!! 刷屏 4 次, 分别是 8, 4, 2, 1 个周期, 从而实现 16 级灰度, 相当于只用了 4 倍刷新时间</li>
+</ul>
+
+<p>废话不多说, 直接上代码:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="cd">/// Level 0 to 15</span>
+    <span class="k">fn</span> <span class="nf">configure_gray_update_level</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nd">#[rustfmt::skip]</span>
+        <span class="k">let</span> <span class="n">lut</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">[</span>
+            <span class="mi">0b01_00_00_00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT0, B2B</span>
+            <span class="mi">0b00_00_00_00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT1, B2W</span>
+            <span class="mi">0b01_00_00_00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT2, W2B</span>
+            <span class="mi">0b00_00_00_00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//LUT3, W2W</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//5</span>
+            <span class="c1">// TP[xA, xB, xC, xD], RP</span>
+            <span class="n">level</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//7</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="c1">//9</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span><span class="mi">0x00</span><span class="p">,</span>
+            <span class="c1">// FR</span>
+            <span class="mi">0x22</span><span class="p">,</span><span class="mi">0x22</span><span class="p">,</span><span class="mi">0x22</span><span class="p">,</span><span class="mi">0x22</span><span class="p">,</span><span class="mi">0x22</span>
+        <span class="p">];</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x32</span><span class="p">,</span> <span class="n">lut</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">refresh_gray4_image</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="k">in</span> <span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="mi">4</span><span class="p">)</span><span class="nf">.rev</span><span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// level: (8, 4, 2, 1)</span>
+            <span class="k">self</span><span class="nf">.configure_gray_update_level</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">level</span><span class="p">);</span>
+            <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x24</span><span class="p">);</span>
+
+            <span class="k">for</span> <span class="n">chunk</span> <span class="k">in</span> <span class="n">buf</span><span class="nf">.chunks</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">let</span> <span class="k">mut</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">for</span> <span class="n">b</span> <span class="k">in</span> <span class="n">chunk</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="n">b</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0x10</span> <span class="o">&lt;&lt;</span> <span class="n">level</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">|</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">b</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">level</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">|</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="c1">// 0xFF is white, 0x00 is black</span>
+                <span class="k">self</span><span class="nf">.send_data</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="n">n</span><span class="p">]);</span>
+            <span class="p">}</span>
+
+            <span class="k">self</span><span class="nf">.refresh</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">refresh_gray2_image</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="nb">u8</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="k">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+            <span class="c1">// level: 9, 5</span>
+            <span class="k">self</span><span class="nf">.configure_gray_update_level</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">level</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x24</span><span class="p">);</span>
+
+            <span class="k">for</span> <span class="n">chunk</span> <span class="k">in</span> <span class="n">buf</span><span class="nf">.chunks</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">let</span> <span class="k">mut</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">for</span> <span class="n">b</span> <span class="k">in</span> <span class="n">chunk</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="n">b</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0b01_00_00_00</span> <span class="o">&lt;&lt;</span> <span class="n">level</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">|</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">b</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0b00_01_00_00</span> <span class="o">&lt;&lt;</span> <span class="n">level</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">|</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">b</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0b00_00_01_00</span> <span class="o">&lt;&lt;</span> <span class="n">level</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">|</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">b</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">0b00_00_00_01</span> <span class="o">&lt;&lt;</span> <span class="n">level</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">|</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="c1">// 0xFF is white, 0x00 is black</span>
+                <span class="k">self</span><span class="nf">.send_data</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="n">n</span><span class="p">]);</span>
+            <span class="p">}</span>
+
+            <span class="k">self</span><span class="nf">.refresh</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>以上代码中, <code class="language-plaintext highlighter-rouge">refresh_gray4_image</code> 和 <code class="language-plaintext highlighter-rouge">refresh_gray2_image</code> 分别是 4 级和 2 级灰度的刷新函数.
+这里对灰度的每一位的权重映射做了微调.
+格式兼容 embedded-graphics 中的 Framebuffer 和 Image 类型, 可以直接使用.
+其中的 bit 操作, 其实基本上是 Github Copilot 写的, 我只是稍微修改了下边界情况和编译错误,
+实现不是最优, 但好理解.</p>
+
+<p>显示效果, 这里以互联网 UGC 时代的化石, 徐静蕾手写体为例:</p>
+
+<p><img src="/assets/esl-10in2-grayscale.jpeg" alt="Gray4 for Font Renderring" /></p>
+
+<p>你猜我抗锯齿字体怎么渲染的? 没错, 还是 <a href="https://github.com/andelf/text-image">text-image</a> 过程宏, 使用方法:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span> <span class="o">=</span> <span class="nn">text_image</span><span class="p">::</span><span class="nd">text_image!</span><span class="p">(</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s">"北京市发布持续低温黄色预警</span><span class="se">\n</span><span class="s">北京市发布道路结冰橙色预警</span><span class="se">\n\n</span><span class="s">-12.5℃ </span><span class="se">\n</span><span class="s">-16℃ -- -7℃</span><span class="se">\n</span><span class="s">相对湿度 36%</span><span class="se">\n</span><span class="s">东北风 1级"</span><span class="p">,</span>
+    <span class="n">font</span> <span class="o">=</span> <span class="s">"./徐静蕾手写体.ttf"</span><span class="p">,</span>
+    <span class="n">font_size</span> <span class="o">=</span> <span class="mf">48.0</span><span class="p">,</span>
+    <span class="n">line_spacing</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">inverse</span><span class="p">,</span>
+    <span class="n">Gray4</span><span class="p">,</span>
+<span class="p">);</span>
+
+<span class="nd">info!</span><span class="p">(</span><span class="s">"w: {}, h: {}"</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">);</span>
+
+<span class="n">epd</span><span class="nf">.set_partial_refresh</span><span class="p">(</span><span class="nn">Rectangle</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nn">Point</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">160</span><span class="p">),</span> <span class="nn">Size</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)));</span>
+<span class="n">epd</span><span class="nf">.refresh_gray4_image</span><span class="p">(</span><span class="n">raw</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>当然这里用到了 “局部刷新” 函数, 我们这就介绍.</p>
+
+<h3 id="局部刷新">局部刷新</h3>
+
+<p>局部刷新是指, 只刷新屏幕的一个矩形部分, 而不是整屏刷新. 这在阅读器类应用中, 是非常重要的功能.
+包括弹出式彩蛋, 局部 UI 元素等都可以用到.
+在日历天气中, 局部刷新可以只刷新时间或天气的一小部分, 而不是整屏刷新, 从而大大提升观感.</p>
+
+<p>实际上局部刷新只需要找驱动 IC 手册中的 RAM X/Y Start/End 关键词即可,
+UCxxxx 系列的驱动 IC, 也会直接提供 Partial Update 的相关命令.
+这里一笔带过直接上代码:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">fn</span> <span class="nf">clear_as_bw_mode</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// set X/Y ram counter</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x4E</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x4F</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">]);</span>
+
+        <span class="k">const</span> <span class="n">NBUF</span><span class="p">:</span> <span class="nb">usize</span> <span class="o">=</span> <span class="mi">960</span> <span class="o">*</span> <span class="mi">640</span> <span class="o">/</span> <span class="mi">8</span><span class="p">;</span>
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x24</span><span class="p">);</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="n">NBUF</span> <span class="p">{</span>
+            <span class="k">self</span><span class="nf">.send_data</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="mi">0xFF</span><span class="p">]);</span> <span class="c1">// W</span>
+        <span class="p">}</span>
+
+        <span class="c1">// reset X/Y ram counter</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x4E</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x4F</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">0x00</span><span class="p">,</span> <span class="mi">0x00</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command</span><span class="p">(</span><span class="mi">0x26</span><span class="p">);</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="n">NBUF</span> <span class="p">{</span>
+            <span class="k">self</span><span class="nf">.send_data</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="mi">0xFF</span><span class="p">]);</span> <span class="c1">// Red off</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">set_partial_refresh</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">rect</span><span class="p">:</span> <span class="n">Rectangle</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// clear old buf</span>
+        <span class="k">self</span><span class="nf">.clear_as_bw_mode</span><span class="p">();</span>
+        <span class="k">let</span> <span class="n">x0</span> <span class="o">=</span> <span class="p">(</span><span class="n">rect</span><span class="py">.top_left.x</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">);</span>
+        <span class="k">let</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">rect</span><span class="nf">.bottom_right</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span><span class="py">.x</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">;</span>
+        <span class="k">let</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">rect</span><span class="py">.top_left.y</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">;</span>
+        <span class="k">let</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">rect</span><span class="nf">.bottom_right</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span><span class="py">.y</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">;</span>
+
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x44</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[(</span><span class="n">x0</span> <span class="o">&amp;</span> <span class="mi">0xff</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">,</span> <span class="p">(</span><span class="n">x0</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">,</span> <span class="p">(</span><span class="n">x1</span> <span class="o">&amp;</span> <span class="mi">0xff</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">,</span> <span class="p">(</span><span class="n">x1</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x45</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[(</span><span class="n">y0</span> <span class="o">&amp;</span> <span class="mi">0xff</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">,</span> <span class="p">(</span><span class="n">y0</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">,</span> <span class="p">(</span><span class="n">y1</span> <span class="o">&amp;</span> <span class="mi">0xff</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">,</span> <span class="p">(</span><span class="n">y1</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">]);</span>
+        <span class="c1">// set X/Y ram counter</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x4E</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[(</span><span class="n">x0</span> <span class="o">&amp;</span> <span class="mi">0xff</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">,</span> <span class="p">(</span><span class="n">x0</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">]);</span>
+        <span class="k">self</span><span class="nf">.send_command_data</span><span class="p">(</span><span class="mi">0x4F</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[(</span><span class="n">y0</span> <span class="o">&amp;</span> <span class="mi">0xff</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">,</span> <span class="p">(</span><span class="n">y0</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">]);</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>需要注意的是:</p>
+
+<ul>
+  <li>在开启局部刷新前需要处理好 OLD/NEW RAM 的状态, 这里选择直接清空</li>
+  <li>X/Y RAM counter 需要设置正确</li>
+  <li>部分驱动 IC 要求 gate 或 source 边界以 8 对齐, 需要参考手册, 并提前对图片进行裁剪补齐</li>
+</ul>
+
+<h2 id="结语">结语</h2>
+
+<p>这里只是简单介绍了如何驱动这块价签, 以及如何实现局部刷新和灰度显示.
+其中若干技术可以混用, 例如局部刷新 + 灰度显示, 局部刷新 + 三色显示等等.
+屏幕也可以在不同状态下重新初始化, 最终实现的效果, 取决于你的想象力.</p>
+
+<p>原理有了, 剩下的就是点子了. 之前做了一个 <a href="https://www.bing.com/images/create">Bing Image Crator</a>
+加随机每日诗词的小工具. 效果还不错, 但一堆粗糙脚本未整理.</p>
+
+<p>一些可能用到的技术再提一遍:</p>
+
+<ul>
+  <li>Context Aware Image Resizing(CAIR) - PhotoShop 或一些图形学算法库</li>
+  <li>Diffusion Dithering - ImageMagick / PhotoShop</li>
+  <li>各种 Text to Image 模型</li>
+  <li>我的 <a href="https://github.com/andelf/text-image">text-image</a> 过程宏, 粗糙, 但支持各种图片加载, 字体抗锯齿渲染</li>
+  <li>Rust Embedded 我推荐 embassy 框架, 至少它够统一, 而且是 async-first 的
+    <ul>
+      <li>Rust embedded-graphics 提供了 Framebuffer API, 以及各种图形绘制 API</li>
+    </ul>
+  </li>
+  <li>本项目粗糙代码, 未整理 <a href="https://github.com/andelf/rp-embassy-playground/commit/568eac55c42b9c5682b4c92177090a1fa63842f0">commit</a></li>
+</ul>
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>https://blog.csdn.net/qq_41893274/article/details/108649622 <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>]]></content><author><name>andelf</name></author><category term="blog" /><category term="embedded" /><category term="epd" /><summary type="html"><![CDATA[书接很久以前的 这里. 最近机缘巧合又收了一个 10.2 寸的黑白红墨水屏价签. 很新, 屏幕保护膜都没撕, 又可见倒闭的公司库存.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://andelf.github.io/assets/esl-10in2-bwr.jpeg" /><media:content medium="image" url="https://andelf.github.io/assets/esl-10in2-bwr.jpeg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输</title><link href="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" rel="alternate" type="text/html" title="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" /><published>2023-01-23T04:00:00+00:00</published><updated>2023-01-23T04:00:00+00:00</updated><id>https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy</id><content type="html" xml:base="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"><![CDATA[<p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 <a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>, 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.</p>
 
 <p>本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输. 过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.</p>
 
@@ -4739,238 +5318,4 @@ swiftFoundation
   <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a>。</li>
   <li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop 简析Swift和C的交互 第一部分</a></li>
   <li><a href="http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a></li>
-</ul>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina . weibo]]></summary></entry><entry><title type="html">NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)</title><link href="https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/" rel="alternate" type="text/html" title="NSObject Pattern Match in Swift (简析 Swift 中的 Pattern Match)" /><published>2014-06-17T01:29:48+00:00</published><updated>2014-06-17T01:29:48+00:00</updated><id>https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/17/nsobject-pattern-match-in-swift/"><![CDATA[<p>本文正式标题是：简析 Swift 中的 Pattern Match</p>
-
-<p>副标题是：妈蛋 Swift 你又用黑属性坑大家了: 为什么 switch case 可以用数字匹配字符</p>
-
-<p>声明： 原创发现，原创内容。转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
-
-<h2 id="问题的提出">问题的提出</h2>
-
-<p>故事是这样的，昨天有人在论坛上发了个帖子，虽然不太规范而且含糊，不过还是能看出来他在问什么。<a href="http://swift.sh/topic/151/switch-case10/">传送门</a></p>
-
-<p>重新把问题简化搬运过来。</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">let</span> <span class="n">count</span> <span class="k">=</span> <span class="s">"0"</span>
-<span class="n">switch</span> <span class="n">count</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="mi">1</span><span class="k">:</span>
-    <span class="kt">println</span><span class="o">(</span><span class="err">"</span><span class="kt">location</span> <span class="err">1"</span><span class="o">)</span>
-    <span class="kt">case</span> <span class="err">0</span><span class="kt">:</span>
-    <span class="kt">println</span><span class="o">(</span><span class="err">"</span><span class="kt">location</span> <span class="err">2"</span><span class="o">)</span>
-    <span class="kt">case</span> <span class="err">"1"</span><span class="kt">:</span>
-    <span class="kt">println</span><span class="o">(</span><span class="err">"</span><span class="kt">location</span> <span class="err">3"</span><span class="o">)</span>
-    <span class="kt">default:</span>
-    <span class="kt">println</span><span class="o">(</span><span class="err">"</span><span class="kt">location</span> <span class="err">4"</span><span class="o">)</span>
-<span class="o">}</span>
-</code></pre></div></div>
-
-<p>为什么上面的代码可以通过编译？</p>
-
-<h2 id="问题验证">问题验证</h2>
-
-<p>这几天说了很多了， Swift 是强类型语言，所以类型不同肯定不能在一起。直觉上，这段代码肯定不可能编译通过，错误一定是类型错误。</p>
-
-<p>果断扔代码到文件，然后编译（我个人习惯用命令行直接编译）:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 填入 test.swift
-xcrun swift -g test.swift
-</code></pre></div></div>
-
-<p>果然出错，不过出错信息略诡异：</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>test.swift:4:6: error: could not find an overload for '~=' that accepts the supplied arguments
-case 1:
-     ^
-</code></pre></div></div>
-
-<p>故事到这里也许完事了。嗯，不可以编译，问题也许是 Xcode 6 beta 版的 BUG 什么的。微博上的 <a href="http://weibo.com/owenzx">@肇鑫</a> 也提到， 用 Playground 编译也是出错，出错信息同上。</p>
-
-<p>看起来暂时是无法重现问题。</p>
-
-<h3 id="出错信息">出错信息</h3>
-
-<p>先解释下这个出错信息，熟读那本 ibook 的同学，可能会记得，在 swift case 那节是有讲到 <code class="language-plaintext highlighter-rouge">~=</code> 这个运算符的，也讲到了如何自定义它。</p>
-
-<blockquote>
-  <p>Expression Pattern</p>
-</blockquote>
-
-<blockquote>
-  <p>An expression pattern represents the value of an expression. Expression patterns appear only in switch statement case labels.</p>
-</blockquote>
-
-<blockquote>
-  <p>The expression represented by the expression pattern is compared with the value of an input expression using the Swift standard library ~= operator. The matches succeeds if the ~= operator returns true. By default, the ~= operator compares two values of the same type using the == operator. It can also match an integer value with a range of integers in an Range object.</p>
-</blockquote>
-
-<p>所以其实 <code class="language-plaintext highlighter-rouge">~=</code> 是一个匹配运算符(Pattern Match Operator)，专门用在 Pattern Match 的地方，比如 switch 的 case 。一般情况下它直接调用 <code class="language-plaintext highlighter-rouge">==</code> 运算符。</p>
-
-<p>原书还写道：</p>
-
-<blockquote>
-  <p>You can overload the ~= operator to provide custom expression matching behavior. For example, you can rewrite the above example to compare the point expression with a string representations of points.</p>
-</blockquote>
-
-<p>说明 Pattern Match 的行为是可以通过重载 <code class="language-plaintext highlighter-rouge">~=</code> 控制的。书中有重载的例子，小伙伴们可以看看。</p>
-
-<p>深入下，来看看 <code class="language-plaintext highlighter-rouge">~=</code> 到底是什么东西：</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@transparent func ~=&lt;T : Equatable&gt;(a: T, b: T) -&gt; Bool
-func ~=&lt;T : RandomAccessIndex where T.DistanceType : SignedInteger&gt;(x: Range&lt;T&gt;, y: T) -&gt; Bool
-</code></pre></div></div>
-
-<p>可以看到，首先它可以匹配两个相同类型的 Equatable，而且是 <code class="language-plaintext highlighter-rouge">@transparent</code>，说明没有额外开销， inline 函数，从书中看，完全等价于调用 <code class="language-plaintext highlighter-rouge">==</code>，不深究了。</p>
-
-<p>然后，它可以匹配一个 <code class="language-plaintext highlighter-rouge">Rnage&lt;T&gt;</code> 和 <code class="language-plaintext highlighter-rouge">T</code>，这也就是我们在 switch case 里写的 <code class="language-plaintext highlighter-rouge">case 1..18: println("未成年")</code> 背后的奥秘，略有开销。</p>
-
-<p>以上说明了为什么出错信息提示为什么是 <code class="language-plaintext highlighter-rouge">~=</code> 运算符重载失败，而不是类型错误（其实也算是一种类型错误，没有找到适合运算符的类型）。</p>
-
-<h3 id="再次尝试重现">再次尝试重现</h3>
-
-<p>有了上面的线索，是不是怀疑我们遗漏了什么？回到原问题提出的地方：</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">override</span> <span class="n">func</span> <span class="nf">viewDidLoad</span><span class="o">()</span> <span class="o">{</span>
-<span class="nv">super</span><span class="o">.</span><span class="py">viewDidLoad</span><span class="o">()</span>
-<span class="n">let</span> <span class="n">count</span> <span class="k">=</span> <span class="s">"0"</span>
-<span class="o">....</span>
-</code></pre></div></div>
-
-<p>看起来，他是在 App 环境下调用的，这也许就是问题的根源。之前有介绍过， Cocoa 框架给 Swift 语言添加了很多东西，包括一大批的 <code class="language-plaintext highlighter-rouge">extension</code>，还有一堆隐式类型转换。</p>
-
-<p>我们在 <code class="language-plaintext highlighter-rouge">test.swift</code> 第一行加入 <code class="language-plaintext highlighter-rouge">import Cocoa</code>，重新编译。结果正常通过编译。代码执行结果符合预期，走 default 分支。</p>
-
-<h3 id="这也不科学">这也不科学!</h3>
-
-<p>小伙伴们惊呆了，看起来 <code class="language-plaintext highlighter-rouge">count</code> 变量明明是一个 <code class="language-plaintext highlighter-rouge">Character</code>，结果竟然能匹配 <code class="language-plaintext highlighter-rouge">Character</code> 和 <code class="language-plaintext highlighter-rouge">Int</code>。</p>
-
-<h2 id="祭出-lldb">祭出 lldb</h2>
-
-<p>lldb 挂上 exe ，看看汇编代码是怎么样的。带上注释。我摘录最能说明问题的一段。</p>
-
-<pre><code class="language-gas">   ; 这里是 case 1
-   0x100001d1a:  movabsq $0x01, %rdi
-   0x100001d24:  movq   %rax, -0x148(%rbp)
-
-   ; 将 1 转换为 NSNumber
-   0x100001d2b:  callq  0x100003f32               ; symbol stub for: Swift.Int.__conversion (Swift.Int)() -&gt; ObjectiveC.NSNumber
-
-   ; 此处省略调用 ARC 代码若干
-   ....
-
-   ; 这里其实是 count: String , 三个寄存器表示
-   ; 检查 String 大小你会发现 sizeof(String) 是 24，三个 64bit
-   ; 熟悉 Rust 的同学知道，字符串实现，无非三个 field ： size 、 capacity 、pointer
-   ; 猜测 Swift 完全相同因为它大量借鉴了 Rust （不服来喷）
-   0x100001d43:  movq   -0x128(%rbp), %rdi
-   0x100001d4a:  movq   -0x130(%rbp), %rsi
-   0x100001d51:  movq   -0x138(%rbp), %rdx
-
-   0x100001d58:  movq   %rax, -0x158(%rbp)
-   ; 这里将 count: String 转换为 NSString
-   0x100001d5f:  callq  0x100003f26               ; symbol stub for: Swift.String.__conversion (Swift.String)() -&gt; ObjectiveC.NSString
-   0x100001d64:  movq   -0x150(%rbp), %rdi
-   0x100001d6b:  movq   %rax, %rsi
-   ; **最最神奇的地方来了，这里调用了 ~= ObjectiveC 版，比较两个 NSObject 的版本。
-   0x100001d6e:  callq  0x100003f20               ; symbol stub for: ObjectiveC.~= @infix (ObjectiveC.NSObject, ObjectiveC.NSObject) -&gt; Swift.Bool
-</code></pre>
-
-<h2 id="分析">分析</h2>
-
-<p>上面一堆看不懂没关系，这里再复述下在 Cocoa 环境（或者说 Foundation 环境下）第一条 <code class="language-plaintext highlighter-rouge">case 1:</code> 的流程:</p>
-
-<ul>
-  <li>将 1 转换为 <code class="language-plaintext highlighter-rouge">NSNumber</code>，通过隐式类型转换实现</li>
-  <li>将 <code class="language-plaintext highlighter-rouge">count</code> 转换为 <code class="language-plaintext highlighter-rouge">NSString</code>，通过隐式类型转换实现</li>
-  <li>调用 <code class="language-plaintext highlighter-rouge">NSObject</code> 重载版的 <code class="language-plaintext highlighter-rouge">~=</code> 运算符进行比较</li>
-</ul>
-
-<p>这么看起来明了多了。但是，我们的 <code class="language-plaintext highlighter-rouge">Character</code> 哪里去了？为什么 count 的类型变了？</p>
-
-<p>直接下断点然后 repl 命令检查，果然，我们没有指定类型的 <code class="language-plaintext highlighter-rouge">count</code> 在这个版本中变成了一个 <code class="language-plaintext highlighter-rouge">String</code>。</p>
-
-<p>从标准库定义看， <code class="language-plaintext highlighter-rouge">Character</code> 和 <code class="language-plaintext highlighter-rouge">String</code> 都实现了 <code class="language-plaintext highlighter-rouge">ExtendedGraphemeClusterLiteralConvertible</code> 协议，保证他们能从字符字面常量获得。所以实际上每当我们写 <code class="language-plaintext highlighter-rouge">let foo = "a"</code> 其实是完全依赖编译器的类型推导，选择到底是 <code class="language-plaintext highlighter-rouge">Character</code> 还是 <code class="language-plaintext highlighter-rouge">String</code>。</p>
-
-<p>说明 Swift 编译器高大上，可以从当前加载的所有类型中推导出合法合理能编译的类型组合。来自 Haskell 背景的同学一定笑而不语，当然那种怎么改都凑不对类型的痛苦也是其他同学无法理解和感同身受的。</p>
-
-<p>回头再看看 <code class="language-plaintext highlighter-rouge">ObjectiveC.~=</code> 这个运算符重载：</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">func</span> <span class="o">~=(</span><span class="n">x</span><span class="k">:</span> <span class="kt">NSObject</span><span class="o">,</span> <span class="n">y</span><span class="k">:</span> <span class="kt">NSObject</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Bool</span>
-</code></pre></div></div>
-
-<p>定义在 ObjectiveC 模块里，使用 <code class="language-plaintext highlighter-rouge">import ObjectiveC</code> 可以加载。这个模块是 Swift 到 Objective-C 的一些映射模块，基础的 <code class="language-plaintext highlighter-rouge">NSObject</code> 方法还有一些运行时控制函数。</p>
-
-<p>当然 <code class="language-plaintext highlighter-rouge">Foundation</code>, <code class="language-plaintext highlighter-rouge">Cocoa</code> 这些都会加载它，所以理论上写应用的时候不需要指定，只要你用到了 <code class="language-plaintext highlighter-rouge">NSObject</code> 就一定有它。</p>
-
-<p>实际上 WWDC 某一集里讲到（忘记了，等我再找到会补上），对比 <code class="language-plaintext highlighter-rouge">NSObject</code> 的时候，Swift 会选择调用 <code class="language-plaintext highlighter-rouge">isEqual</code> 方法。我们反汇编验证下。简单加点注释。</p>
-
-<pre><code class="language-gas">(lldb) dis -a 0x100003f20
-asmtest`symbol stub for: ObjectiveC.~= @infix (ObjectiveC.NSObject, ObjectiveC.NSObject) -&gt; Swift.Bool:
-   0x100003f20:  jmpq   *0x1252(%rip)             ; (void *)0x00000001000e88d0: ObjectiveC.~= @infix (ObjectiveC.NSObject, ObjectiveC.NSObject) -&gt; Swift.Bool
-(lldb) dis -a 0x00000001000e88d0
-libswiftObjectiveC.dylib`ObjectiveC.~= @infix (ObjectiveC.NSObject, ObjectiveC.NSObject) -&gt; Swift.Bool:
-   0x1000e88d0:  pushq  %rbp
-   0x1000e88d1:  movq   %rsp, %rbp
-   0x1000e88d4:  pushq  %r15
-   0x1000e88d6:  pushq  %r14
-   0x1000e88d8:  pushq  %rbx
-   0x1000e88d9:  pushq  %rax
-   ; 64位 寄存器传参
-   0x1000e88da:  movq   %rsi, %rbx
-   0x1000e88dd:  movq   %rdi, %r14
-   0x1000e88e0:  movq   0x3da1(%rip), %rsi        ; "isEqual:"
-   0x1000e88e7:  movq   %rbx, %rdx
-   0x1000e88ea:  callq  0x1000eb670               ; symbol stub for: objc_msgSend
-   ; 测试 isEqual: 调用的返回值，存到 %r16b
-   0x1000e88ef:  testb  %al, %al
-   0x1000e88f1:  setne  %r15b
-   0x1000e88f5:  movq   %rbx, %rdi
-   0x1000e88f8:  callq  0x1000eb676               ; symbol stub for: objc_release
-   0x1000e88fd:  movq   %r14, %rdi
-   0x1000e8900:  callq  0x1000eb676               ; symbol stub for: objc_release
-   ; 本运算符函数返回值
-   0x1000e8905:  movb   %r15b, %al
-   0x1000e8908:  addq   $0x8, %rsp
-   0x1000e890c:  popq   %rbx
-   0x1000e890d:  popq   %r14
-   0x1000e890f:  popq   %r15
-   0x1000e8911:  popq   %rbp
-   0x1000e8912:  retq
-</code></pre>
-
-<p>啧啧， Instruction Pointer Relative Addressing 用的飞起。 64 位名字也特好听。 RIP 。 对了， MacOSX 下都是 PIC 位置无关代码。</p>
-
-<p>从上面看，果然是调用了 Objective-C 的 <code class="language-plaintext highlighter-rouge">isEqual:</code>。</p>
-
-<h2 id="总结">总结</h2>
-
-<ul>
-  <li>Swift 的编译器会根据大范围的代码推导类型，遍历 AST 然后用树或者图算法填充未指定的类型
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">"c"</code> 可以是任意 <code class="language-plaintext highlighter-rouge">ExtendedGraphemeClusterLiteralConvertible</code> 类型，包括 <code class="language-plaintext highlighter-rouge">Character</code>、<code class="language-plaintext highlighter-rouge">String</code>、<code class="language-plaintext highlighter-rouge">CString</code>、<code class="language-plaintext highlighter-rouge">UnicodeScalar</code>、<code class="language-plaintext highlighter-rouge">StaticString</code> 等</li>
-    </ul>
-  </li>
-  <li>swith case 语句使用 <code class="language-plaintext highlighter-rouge">~=</code> 运算符执行匹配操作
-    <ul>
-      <li>非 Foundation 环境下，相当于 <code class="language-plaintext highlighter-rouge">==</code> 运算符</li>
-      <li>在 Foundation 环境下，如果是 <code class="language-plaintext highlighter-rouge">NSObject</code> 及其子类，相当于 <code class="language-plaintext highlighter-rouge">isEqual:</code> 方法</li>
-      <li><code class="language-plaintext highlighter-rouge">a..b</code> 这样的匹配也是通过 <code class="language-plaintext highlighter-rouge">~=</code> 运算符实现，也可以重载后自定义</li>
-    </ul>
-  </li>
-  <li>在 Foundation 环境下，隐式类型转换遍地都是</li>
-</ul>
-
-<h2 id="教训">教训</h2>
-
-<ul>
-  <li>真用到字符类型 <code class="language-plaintext highlighter-rouge">Character</code> 的时候，还是显式指定吧</li>
-  <li>需要额外注意能隐式类型转换到 <code class="language-plaintext highlighter-rouge">NSObject</code> 的几个类型，避免非预期行为</li>
-</ul>
-
-<h2 id="参考文献">参考文献</h2>
-
-<ul>
-  <li>Apple Inc. “The Swift Programming Language”。 iBooks. https://itun.es/cn/jEUH0.l</li>
-  <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
-  <li><a href="http://andelf.github.io/blog/2014/06/08/swift-implicit-type-cast/">隐式类型转换</a></li>
-  <li>WWDC 某集讲到的 <code class="language-plaintext highlighter-rouge">isEqual:</code></li>
-</ul>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[本文正式标题是：简析 Swift 中的 Pattern Match]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina . weibo]]></summary></entry></feed>
