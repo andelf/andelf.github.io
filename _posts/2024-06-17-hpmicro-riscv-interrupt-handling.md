@@ -14,21 +14,21 @@ published: true
 
 Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode.
 
-最近在折腾 HPMicro 的 RISC-V 系列 MCU 的 Rust 支持 [hpm-hal], 由于需要处理中断, 所以对其中断控制器有了一些了解.
-虽然 HPMicro 的文档已经是国内厂商的天花板了, 但对于一些细节还是有些模糊, 比如中断的向量模式和具体中断软件处理步骤.
+最近在折腾 HPMicro 的 RISC-V 系列 MCU 的 Rust 支持 [hpm-hal], 由于需要处理中断, 所以对其中断控制器的工作原理有了一些了解.
+虽然 HPMicro 的文档相对于国内其他厂商已经很出色了, 但对于一些细节还是有些模糊, 比如中断的向量模式和具体中断软件处理步骤.
 虽然阅读 [hpm_sdk] 代码可以了解到一些细节, 但很容易迷失在条件编译的海洋中.
 
 这里以 HPM5300EVK 为例, MCU 为 HPM5361, IP Core 为 Andes D25(F). HPM6xxx 系列的 IP Core 为 Andes D45, 但是中断控制器的实现是一样的.
 
-- 本文不涉及多核. 每个核心各有一个 PLIC, 无具体区别.
+- 本文不涉及多核情况. 每个核心各自有一个 PLIC,其工作机制无本质区别.
 - 本文不涉及 Supervisor / User 模式, 仅讨论 Machine 模式下的中断处理.
 - 本文混合使用 HPM RISC-V MCU 和 Andes IP Core 两个名词, 对于中断处理来说, 他们是通用的.
 - 本文使用 [hpm-metapac] 和 [hpm-hal] 作为代码示例.
 
 ## 基础介绍
 
-我们都知道 RISC-V 的中断分为核心本地(Core Local, 即各种缩写中 "CLxxx" 的由来)中断和外部中断(External Interrupt).
-异常也是一种中断, 但是异常是由指令执行引起的. 异常和中断通过 `mcause` 寄存器的最高位区分. 通过 `mstatus` 和 `mie` 寄存器开启和关闭中断.
+RISC-V 的中断分为核心本地中断(Core Local Interrupts, 即各种缩写中 "CLxxx" 的由来)和外部中断(External Interrupts).
+异常也是一种中断, 但是异常是由指令执行引起的. 异常和中断通过 `mcause` 寄存器的最高位来区分. 通过 `mstatus` 和 `mie` 寄存器开启和关闭中断.
 
 ### 异常
 
@@ -111,13 +111,11 @@ pub static __INTERRUPTS: [Option<unsafe extern "C" fn()>; 12] = [
 如上代码是中断处理函数的定义, 处理方式一致, 也是通过静态数组 `__INTERRUPTS` 索引. 但是中断处理函数不需要传递 `TrapFrame`, 因为中断发生时,
 由中断处理函数来保存寄存器和恢复状态.
 
-其中我们需要关注的是 `MachineExternal`, 这个函数是处理外部中断的. 当发生外部中断时, 我们可以在 `MachineExternal` 中读取 `PLIC` 状态, 然后处理具体的中断.
+其中我们需要关注的是 `MachineExternal` 函数,它负责处理外部中断. 当发生外部中断时, 在 `MachineExternal` 函数中,需要先读取 `PLIC` 的中断挂起状态, 确定具体的中断源, 然后调用相应的中断处理函数进行处理.
 
 ### 中断入口
 
-[riscv-rt] 默认使用直接地址模式处理中断, 即 `mtvec` 寄存器的值为中断处理函数的地址. 这种模式下, 中断处理函数会直接跳转到中断处理函数.
-由函数来读取 `mcause` 寄存器的值, 然后调用对应的异常或中断处理函数. 具体在代码中实现有部分, 汇编代码部分负责包装 Rust
-逻辑, 加入 `mret` 指令返回.
+[riscv-rt] 默认使用直接模式(Direct Mode)处理中断, 即将 `mtvec` 寄存器设置为中断入口函数的地址。在这种模式下, 发生中断时会直接跳转到中断入口函数执行. 中断入口函数需要读取 `mcause` 寄存器的值, 判断是异常还是中断, 然后调用相应的异常或中断处理函数. 具体实现中, 有一部分是汇编代码负责调用 Rust 函数, 最后执行 mret 指令返回.
 
 (这部分实现 [riscv-rt] 经常修改, 今天汇编改 Rust, 明天 Rust 改宏, 大后天可能又换个位置..., 实际上区别不大, 依然很难用)
 
@@ -400,13 +398,13 @@ fn DefaultHandler() {
 ```
 
 由于没有了 [riscv-rt] 的中断入口函数, 我们需要自己处理寄存器压栈和恢复, 以及中断结束的 `mret` 指令.
-`extern "riscv-interrupt-m" fn` 是一个特殊的 ABI, 会自动处理所有寄存器的压栈和恢复, 最后通过 `mret` 返回.
+`extern "riscv-interrupt-m" fn` 是一个特殊的 ABI, 它会自动处理所有寄存器的保存和恢复,并在中断处理函数返回时执行 `mret` 指令.
 需要 Nightly Rust 和 `#![feature(abi_riscv_interrupt)]` feature 启用.
 
-这样打了补丁后几乎可以完全兼容上一节传统中断处理方式.
+使用这种方式, 可以在不 fork [riscv-rt] 的情况下, 实现与上一节中断处理方式类似的功能.
 
-这里我踩了一个不小的坑, 当开启向量模式后, `PLIC.CLAIM` 不再提供中断号, 但中断处理函数依然需要写入它来通知 PLIC 处理完毕.
-这里需要通过 `mcause` 寄存器读取中断号, 然后写入 `PLIC.CLAIM` 来通知 PLIC.
+这里我踩了一个不小的坑, 当开启向量模式后, `PLIC.CLAIM` 不再提供中断号, 但中断处理函数依然需要写入它来通知 `PLIC` 处理完毕.
+因此, 需要通过读取 `mcause` 寄存器获取中断号, 然后写入 `PLIC.CLAIM` 寄存器来通知 `PLIC` 中断已经处理完毕.
 
 ### 中断处理函数 - 外部中断
 
