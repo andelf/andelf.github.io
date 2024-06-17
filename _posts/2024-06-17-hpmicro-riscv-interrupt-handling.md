@@ -1,6 +1,6 @@
 ---
 layout: post
-title: HPMicro RISC-V (Andes IP Core) Interrupt Handling - Direct Address Mode and Vector Mode
+title: HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式(Interrupt Handling for HPMicro RISC-V MCU)
 date: 2024-05-05 11:06 +0800
 author: andelf
 tags:
@@ -12,7 +12,7 @@ toc: true
 published: true
 ---
 
-HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式
+Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode.
 
 最近在折腾 HPMicro 的 RISC-V 系列 MCU 的 Rust 支持 [hpm-hal], 由于需要处理中断, 所以对其中断控制器有了一些了解.
 虽然 HPMicro 的文档已经是国内厂商的天花板了, 但对于一些细节还是有些模糊, 比如中断的向量模式和具体中断软件处理步骤.
