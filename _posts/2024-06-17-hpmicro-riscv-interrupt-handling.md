@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU / Andes RISC-V"
-date: 2024-05-05 11:06 +0800
+date: 2024-06-17 11:06 +0800
 author: andelf
 tags:
   - embedded
