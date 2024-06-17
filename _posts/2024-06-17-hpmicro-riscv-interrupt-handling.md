@@ -325,7 +325,6 @@ extern "C" fn MachineTimer() {
 #[no_mangle]
 pub unsafe extern "Rust" fn _setup_interrupts() {
     extern "C" {
-
         static __VECTORED_INTERRUPTS: [u32; 1];
     }
 
@@ -366,7 +365,7 @@ pub static __VECTORED_INTERRUPTS: [Vector; 73] = [
 }
 ```
 
-这样久可以可以通过链接符号直接覆盖:
+这样久可以通过链接符号直接覆盖:
 
 ```rust
 #[no_mangle]
