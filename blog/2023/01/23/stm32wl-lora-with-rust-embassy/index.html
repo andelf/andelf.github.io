@@ -4,7 +4,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输 | 猫·仁波切</title>
-<meta name="generator" content="Jekyll v4.3.2" />
+<meta name="generator" content="Jekyll v4.3.3" />
 <meta property="og:title" content="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" />
 <meta name="author" content="andelf" />
 <meta property="og:locale" content="en_US" />
@@ -245,7 +245,7 @@ target = "thumbv7em-none-eabi"
         <div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># part of Cargo.toml</span>
 <span class="nn">[dependencies]</span>
 <span class="c"># ...</span>
-<span class="nn">embassy-stm32</span> <span class="o">=</span> <span class="p">{</span> <span class="py">version</span> <span class="p">=</span> <span class="s">"0.1.0"</span><span class="p">,</span> <span class="py">path</span> <span class="p">=</span> <span class="s">"../embassy/embassy-stm32"</span><span class="p">,</span> <span class="py">features</span> <span class="p">=</span> <span class="p">[</span>
+<span class="py">embassy-stm32</span> <span class="o">=</span> <span class="p">{</span> <span class="py">version</span> <span class="p">=</span> <span class="s">"0.1.0"</span><span class="p">,</span> <span class="py">path</span> <span class="p">=</span> <span class="s">"../embassy/embassy-stm32"</span><span class="p">,</span> <span class="py">features</span> <span class="p">=</span> <span class="p">[</span>
     <span class="s">"nightly"</span><span class="p">,</span>
     <span class="s">"defmt"</span><span class="p">,</span>
     <span class="s">"stm32wle5cb"</span><span class="p">,</span>

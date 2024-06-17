@@ -1,4 +1,435 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2023-12-18T16:30:39+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL</title><link href="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/" rel="alternate" type="text/html" title="10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL" /><published>2023-12-17T11:54:00+00:00</published><updated>2023-12-17T11:54:00+00:00</updated><id>https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl</id><content type="html" xml:base="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/"><![CDATA[<p>书接很久以前的 <a href="/blog/2021/01/14/play-with-2-13-inch-e-ink-display/">这里</a>.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-06-17T07:26:26+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">HPMicro RISC-V (Andes IP Core) Interrupt Handling - Direct Address Mode and Vector Mode</title><link href="https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/" rel="alternate" type="text/html" title="HPMicro RISC-V (Andes IP Core) Interrupt Handling - Direct Address Mode and Vector Mode" /><published>2024-05-05T03:06:00+00:00</published><updated>2024-05-05T03:06:00+00:00</updated><id>https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling</id><content type="html" xml:base="https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/"><![CDATA[<p>HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式</p>
+
+<p>最近在折腾 HPMicro 的 RISC-V 系列 MCU 的 Rust 支持 <a href="https://github.com/hpmicro-rs/hpm-hal">hpm-hal</a>, 由于需要处理中断, 所以对其中断控制器有了一些了解.
+虽然 HPMicro 的文档已经是国内厂商的天花板了, 但对于一些细节还是有些模糊, 比如中断的向量模式和具体中断软件处理步骤.
+虽然阅读 <a href="https://github.com/hpmicro/hpm_sdk">hpm_sdk</a> 代码可以了解到一些细节, 但很容易迷失在条件编译的海洋中.</p>
+
+<p>这里以 HPM5300EVK 为例, MCU 为 HPM5361, IP Core 为 Andes D25(F). HPM6xxx 系列的 IP Core 为 Andes D45, 但是中断控制器的实现是一样的.</p>
+
+<p>本文不涉及多核. 每个核心各有一个 PLIC, 无具体区别.</p>
+
+<p>本文不涉及 Supervisor 模式, 仅讨论 Machine 模式下的中断处理.</p>
+
+<p>本文混合使用 HPM RISC-V MCU 和 Andes IP Core 两个名词, 对于中断处理来说, 他们是通用的.</p>
+
+<h2 id="基础介绍">基础介绍</h2>
+
+<p>我们都知道 RISC-V 的中断分为核心本地(Core Local, 即各种缩写中 “CLxxx” 的由来)中断和外部中断(External Interrupt).
+异常也是一种中断, 但是异常是由指令执行引起的. 异常和中断通过 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器的最高位区分. 通过 <code class="language-plaintext highlighter-rouge">mstatus</code> 和 <code class="language-plaintext highlighter-rouge">mie</code> 寄存器开启和关闭中断.</p>
+
+<h3 id="异常">异常</h3>
+
+<p>我们掏出 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 源码看看具体定义:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">InstructionMisaligned</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">InstructionFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">IllegalInstruction</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">Breakpoint</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">LoadMisaligned</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">LoadFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">StoreMisaligned</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">StoreFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">UserEnvCall</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">SupervisorEnvCall</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">MachineEnvCall</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">InstructionPageFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">LoadPageFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">StorePageFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nd">#[doc(hidden)]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">static</span> <span class="n">__EXCEPTIONS</span><span class="p">:</span> <span class="p">[</span><span class="nb">Option</span><span class="o">&lt;</span><span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span> <span class="mi">16</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">InstructionMisaligned</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">InstructionFault</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">IllegalInstruction</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">Breakpoint</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">LoadMisaligned</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">LoadFault</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">StoreMisaligned</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">StoreFault</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">UserEnvCall</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">SupervisorEnvCall</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">MachineEnvCall</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">InstructionPageFault</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">LoadPageFault</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">StorePageFault</span><span class="p">),</span>
+<span class="p">];</span>
+</code></pre></div></div>
+
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 通过静态数组 <code class="language-plaintext highlighter-rouge">__EXCEPTIONS</code> 定义了异常处理函数列表, 通过 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器的值来索引.
+<code class="language-plaintext highlighter-rouge">TrapFrame</code> 是一个结构体, 用于保存异常发生时的寄存器状态. 由汇编代码保存后压栈传递.
+所有函数实现由链接脚本定义, 提供了一个 <code class="language-plaintext highlighter-rouge">loop {}</code> 死循环的默认实现, 最终用户可以在代码中覆盖.</p>
+
+<h3 id="中断">中断</h3>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">SupervisorSoft</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">MachineSoft</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">SupervisorTimer</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">MachineTimer</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">SupervisorExternal</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">MachineExternal</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nd">#[doc(hidden)]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">static</span> <span class="n">__INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="nb">Option</span><span class="o">&lt;</span><span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span><span class="p">()</span><span class="o">&gt;</span><span class="p">;</span> <span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">SupervisorSoft</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">MachineSoft</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">SupervisorTimer</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">MachineTimer</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">SupervisorExternal</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">MachineExternal</span><span class="p">),</span>
+<span class="p">];</span>
+</code></pre></div></div>
+
+<p>如上代码是中断处理函数的定义, 处理方式一致, 也是通过静态数组 <code class="language-plaintext highlighter-rouge">__INTERRUPTS</code> 索引. 但是中断处理函数不需要传递 <code class="language-plaintext highlighter-rouge">TrapFrame</code>, 因为中断发生时,
+由中断处理函数来保存寄存器和恢复状态.</p>
+
+<p>其中我们需要关注的是 <code class="language-plaintext highlighter-rouge">MachineExternal</code>, 这个函数是处理外部中断的. 当发生外部中断时, 我们可以在 <code class="language-plaintext highlighter-rouge">MachineExternal</code> 中读取 <code class="language-plaintext highlighter-rouge">PLIC</code> 状态, 然后处理具体的中断.</p>
+
+<h3 id="中断入口">中断入口</h3>
+
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 默认使用直接地址模式处理中断, 即 <code class="language-plaintext highlighter-rouge">mtvec</code> 寄存器的值为中断处理函数的地址. 这种模式下, 中断处理函数会直接跳转到中断处理函数.
+由函数来读取 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器的值, 然后调用对应的异常或中断处理函数. 具体在代码中实现有部分, 汇编代码部分负责包装 Rust
+逻辑, 加入 <code class="language-plaintext highlighter-rouge">mret</code> 指令返回.</p>
+
+<p>(这部分实现 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 经常修改, 今天汇编改 Rust, 明天 Rust 改宏, 大后天可能又换个位置…, 实际上区别不大, 依然很难用)</p>
+
+<p>而 Rust 部分比较直观:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">start_trap_rust</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">TrapFrame</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+        <span class="k">fn</span> <span class="nf">ExceptionHandler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+        <span class="k">fn</span> <span class="nf">DefaultHandler</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">let</span> <span class="n">cause</span> <span class="o">=</span> <span class="nn">xcause</span><span class="p">::</span><span class="nf">read</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">code</span> <span class="o">=</span> <span class="n">cause</span><span class="nf">.code</span><span class="p">();</span>
+
+    <span class="k">if</span> <span class="n">cause</span><span class="nf">.is_exception</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">trap_frame</span> <span class="o">=</span> <span class="o">&amp;*</span><span class="n">trap_frame</span><span class="p">;</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">&lt;</span> <span class="n">__EXCEPTIONS</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="n">h</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">__EXCEPTIONS</span><span class="p">[</span><span class="n">code</span><span class="p">];</span>
+            <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span> <span class="p">{</span>
+                <span class="nf">handler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nf">ExceptionHandler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">ExceptionHandler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="nf">ExceptionHandler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="n">code</span> <span class="o">&lt;</span> <span class="n">__INTERRUPTS</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">h</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">__INTERRUPTS</span><span class="p">[</span><span class="n">code</span><span class="p">];</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span> <span class="p">{</span>
+            <span class="nf">handler</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">DefaultHandler</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nf">DefaultHandler</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样当我们需要处理外部中断时候, 只需要覆盖 <code class="language-plaintext highlighter-rouge">MachineExternal</code> 函数即可.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">MachineExternal</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">irq_no</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.claim</span><span class="p">();</span>
+
+    <span class="c1">// handle irq_no here!</span>
+
+    <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.complete</span><span class="p">(</span><span class="n">irq_no</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>一般情况下, <a href="https://github.com/rust-embedded/svd2rust">svd2rust</a> 生成的 pac crate 会自带一个 <code class="language-plaintext highlighter-rouge">__EXTERNAL_INTERRUPTS</code> 表, 我们在 <code class="language-plaintext highlighter-rouge">MachineExternal</code> 中读取当前外部中断号, 然后跳转处理即可.</p>
+
+<p>部分 RISC-V 核心实现可能会有一些特殊的处理, 以具体型号参考文档为准.</p>
+
+<h2 id="hpm-risc-v-mcu-中断处理---直接地址模式">HPM RISC-V MCU 中断处理 - 直接地址模式</h2>
+
+<p>这里分别 HPM RISC-V MCU 的中断处理, 包括传统的直接地址模式和 Andes IP Core 特有的向量模式.</p>
+
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 支持通过编译选项选择中断处理模式, 但向量模式实现极不通用, 直接地址模式是最常见的, 也是几乎被所有 RISC-V 实现支持的.</p>
+
+<p>大致流程如下:</p>
+
+<ul>
+  <li>中断模式启用:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">mstatus</code> 中 <code class="language-plaintext highlighter-rouge">MIE</code> 位用于开启全局中断</li>
+      <li><code class="language-plaintext highlighter-rouge">mie</code> 中 <code class="language-plaintext highlighter-rouge">MEXT</code> 位用于开启外部中断, <code class="language-plaintext highlighter-rouge">MTIMER</code> 位用于开启 MTIME 中断…</li>
+      <li><code class="language-plaintext highlighter-rouge">mtvec</code> 写入中断处理函数地址, 低位置 0(无影响)</li>
+    </ul>
+  </li>
+  <li>中断处理入口 - <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 提供
+    <ul>
+      <li>从 <code class="language-plaintext highlighter-rouge">mcuase</code> 可以获得当前是异常还是中断, 中断号等信息</li>
+      <li>从静态数组中读取对应的处理函数地址, 调用中断处理函数中处理具体的中断</li>
+      <li><code class="language-plaintext highlighter-rouge">mret</code> 返回</li>
+    </ul>
+  </li>
+  <li>外部中断处理函数 - 链接符号覆盖
+    <ul>
+      <li>读取 PLIC, 获取当前中断号</li>
+      <li>处理中断</li>
+      <li>完成中断, 通知 PLIC (PLIC.claim)</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="gpio-外设---外部中断">GPIO 外设 - 外部中断</h3>
+
+<p>HPM RISC-V MCU 的中断处理和上面的基础介绍类似, 但是有一些细节需要注意.</p>
+
+<p><code class="language-plaintext highlighter-rouge">mtvec</code> 的设置在 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 中完成, <code class="language-plaintext highlighter-rouge">xtvec::write(_start_trap as usize, xTrapMode::Direct);</code> 写入函数地址和中断模式即可.
+但 Andes RISC-V IP Core 的 mtvec 低位地址无效, 它使用额外的自定义 CSR 来选择中断模式. 这里的只用于写入函数地址.</p>
+
+<p>在 <code class="language-plaintext highlighter-rouge">mtvec</code> 设置后, 还需要额外设置 <code class="language-plaintext highlighter-rouge">mstatus</code>, <code class="language-plaintext highlighter-rouge">mie</code> 寄存器, 开启全局中断, 和外部中断.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">unsafe</span> <span class="p">{</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mstatus</span><span class="p">::</span><span class="nf">set_mie</span><span class="p">();</span> <span class="c1">// enable global interrupt</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mie</span><span class="p">::</span><span class="nf">set_mext</span><span class="p">();</span> <span class="c1">// enbale external interrupt</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里以 PA09 GPIO0 中断为例(开发板板载按钮), 设置外设中断:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 省略 GPIO 配置</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.pl</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.set</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_pol</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span> <span class="c1">// falling edge</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.tp</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.set</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_type</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span> <span class="c1">// edge trigger</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.ie</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.set</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_en</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span> <span class="c1">// enable interrupt</span>
+</code></pre></div></div>
+
+<p>然后针对具体的外设中断号通过 PLIC 启用中断:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">unsafe</span> <span class="p">{</span>
+    <span class="nn">hal</span><span class="p">::</span><span class="nn">interrupt</span><span class="p">::</span><span class="n">GPIO0_A</span><span class="nf">.set_priority</span><span class="p">(</span><span class="nn">Priority</span><span class="p">::</span><span class="n">P1</span><span class="p">);</span> <span class="c1">// PLIC.priority</span>
+    <span class="nn">hal</span><span class="p">::</span><span class="nn">interrupt</span><span class="p">::</span><span class="n">GPIO0_A</span><span class="nf">.enable</span><span class="p">();</span> <span class="c1">// PLIC.targetint[0].inten</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里我们直接覆盖 <code class="language-plaintext highlighter-rouge">MachineExternal</code> 函数即可.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">MachineExternal</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">claim</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.claim</span><span class="p">();</span> <span class="c1">// 获取当前 interrupt id</span>
+
+    <span class="nn">defmt</span><span class="p">::</span><span class="nd">info!</span><span class="p">(</span><span class="s">"claim = {}"</span><span class="p">,</span> <span class="n">claim</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="n">claim</span> <span class="o">==</span> <span class="nn">hal</span><span class="p">::</span><span class="nn">interrupt</span><span class="p">::</span><span class="n">GPIO0_A</span><span class="nf">.number</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// GPIO0_A();</span>
+        <span class="c1">// write 1 to clear</span>
+        <span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.if_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.value</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_flag</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span> <span class="c1">// 清除对应外设的中断标志</span>
+    <span class="p">}</span>
+
+    <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.complete</span><span class="p">(</span><span class="n">claim</span><span class="p">);</span> <span class="c1">// 通知 PLIC 处理完毕</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样就完成了对 PA09 GPIO0 的中断处理.</p>
+
+<h3 id="mchtmr---mtime-中断">MCHTMR - MTIME 中断</h3>
+
+<p>以上举例的是 MCU 的外设中断, 这里再介绍下 MTIME, 即 MCHTMR 中断的处理. 假定 <code class="language-plaintext highlighter-rouge">mstatus::set_mie()</code> 已经设置, 即全局中断已经开启.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">MCHTMR</span><span class="nf">.mtime</span><span class="p">()</span><span class="nf">.read</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">next</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="mi">24_000_000</span><span class="p">;</span> <span class="c1">// 24Mhz default</span>
+
+<span class="nn">pac</span><span class="p">::</span><span class="n">MCHTMR</span><span class="nf">.mtimecmp</span><span class="p">()</span><span class="nf">.write_value</span><span class="p">(</span><span class="n">next</span><span class="p">);</span> <span class="c1">// + 1s</span>
+
+<span class="k">unsafe</span> <span class="p">{</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mie</span><span class="p">::</span><span class="nf">set_mtimer</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里我们直接设置了一个 1 秒之后的中断. 然后在 <code class="language-plaintext highlighter-rouge">MachineTimer</code> 中处理即可.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">MachineTimer</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// // disable mtime interrupt</span>
+    <span class="c1">//  unsafe {</span>
+    <span class="c1">//        riscv::register::mie::clear_mtimer();</span>
+    <span class="c1">//}</span>
+
+    <span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">MCHTMR</span><span class="nf">.mtime</span><span class="p">()</span><span class="nf">.read</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">next</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="mi">24_000_000</span><span class="p">;</span> <span class="c1">// 24Mhz</span>
+
+    <span class="nn">pac</span><span class="p">::</span><span class="n">MCHTMR</span><span class="nf">.mtimecmp</span><span class="p">()</span><span class="nf">.write_value</span><span class="p">(</span><span class="n">next</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里可以直接 <code class="language-plaintext highlighter-rouge">mie::clear_mtimer()</code> 关闭 MTIME 中断, 也可以在 <code class="language-plaintext highlighter-rouge">MachineTimer</code> 中设置下一个中断时间.</p>
+
+<h2 id="hpm-risc-v-mcu-中断向量模式">HPM RISC-V MCU 中断向量模式</h2>
+
+<p>中断向量模式在官方 Datasheet 中介绍较为简略, 同时还需要参考 Andes RISC-V IP Core 的<a href="http://www.andestech.com/en/products-solutions/product-documentation/">文档</a>.</p>
+
+<ul>
+  <li>AndeStar V5 Platform-Level Interrupt Controller Specification</li>
+  <li>AndeStar V5 System Privileged Architecture and CSR</li>
+</ul>
+
+<p>经过相关试验, 得到如下结论:</p>
+
+<ul>
+  <li>中断模式启用:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">mstatus</code> 中 <code class="language-plaintext highlighter-rouge">MIE</code> 位用于开启全局中断</li>
+      <li><code class="language-plaintext highlighter-rouge">mie</code> 中 <code class="language-plaintext highlighter-rouge">MEXT</code> 位用于开启外部中断, <code class="language-plaintext highlighter-rouge">MTIMER</code> 位用于开启 MTIME 中断…</li>
+      <li><code class="language-plaintext highlighter-rouge">mtvec</code> 写入中断表地址, <code class="language-plaintext highlighter-rouge">mtvec</code> 低 2 位无效 - <strong>与标准 RISC-V 行为不一致</strong></li>
+      <li>自定义 CSR <code class="language-plaintext highlighter-rouge">mmisc_ctl</code>(0x7D0) 和 PLIC 设置位 <code class="language-plaintext highlighter-rouge">PLIC.FEATURE.VECTORED</code> 用于选择向量模式</li>
+      <li>中断表地址必须位于 FLASH(XPI) 或 ILM, <strong>无法放在 DLM</strong>, 编写自定义链接脚本时候需要注意</li>
+    </ul>
+  </li>
+  <li>中断表
+    <ul>
+      <li>中断表索引为中断号, 4 字节内存地址表, 必须 4 字节对齐</li>
+      <li>外设中断(外部中断)编号从 1 开始</li>
+      <li>中断表索引 0 为异常处理和 Core Local 中断, 即上面提到的 <code class="language-plaintext highlighter-rouge">__EXCEPTIONS</code> 和 <code class="language-plaintext highlighter-rouge">__INTERRUPTS</code></li>
+      <li>中断表 <code class="language-plaintext highlighter-rouge">mtvec[N]</code> 长 1024, 对于 Supervisor 模式和 User 模式, 中断表为 <code class="language-plaintext highlighter-rouge">mtvec[1024+N]</code>, <code class="language-plaintext highlighter-rouge">mtvec[2048+N]</code></li>
+    </ul>
+  </li>
+  <li>中断处理函数 - 外部中断
+    <ul>
+      <li><strong>此模式下 <code class="language-plaintext highlighter-rouge">PLIC.CLAIM</code> 寄存器值无效</strong>, 需要当前函数名获得, 或者通过 <code class="language-plaintext highlighter-rouge">mcause</code> 读取</li>
+      <li>处理中断</li>
+      <li>写入中断号到 <code class="language-plaintext highlighter-rouge">PLIC.CLAIM</code> 通知 PLIC 处理完毕</li>
+      <li><code class="language-plaintext highlighter-rouge">mret</code> 返回</li>
+    </ul>
+  </li>
+  <li>中断处理函数 - Core Local 中断
+    <ul>
+      <li>在向量模式下, 内部中断和异常处理函数位于向量表 0 位置</li>
+      <li>通过读取 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器值, 获取异常或中断原因, 然后调用对应的异常或中断处理函数</li>
+      <li><code class="language-plaintext highlighter-rouge">mret</code> 返回</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="patch-riscv-rt-_setup_interrupts">Patch <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> <code class="language-plaintext highlighter-rouge">_setup_interrupts</code></h3>
+
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 中的中断处理是直接地址模式, 通过编译选项可以选择中断处理模式, 但是实现无法兼容 HPM RISC-V MCU 的中断向量模式.
+万幸是它提供了扩展点, 可以通过覆盖 <code class="language-plaintext highlighter-rouge">_setup_interrupts</code> 函数来实现自定义中断处理相关设置.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"Rust"</span> <span class="k">fn</span> <span class="nf">_setup_interrupts</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+
+        <span class="k">static</span> <span class="n">__VECTORED_INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="mi">1</span><span class="p">];</span>
+    <span class="p">}</span>
+
+    <span class="k">let</span> <span class="n">vector_addr</span> <span class="o">=</span> <span class="n">__VECTORED_INTERRUPTS</span><span class="nf">.as_ptr</span><span class="p">()</span> <span class="k">as</span> <span class="nb">u32</span><span class="p">;</span>
+    <span class="c1">// FIXME: TrapMode is ignored in mtvec, it's set in CSR_MMISC_CTL</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mtvec</span><span class="p">::</span><span class="nf">write</span><span class="p">(</span><span class="n">vector_addr</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mtvec</span><span class="p">::</span><span class="nn">TrapMode</span><span class="p">::</span><span class="n">Direct</span><span class="p">);</span>
+
+    <span class="c1">// Enable vectored external PLIC interrupt</span>
+    <span class="c1">// CSR_MMISC_CTL = 0x7D0</span>
+    <span class="k">unsafe</span> <span class="p">{</span>
+        <span class="nd">asm!</span><span class="p">(</span><span class="s">"csrsi 0x7D0, 2"</span><span class="p">);</span>
+        <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.feature</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_vectored</span><span class="p">(</span><span class="k">true</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">__VECTORED_INTERRUPTS</code> 是在 <a href="https://github.com/hpmicro-rs/hpm-metapac">hpm-metapac</a> 中定义的向量模式中断表, 通过 <code class="language-plaintext highlighter-rouge">extern</code> 方式从链接器过程获取地址.</p>
+
+<p>此时我们可能需要自定义链接脚本, 将 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 中的额外无效符号丢弃. 不过目前暂时不需要.</p>
+
+<h3 id="中断处理函数---内部中断和异常">中断处理函数 - 内部中断和异常</h3>
+
+<p>考虑到向量表 0 位置用于处理内部中断和异常, 我们希望能用到 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 中的异常处理函数. 在 <code class="language-plaintext highlighter-rouge">hpm-metapac</code> 的实现中,
+我定义向量表第一个位置为 <code class="language-plaintext highlighter-rouge">CORE_LOCAL</code> 中断处理函数(通过代码生成工具自动处理):</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[link_section</span> <span class="nd">=</span> <span class="s">".vector_table.interrupts"</span><span class="nd">]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">static</span> <span class="n">__VECTORED_INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="n">Vector</span><span class="p">;</span> <span class="mi">73</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">CORE_LOCAL</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPIO0_A</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPIO0_B</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPIO0_X</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPIO0_Y</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPTMR0</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPTMR1</span> <span class="p">},</span>
+    <span class="c1">// ......</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样久可以可以通过链接符号直接覆盖:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"riscv-interrupt-m"</span> <span class="k">fn</span> <span class="nf">CORE_LOCAL</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// 使用这样的方式, 可以链接非 `pub` 向量表</span>
+    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+        <span class="k">static</span> <span class="n">__INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="nb">Option</span><span class="o">&lt;</span><span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span><span class="p">()</span><span class="o">&gt;</span><span class="p">;</span> <span class="mi">12</span><span class="p">];</span>
+    <span class="p">}</span>
+
+    <span class="k">let</span> <span class="n">cause</span> <span class="o">=</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mcause</span><span class="p">::</span><span class="nf">read</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">code</span> <span class="o">=</span> <span class="n">cause</span><span class="nf">.code</span><span class="p">();</span>
+
+    <span class="nn">defmt</span><span class="p">::</span><span class="nd">info!</span><span class="p">(</span><span class="s">"mcause = 0x{:08x}"</span><span class="p">,</span> <span class="n">cause</span><span class="nf">.bits</span><span class="p">());</span>
+    <span class="k">if</span> <span class="n">cause</span><span class="nf">.is_exception</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">loop</span> <span class="p">{}</span> <span class="c1">// let it crash for now</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="n">code</span> <span class="o">&lt;</span> <span class="n">__INTERRUPTS</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">h</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">__INTERRUPTS</span><span class="p">[</span><span class="n">code</span><span class="p">];</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span> <span class="p">{</span>
+            <span class="nf">handler</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">DefaultHandler</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nf">DefaultHandler</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="nd">#[allow(non_snake_case)]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">fn</span> <span class="nf">DefaultHandler</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">loop</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>由于没有了 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 的中断入口函数, 我们需要自己处理寄存器压栈和恢复, 以及中断结束的 <code class="language-plaintext highlighter-rouge">mret</code> 指令.
+<code class="language-plaintext highlighter-rouge">extern "riscv-interrupt-m" fn</code> 是一个特殊的 ABI, 会自动处理所有寄存器的压栈和恢复, 最后通过 <code class="language-plaintext highlighter-rouge">mret</code> 返回.
+需要 Nightly Rust 和 <code class="language-plaintext highlighter-rouge">#![feature(abi_riscv_interrupt)]</code> feature 启用.</p>
+
+<p>这样打了补丁后几乎可以完全兼容上一节传统中断处理方式.</p>
+
+<p>这里我踩了一个不小的坑, 当开启向量模式后, <code class="language-plaintext highlighter-rouge">PLIC.CLAIM</code> 不再提供中断号, 但中断处理函数依然需要写入它来通知 PLIC 处理完毕.
+这里需要通过 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器读取中断号, 然后写入 <code class="language-plaintext highlighter-rouge">PLIC.CLAIM</code> 来通知 PLIC.</p>
+
+<h3 id="中断处理函数---外部中断">中断处理函数 - 外部中断</h3>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"riscv-interrupt-m"</span> <span class="k">fn</span> <span class="nf">GPIO0_A</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// let claim = pac::PLIC.claim(); // WRONG!!!</span>
+    <span class="k">let</span> <span class="n">mcause</span> <span class="o">=</span> <span class="nn">mcause</span><span class="p">::</span><span class="nf">read</span><span class="p">()</span><span class="nf">.bits</span><span class="p">();</span>
+
+    <span class="nn">defmt</span><span class="p">::</span><span class="nd">info!</span><span class="p">(</span><span class="s">"button pressed!"</span><span class="p">);</span>
+
+    <span class="c1">// write 1 to clear</span>
+    <span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.if_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.value</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_flag</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span>
+
+    <span class="nf">compiler_fence</span><span class="p">(</span><span class="nn">core</span><span class="p">::</span><span class="nn">sync</span><span class="p">::</span><span class="nn">atomic</span><span class="p">::</span><span class="nn">Ordering</span><span class="p">::</span><span class="n">SeqCst</span><span class="p">);</span>
+    <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.complete</span><span class="p">(</span><span class="n">mcause</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="总结">总结</h2>
+
+<p>本文中对 <code class="language-plaintext highlighter-rouge">PLIC</code> 操作的实现位于 <a href="https://github.com/hpmicro-rs/hpm-hal">hpm-hal</a> 的 <a href="https://github.com/hpmicro-rs/hpm-hal/blob/master/src/internal/interrupt.rs">src/internal/interrupt.rs</a>.</p>]]></content><author><name>andelf</name></author><category term="embedded" /><category term="rust" /><category term="riscv" /><summary type="html"><![CDATA[HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式]]></summary></entry><entry><title type="html">10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL</title><link href="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/" rel="alternate" type="text/html" title="10.2 寸黑白红三色墨水屏价签拆解及驱动过程简记 - 10.2 inch 3-Color BWR ESL" /><published>2023-12-17T11:54:00+00:00</published><updated>2023-12-17T11:54:00+00:00</updated><id>https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl</id><content type="html" xml:base="https://andelf.github.io/blog/2023/12/17/10-2-inch-3-color-esl/"><![CDATA[<p>书接很久以前的 <a href="/blog/2021/01/14/play-with-2-13-inch-e-ink-display/">这里</a>.
 最近机缘巧合又收了一个 10.2 寸的黑白红墨水屏价签. 很新, 屏幕保护膜都没撕, 又可见倒闭的公司库存.</p>
 
 <p><img src="/assets/esl-10in2.jpeg" alt="ESL 10in2" /></p>
@@ -735,7 +1166,7 @@ target = "thumbv7em-none-eabi"
         <div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># part of Cargo.toml</span>
 <span class="nn">[dependencies]</span>
 <span class="c"># ...</span>
-<span class="nn">embassy-stm32</span> <span class="o">=</span> <span class="p">{</span> <span class="py">version</span> <span class="p">=</span> <span class="s">"0.1.0"</span><span class="p">,</span> <span class="py">path</span> <span class="p">=</span> <span class="s">"../embassy/embassy-stm32"</span><span class="p">,</span> <span class="py">features</span> <span class="p">=</span> <span class="p">[</span>
+<span class="py">embassy-stm32</span> <span class="o">=</span> <span class="p">{</span> <span class="py">version</span> <span class="p">=</span> <span class="s">"0.1.0"</span><span class="p">,</span> <span class="py">path</span> <span class="p">=</span> <span class="s">"../embassy/embassy-stm32"</span><span class="p">,</span> <span class="py">features</span> <span class="p">=</span> <span class="p">[</span>
     <span class="s">"nightly"</span><span class="p">,</span>
     <span class="s">"defmt"</span><span class="p">,</span>
     <span class="s">"stm32wle5cb"</span><span class="p">,</span>
@@ -5066,260 +5497,4 @@ swiftFoundation
       <p><a href="http://cocoapods.org/">CocoaPods</a> <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
-</div>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo]]></summary></entry><entry><title type="html">Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)</title><link href="https://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/" rel="alternate" type="text/html" title="Swift and C Interop Cont. (简析 Swift 和 C 的交互，Part 二)" /><published>2014-06-18T15:38:01+00:00</published><updated>2014-06-18T15:38:01+00:00</updated><id>https://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/18/swift-and-c-interop-cont/"><![CDATA[<p>声明： 转载注明我或者 SwiftChina . <a href="http://weibo.com/234632333">weibo</a></p>
-
-<p>本文的发现基于个人研究，目测是官方外的首创。请尊重原创。</p>
-
-<p>本文是讲述 Swift 与 C 交互操作系列文章的第二部分。解决之前的所有遗留问题。</p>
-
-<p>第一部分请参考 <a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop 简析Swift和C的交互</a></p>
-
-<p>本文将介绍实际应用过程中会遇到的各类情况。</p>
-
-<h2 id="再看类型对应">再看类型对应</h2>
-
-<p>标准类型这里就不提了，上面的文章讲的很明白了。</p>
-
-<h3 id="7-种指针类型">7 种指针类型</h3>
-
-<p>从代码看，我认为 Swift 对应 C 的指针时候，存在一个最原始的类型 <code class="language-plaintext highlighter-rouge">RawPointer</code>，但是它是内部表示，不可以直接使用。所以略过。但它是基础，可以认为它相当于 <code class="language-plaintext highlighter-rouge">Word</code> 类型（机器字长）。</p>
-
-<p><strong>以下内容再 Xcode6-beta3 中不适用</strong> 请参考 <a href="http://andelf.github.io/blog/2014/07/08/swift-beta3-changes/">Swift 在 Xcode6-beta3 中的变化</a>。</p>
-
-<h4 id="copaquepointer">COpaquePointer</h4>
-
-<p>不透明指针。之前我以为它很少会用到，不过现在看来想错了，虽然类型不安全，但是很多场合只能用它。它是直接对应 <code class="language-plaintext highlighter-rouge">RawPointer</code> 的。字长相等。</p>
-
-<blockquote>
-  <p>In computer programming, an opaque pointer is a special case of an opaque data type, a datatype declared to be a pointer to a record or data structure of some unspecified type. - 来自 Wikipedia</p>
-</blockquote>
-
-<p>几乎没有任何操作方法，不带类型，主要用于 Bridging Header 中表示 C 中的复杂结构指针</p>
-
-<p>比如一个例子， libcurl 中的 <code class="language-plaintext highlighter-rouge">CURL *</code> 的处理，其实就是对应为 <code class="language-plaintext highlighter-rouge">COpaquePointer</code>。</p>
-
-<h4 id="unsafepointer">UnsafePointer<T></T></h4>
-
-<p>泛型指针。直接对应 <code class="language-plaintext highlighter-rouge">RawPointer</code>。字长相等。</p>
-
-<p>处理指针的主力类型。常量中的 <code class="language-plaintext highlighter-rouge">C_ARGV</code> 的类型也是它 <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;CString&gt;</code>。</p>
-
-<p>支持大量操作方法：</p>
-
-<ul>
-  <li>通过 <code class="language-plaintext highlighter-rouge">.memory</code> 属性 <code class="language-plaintext highlighter-rouge">{ get set }</code> 操作指针指向的内容</li>
-  <li>支持 subscript ，直接对应于 C 的数组，例如 <code class="language-plaintext highlighter-rouge">C_ARGV[1]</code></li>
-  <li>通过 <code class="language-plaintext highlighter-rouge">alloc(num: Int)</code> 分配数组空间</li>
-  <li><code class="language-plaintext highlighter-rouge">initialize(val: T)</code> 直接初始化</li>
-  <li>offset 操作 <code class="language-plaintext highlighter-rouge">.succ()</code> <code class="language-plaintext highlighter-rouge">.pred()</code></li>
-  <li>可以从任意一种指针直接调用构造函数获得</li>
-  <li>隐式类型转换为非 <code class="language-plaintext highlighter-rouge">COpaquePointer</code> 之外的任意一种指针</li>
-</ul>
-
-<h4 id="autoreleasingunsafepointer">AutoreleasingUnsafePointer<T></T></h4>
-
-<p>之前特地写文介绍过这个指针类型。<code class="language-plaintext highlighter-rouge">NSError</code> 的处理就主要用它。传送门： <a href="http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a></p>
-
-<p>内部实现用了语言内置特性，从名字也可以看出来，这个应该是非常棒的一个指针，可以帮助管理内存，逼格也高。内存直接对应 <code class="language-plaintext highlighter-rouge">RawPointer</code> 可以传递给 C 函数。</p>
-
-<ul>
-  <li>通过 <code class="language-plaintext highlighter-rouge">.memory</code> 属性 <code class="language-plaintext highlighter-rouge">{ get set }</code> 操作指针指向的内容</li>
-  <li>直接从 <code class="language-plaintext highlighter-rouge">&amp;T</code> 类型获得，使用方法比较诡异，建议参考文章</li>
-</ul>
-
-<h4 id="cmutablepointer-cconstpointer">CMutablePointer<T> CConstPointer<T></T></T></h4>
-
-<p>分别对应于 C 中的 <code class="language-plaintext highlighter-rouge">T *</code>、<code class="language-plaintext highlighter-rouge">const T *</code>。不可直接传递给 C 函数，因为表示结构里还有一个 <code class="language-plaintext highlighter-rouge">owner</code> 域，应该是用来自动管理生命周期的。<code class="language-plaintext highlighter-rouge">sizeof</code> 操作返回 16。但是可以有隐式类型转换。</p>
-
-<p>操作方法主要是 <code class="language-plaintext highlighter-rouge">func withUnsafePointer&lt;U&gt;(f: UnsafePointer&lt;T&gt; -&gt; U) -&gt; U</code>，用 Trailing Closure 语法非常方便。</p>
-
-<h4 id="cmutablevoidpointer-cconstvoidpointer">CMutableVoidPointer CConstVoidPointer</h4>
-
-<p>分别对应于 C 中的 <code class="language-plaintext highlighter-rouge">void *</code>、<code class="language-plaintext highlighter-rouge">const void *</code>。其他内容同上一种。</p>
-
-<h4 id="小结指针">小结指针</h4>
-
-<p>以上 7 种指针类型可以分未两类，我给他们起名为 第一类指针 和 第二类指针 。（你看我在黑马克思耶，算了这个梗太深，参考马克思主义政治经济学）</p>
-
-<ul>
-  <li>可以直接用于 C 函数声明的 第一类指针
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">COpaquePointer</code> <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;T&gt;</code> <code class="language-plaintext highlighter-rouge">AutoreleasingUnsafePointer&lt;T&gt;</code></li>
-      <li>是对 <code class="language-plaintext highlighter-rouge">RawPointer</code> 的封装，直接对应于 C 的指针，它们的 <code class="language-plaintext highlighter-rouge">sizeof</code> 都是单位字长</li>
-    </ul>
-  </li>
-  <li>不可用于声明 第二类指针
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">CMutablePointer&lt;T&gt; CConstPointer&lt;T&gt; CMutableVoidPointer CConstVoidPointer</code></li>
-      <li>直接从 Swift 对象的引用获得（一个隐藏特性，引用隐式转换）（主要构造方法）</li>
-      <li>包含了一个 <code class="language-plaintext highlighter-rouge">owner</code> 字段，可以管理生命周期，理论上在 Swift 中使用</li>
-      <li>通过 <code class="language-plaintext highlighter-rouge">.withUnsafePointer</code> 方法调用</li>
-    </ul>
-  </li>
-</ul>
-
-<p>所有指针都实现了 <code class="language-plaintext highlighter-rouge">LogicValue</code> 协议，可以直接 <code class="language-plaintext highlighter-rouge">if a_pointer</code> 判断是否为 <code class="language-plaintext highlighter-rouge">NULL</code>。</p>
-
-<p><code class="language-plaintext highlighter-rouge">nil</code> 类型实现了到所有指针类型的隐式类型转换，等价于 C 中的 ``NULL`，可以直接判断。</p>
-
-<p>什么时候用什么？这个问题我也在考虑中，以下是我的建议。</p>
-
-<ul>
-  <li>对应复杂结构体，不操作结构体字段的： <code class="language-plaintext highlighter-rouge">COpaquePointer</code> 例如 <code class="language-plaintext highlighter-rouge">CURL *</code></li>
-  <li>日常操作： <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;T&gt;</code></li>
-  <li>同时需要在 Swift 和 C 中操作结构体字段，由 Swift 管理内存：<code class="language-plaintext highlighter-rouge">AutoreleasingUnsafePointer&lt;T&gt;</code></li>
-  <li>Swift 中创建对象，传递给 C： 第二类指针</li>
-</ul>
-
-<h2 id="工具类型">工具类型</h2>
-
-<h3 id="cvararg-cvalistpointer-valistbuilder">CVarArg CVaListPointer VaListBuilder</h3>
-
-<p>用于处理 C 语言中的可变参数 valist 函数。</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">protocol</span> <span class="nc">CVarArg</span> <span class="o">{</span>
-  <span class="n">func</span> <span class="nf">encode</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Word</span><span class="o">[]</span>
-<span class="o">}</span>
-</code></pre></div></div>
-
-<p>表示该类型可以作为可变参数，相当多的类型都实现了这个。</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">struct</span> <span class="nc">CVaListPointer</span> <span class="o">{</span>
-    <span class="k">var</span> <span class="n">value</span><span class="k">:</span> <span class="kt">UnsafePointer&lt;Void&gt;</span>
-    <span class="kt">init</span><span class="o">(</span><span class="kt">fromUnsafePointer</span> <span class="kt">from:</span> <span class="kt">UnsafePointer&lt;Void&gt;</span><span class="o">)</span>
-    <span class="kt">@conversion</span> <span class="kt">func</span> <span class="k">__</span><span class="kt">conversion</span><span class="o">()</span> <span class="kt">-&gt;</span> <span class="kt">CMutableVoidPointer</span>
-<span class="o">}</span>
-</code></pre></div></div>
-
-<p>对应于 C，直接给 C 函数传递，声明、定义时使用。</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">VaListBuilder</span> <span class="o">{</span>
-    <span class="nf">init</span><span class="o">()</span>
-    <span class="n">func</span> <span class="nf">append</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">CVarArg</span><span class="o">)</span>
-    <span class="n">func</span> <span class="nf">va_list</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">CVaListPointer</span>
-<span class="o">}</span>
-</code></pre></div></div>
-
-<p>工具类，方便地创建 <code class="language-plaintext highlighter-rouge">CVaListPointer</code>。</p>
-
-<p>还有一些工具函数：</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">func</span> <span class="nf">getVaList</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">CVarArg</span><span class="o">[])</span> <span class="o">-&gt;</span> <span class="nc">CVaListPointer</span>
-<span class="n">func</span> <span class="n">withVaList</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;(</span><span class="n">args</span><span class="k">:</span> <span class="kt">CVarArg</span><span class="o">[],</span> <span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">CVaListPointer</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">R</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">R</span>
-<span class="n">func</span> <span class="n">withVaList</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;(</span><span class="n">builder</span><span class="k">:</span> <span class="kt">VaListBuilder</span><span class="o">,</span> <span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">CVaListPointer</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">R</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">R</span>
-</code></pre></div></div>
-
-<p>非常方便。</p>
-
-<h3 id="unsafearray">UnsafeArray<T></T></h3>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">struct</span> <span class="nc">UnsafeArray</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="k">:</span> <span class="kt">Collection</span><span class="o">,</span> <span class="nc">Generator</span> <span class="o">{</span>
-  <span class="k">var</span> <span class="n">startIndex</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-  <span class="kt">var</span> <span class="kt">endIndex:</span> <span class="kt">Int</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-  <span class="kt">subscript</span> <span class="o">(</span><span class="kt">i:</span> <span class="kt">Int</span><span class="o">)</span> <span class="kt">-&gt;</span> <span class="kt">T</span> <span class="o">{</span> <span class="kt">get</span> <span class="o">}</span>
-  <span class="kt">init</span><span class="o">(</span><span class="kt">start:</span> <span class="kt">UnsafePointer&lt;T&gt;</span><span class="o">,</span> <span class="kt">length:</span> <span class="kt">Int</span><span class="o">)</span>
-  <span class="n">func</span> <span class="nf">next</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">?</span>
-  <span class="n">func</span> <span class="nf">generate</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">UnsafeArray</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-<span class="o">}</span>
-</code></pre></div></div>
-
-<p>处理 C 数组的工具类型，可以直接 for-in 处理。当然，只读的，略可惜。</p>
-
-<h3 id="unmanaged">Unmanaged<T></T></h3>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">struct</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
-  <span class="k">var</span> <span class="nc">_value</span><span class="k">:</span> <span class="kt">T</span>
-  <span class="nf">init</span><span class="o">(</span><span class="nc">_private</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span>
-  <span class="n">func</span> <span class="nf">fromOpaque</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">COpaquePointer</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-  <span class="n">func</span> <span class="nf">toOpaque</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">COpaquePointer</span>
-  <span class="n">static</span> <span class="n">func</span> <span class="nf">passRetained</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-  <span class="n">static</span> <span class="n">func</span> <span class="nf">passUnretained</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-  <span class="n">func</span> <span class="nf">takeUnretainedValue</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="n">T</span>
-  <span class="n">func</span> <span class="nf">takeRetainedValue</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="n">T</span>
-  <span class="n">func</span> <span class="nf">retain</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-  <span class="n">func</span> <span class="nf">release</span><span class="o">()</span>
-  <span class="n">func</span> <span class="nf">autorelease</span><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">Unmanaged</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
-<span class="o">}</span>
-</code></pre></div></div>
-
-<p>顾名思义，手动管理 RC 的。避免 Swift 插入的 ARC 代码影响程序逻辑。</p>
-
-<h2 id="c-头文件的导入行为">C 头文件的导入行为</h2>
-
-<h3 id="宏定义">宏定义</h3>
-
-<p>数字常量 CInt, CDouble (带类型后缀则为对应类型，如 1.0f ）
-字符常量 CString
-其他宏 展开后，无定义</p>
-
-<h3 id="枚举-enum">枚举 enum</h3>
-
-<p>创建 enum 类型，并继承自 <code class="language-plaintext highlighter-rouge">CUnsignedInt</code> 或 <code class="language-plaintext highlighter-rouge">CInt</code> （enum 是否有负初始值）</p>
-
-<p>可以通过 <code class="language-plaintext highlighter-rouge">.value</code> 访问。</p>
-
-<h3 id="结构体-struct">结构体 struct</h3>
-
-<p>创建 struct 类型，只有默认 init ，需要加上所有结构体字段名创建。</p>
-
-<h3 id="可变参数函数">可变参数函数</h3>
-
-<p>转为 <code class="language-plaintext highlighter-rouge">CVaListPointer</code>。手动重声明更好。这里举 <code class="language-plaintext highlighter-rouge">Darwin</code> 模块的例子说。</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func vprintf(_: CString, _: CVaListPointer) -&gt; CInt
-</code></pre></div></div>
-
-<h2 id="从-c-调用-swift">从 C 调用 Swift</h2>
-
-<p>只能调用函数。</p>
-
-<p>之前说过，用 <code class="language-plaintext highlighter-rouge">@asmname("name")</code> 指定 mangled name 即可。</p>
-
-<p>然后 C 语言中人工声明下函数。很可惜自动导出头文件不适用于 C 语言，只适用于 Objective-C 。</p>
-
-<p>目测暂时无法导出结构体，因为 Swift 闭源不提供相关头文件。靠猜有风险。</p>
-
-<p>全局变量不支持用 <code class="language-plaintext highlighter-rouge">@asmname("name")</code> 控制导出符号名。目测可以尝试用 mangled name 访问，但是很不方便。</p>
-
-<h2 id="示例">示例</h2>
-
-<p>我尝试调用了下 libcurl 。</p>
-
-<p>项目地址在 <a href="https://github.com/andelf/curl-swift">andelf/curl-swift</a> 包含编译脚本（就一句命令）。</p>
-
-<p>Bridging Header 只写入 <code class="language-plaintext highlighter-rouge">#include&lt;curl/curl.h&gt;</code> 即可。</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@asmname</span><span class="o">(</span><span class="s">"curl_easy_setopt"</span><span class="o">)</span> <span class="n">func</span> <span class="nf">curl_easy_setopt</span><span class="o">(</span><span class="n">curl</span><span class="k">:</span> <span class="kt">COpaquePointer</span><span class="o">,</span> <span class="n">option</span><span class="k">:</span> <span class="kt">CURLoption</span><span class="o">,</span> <span class="n">param</span><span class="k">:</span> <span class="kt">CString</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CURLcode</span>
-<span class="nd">@asmname</span><span class="o">(</span><span class="s">"curl_easy_setopt"</span><span class="o">)</span> <span class="n">func</span> <span class="nf">curl_easy_setopt</span><span class="o">(</span><span class="n">curl</span><span class="k">:</span> <span class="kt">COpaquePointer</span><span class="o">,</span> <span class="n">option</span><span class="k">:</span> <span class="kt">CURLoption</span><span class="o">,</span> <span class="n">param</span><span class="k">:</span> <span class="kt">CBool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CURLcode</span>
-
-<span class="n">let</span> <span class="n">handle</span> <span class="k">=</span> <span class="nf">curl_easy_init</span><span class="o">()</span>
-
-<span class="c1">// this should be a const c string. curl_easy_perform() will use this.</span>
-<span class="n">let</span> <span class="n">url</span><span class="k">:</span> <span class="kt">CString</span> <span class="o">=</span> <span class="s">"http://www.baidu.com"</span>
-
-<span class="nf">curl_easy_setopt</span><span class="o">(</span><span class="n">handle</span><span class="o">,</span> <span class="nc">CURLOPT_URL</span><span class="o">,</span> <span class="n">url</span><span class="o">)</span>
-<span class="nf">curl_easy_setopt</span><span class="o">(</span><span class="n">handle</span><span class="o">,</span> <span class="nc">CURLOPT_VERBOSE</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
-
-<span class="n">let</span> <span class="n">ret</span> <span class="k">=</span> <span class="nf">curl_easy_perform</span><span class="o">(</span><span class="n">handle</span><span class="o">)</span>
-<span class="n">let</span> <span class="n">error</span> <span class="k">=</span> <span class="nf">curl_easy_strerror</span><span class="o">(</span><span class="n">ret</span><span class="o">)</span>
-<span class="nf">println</span><span class="o">(</span><span class="s">"error = \(error)"</span><span class="o">)</span>
-</code></pre></div></div>
-
-<p>值得注意的是其中对单个函数的多态声明， <code class="language-plaintext highlighter-rouge">curl_easy_setopt</code> 实际上第三个参数是 <code class="language-plaintext highlighter-rouge">void *</code>。</p>
-
-<p>以及对 <code class="language-plaintext highlighter-rouge">url</code> 的处理，实际上 libcurl 要求设置的 url 参数一直保持到 <code class="language-plaintext highlighter-rouge">curl_easy_perform</code> 时，所以这里用 <code class="language-plaintext highlighter-rouge">withUnsafePointer</code> 或者
-<code class="language-plaintext highlighter-rouge">withCString</code> 是不太可取的方法。实际上或许可以用 <code class="language-plaintext highlighter-rouge">Unmanaged&lt;T&gt;</code> 来解决。</p>
-
-<h2 id="总结">总结</h2>
-
-<p>我觉得说这么多。。。</p>
-
-<p>调用 C 已经再没有别的内容可说了。其他的就是编程经验的问题，比如如何实现 C 回调 Swift 或者 Swift 回调 C 。可以参考其他语言的做法。解决方法不只一种。</p>
-
-<h2 id="参考文献">参考文献</h2>
-
-<ul>
-  <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a>。</li>
-  <li><a href="http://andelf.github.io/blog/2014/06/15/swift-and-c-interop/">Swift and C Interop 简析Swift和C的交互 第一部分</a></li>
-  <li><a href="http://andelf.github.io/blog/2014/06/16/swift-nserror-internals/">Swift NSError Internals（解析 Swift 对 NSError 操作）</a></li>
-</ul>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina . weibo]]></summary></entry></feed>
+</div>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo]]></summary></entry></feed>

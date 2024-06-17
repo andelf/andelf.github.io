@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>HPMicro RISC-V (Andes IP Core) Interrupt Handling - Direct Address Mode and Vector Mode | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.3.3" />
+<meta property="og:title" content="HPMicro RISC-V (Andes IP Core) Interrupt Handling - Direct Address Mode and Vector Mode" />
+<meta name="author" content="andelf" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式" />
+<meta property="og:description" content="HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式" />
+<link rel="canonical" href="https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/" />
+<meta property="og:url" content="https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-05-05T03:06:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="HPMicro RISC-V (Andes IP Core) Interrupt Handling - Direct Address Mode and Vector Mode" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2024-05-05T03:06:00+00:00","datePublished":"2024-05-05T03:06:00+00:00","description":"HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式","headline":"HPMicro RISC-V (Andes IP Core) Interrupt Handling - Direct Address Mode and Vector Mode","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/"},"url":"https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">HPMicro RISC-V (Andes IP Core) Interrupt Handling - Direct Address Mode and Vector Mode</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-05-05T03:06:00+00:00" itemprop="datePublished">May 5, 2024
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card"
+          itemprop="name">andelf</span></span>• <span>Tags: embedded, rust, riscv</span></p><div class="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#基础介绍">基础介绍</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#异常">异常</a></li>
+<li class="toc-entry toc-h3"><a href="#中断">中断</a></li>
+<li class="toc-entry toc-h3"><a href="#中断入口">中断入口</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#hpm-risc-v-mcu-中断处理---直接地址模式">HPM RISC-V MCU 中断处理 - 直接地址模式</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#gpio-外设---外部中断">GPIO 外设 - 外部中断</a></li>
+<li class="toc-entry toc-h3"><a href="#mchtmr---mtime-中断">MCHTMR - MTIME 中断</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#hpm-risc-v-mcu-中断向量模式">HPM RISC-V MCU 中断向量模式</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#patch-riscv-rt-_setup_interrupts">Patch riscv-rt _setup_interrupts</a></li>
+<li class="toc-entry toc-h3"><a href="#中断处理函数---内部中断和异常">中断处理函数 - 内部中断和异常</a></li>
+<li class="toc-entry toc-h3"><a href="#中断处理函数---外部中断">中断处理函数 - 外部中断</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#总结">总结</a></li>
+</ul>
+    </div>
+    <hr />
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式</p>
+
+<p>最近在折腾 HPMicro 的 RISC-V 系列 MCU 的 Rust 支持 <a href="https://github.com/hpmicro-rs/hpm-hal">hpm-hal</a>, 由于需要处理中断, 所以对其中断控制器有了一些了解.
+虽然 HPMicro 的文档已经是国内厂商的天花板了, 但对于一些细节还是有些模糊, 比如中断的向量模式和具体中断软件处理步骤.
+虽然阅读 <a href="https://github.com/hpmicro/hpm_sdk">hpm_sdk</a> 代码可以了解到一些细节, 但很容易迷失在条件编译的海洋中.</p>
+
+<p>这里以 HPM5300EVK 为例, MCU 为 HPM5361, IP Core 为 Andes D25(F). HPM6xxx 系列的 IP Core 为 Andes D45, 但是中断控制器的实现是一样的.</p>
+
+<p>本文不涉及多核. 每个核心各有一个 PLIC, 无具体区别.</p>
+
+<p>本文不涉及 Supervisor 模式, 仅讨论 Machine 模式下的中断处理.</p>
+
+<p>本文混合使用 HPM RISC-V MCU 和 Andes IP Core 两个名词, 对于中断处理来说, 他们是通用的.</p>
+
+<h2 id="基础介绍">基础介绍</h2>
+
+<p>我们都知道 RISC-V 的中断分为核心本地(Core Local, 即各种缩写中 “CLxxx” 的由来)中断和外部中断(External Interrupt).
+异常也是一种中断, 但是异常是由指令执行引起的. 异常和中断通过 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器的最高位区分. 通过 <code class="language-plaintext highlighter-rouge">mstatus</code> 和 <code class="language-plaintext highlighter-rouge">mie</code> 寄存器开启和关闭中断.</p>
+
+<h3 id="异常">异常</h3>
+
+<p>我们掏出 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 源码看看具体定义:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">InstructionMisaligned</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">InstructionFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">IllegalInstruction</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">Breakpoint</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">LoadMisaligned</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">LoadFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">StoreMisaligned</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">StoreFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">UserEnvCall</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">SupervisorEnvCall</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">MachineEnvCall</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">InstructionPageFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">LoadPageFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">StorePageFault</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nd">#[doc(hidden)]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">static</span> <span class="n">__EXCEPTIONS</span><span class="p">:</span> <span class="p">[</span><span class="nb">Option</span><span class="o">&lt;</span><span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span> <span class="mi">16</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">InstructionMisaligned</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">InstructionFault</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">IllegalInstruction</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">Breakpoint</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">LoadMisaligned</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">LoadFault</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">StoreMisaligned</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">StoreFault</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">UserEnvCall</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">SupervisorEnvCall</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">MachineEnvCall</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">InstructionPageFault</span><span class="p">),</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">LoadPageFault</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">StorePageFault</span><span class="p">),</span>
+<span class="p">];</span>
+</code></pre></div></div>
+
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 通过静态数组 <code class="language-plaintext highlighter-rouge">__EXCEPTIONS</code> 定义了异常处理函数列表, 通过 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器的值来索引.
+<code class="language-plaintext highlighter-rouge">TrapFrame</code> 是一个结构体, 用于保存异常发生时的寄存器状态. 由汇编代码保存后压栈传递.
+所有函数实现由链接脚本定义, 提供了一个 <code class="language-plaintext highlighter-rouge">loop {}</code> 死循环的默认实现, 最终用户可以在代码中覆盖.</p>
+
+<h3 id="中断">中断</h3>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">SupervisorSoft</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">MachineSoft</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">SupervisorTimer</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">MachineTimer</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">SupervisorExternal</span><span class="p">();</span>
+    <span class="k">fn</span> <span class="nf">MachineExternal</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nd">#[doc(hidden)]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">static</span> <span class="n">__INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="nb">Option</span><span class="o">&lt;</span><span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span><span class="p">()</span><span class="o">&gt;</span><span class="p">;</span> <span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">SupervisorSoft</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">MachineSoft</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">SupervisorTimer</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">MachineTimer</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">SupervisorExternal</span><span class="p">),</span>
+    <span class="nb">None</span><span class="p">,</span>
+    <span class="nf">Some</span><span class="p">(</span><span class="n">MachineExternal</span><span class="p">),</span>
+<span class="p">];</span>
+</code></pre></div></div>
+
+<p>如上代码是中断处理函数的定义, 处理方式一致, 也是通过静态数组 <code class="language-plaintext highlighter-rouge">__INTERRUPTS</code> 索引. 但是中断处理函数不需要传递 <code class="language-plaintext highlighter-rouge">TrapFrame</code>, 因为中断发生时,
+由中断处理函数来保存寄存器和恢复状态.</p>
+
+<p>其中我们需要关注的是 <code class="language-plaintext highlighter-rouge">MachineExternal</code>, 这个函数是处理外部中断的. 当发生外部中断时, 我们可以在 <code class="language-plaintext highlighter-rouge">MachineExternal</code> 中读取 <code class="language-plaintext highlighter-rouge">PLIC</code> 状态, 然后处理具体的中断.</p>
+
+<h3 id="中断入口">中断入口</h3>
+
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 默认使用直接地址模式处理中断, 即 <code class="language-plaintext highlighter-rouge">mtvec</code> 寄存器的值为中断处理函数的地址. 这种模式下, 中断处理函数会直接跳转到中断处理函数.
+由函数来读取 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器的值, 然后调用对应的异常或中断处理函数. 具体在代码中实现有部分, 汇编代码部分负责包装 Rust
+逻辑, 加入 <code class="language-plaintext highlighter-rouge">mret</code> 指令返回.</p>
+
+<p>(这部分实现 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 经常修改, 今天汇编改 Rust, 明天 Rust 改宏, 大后天可能又换个位置…, 实际上区别不大, 依然很难用)</p>
+
+<p>而 Rust 部分比较直观:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">start_trap_rust</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">*</span><span class="k">const</span> <span class="n">TrapFrame</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+        <span class="k">fn</span> <span class="nf">ExceptionHandler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">TrapFrame</span><span class="p">);</span>
+        <span class="k">fn</span> <span class="nf">DefaultHandler</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">let</span> <span class="n">cause</span> <span class="o">=</span> <span class="nn">xcause</span><span class="p">::</span><span class="nf">read</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">code</span> <span class="o">=</span> <span class="n">cause</span><span class="nf">.code</span><span class="p">();</span>
+
+    <span class="k">if</span> <span class="n">cause</span><span class="nf">.is_exception</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">trap_frame</span> <span class="o">=</span> <span class="o">&amp;*</span><span class="n">trap_frame</span><span class="p">;</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">&lt;</span> <span class="n">__EXCEPTIONS</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="n">h</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">__EXCEPTIONS</span><span class="p">[</span><span class="n">code</span><span class="p">];</span>
+            <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span> <span class="p">{</span>
+                <span class="nf">handler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nf">ExceptionHandler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">ExceptionHandler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="nf">ExceptionHandler</span><span class="p">(</span><span class="n">trap_frame</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="n">code</span> <span class="o">&lt;</span> <span class="n">__INTERRUPTS</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">h</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">__INTERRUPTS</span><span class="p">[</span><span class="n">code</span><span class="p">];</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span> <span class="p">{</span>
+            <span class="nf">handler</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">DefaultHandler</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nf">DefaultHandler</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样当我们需要处理外部中断时候, 只需要覆盖 <code class="language-plaintext highlighter-rouge">MachineExternal</code> 函数即可.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">MachineExternal</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">irq_no</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.claim</span><span class="p">();</span>
+
+    <span class="c1">// handle irq_no here!</span>
+
+    <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.complete</span><span class="p">(</span><span class="n">irq_no</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>一般情况下, <a href="https://github.com/rust-embedded/svd2rust">svd2rust</a> 生成的 pac crate 会自带一个 <code class="language-plaintext highlighter-rouge">__EXTERNAL_INTERRUPTS</code> 表, 我们在 <code class="language-plaintext highlighter-rouge">MachineExternal</code> 中读取当前外部中断号, 然后跳转处理即可.</p>
+
+<p>部分 RISC-V 核心实现可能会有一些特殊的处理, 以具体型号参考文档为准.</p>
+
+<h2 id="hpm-risc-v-mcu-中断处理---直接地址模式">HPM RISC-V MCU 中断处理 - 直接地址模式</h2>
+
+<p>这里分别 HPM RISC-V MCU 的中断处理, 包括传统的直接地址模式和 Andes IP Core 特有的向量模式.</p>
+
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 支持通过编译选项选择中断处理模式, 但向量模式实现极不通用, 直接地址模式是最常见的, 也是几乎被所有 RISC-V 实现支持的.</p>
+
+<p>大致流程如下:</p>
+
+<ul>
+  <li>中断模式启用:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">mstatus</code> 中 <code class="language-plaintext highlighter-rouge">MIE</code> 位用于开启全局中断</li>
+      <li><code class="language-plaintext highlighter-rouge">mie</code> 中 <code class="language-plaintext highlighter-rouge">MEXT</code> 位用于开启外部中断, <code class="language-plaintext highlighter-rouge">MTIMER</code> 位用于开启 MTIME 中断…</li>
+      <li><code class="language-plaintext highlighter-rouge">mtvec</code> 写入中断处理函数地址, 低位置 0(无影响)</li>
+    </ul>
+  </li>
+  <li>中断处理入口 - <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 提供
+    <ul>
+      <li>从 <code class="language-plaintext highlighter-rouge">mcuase</code> 可以获得当前是异常还是中断, 中断号等信息</li>
+      <li>从静态数组中读取对应的处理函数地址, 调用中断处理函数中处理具体的中断</li>
+      <li><code class="language-plaintext highlighter-rouge">mret</code> 返回</li>
+    </ul>
+  </li>
+  <li>外部中断处理函数 - 链接符号覆盖
+    <ul>
+      <li>读取 PLIC, 获取当前中断号</li>
+      <li>处理中断</li>
+      <li>完成中断, 通知 PLIC (PLIC.claim)</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="gpio-外设---外部中断">GPIO 外设 - 外部中断</h3>
+
+<p>HPM RISC-V MCU 的中断处理和上面的基础介绍类似, 但是有一些细节需要注意.</p>
+
+<p><code class="language-plaintext highlighter-rouge">mtvec</code> 的设置在 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 中完成, <code class="language-plaintext highlighter-rouge">xtvec::write(_start_trap as usize, xTrapMode::Direct);</code> 写入函数地址和中断模式即可.
+但 Andes RISC-V IP Core 的 mtvec 低位地址无效, 它使用额外的自定义 CSR 来选择中断模式. 这里的只用于写入函数地址.</p>
+
+<p>在 <code class="language-plaintext highlighter-rouge">mtvec</code> 设置后, 还需要额外设置 <code class="language-plaintext highlighter-rouge">mstatus</code>, <code class="language-plaintext highlighter-rouge">mie</code> 寄存器, 开启全局中断, 和外部中断.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">unsafe</span> <span class="p">{</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mstatus</span><span class="p">::</span><span class="nf">set_mie</span><span class="p">();</span> <span class="c1">// enable global interrupt</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mie</span><span class="p">::</span><span class="nf">set_mext</span><span class="p">();</span> <span class="c1">// enbale external interrupt</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里以 PA09 GPIO0 中断为例(开发板板载按钮), 设置外设中断:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 省略 GPIO 配置</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.pl</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.set</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_pol</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span> <span class="c1">// falling edge</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.tp</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.set</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_type</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span> <span class="c1">// edge trigger</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.ie</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.set</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_en</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span> <span class="c1">// enable interrupt</span>
+</code></pre></div></div>
+
+<p>然后针对具体的外设中断号通过 PLIC 启用中断:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">unsafe</span> <span class="p">{</span>
+    <span class="nn">hal</span><span class="p">::</span><span class="nn">interrupt</span><span class="p">::</span><span class="n">GPIO0_A</span><span class="nf">.set_priority</span><span class="p">(</span><span class="nn">Priority</span><span class="p">::</span><span class="n">P1</span><span class="p">);</span> <span class="c1">// PLIC.priority</span>
+    <span class="nn">hal</span><span class="p">::</span><span class="nn">interrupt</span><span class="p">::</span><span class="n">GPIO0_A</span><span class="nf">.enable</span><span class="p">();</span> <span class="c1">// PLIC.targetint[0].inten</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里我们直接覆盖 <code class="language-plaintext highlighter-rouge">MachineExternal</code> 函数即可.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">MachineExternal</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">claim</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.claim</span><span class="p">();</span> <span class="c1">// 获取当前 interrupt id</span>
+
+    <span class="nn">defmt</span><span class="p">::</span><span class="nd">info!</span><span class="p">(</span><span class="s">"claim = {}"</span><span class="p">,</span> <span class="n">claim</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="n">claim</span> <span class="o">==</span> <span class="nn">hal</span><span class="p">::</span><span class="nn">interrupt</span><span class="p">::</span><span class="n">GPIO0_A</span><span class="nf">.number</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// GPIO0_A();</span>
+        <span class="c1">// write 1 to clear</span>
+        <span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.if_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.value</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_flag</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span> <span class="c1">// 清除对应外设的中断标志</span>
+    <span class="p">}</span>
+
+    <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.complete</span><span class="p">(</span><span class="n">claim</span><span class="p">);</span> <span class="c1">// 通知 PLIC 处理完毕</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样就完成了对 PA09 GPIO0 的中断处理.</p>
+
+<h3 id="mchtmr---mtime-中断">MCHTMR - MTIME 中断</h3>
+
+<p>以上举例的是 MCU 的外设中断, 这里再介绍下 MTIME, 即 MCHTMR 中断的处理. 假定 <code class="language-plaintext highlighter-rouge">mstatus::set_mie()</code> 已经设置, 即全局中断已经开启.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">MCHTMR</span><span class="nf">.mtime</span><span class="p">()</span><span class="nf">.read</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">next</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="mi">24_000_000</span><span class="p">;</span> <span class="c1">// 24Mhz default</span>
+
+<span class="nn">pac</span><span class="p">::</span><span class="n">MCHTMR</span><span class="nf">.mtimecmp</span><span class="p">()</span><span class="nf">.write_value</span><span class="p">(</span><span class="n">next</span><span class="p">);</span> <span class="c1">// + 1s</span>
+
+<span class="k">unsafe</span> <span class="p">{</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mie</span><span class="p">::</span><span class="nf">set_mtimer</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里我们直接设置了一个 1 秒之后的中断. 然后在 <code class="language-plaintext highlighter-rouge">MachineTimer</code> 中处理即可.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">MachineTimer</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// // disable mtime interrupt</span>
+    <span class="c1">//  unsafe {</span>
+    <span class="c1">//        riscv::register::mie::clear_mtimer();</span>
+    <span class="c1">//}</span>
+
+    <span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">MCHTMR</span><span class="nf">.mtime</span><span class="p">()</span><span class="nf">.read</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">next</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="mi">24_000_000</span><span class="p">;</span> <span class="c1">// 24Mhz</span>
+
+    <span class="nn">pac</span><span class="p">::</span><span class="n">MCHTMR</span><span class="nf">.mtimecmp</span><span class="p">()</span><span class="nf">.write_value</span><span class="p">(</span><span class="n">next</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里可以直接 <code class="language-plaintext highlighter-rouge">mie::clear_mtimer()</code> 关闭 MTIME 中断, 也可以在 <code class="language-plaintext highlighter-rouge">MachineTimer</code> 中设置下一个中断时间.</p>
+
+<h2 id="hpm-risc-v-mcu-中断向量模式">HPM RISC-V MCU 中断向量模式</h2>
+
+<p>中断向量模式在官方 Datasheet 中介绍较为简略, 同时还需要参考 Andes RISC-V IP Core 的<a href="http://www.andestech.com/en/products-solutions/product-documentation/">文档</a>.</p>
+
+<ul>
+  <li>AndeStar V5 Platform-Level Interrupt Controller Specification</li>
+  <li>AndeStar V5 System Privileged Architecture and CSR</li>
+</ul>
+
+<p>经过相关试验, 得到如下结论:</p>
+
+<ul>
+  <li>中断模式启用:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">mstatus</code> 中 <code class="language-plaintext highlighter-rouge">MIE</code> 位用于开启全局中断</li>
+      <li><code class="language-plaintext highlighter-rouge">mie</code> 中 <code class="language-plaintext highlighter-rouge">MEXT</code> 位用于开启外部中断, <code class="language-plaintext highlighter-rouge">MTIMER</code> 位用于开启 MTIME 中断…</li>
+      <li><code class="language-plaintext highlighter-rouge">mtvec</code> 写入中断表地址, <code class="language-plaintext highlighter-rouge">mtvec</code> 低 2 位无效 - <strong>与标准 RISC-V 行为不一致</strong></li>
+      <li>自定义 CSR <code class="language-plaintext highlighter-rouge">mmisc_ctl</code>(0x7D0) 和 PLIC 设置位 <code class="language-plaintext highlighter-rouge">PLIC.FEATURE.VECTORED</code> 用于选择向量模式</li>
+      <li>中断表地址必须位于 FLASH(XPI) 或 ILM, <strong>无法放在 DLM</strong>, 编写自定义链接脚本时候需要注意</li>
+    </ul>
+  </li>
+  <li>中断表
+    <ul>
+      <li>中断表索引为中断号, 4 字节内存地址表, 必须 4 字节对齐</li>
+      <li>外设中断(外部中断)编号从 1 开始</li>
+      <li>中断表索引 0 为异常处理和 Core Local 中断, 即上面提到的 <code class="language-plaintext highlighter-rouge">__EXCEPTIONS</code> 和 <code class="language-plaintext highlighter-rouge">__INTERRUPTS</code></li>
+      <li>中断表 <code class="language-plaintext highlighter-rouge">mtvec[N]</code> 长 1024, 对于 Supervisor 模式和 User 模式, 中断表为 <code class="language-plaintext highlighter-rouge">mtvec[1024+N]</code>, <code class="language-plaintext highlighter-rouge">mtvec[2048+N]</code></li>
+    </ul>
+  </li>
+  <li>中断处理函数 - 外部中断
+    <ul>
+      <li><strong>此模式下 <code class="language-plaintext highlighter-rouge">PLIC.CLAIM</code> 寄存器值无效</strong>, 需要当前函数名获得, 或者通过 <code class="language-plaintext highlighter-rouge">mcause</code> 读取</li>
+      <li>处理中断</li>
+      <li>写入中断号到 <code class="language-plaintext highlighter-rouge">PLIC.CLAIM</code> 通知 PLIC 处理完毕</li>
+      <li><code class="language-plaintext highlighter-rouge">mret</code> 返回</li>
+    </ul>
+  </li>
+  <li>中断处理函数 - Core Local 中断
+    <ul>
+      <li>在向量模式下, 内部中断和异常处理函数位于向量表 0 位置</li>
+      <li>通过读取 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器值, 获取异常或中断原因, 然后调用对应的异常或中断处理函数</li>
+      <li><code class="language-plaintext highlighter-rouge">mret</code> 返回</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="patch-riscv-rt-_setup_interrupts">Patch <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> <code class="language-plaintext highlighter-rouge">_setup_interrupts</code></h3>
+
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 中的中断处理是直接地址模式, 通过编译选项可以选择中断处理模式, 但是实现无法兼容 HPM RISC-V MCU 的中断向量模式.
+万幸是它提供了扩展点, 可以通过覆盖 <code class="language-plaintext highlighter-rouge">_setup_interrupts</code> 函数来实现自定义中断处理相关设置.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"Rust"</span> <span class="k">fn</span> <span class="nf">_setup_interrupts</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+
+        <span class="k">static</span> <span class="n">__VECTORED_INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="mi">1</span><span class="p">];</span>
+    <span class="p">}</span>
+
+    <span class="k">let</span> <span class="n">vector_addr</span> <span class="o">=</span> <span class="n">__VECTORED_INTERRUPTS</span><span class="nf">.as_ptr</span><span class="p">()</span> <span class="k">as</span> <span class="nb">u32</span><span class="p">;</span>
+    <span class="c1">// FIXME: TrapMode is ignored in mtvec, it's set in CSR_MMISC_CTL</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mtvec</span><span class="p">::</span><span class="nf">write</span><span class="p">(</span><span class="n">vector_addr</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">,</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mtvec</span><span class="p">::</span><span class="nn">TrapMode</span><span class="p">::</span><span class="n">Direct</span><span class="p">);</span>
+
+    <span class="c1">// Enable vectored external PLIC interrupt</span>
+    <span class="c1">// CSR_MMISC_CTL = 0x7D0</span>
+    <span class="k">unsafe</span> <span class="p">{</span>
+        <span class="nd">asm!</span><span class="p">(</span><span class="s">"csrsi 0x7D0, 2"</span><span class="p">);</span>
+        <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.feature</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_vectored</span><span class="p">(</span><span class="k">true</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">__VECTORED_INTERRUPTS</code> 是在 <a href="https://github.com/hpmicro-rs/hpm-metapac">hpm-metapac</a> 中定义的向量模式中断表, 通过 <code class="language-plaintext highlighter-rouge">extern</code> 方式从链接器过程获取地址.</p>
+
+<p>此时我们可能需要自定义链接脚本, 将 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 中的额外无效符号丢弃. 不过目前暂时不需要.</p>
+
+<h3 id="中断处理函数---内部中断和异常">中断处理函数 - 内部中断和异常</h3>
+
+<p>考虑到向量表 0 位置用于处理内部中断和异常, 我们希望能用到 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 中的异常处理函数. 在 <code class="language-plaintext highlighter-rouge">hpm-metapac</code> 的实现中,
+我定义向量表第一个位置为 <code class="language-plaintext highlighter-rouge">CORE_LOCAL</code> 中断处理函数(通过代码生成工具自动处理):</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[link_section</span> <span class="nd">=</span> <span class="s">".vector_table.interrupts"</span><span class="nd">]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">static</span> <span class="n">__VECTORED_INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="n">Vector</span><span class="p">;</span> <span class="mi">73</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">CORE_LOCAL</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPIO0_A</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPIO0_B</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPIO0_X</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPIO0_Y</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPTMR0</span> <span class="p">},</span>
+    <span class="n">Vector</span> <span class="p">{</span> <span class="n">_handler</span><span class="p">:</span> <span class="n">GPTMR1</span> <span class="p">},</span>
+    <span class="c1">// ......</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这样久可以可以通过链接符号直接覆盖:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"riscv-interrupt-m"</span> <span class="k">fn</span> <span class="nf">CORE_LOCAL</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// 使用这样的方式, 可以链接非 `pub` 向量表</span>
+    <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
+        <span class="k">static</span> <span class="n">__INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="nb">Option</span><span class="o">&lt;</span><span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span><span class="p">()</span><span class="o">&gt;</span><span class="p">;</span> <span class="mi">12</span><span class="p">];</span>
+    <span class="p">}</span>
+
+    <span class="k">let</span> <span class="n">cause</span> <span class="o">=</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mcause</span><span class="p">::</span><span class="nf">read</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">code</span> <span class="o">=</span> <span class="n">cause</span><span class="nf">.code</span><span class="p">();</span>
+
+    <span class="nn">defmt</span><span class="p">::</span><span class="nd">info!</span><span class="p">(</span><span class="s">"mcause = 0x{:08x}"</span><span class="p">,</span> <span class="n">cause</span><span class="nf">.bits</span><span class="p">());</span>
+    <span class="k">if</span> <span class="n">cause</span><span class="nf">.is_exception</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">loop</span> <span class="p">{}</span> <span class="c1">// let it crash for now</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="n">code</span> <span class="o">&lt;</span> <span class="n">__INTERRUPTS</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">h</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">__INTERRUPTS</span><span class="p">[</span><span class="n">code</span><span class="p">];</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="o">=</span> <span class="n">h</span> <span class="p">{</span>
+            <span class="nf">handler</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">DefaultHandler</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nf">DefaultHandler</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="nd">#[allow(non_snake_case)]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">fn</span> <span class="nf">DefaultHandler</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">loop</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>由于没有了 <a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 的中断入口函数, 我们需要自己处理寄存器压栈和恢复, 以及中断结束的 <code class="language-plaintext highlighter-rouge">mret</code> 指令.
+<code class="language-plaintext highlighter-rouge">extern "riscv-interrupt-m" fn</code> 是一个特殊的 ABI, 会自动处理所有寄存器的压栈和恢复, 最后通过 <code class="language-plaintext highlighter-rouge">mret</code> 返回.
+需要 Nightly Rust 和 <code class="language-plaintext highlighter-rouge">#![feature(abi_riscv_interrupt)]</code> feature 启用.</p>
+
+<p>这样打了补丁后几乎可以完全兼容上一节传统中断处理方式.</p>
+
+<p>这里我踩了一个不小的坑, 当开启向量模式后, <code class="language-plaintext highlighter-rouge">PLIC.CLAIM</code> 不再提供中断号, 但中断处理函数依然需要写入它来通知 PLIC 处理完毕.
+这里需要通过 <code class="language-plaintext highlighter-rouge">mcause</code> 寄存器读取中断号, 然后写入 <code class="language-plaintext highlighter-rouge">PLIC.CLAIM</code> 来通知 PLIC.</p>
+
+<h3 id="中断处理函数---外部中断">中断处理函数 - 外部中断</h3>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
+<span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"riscv-interrupt-m"</span> <span class="k">fn</span> <span class="nf">GPIO0_A</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// let claim = pac::PLIC.claim(); // WRONG!!!</span>
+    <span class="k">let</span> <span class="n">mcause</span> <span class="o">=</span> <span class="nn">mcause</span><span class="p">::</span><span class="nf">read</span><span class="p">()</span><span class="nf">.bits</span><span class="p">();</span>
+
+    <span class="nn">defmt</span><span class="p">::</span><span class="nd">info!</span><span class="p">(</span><span class="s">"button pressed!"</span><span class="p">);</span>
+
+    <span class="c1">// write 1 to clear</span>
+    <span class="nn">pac</span><span class="p">::</span><span class="n">GPIO0</span><span class="nf">.if_</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.value</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_irq_flag</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">));</span>
+
+    <span class="nf">compiler_fence</span><span class="p">(</span><span class="nn">core</span><span class="p">::</span><span class="nn">sync</span><span class="p">::</span><span class="nn">atomic</span><span class="p">::</span><span class="nn">Ordering</span><span class="p">::</span><span class="n">SeqCst</span><span class="p">);</span>
+    <span class="nn">pac</span><span class="p">::</span><span class="n">PLIC</span><span class="nf">.complete</span><span class="p">(</span><span class="n">mcause</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="总结">总结</h2>
+
+<p>本文中对 <code class="language-plaintext highlighter-rouge">PLIC</code> 操作的实现位于 <a href="https://github.com/hpmicro-rs/hpm-hal">hpm-hal</a> 的 <a href="https://github.com/hpmicro-rs/hpm-hal/blob/master/src/internal/interrupt.rs">src/internal/interrupt.rs</a>.</p>
+
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/';
+      this.page.identifier = 'https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/2024/05/05/hpmicro-riscv-interrupt-handling/" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/';
+      this.page.identifier = 'https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+  });
+</script>
+<script
+  type="text/javascript"
+  async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+></script>
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/0c125dd8ac23b21"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">0c125dd8ac23b21</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
