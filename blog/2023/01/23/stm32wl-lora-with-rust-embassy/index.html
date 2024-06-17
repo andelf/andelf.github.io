@@ -8,8 +8,8 @@
 <meta property="og:title" content="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" />
 <meta name="author" content="andelf" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试." />
-<meta property="og:description" content="之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试." />
+<meta name="description" content="2024-06 补充: 相关内容已经过期, 且 lora-rust 项目长达 1 年多是时间删去 CN470 支持后没有再加回来. 本文仅作为历史记录." />
+<meta property="og:description" content="2024-06 补充: 相关内容已经过期, 且 lora-rust 项目长达 1 年多是时间删去 CN470 支持后没有再加回来. 本文仅作为历史记录." />
 <link rel="canonical" href="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" />
 <meta property="og:url" content="https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/" />
 <meta property="og:site_name" content="猫·仁波切" />
@@ -20,7 +20,7 @@
 <meta property="twitter:image" content="https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png" />
 <meta property="twitter:title" content="使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2023-01-23T04:00:00+00:00","datePublished":"2023-01-23T04:00:00+00:00","description":"之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.","headline":"使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输","image":"https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"},"url":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2023-01-23T04:00:00+00:00","datePublished":"2023-01-23T04:00:00+00:00","description":"2024-06 补充: 相关内容已经过期, 且 lora-rust 项目长达 1 年多是时间删去 CN470 支持后没有再加回来. 本文仅作为历史记录.","headline":"使用 Rust 语言 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输","image":"https://user-images.githubusercontent.com/72891/213959627-2d2dfd95-6b29-4770-a1ee-85eb81081acd.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"},"url":"https://andelf.github.io/blog/2023/01/23/stm32wl-lora-with-rust-embassy/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -91,7 +91,11 @@
     <hr />
   </header>
   <div class="post-content e-content" itemprop="articleBody">
-    <p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 <a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>, 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.</p>
+    <blockquote>
+  <p>2024-06 补充: 相关内容已经过期, 且 lora-rust 项目长达 1 年多是时间删去 CN470 支持后没有再加回来. 本文仅作为历史记录.</p>
+</blockquote>
+
+<p>之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 <a href="https://mbb.eet-china.com/evaluating/product-106.html">STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)</a>, 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.</p>
 
 <p>本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输. 过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.</p>
 
