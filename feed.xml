@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-06-17T07:41:26+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU / Andes RISC-V</title><link href="https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling/" rel="alternate" type="text/html" title="HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU / Andes RISC-V" /><published>2024-06-17T07:30:00+00:00</published><updated>2024-06-17T07:30:00+00:00</updated><id>https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling</id><content type="html" xml:base="https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling/"><![CDATA[<p>Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-06-17T07:43:59+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU / Andes RISC-V</title><link href="https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling/" rel="alternate" type="text/html" title="HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU / Andes RISC-V" /><published>2024-06-17T07:30:00+00:00</published><updated>2024-06-17T07:30:00+00:00</updated><id>https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling</id><content type="html" xml:base="https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling/"><![CDATA[<p>Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode.</p>
 
 <p>最近在折腾 HPMicro 的 RISC-V 系列 MCU 的 Rust 支持 <a href="https://github.com/hpmicro-rs/hpm-hal">hpm-hal</a>, 由于需要处理中断, 所以对其中断控制器有了一些了解.
 虽然 HPMicro 的文档已经是国内厂商的天花板了, 但对于一些细节还是有些模糊, 比如中断的向量模式和具体中断软件处理步骤.
@@ -329,7 +329,6 @@
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
 <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"Rust"</span> <span class="k">fn</span> <span class="nf">_setup_interrupts</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
-
         <span class="k">static</span> <span class="n">__VECTORED_INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="mi">1</span><span class="p">];</span>
     <span class="p">}</span>
 
@@ -369,7 +368,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>这样久可以可以通过链接符号直接覆盖:</p>
+<p>这样久可以通过链接符号直接覆盖:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
 <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"riscv-interrupt-m"</span> <span class="k">fn</span> <span class="nf">CORE_LOCAL</span><span class="p">()</span> <span class="p">{</span>

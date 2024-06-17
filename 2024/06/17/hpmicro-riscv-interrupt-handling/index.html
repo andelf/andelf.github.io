@@ -404,7 +404,6 @@
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
 <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"Rust"</span> <span class="k">fn</span> <span class="nf">_setup_interrupts</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span>
-
         <span class="k">static</span> <span class="n">__VECTORED_INTERRUPTS</span><span class="p">:</span> <span class="p">[</span><span class="nb">u32</span><span class="p">;</span> <span class="mi">1</span><span class="p">];</span>
     <span class="p">}</span>
 
@@ -444,7 +443,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>这样久可以可以通过链接符号直接覆盖:</p>
+<p>这样久可以通过链接符号直接覆盖:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[no_mangle]</span>
 <span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"riscv-interrupt-m"</span> <span class="k">fn</span> <span class="nf">CORE_LOCAL</span><span class="p">()</span> <span class="p">{</span>
