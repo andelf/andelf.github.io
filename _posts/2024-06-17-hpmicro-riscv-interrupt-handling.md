@@ -363,7 +363,7 @@ pub static __VECTORED_INTERRUPTS: [Vector; 73] = [
 }
 ```
 
-这样久可以通过链接符号直接覆盖:
+这样就可以通过链接符号直接覆盖:
 
 ```rust
 #[no_mangle]
