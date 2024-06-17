@@ -506,6 +506,16 @@
 
 <p>本文中对 <code class="language-plaintext highlighter-rouge">PLIC</code> 操作的实现位于 <a href="https://github.com/hpmicro-rs/hpm-hal">hpm-hal</a> 的 <a href="https://github.com/hpmicro-rs/hpm-hal/blob/master/src/internal/interrupt.rs">src/internal/interrupt.rs</a>.</p>
 
+<p><a href="https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs">riscv-rt</a> 的实现不够通用, 但疯狂打 patch 还是能将就的. 如果我已经自定义了向量表, 中断处理, 链接脚本, 那么原本属于它的只剩下几句 <code class="language-plaintext highlighter-rouge">.data</code> <code class="language-plaintext highlighter-rouge">.bss</code> 和 FPU 初始化汇编了. 并不是很好的方式.</p>
+
+<p>向量模式中断总体实现更简洁明了, 少一层跳转, 其中 <code class="language-plaintext highlighter-rouge">extern "riscv-interrupt-m" fn</code> 可以通过过程宏的方式处理, 例如 <code class="language-plaintext highlighter-rouge">#[interrupt]</code>.</p>
+
+<p>本文适用于其他 Andes IP Core 的 RISC-V MCU, 但是具体实现细节请参考具体型号的文档.</p>
+
+<p>本文适用于其他语言. 但是需要注意 ABI 和寄存器的处理.</p>
+
+<p>欢迎关注 <a href="https://github.com/hpmicro-rs/hpm-hal">hpm-hal</a> 的进展, 以及 <a href="https://github.com/hpmicro-rs/hpm-metapac">hpm-metapac</a> 的实现 <a href="https://github.com/andelf/hpm-data">hpm-data</a>.</p>
+
 
   </div>
 
