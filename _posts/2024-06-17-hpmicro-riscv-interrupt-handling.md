@@ -20,11 +20,10 @@ Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address
 
 这里以 HPM5300EVK 为例, MCU 为 HPM5361, IP Core 为 Andes D25(F). HPM6xxx 系列的 IP Core 为 Andes D45, 但是中断控制器的实现是一样的.
 
-本文不涉及多核. 每个核心各有一个 PLIC, 无具体区别.
-
-本文不涉及 Supervisor 模式, 仅讨论 Machine 模式下的中断处理.
-
-本文混合使用 HPM RISC-V MCU 和 Andes IP Core 两个名词, 对于中断处理来说, 他们是通用的.
+- 本文不涉及多核. 每个核心各有一个 PLIC, 无具体区别.
+- 本文不涉及 Supervisor / User 模式, 仅讨论 Machine 模式下的中断处理.
+- 本文混合使用 HPM RISC-V MCU 和 Andes IP Core 两个名词, 对于中断处理来说, 他们是通用的.
+- 本文使用 [hpm-metapac] 和 [hpm-hal] 作为代码示例.
 
 ## 基础介绍
 
