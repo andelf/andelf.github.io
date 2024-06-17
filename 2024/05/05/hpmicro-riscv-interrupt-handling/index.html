@@ -3,9 +3,9 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式(Interrupt Handling for HPMicro RISC-V MCU) | 猫·仁波切</title>
+<title>HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU | 猫·仁波切</title>
 <meta name="generator" content="Jekyll v4.3.3" />
-<meta property="og:title" content="HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式(Interrupt Handling for HPMicro RISC-V MCU)" />
+<meta property="og:title" content="HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU" />
 <meta name="author" content="andelf" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode." />
@@ -16,9 +16,9 @@
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2024-05-05T03:06:00+00:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式(Interrupt Handling for HPMicro RISC-V MCU)" />
+<meta property="twitter:title" content="HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2024-05-05T03:06:00+00:00","datePublished":"2024-05-05T03:06:00+00:00","description":"Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode.","headline":"HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式(Interrupt Handling for HPMicro RISC-V MCU)","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/"},"url":"https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2024-05-05T03:06:00+00:00","datePublished":"2024-05-05T03:06:00+00:00","description":"Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode.","headline":"HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/"},"url":"https://andelf.github.io/2024/05/05/hpmicro-riscv-interrupt-handling/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -41,7 +41,7 @@
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">HPM RISC-V MCU 中断处理简介 - 直接地址模式和向量模式(Interrupt Handling for HPMicro RISC-V MCU)</h1>
+    <h1 class="post-title p-name" itemprop="name headline">HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU</h1>
     <p class="post-meta">
       <time class="dt-published" datetime="2024-05-05T03:06:00+00:00" itemprop="datePublished">May 5, 2024
       </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card"
