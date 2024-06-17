@@ -432,8 +432,19 @@ unsafe extern "riscv-interrupt-m" fn GPIO0_A() {
 
 本文中对 `PLIC` 操作的实现位于 [hpm-hal] 的 [src/internal/interrupt.rs](https://github.com/hpmicro-rs/hpm-hal/blob/master/src/internal/interrupt.rs).
 
+[riscv-rt] 的实现不够通用, 但疯狂打 patch 还是能将就的. 如果我已经自定义了向量表, 中断处理, 链接脚本, 那么原本属于它的只剩下几句 `.data` `.bss` 和 FPU 初始化汇编了. 并不是很好的方式.
+
+向量模式中断总体实现更简洁明了, 少一层跳转, 其中 `extern "riscv-interrupt-m" fn` 可以通过过程宏的方式处理, 例如 `#[interrupt]`.
+
+本文适用于其他 Andes IP Core 的 RISC-V MCU, 但是具体实现细节请参考具体型号的文档.
+
+本文适用于其他语言. 但是需要注意 ABI 和寄存器的处理.
+
+欢迎关注 [hpm-hal] 的进展, 以及 [hpm-metapac] 的实现 [hpm-data].
+
 [hpm_sdk]: https://github.com/hpmicro/hpm_sdk
 [hpm-hal]: https://github.com/hpmicro-rs/hpm-hal
 [riscv-rt]: https://docs.rs/crate/riscv-rt/latest/source/src/lib.rs
 [svd2rust]: https://github.com/rust-embedded/svd2rust
 [hpm-metapac]: https://github.com/hpmicro-rs/hpm-metapac
+[hpm-data]: https://github.com/andelf/hpm-data
