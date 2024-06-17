@@ -16,6 +16,8 @@ toc: true
 published: true
 ---
 
+> 2024-06 补充: 相关内容已经过期, 且 lora-rust 项目长达 1 年多是时间删去 CN470 支持后没有再加回来. 本文仅作为历史记录.
+
 之前参与了 eet-china.com 的开发板测评活动, 申请的板子是 [STM32WLE5 易智联 Lora 评估板(LM401-Pro-Kit)](https://mbb.eet-china.com/evaluating/product-106.html), 正好 Rust Embassy 框架对 STM32WL 系列及其 SubGhz 有不错的支持, 所以打算用这套技术栈进行开发尝试.
 
 本文主要介绍如何使用 Rust 语言的 Embassy 嵌入式框架实现 STM32WL LoRa 数据传输. 过年回老家, 随身带的东西不多, 只有一个迷你 BMP280 (大气压温度)传感器模块, 所以本文使用 BMP280 传感器数据作为例子.

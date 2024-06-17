@@ -76,7 +76,7 @@ pub static __EXCEPTIONS: [Option<unsafe extern "C" fn(&TrapFrame)>; 16] = [
 
 [riscv-rt] 通过静态数组 `__EXCEPTIONS` 定义了异常处理函数列表, 通过 `mcause` 寄存器的值来索引.
 `TrapFrame` 是一个结构体, 用于保存异常发生时的寄存器状态. 由汇编代码保存后压栈传递.
-所有函数实现由链接脚本定义, 提供了一个 `loop {}` 死循环的默认实现, 最终用户可以在代码中覆盖.
+所有函数由链接脚本提供了一个 `loop {}` 死循环的默认实现, 用户可以在代码中覆盖.
 
 ### 中断
 
@@ -111,11 +111,14 @@ pub static __INTERRUPTS: [Option<unsafe extern "C" fn()>; 12] = [
 如上代码是中断处理函数的定义, 处理方式一致, 也是通过静态数组 `__INTERRUPTS` 索引. 但是中断处理函数不需要传递 `TrapFrame`, 因为中断发生时,
 由中断处理函数来保存寄存器和恢复状态.
 
-其中我们需要关注的是 `MachineExternal` 函数,它负责处理外部中断. 当发生外部中断时, 在 `MachineExternal` 函数中,需要先读取 `PLIC` 的中断挂起状态, 确定具体的中断源, 然后调用相应的中断处理函数进行处理.
+其中我们需要关注的是 `MachineExternal` 函数, 它负责在机器模式下处理外部中断(即 MCU 的外设中断).
+当发生外部中断时, 在 `MachineExternal` 函数中, 需要先读取 `PLIC` 的中断挂起状态, 确定具体的中断源, 然后调用相应的中断处理函数进行处理.
 
 ### 中断入口
 
-[riscv-rt] 默认使用直接模式(Direct Mode)处理中断, 即将 `mtvec` 寄存器设置为中断入口函数的地址。在这种模式下, 发生中断时会直接跳转到中断入口函数执行. 中断入口函数需要读取 `mcause` 寄存器的值, 判断是异常还是中断, 然后调用相应的异常或中断处理函数. 具体实现中, 有一部分是汇编代码负责调用 Rust 函数, 最后执行 mret 指令返回.
+[riscv-rt] 默认使用直接模式(Direct Mode)处理中断, 即将 `mtvec` 寄存器设置为统一的中断入口函数地址。
+在这种模式下, 发生中断时会直接跳转到该函数执行. 中断入口函数需要读取 `mcause` 寄存器的值, 判断是异常还是中断, 然后调用相应的异常或中断处理逻辑.
+具体实现中, 入口地址为汇编代码, 负责调用 Rust 函数, 并执行 mret 指令返回.
 
 (这部分实现 [riscv-rt] 经常修改, 今天汇编改 Rust, 明天 Rust 改宏, 大后天可能又换个位置..., 实际上区别不大, 依然很难用)
 
@@ -157,7 +160,7 @@ pub unsafe extern "C" fn start_trap_rust(trap_frame: *const TrapFrame) {
 }
 ```
 
-这样当我们需要处理外部中断时候, 只需要覆盖 `MachineExternal` 函数即可.
+这样当我们需要处理外部中断时候, 只需要覆盖 `MachineExternal` 函数即可, `__INTERRUPTS` 通过链接符号获得函数入口地址.
 
 ```rust
 #[no_mangle]
@@ -176,11 +179,11 @@ extern "C" fn MachineExternal() {
 
 ## HPM RISC-V MCU 中断处理 - 直接地址模式
 
-这里分别 HPM RISC-V MCU 的中断处理, 包括传统的直接地址模式和 Andes IP Core 特有的向量模式.
+这里介绍 HPM RISC-V MCU 中断处理的两种模式, 包括传统的直接地址模式和 Andes IP Core 特有的向量模式.
 
 [riscv-rt] 支持通过编译选项选择中断处理模式, 但向量模式实现极不通用, 直接地址模式是最常见的, 也是几乎被所有 RISC-V 实现支持的.
 
-大致流程如下:
+直接地址模式大致流程如下:
 
 - 中断模式启用:
   - `mstatus` 中 `MIE` 位用于开启全局中断
@@ -197,12 +200,12 @@ extern "C" fn MachineExternal() {
 
 ### GPIO 外设 - 外部中断
 
-HPM RISC-V MCU 的中断处理和上面的基础介绍类似, 但是有一些细节需要注意.
+对于外部中断来说, 处理 `MachineExternal` 即可.
 
-`mtvec` 的设置在 [riscv-rt] 中完成, `xtvec::write(_start_trap as usize, xTrapMode::Direct);` 写入函数地址和中断模式即可.
-但 Andes RISC-V IP Core 的 mtvec 低位地址无效, 它使用额外的自定义 CSR 来选择中断模式. 这里的只用于写入函数地址.
+需要注意的是 `mtvec` 的设置在 [riscv-rt] 中完成, 通过 `xtvec::write(_start_trap as usize, xTrapMode::Direct);` 写入函数地址和中断模式即可.
+但 Andes RISC-V IP Core 的 mtvec 低位地址无效, 它使用额外的自定义 CSR 来选择中断模式. 这里 `mtvec` 只用于写入函数入口地址.
 
-在 `mtvec` 设置后, 还需要额外设置 `mstatus`, `mie` 寄存器, 开启全局中断, 和外部中断.
+在 `mtvec` 设置后, 还需要额外设置 `mstatus`, `mie` CSR 寄存器, 开启全局中断, 和外部中使能.
 
 ```rust
 unsafe {
@@ -282,14 +285,14 @@ extern "C" fn MachineTimer() {
 }
 ```
 
-这里可以直接 `mie::clear_mtimer()` 关闭 MTIME 中断, 也可以在 `MachineTimer` 中设置下一个中断时间.
+中断处理函数 `MachineTimer` 中可以直接 `mie::clear_mtimer()` 关闭 MTIME 中断, 也可以设置比较寄存器, 设置下次中断时间.
 
-## HPM RISC-V MCU 中断向量模式
+## HPM RISC-V MCU 中断处理 - 向量模式
 
-中断向量模式在官方 Datasheet 中介绍较为简略, 同时还需要参考 Andes RISC-V IP Core 的[文档](http://www.andestech.com/en/products-solutions/product-documentation/).
+中断向量模式在 HPM 官方 Datasheet 中介绍较为简略, 同时还需要参考 Andes RISC-V IP Core 的[文档](http://www.andestech.com/en/products-solutions/product-documentation/).
 
-- AndeStar V5 Platform-Level Interrupt Controller Specification
-- AndeStar V5 System Privileged Architecture and CSR
+- AndeStar V5 Platform-Level Interrupt Controller Specification (PLIC IP Core 文档)
+- AndeStar V5 System Privileged Architecture and CSR (CSR 文档)
 
 经过相关试验, 得到如下结论:
 
@@ -316,8 +319,14 @@ extern "C" fn MachineTimer() {
 
 ### Patch [riscv-rt] `_setup_interrupts`
 
-[riscv-rt] 中的中断处理是直接地址模式, 通过编译选项可以选择中断处理模式, 但是实现无法兼容 HPM RISC-V MCU 的中断向量模式.
-万幸是它提供了扩展点, 可以通过覆盖 `_setup_interrupts` 函数来实现自定义中断处理相关设置.
+[riscv-rt] 中的中断处理默认是直接地址模式, 通过编译选项 `v-trap` 可以切换到向量中断处理模式,
+但是实现无法兼容 HPM RISC-V MCU 的向量中断模式. 传统 RISC-V 标准实现的向量中断模式,
+指的是跳转指令的向量表, 即中断向量每个中断号对应一条 jump 指令, 跳转到对应的中断处理函数.
+
+而 Andes IP Core 的中断向量是一个内存地址表, 每个中断号对应一个函数的内存地址.
+这样的好处是直接跳转, 没有跳转指令的内存偏移限制.
+
+万幸是 [riscv-rt]  提供了扩展点, 可以通过覆盖 `_setup_interrupts` 函数来实现自定义中断处理相关设置.
 
 ```rust
 #[no_mangle]
@@ -345,7 +354,7 @@ pub unsafe extern "Rust" fn _setup_interrupts() {
 
 ### 中断处理函数 - 内部中断和异常
 
-考虑到向量表 0 位置用于处理内部中断和异常, 我们希望能用到 [riscv-rt] 中的异常处理函数. 在 `hpm-metapac` 的实现中,
+考虑到向量表 0 位置用于处理处理器内部中断和异常, 我们希望能复用 [riscv-rt] 中的异常处理函数定义表. 在 `hpm-metapac` 的实现中,
 我定义向量表第一个位置为 `CORE_LOCAL` 中断处理函数(通过代码生成工具自动处理):
 
 ```rust
@@ -363,7 +372,7 @@ pub static __VECTORED_INTERRUPTS: [Vector; 73] = [
 }
 ```
 
-这样就可以通过链接符号直接覆盖:
+这样就可以通过链接符号直接添加内部中断处理函数:
 
 ```rust
 #[no_mangle]
@@ -401,7 +410,7 @@ fn DefaultHandler() {
 `extern "riscv-interrupt-m" fn` 是一个特殊的 ABI, 它会自动处理所有寄存器的保存和恢复,并在中断处理函数返回时执行 `mret` 指令.
 需要 Nightly Rust 和 `#![feature(abi_riscv_interrupt)]` feature 启用.
 
-使用这种方式, 可以在不 fork [riscv-rt] 的情况下, 实现与上一节中断处理方式类似的功能.
+使用这种方式, 可以在不 fork [riscv-rt] 的情况下, 实现与传统 [riscv-rt] 中断处理方式类似的功能.
 
 这里我踩了一个不小的坑, 当开启向量模式后, `PLIC.CLAIM` 不再提供中断号, 但中断处理函数依然需要写入它来通知 `PLIC` 处理完毕.
 因此, 需要通过读取 `mcause` 寄存器获取中断号, 然后写入 `PLIC.CLAIM` 寄存器来通知 `PLIC` 中断已经处理完毕.
