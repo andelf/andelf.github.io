@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit | 猫·仁波切</title>
+<meta name="generator" content="Jekyll v4.3.3" />
+<meta property="og:title" content="机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit" />
+<meta name="author" content="andelf" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="之前在咸鱼 App 上收了 3 个 24x24 像素的机场 RGB 点阵显示单元, 大概是这么个东西:" />
+<meta property="og:description" content="之前在咸鱼 App 上收了 3 个 24x24 像素的机场 RGB 点阵显示单元, 大概是这么个东西:" />
+<link rel="canonical" href="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/" />
+<meta property="og:url" content="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/" />
+<meta property="og:site_name" content="猫·仁波切" />
+<meta property="og:image" content="https://andelf.github.io/assets/display-24x24-final.jpeg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-08-19T13:42:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://andelf.github.io/assets/display-24x24-final.jpeg" />
+<meta property="twitter:title" content="机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2024-08-19T13:42:00+00:00","datePublished":"2024-08-19T13:42:00+00:00","description":"之前在咸鱼 App 上收了 3 个 24x24 像素的机场 RGB 点阵显示单元, 大概是这么个东西:","headline":"机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit","image":"https://andelf.github.io/assets/display-24x24-final.jpeg","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/"},"url":"https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">猫·仁波切</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-08-19T13:42:00+00:00" itemprop="datePublished">Aug 19, 2024
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card"
+          itemprop="name">andelf</span></span>• <span>Tags: embedded, rust</span></p><p>
+      <img src="/assets/display-24x24-final.jpeg" alt="thumbnail" height="200px" />
+    </p>
+    <hr /><div class="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#介绍">介绍</a></li>
+<li class="toc-entry toc-h2"><a href="#电路部分">电路部分</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#lcd-驱动板">LCD 驱动板</a></li>
+<li class="toc-entry toc-h3"><a href="#背光电路">背光电路</a></li>
+<li class="toc-entry toc-h3"><a href="#电路引出">电路引出</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#coding-time">Coding Time</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#背光驱动">背光驱动</a></li>
+<li class="toc-entry toc-h3"><a href="#lcd-像素驱动">LCD 像素驱动</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#进阶---field-sequential-rgb-driving">进阶 - Field Sequential RGB Driving</a></li>
+<li class="toc-entry toc-h2"><a href="#后">后</a></li>
+</ul>
+    </div>
+    <hr />
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>之前在咸鱼 App 上收了 3 个 24x24 像素的机场 RGB 点阵显示单元, 大概是这么个东西:</p>
+
+<p><img src="/assets/display-24x24-front.jpeg" alt="Front" /></p>
+
+<p>这种显示单元在机场的航站楼里面经常见到，用来显示航班信息, 一个单元显示一个汉字. 常见是红色或黄色单色字符, 特点是显示效果非常醒目.</p>
+
+<p><img src="/assets/display-24x24-airport-screen.jpeg" alt="Airport Screen" /></p>
+
+<p>听商家说, 这一批屏幕来自于浦东机场. 大概是机场航班信息显示屏幕的一部分. 如上图, 一个汉字正好使用一个显示单元.
+字体边缘清晰, 亮度高.</p>
+
+<p>简单搜索发现相关似乎 IC 资料能搜到, 猜测驱动应该不难, 所以当时就收了下来. 垃圾佬的特色就是赌.</p>
+
+<h2 id="介绍">介绍</h2>
+
+<p>整个显示单元成色还可以, 但设备常年在较恶劣使用环境下工作, 有不少陈年灰, 需要清理.</p>
+
+<p>正面稍有岁月痕迹, 外壳有些许运输划痕, 但屏幕成色很好. 屏幕隐约能看到大块的像素点.</p>
+
+<p><img src="/assets/display-24x24-back.jpeg" alt="Back" /></p>
+
+<p>背后是巨大的散热金属片, 用于给 RGB 背光驱动板散热. 说明 RGB 背光板功耗不小, 提醒我们不要直接用单片机驱动.
+从背面的文字可以确定屏幕型号是 KD54008-L025. 同时插座文字可以确定屏幕的上下方向.
+左右两侧有三个 PH2.0 接口, 用于背光级联驱动和背光电源. PCB 上有标注, 但被散热片遮挡不容易看到.
+背光板上有三个电位器可以调整 R, G, B 的亮度.</p>
+
+<p><img src="/assets/display-24x24-back-light-board.jpeg" alt="Back Light Driver PCB" /></p>
+
+<p>拆掉后可以看到背光 RGB 灯珠, 分十六组, 使用移位寄存器驱动, 即完全改变一片背光板的颜色, 需要通过移位16次.</p>
+
+<p><img src="/assets/display-24x24-screen.jpeg" alt="LCD Screen Teardown" /></p>
+
+<p>屏幕是两层静态 TN, 每一层都是 24x24 像素, 相同. 这种屏幕的特点是响应速度快, 高对比度, 叠两层对比度更高.
+LCD 驱动板分上下两块 PCB 板, 每块板四个 LCD 驱动芯片 LC7931 级联. TSSOP20 封装的是 74HC245, 用于级联信号驱动能力.
+上下两块驱动板的布局近似, 但移位方向和屏幕像素连接稍有不同, 基本上是镜像对称的. 这里放上板的图:</p>
+
+<p><img src="/assets/display-24x24-lcd-driver-board.jpeg" alt="LCD Driver PCB" /></p>
+
+<p>每块驱动板背后有两个 10pin 接口, 用于级联和电源. 10pin 接口是超薄接插连接器, 不是常见的型号, 但可以用 MX1.25-10P 超薄接头兼容.</p>
+
+<p>折腾这种东西像是在复习自己当年的数字电路知识, 高低电平, 时钟, 包括移位寄存器, 锁存器等等.</p>
+
+<h2 id="电路部分">电路部分</h2>
+
+<p>掏出家家必备的万用表开始, 一顿测.
+背光驱动板因为接口有标注, 可以直接给驱动信号. LCD 驱动板稍微复杂一点, 但你只需要一个周末的下午. 有一些常用的经验:</p>
+
+<ul>
+  <li>如果外壳或安装孔接地, 可以很容易确定地线和电源</li>
+  <li>从已知芯片和资料比较完善的芯片开始, 检测信号引脚, 例如 74HC245</li>
+  <li>级联式组合的芯片走线一般都比较有规律, 可以大致猜测</li>
+</ul>
+
+<p>背光和LCD驱动是两部分独立的电路,分别处理。</p>
+
+<h3 id="lcd-驱动板">LCD 驱动板</h3>
+
+<p>单个单元有上下两块驱动板, 分别用于上下两半屏幕. 两块驱动板的布局近似, 但移位方向和屏幕连接稍有不同, 基本上是镜像对称的.</p>
+
+<p>以上板为例(01A):</p>
+
+<ul>
+  <li>4 片级联 LC7931, 用于驱动屏幕, 三洋的 80-channel Liquid-crystal Display Driver</li>
+  <li>1 片 HC245A , 即熟悉的 74HC245, Octal 3-State Noninverting Bus Transceiver, 三态 8 位总线收发, 用于驱动信号和级联信号的 buffer, 增加级联信号驱动能力</li>
+  <li>两个超薄 10pin 板对线接插连接器, 不是常见的型号, 能近似兼容的信号是 MX1.25-10P 超薄接头(必须是超薄)</li>
+</ul>
+
+<p>通过分析74HC245三态8路总线收发芯片的使用情况,可以快速判断该PCB的供电和信号线路。74HC245的使能信号和方向信号均接地,说明它被当作一个普通的缓冲芯片使用,用于增加级联信号驱动能力.</p>
+
+<p>74HC245的8路信号输入输出分别引向其他部分。由于LTC7931支持级联, 需要4条信号线控制, 因此可合理猜测这8路信号是用于TC7931的级联输入输出信号.</p>
+
+<p>LTC7931是 80 通道液晶显示驱动芯片,用于驱动LCD的的像素点。引脚较多, 需要慢慢对应到接插件端口上.
+LC7931 手册很详细, 是影印版的 PDF. 我们常把这种显示单元称为 “段码屏”, 屏幕被分成了很多 “segment”, 具体组织方式可以是规则矩阵排列, 也可以是类似数码管, 比如常见的七段数码管就是一种 segment display.</p>
+
+<p>忽略74HC245, 简化电路示意图如下:</p>
+
+<p><img src="/assets/display-24x24-lcd-driver-sch.jpeg" alt="SCH" /></p>
+
+<p>主要是级联和接插件的信号输入输出。上下两块驱动板的四个接口的GND均位于显示单元外侧,电源输入位于靠模块中间一侧。</p>
+
+<p>具体的像素布局需要在代码中一位一位修改尝试, 这里我结合了代码和万用表, 屏幕布局大概是:</p>
+
+<ul>
+  <li>屏幕上半部分像素 width=24, height=12, 由 4 片 LC7931 驱动, 级联方式</li>
+  <li>每片 LC7931 驱动 72 个像素点(segment), 80-bit 输出的高八位为 NC</li>
+  <li>72 个像素点正好是 6 列, z 字形排列, 12 行</li>
+  <li>屏幕下半部分与此镜像对称, 所以成了 80-bit 输出的低八位 NC</li>
+  <li>上下两块驱动板的布局通过跳线电阻选择移位方向, 所以大概是:</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(Back View)
++--CN0------------CN1--+
+| A1 -&gt; A2 -&gt; A3 -&gt; A4 |
+|                      |
+........................
+|                      |
+| B1 -&gt; B2 -&gt; B3 -&gt; B4 |
++--CN0------------CN1--+
+</code></pre></div></div>
+
+<p>其中每个 Ax, Bx 表示单片 LTC7931 驱动的 72 个像素点, 也就是 6 列 12 行的像素点.</p>
+
+<p>CLKSR 是移位寄存器时钟, 最高 1MHz, 计算可以得到, 80 segment 驱动, 一个屏幕 8 片 LC7931,
+(1 MHz / (80 * 8) = 1562 Hz) 理论最高一个单元屏幕刷新率, 3 个级联的话就是 320 Hz. 速度还可以.
+对于机场静态文字来说, 这个速度是足够的.</p>
+
+<h3 id="背光电路">背光电路</h3>
+
+<p>背光板上的 16 组 RGB LED, 每组若干高亮三色 LED, 通过移位的方式逐渐驱动, 一个单元有三个连接器. 很常见的 PH2.0.</p>
+
+<ul>
+  <li>CN1: 电源输入, 5V, GND, 实测单个单元最高电流可达 1A 以上, 常见单片机板子 5V 直接驱动可能过流烧坏电路!!</li>
+  <li>CN2: 驱动信号输出, 用于级联</li>
+  <li>CN3: 驱动信号输入</li>
+  <li>3 个电位器旋钮, 分别用来控制 R, G, B 的亮度, 方便调整颜色一致性</li>
+</ul>
+
+<p>CN2, CN3 都是 8pin PH2.0 接插连接器. CN3 输入驱动信号如下:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>自上到下</th>
+      <th>信号</th>
+      <th>说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>CLK</td>
+      <td>背光移位寄存器时钟</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>LATCH/LOAD</td>
+      <td>背光移位寄存器锁存</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>EN</td>
+      <td>背光输出使能, 低电平有效</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>R</td>
+      <td>红色</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>G</td>
+      <td>绿色</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>B</td>
+      <td>蓝色</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>GND</td>
+      <td>地</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>NC</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="电路引出">电路引出</h3>
+
+<p>得知了接口的信息, 就可以准备转接板了. 我这里选用了常见的单面洞洞焊接板, 引出电源及 10 pin 接口到 2.54mm 排针.</p>
+
+<h2 id="coding-time">Coding Time</h2>
+
+<p>MCU 这里选择 RPi Pico(RP2040), 开发框架选择 Rust Embassy. 它为嵌入式环境提供了方便简洁的 async/await 支持.
+官方对 STM32, RP2040, NRF 等常见芯片提供了支持. 我目前正在做的 <a href="https://github.com/ch32-rs/ch32-hal">ch32-hal</a> 项目提供了 WCH 32 位单片机的 Embassy 支持,
+<a href="https://github.com/hpmicro-rs/hpm-hal">hpm-hal</a> 项目提供了 HPMicro 的 32 位单片机的 Embassy 支持.</p>
+
+<p>我们以 Embassy async task 的方式编写屏幕相关驱动.</p>
+
+<p>从官方项目仓库直接找到 examples 目录, 复制出来搞定项目模板, 开始写代码.</p>
+
+<h3 id="背光驱动">背光驱动</h3>
+
+<p>先从简单的开始, 背光的移位和锁存可以快速验证, 甚至本例中, 我是用跳线来回短接模拟时钟测试的.</p>
+
+<h3 id="lcd-像素驱动">LCD 像素驱动</h3>
+
+<p>相对来说 LCD 的驱动需要处理像素位置等信息, 额外还有 M 信号用于刷新 LCD, 相对复杂一些.</p>
+
+<p>LCD M 信号的 AC 刷新, 可以使用 PWM 输出, 也可以偷懒直接用 GPIO:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[embassy_executor::task]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="nf">lcd_ac_driver</span><span class="p">(</span><span class="n">pin</span><span class="p">:</span> <span class="n">AnyPin</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">pin</span> <span class="o">=</span> <span class="nn">Output</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">pin</span><span class="p">,</span> <span class="nn">Level</span><span class="p">::</span><span class="n">Low</span><span class="p">);</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">ticker</span> <span class="o">=</span> <span class="nn">Ticker</span><span class="p">::</span><span class="nf">every</span><span class="p">(</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_millis</span><span class="p">(</span><span class="mi">10</span><span class="p">));</span>
+    <span class="k">loop</span> <span class="p">{</span>
+        <span class="n">ticker</span><span class="nf">.next</span><span class="p">()</span><span class="k">.await</span><span class="p">;</span>
+        <span class="n">pin</span><span class="nf">.toggle</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>移位式像素屏幕的显示内容驱动其实有完整的一个套路, 例如 WS2812 矩阵, 还有这种 LCD segment 驱动.
+用 Framebuffer 是最简单的方式. Framebuffer 中字节的内容建议在空间允许的情况下, 尽可能接近最终传输输出的数据,
+而不要为了方便像素写入逻辑使用复杂的发送时像素映射运算.(高速移位时候避免复杂指令对于多数低端单片机来说是必要的)</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 3 display units</span>
+<span class="c1">// 10 byte per chip, 24 chip, 12 upper chip, 12 lower chip</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Pixel24x24</span> <span class="p">{</span>
+    <span class="n">buf</span><span class="p">:</span> <span class="p">[</span><span class="nb">u8</span><span class="p">;</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">3</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">Pixel24x24</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">new</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+        <span class="k">Self</span> <span class="p">{</span> <span class="n">buf</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span> <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">set_pixel</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">u16</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">u16</span><span class="p">,</span> <span class="n">on</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">x_index</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="mi">6</span><span class="p">;</span>
+        <span class="k">let</span> <span class="n">y_index</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="mi">12</span><span class="p">;</span>
+
+        <span class="c1">// zig-zag shape</span>
+        <span class="k">let</span> <span class="n">chip_index</span> <span class="o">=</span> <span class="k">if</span> <span class="n">y_index</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span> <span class="p">(</span><span class="mi">12</span> <span class="o">+</span> <span class="n">x_index</span><span class="p">)</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="p">(</span><span class="n">x_index</span><span class="p">)</span> <span class="p">};</span>
+
+        <span class="k">let</span> <span class="n">start_index</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">chip_index</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">);</span>
+
+        <span class="k">let</span> <span class="k">mut</span> <span class="n">chip_buf</span> <span class="o">=</span> <span class="k">if</span> <span class="n">y_index</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="py">.buf</span><span class="p">[</span><span class="n">start_index</span><span class="o">..</span><span class="n">start_index</span> <span class="o">+</span> <span class="mi">9</span><span class="p">]</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="py">.buf</span><span class="p">[</span><span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span><span class="o">..</span><span class="n">start_index</span> <span class="o">+</span> <span class="mi">10</span><span class="p">]</span>
+        <span class="p">};</span>
+
+        <span class="k">let</span> <span class="n">chip_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">6</span><span class="p">;</span>
+        <span class="k">let</span> <span class="n">chip_y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">%</span> <span class="mi">12</span><span class="p">;</span>
+
+        <span class="k">let</span> <span class="n">chip_n</span> <span class="o">=</span> <span class="n">chip_y</span> <span class="o">+</span> <span class="n">chip_x</span> <span class="o">*</span> <span class="mi">12</span><span class="p">;</span>
+        <span class="k">let</span> <span class="n">byte_index</span> <span class="o">=</span> <span class="p">(</span><span class="n">chip_n</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span> <span class="k">as</span> <span class="nb">usize</span><span class="p">;</span>
+        <span class="k">let</span> <span class="n">bit_index</span> <span class="o">=</span> <span class="n">chip_n</span> <span class="o">%</span> <span class="mi">8</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="n">on</span> <span class="p">{</span>
+            <span class="n">chip_buf</span><span class="p">[</span><span class="n">byte_index</span><span class="p">]</span> <span class="p">|</span><span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit_index</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">chip_buf</span><span class="p">[</span><span class="n">byte_index</span><span class="p">]</span> <span class="o">&amp;=</span> <span class="o">!</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit_index</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>随后实现 [<a href="https://docs.rs/[[embedded-graphics]]/latest/embedded_graphics/">embedded-graphics</a>] 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">OriginDimensions</span> <span class="k">for</span> <span class="n">Pixel24x24</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">size</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Size</span> <span class="p">{</span>
+        <span class="nn">Size</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">impl</span> <span class="n">DrawTarget</span> <span class="k">for</span> <span class="n">Pixel24x24</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="n">Color</span> <span class="o">=</span> <span class="n">BinaryColor</span><span class="p">;</span>
+
+    <span class="k">type</span> <span class="n">Error</span> <span class="o">=</span> <span class="nn">core</span><span class="p">::</span><span class="nn">convert</span><span class="p">::</span><span class="n">Infallible</span><span class="p">;</span>
+
+    <span class="k">fn</span> <span class="n">draw_iter</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">pixels</span><span class="p">:</span> <span class="n">I</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="k">Self</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span>
+    <span class="k">where</span>
+        <span class="n">I</span><span class="p">:</span> <span class="nb">IntoIterator</span><span class="o">&lt;</span><span class="n">Item</span> <span class="o">=</span> <span class="n">Pixel</span><span class="o">&lt;</span><span class="k">Self</span><span class="p">::</span><span class="n">Color</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="k">for</span> <span class="nf">Pixel</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span> <span class="k">in</span> <span class="n">pixels</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="k">self</span><span class="nf">.bounding_box</span><span class="p">()</span><span class="nf">.contains</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">self</span><span class="nf">.set_pixel</span><span class="p">(</span><span class="n">coord</span><span class="py">.x</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">,</span> <span class="n">coord</span><span class="py">.y</span> <span class="k">as</span> <span class="nb">u16</span><span class="p">,</span> <span class="n">color</span><span class="nf">.is_on</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="nf">Ok</span><span class="p">(())</span>
+    <span class="p">}</span>
+
+    <span class="k">fn</span> <span class="nf">clear</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="k">Self</span><span class="p">::</span><span class="n">Color</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="k">Self</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="n">color</span><span class="nf">.is_on</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">self</span><span class="py">.buf</span><span class="nf">.fill</span><span class="p">(</span><span class="mi">0xff</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">self</span><span class="py">.buf</span><span class="nf">.fill</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="nf">Ok</span><span class="p">(())</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>完成 Framebuffer 之后, 驱动只需要把 FB 的内容移位输出即可:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[inline]</span>
+<span class="k">fn</span> <span class="nf">shift_out_lsbf</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Output</span><span class="p">,</span> <span class="n">clk</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Output</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">u8</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="mi">8</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="n">p</span><span class="nf">.set_high</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">p</span><span class="nf">.set_low</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">Delay</span><span class="nf">.delay_us</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+        <span class="n">clk</span><span class="nf">.set_low</span><span class="p">();</span> <span class="c1">// falling edge shift data out</span>
+        <span class="n">Delay</span><span class="nf">.delay_us</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+        <span class="n">clk</span><span class="nf">.set_high</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>由此, 就可以用 [<a href="https://docs.rs/[[embedded-graphics]]/latest/embedded_graphics/">embedded-graphics</a>] 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait 来驱动 LCD 了.</p>
+
+<p><img src="/assets/display-24x24-char-display.jpeg" alt="Char Display" /></p>
+
+<h2 id="进阶---field-sequential-rgb-driving">进阶 - Field Sequential RGB Driving</h2>
+
+<p>在群里经 <a href="https://www.youtube.com/watch?v=t_YXjM7Keqw">wenting</a> 大佬的点拨,
+发现它完全可以用 Field Sequential RGB Driving, 也就是分时复用的 RGB 驱动方式, 通过快速切换 R, G, B 三种颜色的亮度来合成出各种颜色.
+它与传统的像素并行驱动显示技术不同，采用时间分割方法来处理颜色。</p>
+
+<p>首先显示所有像素的红色成分，然后是绿色，最后是蓝色。这些颜色的显示通常以非常高的频率交替进行，以便人眼无法察觉到颜色的切换，而是感知到这些颜色的混合效果。由于人眼具有持续性的视觉特性（视觉暂留），不同颜色的快速切换可以在观众的视觉中自然地混合起来，从而形成完整的图像。</p>
+
+<p>本文配图即为这种分时复用 RGB 驱动方式的效果.</p>
+
+<h2 id="后">后</h2>
+
+<p>其实这个拆机折腾早在 2023 年末即完成, 只不过迟迟一直没有总结.</p>
+
+<p>后来考虑到 5V 输出更稳定, 单独做了一块 CH32X033(X035) 的板子, 方便焊接排线驱动, 灵感来自 DALL-E 的一次输出, 即结合可焊接 pad 和 2.54mm 排针, 方便使用.</p>
+
+<p><img src="/assets/display-24x24-pcb-board.jpeg" alt="PCB Board Design" /></p>
+
+
+  </div>
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/';
+      this.page.identifier = 'https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<a class="u-url" href="/2024/08/19/airport-24x24-dot-rgb-character-display/" hidden></a>
+</article>
+
+
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/';
+      this.page.identifier = 'https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/';
+    };
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://andelf.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+  });
+</script>
+<script
+  type="text/javascript"
+  async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+></script>
+
+
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">猫·仁波切</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">猫·仁波切</li><li><a class="u-email" href="mailto:andelf@gmail.com">andelf@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/andelf"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">andelf</span></a></li><li><a href="https://www.twitter.com/0c125dd8ac23b21"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">0c125dd8ac23b21</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>会研发的PM才是好OP.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
