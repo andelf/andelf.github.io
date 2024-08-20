@@ -325,7 +325,7 @@ LC7931 手册很详细, 是影印版的 PDF. 我们常把这种显示单元称�
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>随后实现 [<a href="https://docs.rs/[[embedded-graphics]]/latest/embedded_graphics/">embedded-graphics</a>] 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait:</p>
+<p>随后实现 <a href="https://docs.rs/[embedded-graphics]/latest/embedded_graphics/">embedded-graphics</a> 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">OriginDimensions</span> <span class="k">for</span> <span class="n">Pixel24x24</span> <span class="p">{</span>
     <span class="k">fn</span> <span class="nf">size</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Size</span> <span class="p">{</span>
@@ -378,7 +378,7 @@ LC7931 手册很详细, 是影印版的 PDF. 我们常把这种显示单元称�
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>由此, 就可以用 [<a href="https://docs.rs/[[embedded-graphics]]/latest/embedded_graphics/">embedded-graphics</a>] 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait 来驱动 LCD 了.</p>
+<p>由此, 就可以用 <a href="https://docs.rs/[embedded-graphics]/latest/embedded_graphics/">embedded-graphics</a> 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait 来驱动 LCD 了.</p>
 
 <p><img src="/assets/display-24x24-char-display.jpeg" alt="Char Display" /></p>
 

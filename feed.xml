@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-08-20T07:28:51+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit</title><link href="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/" rel="alternate" type="text/html" title="机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit" /><published>2024-08-19T13:42:00+00:00</published><updated>2024-08-19T13:42:00+00:00</updated><id>https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display</id><content type="html" xml:base="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/"><![CDATA[<p>之前在咸鱼 App 上收了 3 个 24x24 像素的机场 RGB 点阵显示单元, 大概是这么个东西:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-08-20T07:42:20+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit</title><link href="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/" rel="alternate" type="text/html" title="机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit" /><published>2024-08-19T13:42:00+00:00</published><updated>2024-08-19T13:42:00+00:00</updated><id>https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display</id><content type="html" xml:base="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/"><![CDATA[<p>之前在咸鱼 App 上收了 3 个 24x24 像素的机场 RGB 点阵显示单元, 大概是这么个东西:</p>
 
 <p><img src="/assets/display-24x24-front.jpeg" alt="Front" /></p>
 
@@ -250,7 +250,7 @@ LC7931 手册很详细, 是影印版的 PDF. 我们常把这种显示单元称�
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>随后实现 [<a href="https://docs.rs/[[embedded-graphics]]/latest/embedded_graphics/">embedded-graphics</a>] 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait:</p>
+<p>随后实现 <a href="https://docs.rs/[embedded-graphics]/latest/embedded_graphics/">embedded-graphics</a> 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">OriginDimensions</span> <span class="k">for</span> <span class="n">Pixel24x24</span> <span class="p">{</span>
     <span class="k">fn</span> <span class="nf">size</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Size</span> <span class="p">{</span>
@@ -303,7 +303,7 @@ LC7931 手册很详细, 是影印版的 PDF. 我们常把这种显示单元称�
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>由此, 就可以用 [<a href="https://docs.rs/[[embedded-graphics]]/latest/embedded_graphics/">embedded-graphics</a>] 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait 来驱动 LCD 了.</p>
+<p>由此, 就可以用 <a href="https://docs.rs/[embedded-graphics]/latest/embedded_graphics/">embedded-graphics</a> 的 <code class="language-plaintext highlighter-rouge">DrawTarget</code> trait 来驱动 LCD 了.</p>
 
 <p><img src="/assets/display-24x24-char-display.jpeg" alt="Char Display" /></p>
 
