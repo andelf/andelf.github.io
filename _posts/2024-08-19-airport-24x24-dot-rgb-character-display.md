@@ -218,7 +218,7 @@ impl Pixel24x24 {
 }
 ```
 
-随后实现 [[embedded-graphics]] 的 `DrawTarget` trait:
+随后实现 [embedded-graphics] 的 `DrawTarget` trait:
 
 ```rust
 impl OriginDimensions for Pixel24x24 {
@@ -273,7 +273,7 @@ fn shift_out_lsbf(p: &mut Output, clk: &mut Output, data: u8) {
 }
 ```
 
-由此, 就可以用 [[embedded-graphics]] 的 `DrawTarget` trait 来驱动 LCD 了.
+由此, 就可以用 [embedded-graphics] 的 `DrawTarget` trait 来驱动 LCD 了.
 
 ![Char Display](/assets/display-24x24-char-display.jpeg)
 
@@ -298,4 +298,4 @@ fn shift_out_lsbf(p: &mut Output, clk: &mut Output, data: u8) {
 [hpm-hal]: https://github.com/hpmicro-rs/hpm-hal
 [ch32-hal]: https://github.com/ch32-rs/ch32-hal
 [wenting]: https://www.youtube.com/watch?v=t_YXjM7Keqw
-[embedded-graphics]: https://docs.rs/[[embedded-graphics]]/latest/embedded_graphics/
+[embedded-graphics]: https://docs.rs/[embedded-graphics]/latest/embedded_graphics/
