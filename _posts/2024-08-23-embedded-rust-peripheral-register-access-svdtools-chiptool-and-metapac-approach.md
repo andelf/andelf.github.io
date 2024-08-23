@@ -413,13 +413,15 @@ enum/RX_IDLE_COND:
       value: 1
 ```
 
-其中对寄存器描述的优化是整个工作最麻烦耗时的地方, 例如对 enum 的优化, 对寄存器 array 的优化等. 优化修改的好处是显而易见的, 例如如下两种代码风格对比:
+其中对外设寄存器描述的优化是整个工作最麻烦耗时的地方,
+例如对字段值 enum 的优化, 对寄存器 array 的优化等.
+优化修改的好处是显而易见的, 例如如下两种代码风格对比:
 
 ```rust
 // set PWM1_CMP7 mode
 use hpm_metapac as pac;
 use pac::pwm::vals;
-pac::PWM1.cmpcfg(7).modify(|w| {
+pac::PWM1.cmpcfg7().modify(|w| {
     w.set_cmpmode(0); // output compare
     w.set_cmpshdwupt(1); // on modify
 });
@@ -522,7 +524,8 @@ HPMicro 提供了多个系列的高性能 RISV-V MCU, 包括丰富的外设资�
 - `hpm_metapac::trgmmux::` 下的所有 TRGM 常量定义
 
 对于 PAC 库来说, 不仅仅是提供给 HAL 驱动使用, 而是同时能给最终用户一个方便安全的寄存器访问接口. 对于某些设计良好的外设, 寄存器访问更直接有效.
-由此通过简单的方式就可以使用对应的外设(虽然丢失了部分类型安全, 不过加一个 enum 也很容易, 这里主要是等待上游 chiptool 实现该机制):
+所以上面的常量定义其实很有必要, 也为 HAL 的实现提供了额外信息:
+(这里为了方便作为 index 使用, 统一用了 `usize` 类型. 丢失了部分类型安全, 不过加一个 enum 也很容易, 这里主要是等待上游 chiptool 实现 cluster 支持.)
 
 ```rust
 use hpm_metapac as pac;
@@ -536,14 +539,14 @@ pac::IOC
 
 ### pac 库的其他内容
 
-上述一节其实已经介绍了 PAC 库在标准的寄存器访问定义之外还有哪些内容, 这里再总结一遍:
+上述一节其实已经介绍了 PAC 库在标准的外设寄存器访问定义之外还有哪些内容, 这里再总结一遍:
 
 - 中断静态结构体定义, enum 定义 - 用于在 `-rt` 库中使用, 链接到中断处理函数
 - `device.x` 定义中断处理函数的链接符号, 和中断表结构体结合使用
 - `Peripherals` owned struct, 用于通过 ownership 机制管理外设资源 - 仅 svd2rust
-- `CorePeripherals` owned struct, 用于管理核心外设资源 - 仅 svd2rust + Cortex-M
-- `memory.x` 定义内存布局 - 实际上由于应用各异, 可能不会被使用到, 通过 feature gate 启用
-- 各种 METADATA 信息 - 仅本文提到的 metapac
+- `CorePeripherals` owned struct, 用于管理核心外设资源, 一般是内核定时器中断处理器等 - 仅 svd2rust + Cortex-M
+- `memory.x` 定义内存布局 - 实际上由于平台的多样性, 不一定非要由 pac 来提供内存布局定义, 比如某些可自由配置 FLASH/RAM 的芯片, 更适合最终应用提供
+- 各种 METADATA 信息 - 仅适用于本文提到的 metapac
 
 ## 总结及对比
 
@@ -566,6 +569,7 @@ pac::IOC
 [bitflags]: https://crates.io/crates/bitflags
 [stm32-rs]: https://github.com/stm32-rs/stm32-rs
 [ch32-rs]: https://github.com/ch32-rs/ch32-rs
+[ch32-data]: https://github.com/ch32-rs/ch32-data
 [stm32-data]: https://github.com/embassy-rs/stm32-data
 [hpm_sdk]: https://github.com/hpmicro/hpm_sdk
 [yaml2pac]: https://github.com/embedded-drivers/yaml2pac
