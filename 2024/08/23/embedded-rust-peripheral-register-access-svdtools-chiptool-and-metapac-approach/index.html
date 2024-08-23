@@ -124,6 +124,7 @@
          <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_BANDGAP_EN_MASK</span>
          <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_CAL_AVG_CFG_MASK</span>
          <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_CONV_PARAM_SET</span><span class="p">(</span><span class="n">param32</span><span class="p">)</span>
+<span class="n">ADC16_CONFIG0</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
 </code></pre></div></div>
 
 <p>虽然这种方式简单直接，但是不够安全，容易出现错误。例如，当字段名误用时，编译器往往不会报错，而是直接生成错误的代码。另外，当字段的位宽和偏移写错时，也会导致错误的配置.
