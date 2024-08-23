@@ -1,4 +1,556 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-08-20T07:42:20+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit</title><link href="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/" rel="alternate" type="text/html" title="机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit" /><published>2024-08-19T13:42:00+00:00</published><updated>2024-08-19T13:42:00+00:00</updated><id>https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display</id><content type="html" xml:base="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/"><![CDATA[<p>之前在咸鱼 App 上收了 3 个 24x24 像素的机场 RGB 点阵显示单元, 大概是这么个东西:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-08-23T06:40:25+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
+
+<p>本文是基础向文章, 介绍了 Rust 嵌入式开发中的外设寄存器访问问题，以及社区提供的解决方案。包括以下内容:</p>
+
+<ul>
+  <li>简短历史回顾</li>
+  <li><a href="https://github.com/rust-embedded/svd2rust">svd2rust</a> + <a href="https://github.com/rust-embedded/svdtools">svdtools</a> 工作流</li>
+  <li>介绍 <a href="https://embassy.dev/">Embassy</a> 框架中 stm32-metapac 所使用的 <a href="https://github.com/embassy-rs/chiptool">chiptool</a></li>
+  <li>metapac 的设计与实现 - 以 <a href="https://github.com/andelf/hpm-data">hpm-data</a> 和 <a href="https://github.com/hpmicro-rs/hpm-metapac">hpm-metadata</a> 为例</li>
+  <li>额外内容: pac 库的其他内容</li>
+</ul>
+
+<h2 id="背景">背景</h2>
+
+<p>在嵌入式开发中，我们经常需要访问系统外设寄存器，以配置外设的工作模式、读取传感器数据等。在 C 中, 我们通常使用宏定义和来访问外设寄存器，例如：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">uint32_t</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">ptr</span><span class="o">-&gt;</span><span class="n">ADC16_CONFIG0</span><span class="p">;</span>
+<span class="n">temp</span> <span class="o">|=</span> <span class="n">ADC16_ADC16_CONFIG0_REG_EN_MASK</span>
+         <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_BANDGAP_EN_MASK</span>
+         <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_CAL_AVG_CFG_MASK</span>
+         <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_CONV_PARAM_SET</span><span class="p">(</span><span class="n">param32</span><span class="p">)</span>
+<span class="n">ptr</span><span class="o">-&gt;</span><span class="n">ADC16_CONFIG0</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">ptr</code> 类型为 <code class="language-plaintext highlighter-rouge">ADC_Type *</code>，<code class="language-plaintext highlighter-rouge">ADC_Type</code> 是一个结构体，包含了 ADC 模块的所有寄存器字段, 按照相应内存布局一一映射。字段往往定义为 <code class="language-plaintext highlighter-rouge">volatile</code> 类型，以确保编译器不会对其进行优化。</p>
+
+<p>更原始的, 比如在 8051 等单片机上, 往往直接通过内存地址来访问外设寄存器或 SFR, 例如:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define ADC16_CONFIG0 (*(volatile uint32_t *)0x4000_0000)
+</span><span class="kt">uint32_t</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">ADC16_CONFIG0</span><span class="p">;</span>
+<span class="n">temp</span> <span class="o">|=</span> <span class="n">ADC16_ADC16_CONFIG0_REG_EN_MASK</span>
+         <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_BANDGAP_EN_MASK</span>
+         <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_CAL_AVG_CFG_MASK</span>
+         <span class="o">|</span>  <span class="n">ADC16_ADC16_CONFIG0_CONV_PARAM_SET</span><span class="p">(</span><span class="n">param32</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>虽然这种方式简单直接，但是不够安全，容易出现错误。例如，当字段名误用时，编译器往往不会报错，而是直接生成错误的代码。另外，当字段的位宽和偏移写错时，也会导致错误的配置.
+对于嵌入式环境来说, 更难以调试. 究其原因, 一是因为 C 语言中的宏是朴素的文本替换, 缺乏类型检查, 二是因为 C 语言中的类型系统较弱, 隐式类型转换较多. 另外还有历史原因, C 语言中的指针操作较为灵活, 这种 <code class="language-plaintext highlighter-rouge">struct</code> + 宏定义的方式在各大芯片厂商的 SDK/HAL/LL 中被广泛使用.</p>
+
+<p>在 Rust 中，我们同样可以通过类似的直接操作内存地址映射的方式访问外设寄存器。这种方式的优点是速度快，但缺点是不够安全，容易出现错误。为了解决这个问题，社区提供了 <a href="https://github.com/rust-embedded/svd2rust">svd2rust</a> 或 <a href="https://github.com/embassy-rs/chiptool">chiptool</a> 等工具工具来生成类型安全的外设寄存器访问代码.</p>
+
+<h2 id="由来">由来</h2>
+
+<p>这里会绍一个虚拟的发展历程, 可能并不代表真实的历史发展过程, 也不代表新方案完全替换了旧方案.</p>
+
+<h3 id="源起---unsafe--volatile-memory-access">源起 - unsafe &amp; volatile memory access</h3>
+
+<p>在 Rust 中，我们可以通过 <code class="language-plaintext highlighter-rouge">unsafe</code> 代码块和 <code class="language-plaintext highlighter-rouge">ptr::read_volatile</code>、<code class="language-plaintext highlighter-rouge">ptr::write_volatile</code> 等函数来访问外设寄存器。例如：</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">ptr</span> <span class="o">=</span> <span class="mi">0x4000_0000</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u32</span><span class="p">;</span>
+<span class="k">unsafe</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">temp</span> <span class="o">=</span> <span class="nn">ptr</span><span class="p">::</span><span class="nf">read_volatile</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+    <span class="nn">ptr</span><span class="p">::</span><span class="nf">write_volatile</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">temp</span> <span class="p">|</span> <span class="mi">0x1234</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这种方式的优点是简单直接，但缺点是不够安全，且需要依靠开发者本身的经验和代码命名规范来确保字段, SET, MASK 等的正确性. 直觉上, 就是在 Rust 中写 C 的 feel.</p>
+
+<h3 id="memory-mapped-register-io---mmio">Memory Mapped Register IO - MMIO</h3>
+
+<p>和上文提到的 C 结构体类似, Rust 中也可以定义类似的结构体来映射外设寄存器。例如：</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[repr(C)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">ADC</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">config0</span><span class="p">:</span> <span class="n">Config0</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">config1</span><span class="p">:</span> <span class="n">Config1</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">data</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">adc</span> <span class="o">=</span> <span class="mi">0x4000_0000</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="n">ADC</span><span class="p">;</span>
+<span class="k">unsafe</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">rb</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="n">adc</span> <span class="p">};</span>
+    <span class="c1">// calling method or write to `rb.config0`</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>和 C 不同的是, Rust 缺乏 bitfield 的语法糖, 也就是说, Rust 中的结构体字段访问无法直接精确到 bit, 至少也是 <code class="language-plaintext highlighter-rouge">u8</code>. 但这并不妨碍 Rust 社区创建各种好用的第三方 crate, 例如
+<a href="https://docs.rs/bitfield">bitfield</a>, <a href="https://crates.io/crates/bit_field">bit_field</a> 等. 通过直接使用 bitfield 作为字段类型, 可以更加直观的访问寄存器字段. 同时还有 <a href="https://crates.io/crates/bitflags">bitflags</a> 等 crate 提供类似 C 中标志位操作的功能.</p>
+
+<p>这种方式的安全性有所保证，也一定程度上支持 C 样式的代码直接翻译. 但缺点是需要手动定义结构体和字段类型, 工程量大, 且容易出错.</p>
+
+<p>另外在实际使用中, 还需要处理 <code class="language-plaintext highlighter-rouge">volatile</code> 的问题. 避免编译器优化掉对寄存器的访问.</p>
+
+<h2 id="svd2rust">svd2rust</h2>
+
+<p><a href="https://github.com/rust-embedded/svd2rust">svd2rust</a> 是一个由 Rust 社区提供的工具，用于将 SVD 文件转换为 Rust 代码。SVD 文件是一种 XML 格式的文件，用于描述芯片的外设寄存器。svd2rust 会根据 SVD 文件生成一个 Rust 模块(<code class="language-plaintext highlighter-rouge">xxx-pac</code>)，包含了芯片的所有外设寄存器的访问代码. 具体来说就是</p>
+
+<ul>
+  <li>每个外设映射为一个 <code class="language-plaintext highlighter-rouge">periph::RegisterBlock</code> 结构体提供寄存器访问</li>
+  <li>每个寄存器字定义为一个 RegisterBlock 的字段(或成员函数), 通过 <code class="language-plaintext highlighter-rouge">read</code>, <code class="language-plaintext highlighter-rouge">write</code>, <code class="language-plaintext highlighter-rouge">modify</code> 方法来访问: “read proxy” and “write proxy”</li>
+  <li>单个寄存器被定义为类似 bitfield 的结构体</li>
+  <li>寄存器位的访问被分为 <code class="language-plaintext highlighter-rouge">read</code>, <code class="language-plaintext highlighter-rouge">write</code>, <code class="language-plaintext highlighter-rouge">modify</code> 方法, 其中 <code class="language-plaintext highlighter-rouge">write</code>, <code class="language-plaintext highlighter-rouge">modify</code> 通过闭包来传递具体的操作</li>
+</ul>
+
+<h3 id="svd2rust-寄存器访问示例">svd2rust 寄存器访问示例</h3>
+
+<p>早期 svd2rust 实现直接使用了 MMIO struct 的方式, 生成的代码例如:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[doc</span> <span class="nd">=</span> <span class="s">r"ADC Register block"</span><span class="nd">]</span>
+<span class="nd">#[repr(C)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">RegisterBlock</span> <span class="p">{</span>
+    <span class="nd">#[doc</span> <span class="nd">=</span> <span class="s">"0x00 - status register"</span><span class="nd">]</span>
+    <span class="k">pub</span> <span class="n">stat</span><span class="p">:</span> <span class="n">STAT</span><span class="p">,</span>
+    <span class="nd">#[doc</span> <span class="nd">=</span> <span class="s">"0x04 - control register 0"</span><span class="nd">]</span>
+    <span class="k">pub</span> <span class="n">ctl0</span><span class="p">:</span> <span class="n">CTL0</span><span class="p">,</span>
+    <span class="nd">#[doc</span> <span class="nd">=</span> <span class="s">"0x08 - control register 1"</span><span class="nd">]</span>
+    <span class="k">pub</span> <span class="n">ctl1</span><span class="p">:</span> <span class="n">CTL1</span><span class="p">,</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>访问时使用:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">rb</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="nn">pac</span><span class="p">::</span><span class="nn">ADC0</span><span class="p">::</span><span class="n">PTR</span> <span class="p">};</span> <span class="c1">// `pac` 是生成的模块</span>
+
+<span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="n">rb</span><span class="py">.stat</span><span class="nf">.read</span><span class="p">()</span><span class="nf">.adc_stat</span><span class="p">()</span><span class="nf">.bits</span><span class="p">();</span>
+<span class="n">rb</span><span class="py">.ctl0</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.adc_en</span><span class="p">()</span><span class="nf">.set_bit</span><span class="p">()</span><span class="nf">.adc_start</span><span class="p">()</span><span class="nf">.set_bit</span><span class="p">());</span>
+<span class="n">rb</span><span class="py">.ctl0</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">_r</span><span class="p">,</span> <span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.adc_en</span><span class="p">()</span><span class="nf">.clear_bit</span><span class="p">());</span>
+</code></pre></div></div>
+
+<p>后来 svd2rust 在一次更新后, 将所有字段的 <code class="language-plaintext highlighter-rouge">pub</code> 属性去掉, 转而使用 const fn 来访问寄存器字段. 例如:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cd">///Register block</span>
+<span class="nd">#[repr(C)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">RegisterBlock</span> <span class="p">{</span>
+    <span class="n">statr</span><span class="p">:</span> <span class="n">STATR</span><span class="p">,</span>
+    <span class="n">ctlr1</span><span class="p">:</span> <span class="n">CTLR1</span><span class="p">,</span>
+    <span class="n">ctlr2</span><span class="p">:</span> <span class="n">CTLR2</span><span class="p">,</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+<span class="k">impl</span> <span class="n">RegisterBlock</span> <span class="p">{</span>
+    <span class="cd">///0x00 - status register</span>
+    <span class="nd">#[inline(always)]</span>
+    <span class="k">pub</span> <span class="k">const</span> <span class="k">fn</span> <span class="nf">statr</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="n">STATR</span> <span class="p">{</span>
+        <span class="o">&amp;</span><span class="k">self</span><span class="py">.statr</span>
+    <span class="p">}</span>
+    <span class="cd">///0x04 - control register 1/TKEY_V_CTLR</span>
+    <span class="nd">#[inline(always)]</span>
+    <span class="k">pub</span> <span class="k">const</span> <span class="k">fn</span> <span class="nf">ctlr1</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="n">CTLR1</span> <span class="p">{</span>
+        <span class="o">&amp;</span><span class="k">self</span><span class="py">.ctlr1</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>访问时使用:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">rb</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="nn">pac</span><span class="p">::</span><span class="nn">ADC0</span><span class="p">::</span><span class="nf">ptr</span><span class="p">()</span> <span class="p">};</span> <span class="c1">// `pac` 是生成的模块</span>
+
+<span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="n">rb</span><span class="py">.statr</span><span class="nf">.read</span><span class="p">()</span><span class="nf">.adc_stat</span><span class="p">()</span><span class="nf">.bits</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">flag_val</span> <span class="o">=</span> <span class="n">rb</span><span class="nf">.adc_stat</span><span class="p">()</span><span class="nf">.read</span><span class="p">()</span><span class="nf">.status</span><span class="p">()</span><span class="nf">.bit_is_set</span><span class="p">();</span>
+<span class="n">rb</span><span class="nf">.ctlr1</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.adc_en</span><span class="p">()</span><span class="nf">.set_bit</span><span class="p">()</span><span class="nf">.adc_start</span><span class="p">()</span><span class="nf">.set_bit</span><span class="p">());</span>
+<span class="n">rb</span><span class="nf">.ctlr1</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">_r</span><span class="p">,</span> <span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.adc_en</span><span class="p">()</span><span class="nf">.clear_bit</span><span class="p">());</span>
+</code></pre></div></div>
+
+<p>这样做的好处是更好地隐藏了寄存器字段的具体实现，在嵌入式 Rust 中往往会大量使用 <code class="language-plaintext highlighter-rouge">unsafe</code>, 其中缺乏必要的检查, 通过隐藏字段的具体实现, 可以减少错误的发生.
+同时, 通过 const fn 提供的字段访问, 可以很好地支持 “内存重叠字段”, 例如在 USB 外设中, 不同模式下, 同一个寄存器地址的字段可能有不同的含义, 通过 const fn 可以很好地支持这种情况.</p>
+
+<h3 id="使用-svd2rust-生成-pac-库">使用 svd2rust 生成 pac 库</h3>
+
+<p>svd2rust 工具可以通过简单的命令行调用来生成 pac 库. 直接 <code class="language-plaintext highlighter-rouge">cargo install</code> 即可安装.</p>
+
+<p>但实际使用过程中, 往往有很多的额外工作, 例如:</p>
+
+<p><strong>去哪里寻找 SVD 文件?</strong></p>
+
+<p>大部分情况下 SVD 文件可以从芯片的 CMSIS pack, 芯片厂商的 SDK 中找到. 去芯片厂商的网站翻一翻也许能找到.
+SVD 文件为 IDE 的调试功能提供了外设寄存器视图, 所以在对应的 IDE 或 IDE 扩展中也能找到.
+同时, 直接联系厂商, 也许能得到帮助.</p>
+
+<p>比如:</p>
+
+<ul>
+  <li>常见的 Cortex-M MCU 一般会提供 <a href="https://www.keil.arm.com/packs/">CMSIS packs</a>, 可以搜索芯片型号下载</li>
+  <li>CH32/GD32 等国产芯片的 SVD 文件可以在 <a href="http://www.mounriver.com/download">MounRiver Studio</a> IDE 的安装目录找到</li>
+  <li>HPMicro MCU 的 SVD 文件, 在官方 <a href="https://github.com/hpmicro/hpm_sdk/">hpm_sdk</a></li>
+</ul>
+
+<p><strong>SVD 文件的质量如何?</strong></p>
+
+<p>SVD 文件往往由芯片厂商提供, 有些是由社区维护的, 质量参差不齐, 经常能见到格式报错, 字段错误等问题.
+直接使用 svd2rust 工具执行转换也会提示报错信息, 当错误不够直观时候, 可以通过 <code class="language-plaintext highlighter-rouge">xmllint</code> 工具检查:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>xmllint <span class="nt">--schema</span> svd/CMSIS-SVD.xsd <span class="nt">--noout</span> XX32XXX.svd
+</code></pre></div></div>
+
+<p>同时 <a href="https://github.com/rust-embedded/svdtools">svdtools</a> 提供一套基于 YAML 格式的 SVD patch 工具, 可以用来修复 SVD 文件中的错误, 修改字段, 新增外设等等.</p>
+
+<p>对于 <a href="https://github.com/rust-embedded/svdtools">svdtools</a> 补丁工作流的使用, 可以参考 <a href="https://github.com/stm32-rs/stm32-rs">stm32-rs</a>, 或者规模较小的 <a href="https://github.com/ch32-rs/ch32-rs">ch32-rs</a>. 基本思路是拿到官方 SVD -&gt;
+修正格式错误(这个没得洗, 毕竟 xml 库都读不进去的话没有办法处理) -&gt; 创建 patch 文件 -&gt; svdtools apply -&gt; patch 后的 SVD 文件 -&gt; svd2rust -&gt; pac.</p>
+
+<p><strong>SVD 文件的版权问题?</strong></p>
+
+<p>SVD 文件往往是芯片厂商提供的, 有些芯片厂商会在 SVD 文件或对应下载包中加入版权信息, 有些则没有. 一般来说, 用于开发者开发软件, 一般不会有问题,
+但考虑到 pac 库发布需要, 最好联系芯片厂商, 以确认是否可以使用, 以及是否可以把 SVD 源文件包含在 pac 库中.</p>
+
+<p><strong>找不到 SVD 文件怎么办?</strong></p>
+
+<p>如果厂商没有提供 SVD 文件, 也可以通过手动编写 SVD 文件, 但这需要对芯片的外设寄存器有一定的了解, 以及对 SVD 文件格式有一定的了解.
+一般来说, 从芯片手册中可以找到寄存器的描述, 以及寄存器地址, 位宽等信息.</p>
+
+<p>直接以 YAML 格式编写 SVD 文件, 也是一种选择, 请参考 <a href="https://github.com/rust-embedded/svdtools">svdtools</a> 的文档.</p>
+
+<h2 id="chiptool">chiptool</h2>
+
+<p><a href="https://github.com/embassy-rs/chiptool">chiptool</a> 是一个由 <a href="https://embassy.dev/">Embassy</a> 社区提供的工具，用于生成 Rust 外设寄存器访问代码, 主要用于 <a href="https://github.com/embassy-rs/stm32-data">stm32-data</a>, 为 Embassy 框架提供 STM32 所有 MCU 的外设寄存器访问支持.
+相关背景可以参考项目首页, 其中有详细的介绍. 要点如下:</p>
+
+<ul>
+  <li><a href="https://github.com/embassy-rs/chiptool">chiptool</a> 其实是 <a href="https://github.com/rust-embedded/svd2rust">svd2rust</a> 的一个 fork, 使之更适用于创建 <code class="language-plaintext highlighter-rouge">metapac</code> 式的 pac 库, 即厂商的一系列不同芯片的所有外设寄存器都放在一个库中. 这样做的好处是可以更好地复用代码和元数据信息</li>
+  <li>chiptool 没有使用 owned struct 的方式, 避免滥用 ownership, 提供更宽松的使用方式</li>
+  <li>chiptool 没有使用字段的 read/write proy, 这样字段本身作为类型(<code class="language-plaintext highlighter-rouge">repr(u32)</code>)可以直接拿来保存寄存器值 - 一个常见场景是拿到中断 flags 值, 依次判断, 修改, 最后写回寄存器, 用来清除中断标志</li>
+  <li>chiptool 没有使用 MMIO 结构体, 而是直接保存外设地址</li>
+  <li>提供了单个 YAML 文件表示一个外设的处理方式</li>
+  <li>提供更方便的 transform 支持, 用于合并寄存器块, 字段, enum 类型, 创建 cluster, array 等</li>
+</ul>
+
+<h3 id="chiptool-寄存器访问示例">chiptool 寄存器访问示例</h3>
+
+<p>具体使用方法和 svd2rust 基本类似, bit field 访问方法略有不同, 通过 <code class="language-plaintext highlighter-rouge">set_xxx</code> 使用, 总体上更简洁:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">r</span> <span class="o">=</span> <span class="nn">pac</span><span class="p">::</span><span class="n">ADC0</span><span class="p">;</span>
+<span class="k">let</span> <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="nf">.statr</span><span class="p">()</span><span class="nf">.read</span><span class="p">()</span><span class="na">.0</span><span class="p">;</span> <span class="c1">// 读取寄存器值</span>
+<span class="k">let</span> <span class="n">flag_val</span> <span class="o">=</span> <span class="n">r</span><span class="nf">.adc_stat</span><span class="p">()</span><span class="nf">.read</span><span class="p">()</span><span class="nf">.status</span><span class="p">();</span> <span class="c1">// 读取寄存器字段</span>
+
+<span class="n">r</span><span class="nf">.ctlr1</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_adc_en</span><span class="p">(</span><span class="k">true</span><span class="p">));</span> <span class="c1">// 设置寄存器字段</span>
+
+<span class="n">r</span><span class="nf">.ctlr1</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_adc_en</span><span class="p">(</span><span class="k">false</span><span class="p">));</span> <span class="c1">// 修改寄存器字段, 闭包不再需要传递 `r` 参数, 读出的值直接通过 `w` 访问</span>
+</code></pre></div></div>
+
+<h3 id="使用-chiptool-生成-pac-库">使用 chiptool 生成 pac 库</h3>
+
+<p>相比之下, chiptool 更适合于生成 metapac 风格的 pac 库, 这也就意味着它的门槛更高, 需要更多的元数据信息, 以及更多的工作量.</p>
+
+<p>曾经唯一的参考资料是 Embassy 项目维护的 <a href="https://github.com/embassy-rs/stm32-data">stm32-data</a>. 在它的基础上, 我裁剪并维护了 [ch32-data] 和 <a href="https://github.com/andelf/hpm-data">hpm-data</a>, 都可以作为 chiptool + metapac 工作流的参考.</p>
+
+<p>管理多个, 乃至某一厂商所有 MCU 的外设寄存器访问代码, 需要对整个芯片系列有一定的了解, 以及对外设寄存器的共性和差异有一定的认识. 需要来回阅读参考手册和原始 SVD 文件, 以及对生成的代码进行测试.</p>
+
+<p>而 svd2rust 目前需要额外的脚本或工具才能更好支持单个 pac 库对应多个芯片的情况, 例如 <a href="https://github.com/djmcgill/form">form</a> 工具可以拆分 inline mode 到子 mod 文件.</p>
+
+<h2 id="metapac-的设计与实现">metapac 的设计与实现</h2>
+
+<p>这里将介绍 metapac 的创建步骤, 设计思路与具体实现细节, 方便读者理解 metapac 的流程, 并搞定自己的 metapac 库.
+目前的规范一般是 <code class="language-plaintext highlighter-rouge">-data</code> repo 用于存放元数据和生成代码, <code class="language-plaintext highlighter-rouge">-metapac</code> crate 用于最终发布.</p>
+
+<p><a href="https://github.com/embassy-rs/stm32-data">stm32-data</a> 整个流程较复杂, 包含从多个数据源获取的元数据, 包括 SVD 文件, STM32CubeMX 数据文件, 官方 SDK 头文件, ST-MCU-FINDER 数据等,
+然后从 SVD 提取外设寄存器描述 YAML 文件, 通过若干 crate 配合, 完成数据的整合, 生成 pac 库.</p>
+
+<p>而一些其他厂家的 MCU 可能缺乏如此丰富的格式化元数据(json/xml/etc.), 可能需要手动维护.</p>
+
+<p>所以针对这种情况 [ch32-data] 和 <a href="https://github.com/andelf/hpm-data">hpm-data</a> 基于 <a href="https://github.com/embassy-rs/stm32-data">stm32-data</a> 的逻辑, 做了简化流程处理, 尽可能适合手工维护.
+<strong>例如针对不同 MCU family 的外设情况, 增加了 <code class="language-plaintext highlighter-rouge">include</code> 支持, 方便层级化管理外设</strong>.</p>
+
+<p><a href="https://github.com/andelf/hpm-data">hpm-data</a> 的难度相对更小一些, HPMicro 的 MCU 系列较少, 且外设跨度较小. 同时官方还提供了一些标准的元数据(官方 pinmux tool), 可以通过爬虫的方式拿到.</p>
+
+<p>以下内容以 hpm-data 为例, 介绍 metapac 设计思路与具体实现细节.</p>
+
+<h3 id="项目目录结构介绍">项目目录结构介绍</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">d</code> 脚本, 封装各命令</li>
+  <li><code class="language-plaintext highlighter-rouge">data/</code> MCU Family, 外设寄存器元数据目录</li>
+  <li><code class="language-plaintext highlighter-rouge">hpm-data-serde/</code> MCU 元数据的 serde 结构定义, lib</li>
+  <li><code class="language-plaintext highlighter-rouge">hpm-data-macros/</code> proc-macro lib, 从结构体转 Rust 代码的依赖, 不需要定制, 从 stm32-data 复制即可</li>
+  <li><code class="language-plaintext highlighter-rouge">hpm-data-gen/</code> 所有元数据的解析和生成工具, 从 <code class="language-plaintext highlighter-rouge">data</code> 目录读取, 生成到 <code class="language-plaintext highlighter-rouge">build/data</code> 目录</li>
+  <li><code class="language-plaintext highlighter-rouge">hpm-metapac-gen/</code> 最终的 metapac 生成工具, 从 <code class="language-plaintext highlighter-rouge">build/data</code> 目录读取, 生成到 <code class="language-plaintext highlighter-rouge">build/hpm-metapac</code> 目录
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">res/</code> 最后 metapac 的模板文件, 包括 <code class="language-plaintext highlighter-rouge">Cargo.toml</code>, <code class="language-plaintext highlighter-rouge">build.rs</code>, <code class="language-plaintext highlighter-rouge">METADATA</code> 常量结构体类型定义等等</li>
+    </ul>
+  </li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">hpm-data-serde/</code> 并不是唯一的数据类型结构体定义, 它只用于保存到 <code class="language-plaintext highlighter-rouge">build/data</code> 目录的格式.
+在 <code class="language-plaintext highlighter-rouge">hpm-metapac-gen/src</code> 下还有第二份, 用于从 <code class="language-plaintext highlighter-rouge">build/data</code> 下的 json 解析.
+在 <code class="language-plaintext highlighter-rouge">hpm-metapac-gen/res/src</code> 下还有第三份, 用于在最终的 pac 代码中提供 METAPDATA 类型定义.</p>
+
+<p>这是整个项目结构最绕的部分, 新手容易迷失在结构体定义报错中, 往往新增字段需要改三个地方.
+但通过这种方式, 可以很好地分离数据定义, 数据解析, 数据生成, 以及最终的代码类型.
+例如在最终的 METADATA 中, 很可能为了考虑嵌入式环境和常量类型的特点, 所有的字符串都会被转换为 <code class="language-plaintext highlighter-rouge">&amp;'static str</code>, 所有的数组都会被转换为 <code class="language-plaintext highlighter-rouge">[u32; N]</code> 等等.</p>
+
+<h3 id="元数据准备">元数据准备</h3>
+
+<p>首先确定好需要做哪些目标芯片的 PAC, 如果范围较广, 需要提前预留扩展性(比如多核的情况, 不同子架构的情况).</p>
+
+<h4 id="chip-family">Chip Family</h4>
+
+<p>不同的芯片系列列表数据可以从厂商网站获取, 也可以从多个芯片手册中获取. 创建 <code class="language-plaintext highlighter-rouge">data/chips/CHIP_NAME.yaml</code>. 芯片名称的具体的粒度可以根据芯片的外设共性来划分.
+主要型号之后的额外后缀往往包含芯片的具体封装(package: QFN, BGA 等), 以及不同的温度等级, 电压等级, 批次等.
+元数据的字段参考 <code class="language-plaintext highlighter-rouge">-data-serde</code> 内的定义即可. 我们把这个文件定义为单个芯片 pac 的所需全部数据入口:</p>
+
+<p>这里以 <code class="language-plaintext highlighter-rouge">HPM5361.yaml</code> 为例:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">HPM5361</span>
+<span class="na">family</span><span class="pi">:</span> <span class="s">HPM5300 Series</span>
+<span class="na">sub_family</span><span class="pi">:</span> <span class="s">HPM5300, Single-core, Full Featured</span>
+<span class="na">packages</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">HPM5361xCBx</span>
+    <span class="na">package</span><span class="pi">:</span> <span class="s">LQFP100</span>
+    <span class="na">pins</span><span class="pi">:</span> <span class="m">100</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">HPM5361xEGx</span>
+    <span class="na">package</span><span class="pi">:</span> <span class="s">QFN48</span>
+    <span class="na">pins</span><span class="pi">:</span> <span class="m">48</span>
+<span class="na">memory</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">address</span><span class="pi">:</span> <span class="s">0x00000000</span>
+    <span class="na">kind</span><span class="pi">:</span> <span class="s">ram</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">ILM</span>
+    <span class="na">size</span><span class="pi">:</span> <span class="s">128K</span>
+  <span class="pi">-</span> <span class="na">address</span><span class="pi">:</span> <span class="s">0x00080000</span>
+    <span class="na">kind</span><span class="pi">:</span> <span class="s">ram</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">DLM</span>
+    <span class="na">size</span><span class="pi">:</span> <span class="s">128K</span>
+  <span class="pi">-</span> <span class="na">address</span><span class="pi">:</span> <span class="s">0xf0400000</span>
+    <span class="na">kind</span><span class="pi">:</span> <span class="s">ram</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">AHB_SRAM</span>
+    <span class="na">size</span><span class="pi">:</span> <span class="s">32K</span>
+  <span class="pi">-</span> <span class="na">address</span><span class="pi">:</span> <span class="s">0x80000000</span>
+    <span class="na">kind</span><span class="pi">:</span> <span class="s">flash</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">XPI0</span>
+    <span class="na">size</span><span class="pi">:</span> <span class="s">1M</span>
+<span class="na">cores</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">RV32-IMAFDCPB</span> <span class="c1"># D25</span>
+    <span class="na">ip-core</span><span class="pi">:</span> <span class="s">Andes D25F</span>
+    <span class="na">peripherals</span><span class="pi">:</span> <span class="pi">[]</span>
+    <span class="na">interrupts</span><span class="pi">:</span> <span class="pi">[]</span>
+    <span class="na">include_peripherals</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/COMMON.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_GPTMR23.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_UART4567.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_ADC1.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_DAC.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_OPAMP.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_MCAN.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_Motion.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_PLB.yaml"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">../family/HPM5300_Secure.yaml"</span>
+    <span class="na">include_interrupts</span><span class="pi">:</span> <span class="s2">"</span><span class="s">../interrupts/HPM5361.yaml"</span>
+    <span class="na">include_dmamux</span><span class="pi">:</span> <span class="s2">"</span><span class="s">../dmamux/HPM5361.yaml"</span>
+    <span class="na">gen_dma_channels</span><span class="pi">:</span>
+      <span class="na">HDMA</span><span class="pi">:</span> <span class="m">32</span>
+</code></pre></div></div>
+
+<p>除了芯片的基本信息, 还包括了芯片的内存布局, 而在 <code class="language-plaintext highlighter-rouge">cores:</code> key 下, 是外设列表, 中断列表, DMA 通道列表等等. 这里 cores 实现为一个列表, 以支持多核异构芯片, 虽然在 HPMicro 的 MCU 中并没有这种情况.</p>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">include_peripherals:</code>, <code class="language-plaintext highlighter-rouge">include_interrupts:</code>, <code class="language-plaintext highlighter-rouge">include_dmamux:</code> 是外设, 中断, DMAMUX 描述的直接引用, 这是对 stm32-data 的改进, 以支持更好的外设复用和手工维护.
+<code class="language-plaintext highlighter-rouge">gen_dma_channels:</code> 表示 DMA 通道的数量, 用于生成 DMA 控制器和 channel 的元数据, 这些元数据可能会在 hal 实现中用到. 尤其是 <a href="https://embassy.dev/">Embassy</a> 这种异步框架, DMA 通道的管理是一个重要的部分.</p>
+
+<h4 id="外设元数据">外设元数据</h4>
+
+<p>外设的元数据是 pac 库的核心, 也是最复杂的部分. 一般来说, 一个外设的元数据包括:</p>
+
+<ul>
+  <li>外设的基本信息, 包括名称, 描述, 寄存器等
+    <ul>
+      <li>寄存器块的定义, 包括寄存器地址, 寄存器名, 寄存器描述等</li>
+      <li>寄存器字段的定义, 包括字段名, 字段位宽, 字段描述等</li>
+      <li>寄存器字段的值定义, 包括字段值名, 字段值描述等, 通过 enum 提供</li>
+    </ul>
+  </li>
+  <li>外设的中断信号</li>
+  <li>外设的引脚信号, 包括引脚复用情况</li>
+  <li>外设的时钟信号, 使能复位信号等</li>
+  <li>外设的 DMA 请求信息</li>
+</ul>
+
+<p>其中寄存器的信息我们可以从 SVD 里获取, 通过 chiptool 提供的 <code class="language-plaintext highlighter-rouge">chiptool extract-peripheral</code> 子命令, 可以方便地从一系列 SVD 中生成对应外设的 YAML 文件.
+之后的工作就是手工维护这些 YAML 文件. 对于不同芯片使用相同的外设, 可以通过文件 diff 的方法来判断是否同一外设.</p>
+
+<p>其中 YAML 文件格式例子如下, 相比 SVD 的 XML 更简单明了, 便于维护:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">block/UART</span><span class="pi">:</span>
+  <span class="na">description</span><span class="pi">:</span> <span class="s">UART0.</span>
+  <span class="na">items</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">IIR2</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">Interrupt Identification Register2.</span>
+      <span class="na">byte_offset</span><span class="pi">:</span> <span class="m">12</span>
+      <span class="na">fieldset</span><span class="pi">:</span> <span class="s">IIR2</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Cfg</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">Configuration Register.</span>
+      <span class="na">byte_offset</span><span class="pi">:</span> <span class="m">16</span>
+      <span class="na">fieldset</span><span class="pi">:</span> <span class="s">Cfg</span>
+    <span class="c1"># .... other register items</span>
+<span class="na">fieldset/IIR2</span><span class="pi">:</span>
+  <span class="na">description</span><span class="pi">:</span> <span class="s">Interrupt Identification Register2.</span>
+  <span class="na">fields</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">INTRID</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">Interrupt ID, see IIR2 for detail decoding.</span>
+      <span class="na">bit_offset</span><span class="pi">:</span> <span class="m">0</span>
+      <span class="na">bit_size</span><span class="pi">:</span> <span class="m">4</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">FIFOED</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">FIFOs enabled These two bits are 1 when bit 0 of the FIFO Control Register (FIFOE) is set to 1.</span>
+      <span class="na">bit_offset</span><span class="pi">:</span> <span class="m">6</span>
+      <span class="na">bit_size</span><span class="pi">:</span> <span class="m">2</span>
+    <span class="c1"># .... other fields</span>
+<span class="c1"># ... other fieldsets</span>
+<span class="na">enum/RX_IDLE_COND</span><span class="pi">:</span>
+  <span class="na">description</span><span class="pi">:</span> <span class="s">IDLE Detection Condition.</span>
+  <span class="na">bit_size</span><span class="pi">:</span> <span class="m">1</span>
+  <span class="na">variants</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">RXLINE_LOGIC_ONE</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">Treat as idle if RX pin is logic one</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="m">0</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">STATE_MACHINE_IDLE</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">Treat as idle if UART state machine state is idle</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="m">1</span>
+</code></pre></div></div>
+
+<p>其中对寄存器描述的优化是整个工作最麻烦耗时的地方, 例如对 enum 的优化, 对寄存器 array 的优化等. 优化修改的好处是显而易见的, 例如如下两种代码风格对比:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// set PWM1_CMP7 mode</span>
+<span class="k">use</span> <span class="n">hpm_metapac</span> <span class="k">as</span> <span class="n">pac</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">pac</span><span class="p">::</span><span class="nn">pwm</span><span class="p">::</span><span class="n">vals</span><span class="p">;</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">PWM1</span><span class="nf">.cmpcfg</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="p">{</span>
+    <span class="n">w</span><span class="nf">.set_cmpmode</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// output compare</span>
+    <span class="n">w</span><span class="nf">.set_cmpshdwupt</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// on modify</span>
+<span class="p">});</span>
+
+<span class="c1">// vs</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">PWM1</span><span class="nf">.cmpcfg</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="p">{</span>
+    <span class="n">w</span><span class="nf">.set_cmpmode</span><span class="p">(</span><span class="nn">vals</span><span class="p">::</span><span class="nn">CmpMode</span><span class="p">::</span><span class="n">OUTPUT_COMPARE</span><span class="p">);</span>
+    <span class="n">w</span><span class="nf">.set_cmpshdwupt</span><span class="p">(</span><span class="nn">vals</span><span class="p">::</span><span class="nn">ShadowUpdateTrigger</span><span class="p">::</span><span class="n">ON_MODIFY</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>可见, 通过 enum 的方式, 可以更好地表达寄存器字段的含义, 免去额外注释, 也更容易理解, 更类型安全.</p>
+
+<p>寄存器之外的其他信息一般需要从芯片手册中获取. hpm-data 在实现中, 大量使用了 <a href="https://github.com/hpmicro/hpm_sdk">hpm_sdk</a> 头文件中的常量定义, 通过正则解析的方式动态填写在外设结构定义中.
+另外前面提到的 pinmux tool 也提供了重要的引脚复用信息. 都通过 <code class="language-plaintext highlighter-rouge">-data-gen</code> 工具解析, 合并 Chip Family 信息后生成到 <code class="language-plaintext highlighter-rouge">build/data</code> 目录.</p>
+
+<p>然后在 <code class="language-plaintext highlighter-rouge">family/</code> 中创建对应的外设版本引用就可以继而被 <code class="language-plaintext highlighter-rouge">CHIP_NAME.yaml</code> 的 include 引用.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># part of family/HPM5300_UARTs.yaml</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">UART0</span>
+  <span class="na">address</span><span class="pi">:</span> <span class="s">0xF0040000</span>
+  <span class="na">registers</span><span class="pi">:</span>
+    <span class="na">kind</span><span class="pi">:</span> <span class="s">uart</span>
+    <span class="na">version</span><span class="pi">:</span> <span class="s">v53</span>
+    <span class="na">block</span><span class="pi">:</span> <span class="s">UART</span>
+  <span class="c1"># the following are filled by `-data-gen` tool</span>
+  <span class="c1"># pins:</span>
+  <span class="c1"># sysctl:</span>
+  <span class="c1"># interrupts:</span>
+  <span class="c1"># dma_channels:</span>
+</code></pre></div></div>
+
+<h4 id="data-gen-工具"><code class="language-plaintext highlighter-rouge">data-gen</code> 工具</h4>
+
+<p><code class="language-plaintext highlighter-rouge">-data-gen</code> 工具会扫描 <code class="language-plaintext highlighter-rouge">data/chips/</code> 下所有 <code class="language-plaintext highlighter-rouge">CHIP_NAME.yaml</code> 文件, 处理 <code class="language-plaintext highlighter-rouge">include_x:</code> 引用, 根据对应的外设信息, 从 sdk 头文件中提取常量定义, 填充上述的 pins, sysctl, interrupts, dma_channels 等字段,
+最终生成到 <code class="language-plaintext highlighter-rouge">build/data</code> 目录. 这个工具是整个 metapac 生成流程的核心, 也是最复杂的部分. 在 stm32-data 中, 也是这个工具从各种数据来源中提取生成结构化数据.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hpm-data-gen
+├── Cargo.toml
+└── src
+    ├── main.rs <span class="c"># 主程序入口</span>
+    ├── dma.rs <span class="c"># DMA 通道信息提取</span>
+    ├── interrupts.rs <span class="c"># 中断信息提取</span>
+    ├── pinmux.rs <span class="c"># 引脚复用信息提取</span>
+    ├── iomux.rs <span class="c"># 引脚复用信息提取, 提出 sdk 常量</span>
+    ├── pins.rs <span class="c"># 引脚数量, GPIO port 等信息提取</span>
+    ├── registers.rs
+    ├── sysctl.rs <span class="c"># 时钟, GROUP 使能信息提取</span>
+    └── trgmmux.rs <span class="c"># 处理全局 TRGMUX 信号</span>
+</code></pre></div></div>
+
+<p>相关逻辑请参考 <a href="https://github.com/andelf/hpm-data">hpm-data</a> 项目, 通过依次执行以上流程, 完成了外设元数据的准备. 最终元数据如下:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">build/data/chips/CHIP_NAME.json</code> - 对应每个芯片的元数据</li>
+  <li><code class="language-plaintext highlighter-rouge">build/data/registers/periph_ver.json</code> - 对应每种外设的寄存器信息</li>
+</ul>
+
+<h3 id="metapac-生成">metapac 生成</h3>
+
+<p><code class="language-plaintext highlighter-rouge">-metapac-gen</code> 工具会扫描 <code class="language-plaintext highlighter-rouge">build/data/</code> 下所有的芯片和外设寄存器数据, 生成最终的 metapac 代码. 结合 <code class="language-plaintext highlighter-rouge">res/</code> 下项目模板,
+最终输出到 <code class="language-plaintext highlighter-rouge">build/hpm-metapac</code> 目录.
+这个工具是整个 metapac 生成流程的最后一步, 直接输出一个 crate 目录作为结果.</p>
+
+<ul>
+  <li>处理外设寄存器信息, 生成 <code class="language-plaintext highlighter-rouge">periph_ver.rs</code> 文件</li>
+  <li>处理芯片信息, <code class="language-plaintext highlighter-rouge">METADATA</code> 结构, <code class="language-plaintext highlighter-rouge">metadata_xxxx.rs</code> 文件, 通过编译时 feature flag 选择引用具体文件</li>
+  <li>输出 <code class="language-plaintext highlighter-rouge">-metapac</code> crate</li>
+</ul>
+
+<p>芯片信息的处理主要包括 <code class="language-plaintext highlighter-rouge">METADATA</code> 的处理, 最终所有芯片名 feature gate 和外设版本的映射关系, 中断结构体, <code class="language-plaintext highlighter-rouge">memory.x</code>, <code class="language-plaintext highlighter-rouge">device.x</code> 等信息的生成.</p>
+
+<p><code class="language-plaintext highlighter-rouge">METADATA</code> 是区别于 metapac 和传统 svd2rust PAC 的一个重要特点, 用于提供芯片的元数据信息, 例如芯片的内存布局, 中断表, 外设及版本信息等.
+通过 <code class="language-plaintext highlighter-rouge">"metadata"</code> feature gate 启用. 这个信息在 HAL 驱动中可能会用到, 例如 Embassy driver 需要动态创建 DMA 类型等.</p>
+
+<p>外设寄存器信息的代码生成相关逻辑主要是调用 <a href="https://github.com/embassy-rs/chiptool">chiptool</a> 完成, 通过一个简单的 IR (intermediate representation) 结构, 生成对应的 Rust 代码.</p>
+
+<p>题外: chiptool 的这个从 YAML 定义生成 <code class="language-plaintext highlighter-rouge">.rs</code> 代码的逻辑其实非常有用, 使用场景不仅限于 pac 库, 例如一些公共 IP 外设的定义, 二进制协议的定义,
+I2C 传感器寄存器格式的定义等等. 甚至诸如 RISC-V CSR 字段的定义都有可能使用到这种机制. 希望这种格式成为 Rust 嵌入式的某种标准. <a href="https://github.com/embedded-drivers/yaml2pac">yaml2pac</a> 就是这样一个尝试,
+实现单个文件的代码输出. 社区也有类似的工作 <a href="https://github.com/embassy-rs/chiptool/pull/17">embassy-rs/chiptool#17</a>.</p>
+
+<h4 id="hpm-metapac-的扩展内容">hpm-metapac 的扩展内容</h4>
+
+<p>HPMicro 提供了多个系列的高性能 RISV-V MCU, 包括丰富的外设资源和高速时钟, 其中较为复杂的是 SYSCTL 的资源管理, 引脚的 IOMUX, 以及 TRGMUX 外设互联等.
+这些外设涉及到大量的 CLUSTER 寄存器(即外设的寄存器块通过二级, 三级索引的方式使用, 更好地组织资源), 而 <a href="https://github.com/embassy-rs/chiptool">chiptool</a> 目前对这种  CLUSTER 索引支持并不完善,
+无法解析具体索引名字, 例如 CPU0 时钟设置 <code class="language-plaintext highlighter-rouge">SYSCTL.CLOCK[CLK_TOP_CPU0].MUX</code>, 在 chiptool 只能识别为 <code class="language-plaintext highlighter-rouge">pac::SYSCTL.clock(0).read().mux()</code>,
+丢失了其中最终要的 <code class="language-plaintext highlighter-rouge">&lt;dimIndex&gt;</code> 信息. 其在 SVD 的原始定义如下:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dimIncrement&gt;</span>0x4<span class="nt">&lt;/dimIncrement&gt;</span>
+<span class="nt">&lt;dimIndex&gt;</span>cpu0,cpx0,rsv2,rsv3,.... <span class="nt">&lt;/dimIndex&gt;</span>
+</code></pre></div></div>
+
+<p>相同情况的还有 IOC, GPIOM 等外设, 为了处理这种情况, hpm-data 对 pac 库做了扩展, 单独将必备的索引信息, 以 <code class="language-plaintext highlighter-rouge">pub const NAME: usize</code> 的方式提供.</p>
+
+<p>这些 consts 通过 hpm-data-gen 解析, 最终由 hpm-metapac-gen 生成为对应 pac 的子 mod:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">hpm_metapac::clocks::</code> 下的所有时钟，用于 SYSCTL.CLOCK</li>
+  <li><code class="language-plaintext highlighter-rouge">hpm_metapac::resources::</code> 下的所有 SYSCTL 资源</li>
+  <li><code class="language-plaintext highlighter-rouge">hpm_metapac::pins::</code> 下的所有 GPIO 及其 PAD，用于 IOC</li>
+  <li><code class="language-plaintext highlighter-rouge">hpm_metapac::iomux::</code> 下的所有 IOMUX 设置（FUNC_CTL）</li>
+  <li><code class="language-plaintext highlighter-rouge">hpm_metapac::trgmmux::</code> 下的所有 TRGM 常量定义</li>
+</ul>
+
+<p>对于 PAC 库来说, 不仅仅是提供给 HAL 驱动使用, 而是同时能给最终用户一个方便安全的寄存器访问接口. 对于某些设计良好的外设, 寄存器访问更直接有效.
+由此通过简单的方式就可以使用对应的外设(虽然丢失了部分类型安全, 不过加一个 enum 也很容易, 这里主要是等待上游 chiptool 实现该机制):</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="n">hpm_metapac</span> <span class="k">as</span> <span class="n">pac</span><span class="p">;</span>
+<span class="k">use</span> <span class="nn">pac</span><span class="p">::{</span><span class="n">iomux</span><span class="p">,</span> <span class="n">pins</span><span class="p">};</span>
+
+<span class="nn">pac</span><span class="p">::</span><span class="n">IOC</span>
+    <span class="nf">.pad</span><span class="p">(</span><span class="nn">pins</span><span class="p">::</span><span class="n">PA25</span><span class="p">)</span>
+    <span class="nf">.func_ctl</span><span class="p">()</span>
+    <span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_alt_select</span><span class="p">(</span><span class="nn">iomux</span><span class="p">::</span><span class="n">IOC_PA25_FUNC_CTL_PWM1_P_1</span><span class="p">));</span>
+</code></pre></div></div>
+
+<h3 id="pac-库的其他内容">pac 库的其他内容</h3>
+
+<p>上述一节其实已经介绍了 PAC 库在标准的寄存器访问定义之外还有哪些内容, 这里再总结一遍:</p>
+
+<ul>
+  <li>中断静态结构体定义, enum 定义 - 用于在 <code class="language-plaintext highlighter-rouge">-rt</code> 库中使用, 链接到中断处理函数</li>
+  <li><code class="language-plaintext highlighter-rouge">device.x</code> 定义中断处理函数的链接符号, 和中断表结构体结合使用</li>
+  <li><code class="language-plaintext highlighter-rouge">Peripherals</code> owned struct, 用于通过 ownership 机制管理外设资源 - 仅 svd2rust</li>
+  <li><code class="language-plaintext highlighter-rouge">CorePeripherals</code> owned struct, 用于管理核心外设资源 - 仅 svd2rust + Cortex-M</li>
+  <li><code class="language-plaintext highlighter-rouge">memory.x</code> 定义内存布局 - 实际上由于应用各异, 可能不会被使用到, 通过 feature gate 启用</li>
+  <li>各种 METADATA 信息 - 仅本文提到的 metapac</li>
+</ul>
+
+<h2 id="总结及对比">总结及对比</h2>
+
+<ul>
+  <li>C 中的外设寄存器访问, 方式简单直接, 但容易出错, 不够类型安全, Rust 基于自己的类型系统, 可以提供更好的类型安全, 但需要额外的工具支持</li>
+  <li>svd2rust 适合于单个芯片的 PAC 生成, 通过 <code class="language-plaintext highlighter-rouge">svd2rust</code> 命令行工具, 可以快速生成单个芯片的 PAC 库, 目前也是社区最常用的方式</li>
+  <li>chiptool 适合于多个芯片的 PAC 生成, 通过 <code class="language-plaintext highlighter-rouge">chiptool</code> 和 <code class="language-plaintext highlighter-rouge">-data</code> 仓库, 可以为多个芯片生成 PAC 库, 适合于厂商的多个芯片系列的 PAC 生成. 同时具有 <code class="language-plaintext highlighter-rouge">METADATA</code> 的特性, 用于提供芯片的元数据信息</li>
+</ul>
+
+<p>除此之外 [ral] / <a href="https://docs.rs/ral-registers/latest/ral_registers/">ral-registers</a> 也提供了另一种基于宏的外设寄存器访问方案.</p>
+
+<!-- Refs -->]]></content><author><name>andelf</name></author><category term="embedded" /><category term="rust" /><category term="embassy" /><summary type="html"><![CDATA[Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.]]></summary></entry><entry><title type="html">机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit</title><link href="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/" rel="alternate" type="text/html" title="机场 24x24 像素显示单元 Airport 24x24 Dot Matrix RGB Character Display Unit" /><published>2024-08-19T13:42:00+00:00</published><updated>2024-08-19T13:42:00+00:00</updated><id>https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display</id><content type="html" xml:base="https://andelf.github.io/2024/08/19/airport-24x24-dot-rgb-character-display/"><![CDATA[<p>之前在咸鱼 App 上收了 3 个 24x24 像素的机场 RGB 点阵显示单元, 大概是这么个东西:</p>
 
 <p><img src="/assets/display-24x24-front.jpeg" alt="Front" /></p>
 
@@ -5373,194 +5925,4 @@ module </span><span class="si">#{</span><span class="n">normalized_pod_name</spa
       <p><a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift and ObjectiveC Interop (Swift 与 Objective-C 之间的交互)</a> <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
-</div>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. weibo]]></summary></entry><entry><title type="html">Swift Reflection （Swift 的反射）</title><link href="https://andelf.github.io/blog/2014/06/20/swift-reflection/" rel="alternate" type="text/html" title="Swift Reflection （Swift 的反射）" /><published>2014-06-20T15:48:51+00:00</published><updated>2014-06-20T15:48:51+00:00</updated><id>https://andelf.github.io/blog/2014/06/20/swift-reflection</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/20/swift-reflection/"><![CDATA[<p>Swift 其实是支持反射的，不过功能略弱。本文介绍基本的反射用法和相关类型。</p>
-
-<h2 id="metatype-和-type-语法">MetaType 和 Type 语法</h2>
-
-<blockquote>
-  <p>The metatype of a class, structure, or enumeration type is the name of that type followed by .Type. The metatype of a protocol type—not the concrete type that conforms to the protocol at runtime—is the name of that protocol followed by .Protocol. For example, the metatype of the class type SomeClass is SomeClass.Type and the metatype of the protocol SomeProtocol is SomeProtocol.Protocol.</p>
-</blockquote>
-
-<blockquote>
-  <p>You can use the postfix self expression to access a type as a value. For example, SomeClass.self returns SomeClass itself, not an instance of SomeClass. And SomeProtocol.self returns SomeProtocol itself, not an instance of a type that conforms to SomeProtocol at runtime.</p>
-</blockquote>
-
-<ul>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>metatype-type -&gt; <code class="language-plaintext highlighter-rouge">type</code>.<strong>Type</strong></td>
-          <td><code class="language-plaintext highlighter-rouge">type</code>.<strong>Protocol</strong></td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-  <li>type-as-value -&gt; <code class="language-plaintext highlighter-rouge">type</code>.self</li>
-</ul>
-
-<p>其中 metatype-type 出现在代码中需要类型的地方， type-as-value 出现在代码中需要值、变量的地方。</p>
-
-<p><code class="language-plaintext highlighter-rouge">Any.Type</code> 类型大家可以猜下它表示什么。</p>
-
-<h2 id="基础定义">基础定义</h2>
-
-<p>反射信息用 <code class="language-plaintext highlighter-rouge">Mirror</code> 类型表示，类型协议是 <code class="language-plaintext highlighter-rouge">Reflectable</code>，但实际看起来 <code class="language-plaintext highlighter-rouge">Reflectable</code> 没有任何作用。</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol Reflectable {
-  func getMirror() -&gt; Mirror
-}
-protocol Mirror {
-  var value: Any { get }
-  var valueType: Any.Type { get }
-  var objectIdentifier: ObjectIdentifier? { get }
-  var count: Int { get }
-  subscript (i: Int) -&gt; (String, Mirror) { get }
-  var summary: String { get }
-  var quickLookObject: QuickLookObject? { get }
-  var disposition: MirrorDisposition { get }
-}
-</code></pre></div></div>
-
-<p>实际上所有类型都实现了 <code class="language-plaintext highlighter-rouge">Reflectable</code>。</p>
-
-<p><code class="language-plaintext highlighter-rouge">Mirror</code> 协议相关字段：</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">value</code> 相当于变量的 <code class="language-plaintext highlighter-rouge">as Any</code> 操作</li>
-  <li><code class="language-plaintext highlighter-rouge">valueType</code> 获得变量类型</li>
-  <li><code class="language-plaintext highlighter-rouge">objectIdentifier</code> 相当于一个 UInt 作用未知，可能是 metadata 表用到</li>
-  <li><code class="language-plaintext highlighter-rouge">count</code> 子项目个数（可以是类、结构体的成员变量，也可以是字典，数组的数据）</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 访问子项目, 和子项目的名字</li>
-  <li><code class="language-plaintext highlighter-rouge">summary</code> 相当于 <code class="language-plaintext highlighter-rouge">description</code></li>
-  <li><code class="language-plaintext highlighter-rouge">quickLookObject</code> 是一个枚举，这个在 WWDC 有讲到，就是 Playground 代码右边栏的显示内容，比如常见类型，颜色，视图都可以</li>
-  <li><code class="language-plaintext highlighter-rouge">disposition</code> 表示变量类型的性质，基础类型 or 结构 or 类 or 枚举 or 索引对象 or … 如下</li>
-</ul>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enum MirrorDisposition {
-  case Struct // 结构体
-  case Class // 类
-  case Enum // 枚举
-  case Tuple // 元组
-  case Aggregate // 基础类型
-  case IndexContainer // 索引对象
-  case KeyContainer // 键-值对象
-  case MembershipContainer // 未知
-  case Container // 未知
-  case Optional // Type?
-  var hashValue: Int { get }
-}
-</code></pre></div></div>
-
-<p>通过函数 <code class="language-plaintext highlighter-rouge">func reflect&lt;T&gt;(x: T) -&gt; Mirror</code> 可以获得反射对象 <code class="language-plaintext highlighter-rouge">Mirror</code> 。它定义在 <code class="language-plaintext highlighter-rouge">Any</code> 上，所有类型均可用。</p>
-
-<h2 id="实际操作">实际操作</h2>
-
-<h3 id="valuetype-处理"><code class="language-plaintext highlighter-rouge">.valueType</code> 处理</h3>
-
-<p><code class="language-plaintext highlighter-rouge">Any.Type</code> 是所有类型的元类型，所以 <code class="language-plaintext highlighter-rouge">.valueType</code> 属性表示类型。实际使用的时候还真是有点诡异：</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let mir = reflect(someVal)
-swith mir.valueType {
-case _ as String.Type:
-    println("type = string")
-case _ as Range&lt;Int&gt;.Type:
-    println("type = range of int")
-case _ as Dictionary&lt;Int, Int&gt;.Type:
-    println("type = dict of int")
-case _ as Point.Type:
-    println("type = a point struct")
-default:
-    println("unkown type")
-}
-</code></pre></div></div>
-
-<p>或者使用 <code class="language-plaintext highlighter-rouge">is</code> 判断：</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if mir.valueType is String.Type {
-    println("!!!type =&gt; String")
-}
-</code></pre></div></div>
-
-<p>勘误： 这里之前笔误了。遗漏了 <code class="language-plaintext highlighter-rouge">.valueType</code> 。</p>
-
-<p><code class="language-plaintext highlighter-rouge">is String</code> 判断变量是否是 String 类型，而 <code class="language-plaintext highlighter-rouge">is String.Type</code> 这里用来判断类型是否是 String 类型。</p>
-
-<h3 id="subscriptint-处理"><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 处理</h3>
-
-<p>实测发现直接用 <code class="language-plaintext highlighter-rouge">mir[0]</code> 访问偶尔会出错，也许是 beta 的原因。</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>for r in 0..mir.count {
-    let (name, subref) = mir[r]
-    prtln("name: \(name)")
-    // visit sub Mirror here
-}
-</code></pre></div></div>
-
-<p>通过上面的方法，基本上可以遍历大部分结构。</p>
-
-<h2 id="不同类型的处理">不同类型的处理</h2>
-
-<h3 id="struct-结构体-class-类">Struct 结构体、 Class 类</h3>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为字段个数。</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 返回 （字段名，字段值反射 <code class="language-plaintext highlighter-rouge">Mirror</code>） 元组</li>
-  <li><code class="language-plaintext highlighter-rouge">summary</code> 为 mangled name</li>
-</ul>
-
-<h3 id="tuple-元组">Tuple 元组</h3>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “.0”, “.1” …</li>
-</ul>
-
-<h3 id="aggregate-基础类型">Aggregate 基础类型</h3>
-
-<p>包括数字、字符串（含 <code class="language-plaintext highlighter-rouge">NSString</code>）、函数、部分 Foundation 类型、 MetaType 。</p>
-
-<p>很奇怪一点是测试发现枚举也被反射为基础类型。怀疑是没实现完。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为 0</li>
-</ul>
-
-<h3 id="indexcontainer-索引对象">IndexContainer 索引对象</h3>
-
-<p>包括 <code class="language-plaintext highlighter-rouge">Array&lt;T&gt;</code>, <code class="language-plaintext highlighter-rouge">T[]</code>, <code class="language-plaintext highlighter-rouge">NSArray</code> 等。可以通过 subscript 访问。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “[0]”, “[1]” …</li>
-</ul>
-
-<h3 id="keycontainer-键-值对象">KeyContainer 键-值对象</h3>
-
-<p>包括 <code class="language-plaintext highlighter-rouge">Dictionary&lt;T, U&gt;</code>、<code class="language-plaintext highlighter-rouge">NSDictionary</code></p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “[0]”, “[1]” … 实际访问是 <code class="language-plaintext highlighter-rouge">(name, (reflect(key), reflect(val)))</code></li>
-</ul>
-
-<h3 id="optional-type">Optional Type?</h3>
-
-<p>只包括 <code class="language-plaintext highlighter-rouge">Type?</code>，不包括 <code class="language-plaintext highlighter-rouge">Type!</code>。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为 0 或者 1 (对应 nil 和有值的情况)</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> , name 为 “Some”</li>
-</ul>
-
-<h3 id="其他">其他</h3>
-
-<ul>
-  <li>Enum 枚举 看起来是未使用</li>
-  <li>MembershipContainer // 未知</li>
-  <li>Container // 未知</li>
-</ul>
-
-<h2 id="示例代码">示例代码</h2>
-
-<p><a href="https://gist.github.com/anonymous/190fc7ecee30e83a5dca">Gist</a></p>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[Swift 其实是支持反射的，不过功能略弱。本文介绍基本的反射用法和相关类型。]]></summary></entry></feed>
+</div>]]></content><author><name></name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. weibo]]></summary></entry></feed>
