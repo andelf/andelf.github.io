@@ -570,3 +570,4 @@ pac::IOC
 [hpm_sdk]: https://github.com/hpmicro/hpm_sdk
 [yaml2pac]: https://github.com/embedded-drivers/yaml2pac
 [ral-registers]: https://docs.rs/ral-registers/latest/ral_registers/
+[ral]: https://docs.rs/ral/latest/ral/
