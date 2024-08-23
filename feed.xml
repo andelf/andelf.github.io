@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-08-23T07:01:19+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-08-23T10:06:43+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
 
 <p>本文是基础向文章, 介绍了 Rust 嵌入式开发中的外设寄存器访问问题，以及社区提供的解决方案。包括以下内容:</p>
 
@@ -233,7 +233,7 @@ SVD 文件为 IDE 的调试功能提供了外设寄存器视图, 所以在对应
 
 <p>相比之下, chiptool 更适合于生成 metapac 风格的 pac 库, 这也就意味着它的门槛更高, 需要更多的元数据信息, 以及更多的工作量.</p>
 
-<p>曾经唯一的参考资料是 Embassy 项目维护的 <a href="https://github.com/embassy-rs/stm32-data">stm32-data</a>. 在它的基础上, 我裁剪并维护了 [ch32-data] 和 <a href="https://github.com/andelf/hpm-data">hpm-data</a>, 都可以作为 chiptool + metapac 工作流的参考.</p>
+<p>曾经唯一的参考资料是 Embassy 项目维护的 <a href="https://github.com/embassy-rs/stm32-data">stm32-data</a>. 在它的基础上, 我裁剪并维护了 <a href="https://github.com/ch32-rs/ch32-data">ch32-data</a> 和 <a href="https://github.com/andelf/hpm-data">hpm-data</a>, 都可以作为 chiptool + metapac 工作流的参考.</p>
 
 <p>管理多个, 乃至某一厂商所有 MCU 的外设寄存器访问代码, 需要对整个芯片系列有一定的了解, 以及对外设寄存器的共性和差异有一定的认识. 需要来回阅读参考手册和原始 SVD 文件, 以及对生成的代码进行测试.</p>
 
@@ -249,7 +249,7 @@ SVD 文件为 IDE 的调试功能提供了外设寄存器视图, 所以在对应
 
 <p>而一些其他厂家的 MCU 可能缺乏如此丰富的格式化元数据(json/xml/etc.), 可能需要手动维护.</p>
 
-<p>所以针对这种情况 [ch32-data] 和 <a href="https://github.com/andelf/hpm-data">hpm-data</a> 基于 <a href="https://github.com/embassy-rs/stm32-data">stm32-data</a> 的逻辑, 做了简化流程处理, 尽可能适合手工维护.
+<p>所以针对这种情况 <a href="https://github.com/ch32-rs/ch32-data">ch32-data</a> 和 <a href="https://github.com/andelf/hpm-data">hpm-data</a> 基于 <a href="https://github.com/embassy-rs/stm32-data">stm32-data</a> 的逻辑, 做了简化流程处理, 尽可能适合手工维护.
 <strong>例如针对不同 MCU family 的外设情况, 增加了 <code class="language-plaintext highlighter-rouge">include</code> 支持, 方便层级化管理外设</strong>.</p>
 
 <p><a href="https://github.com/andelf/hpm-data">hpm-data</a> 的难度相对更小一些, HPMicro 的 MCU 系列较少, 且外设跨度较小. 同时官方还提供了一些标准的元数据(官方 pinmux tool), 可以通过爬虫的方式拿到.</p>
@@ -406,12 +406,14 @@ SVD 文件为 IDE 的调试功能提供了外设寄存器视图, 所以在对应
       <span class="na">value</span><span class="pi">:</span> <span class="m">1</span>
 </code></pre></div></div>
 
-<p>其中对寄存器描述的优化是整个工作最麻烦耗时的地方, 例如对 enum 的优化, 对寄存器 array 的优化等. 优化修改的好处是显而易见的, 例如如下两种代码风格对比:</p>
+<p>其中对外设寄存器描述的优化是整个工作最麻烦耗时的地方,
+例如对字段值 enum 的优化, 对寄存器 array 的优化等.
+优化修改的好处是显而易见的, 例如如下两种代码风格对比:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// set PWM1_CMP7 mode</span>
 <span class="k">use</span> <span class="n">hpm_metapac</span> <span class="k">as</span> <span class="n">pac</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">pac</span><span class="p">::</span><span class="nn">pwm</span><span class="p">::</span><span class="n">vals</span><span class="p">;</span>
-<span class="nn">pac</span><span class="p">::</span><span class="n">PWM1</span><span class="nf">.cmpcfg</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="p">{</span>
+<span class="nn">pac</span><span class="p">::</span><span class="n">PWM1</span><span class="nf">.cmpcfg7</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="p">{</span>
     <span class="n">w</span><span class="nf">.set_cmpmode</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// output compare</span>
     <span class="n">w</span><span class="nf">.set_cmpshdwupt</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// on modify</span>
 <span class="p">});</span>
@@ -517,7 +519,8 @@ I2C 传感器寄存器格式的定义等等. 甚至诸如 RISC-V CSR 字段的�
 </ul>
 
 <p>对于 PAC 库来说, 不仅仅是提供给 HAL 驱动使用, 而是同时能给最终用户一个方便安全的寄存器访问接口. 对于某些设计良好的外设, 寄存器访问更直接有效.
-由此通过简单的方式就可以使用对应的外设(虽然丢失了部分类型安全, 不过加一个 enum 也很容易, 这里主要是等待上游 chiptool 实现该机制):</p>
+所以上面的常量定义其实很有必要, 也为 HAL 的实现提供了额外信息:
+(这里为了方便作为 index 使用, 统一用了 <code class="language-plaintext highlighter-rouge">usize</code> 类型. 丢失了部分类型安全, 不过加一个 enum 也很容易, 这里主要是等待上游 chiptool 实现 cluster 支持.)</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="n">hpm_metapac</span> <span class="k">as</span> <span class="n">pac</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">pac</span><span class="p">::{</span><span class="n">iomux</span><span class="p">,</span> <span class="n">pins</span><span class="p">};</span>
@@ -530,15 +533,15 @@ I2C 传感器寄存器格式的定义等等. 甚至诸如 RISC-V CSR 字段的�
 
 <h3 id="pac-库的其他内容">pac 库的其他内容</h3>
 
-<p>上述一节其实已经介绍了 PAC 库在标准的寄存器访问定义之外还有哪些内容, 这里再总结一遍:</p>
+<p>上述一节其实已经介绍了 PAC 库在标准的外设寄存器访问定义之外还有哪些内容, 这里再总结一遍:</p>
 
 <ul>
   <li>中断静态结构体定义, enum 定义 - 用于在 <code class="language-plaintext highlighter-rouge">-rt</code> 库中使用, 链接到中断处理函数</li>
   <li><code class="language-plaintext highlighter-rouge">device.x</code> 定义中断处理函数的链接符号, 和中断表结构体结合使用</li>
   <li><code class="language-plaintext highlighter-rouge">Peripherals</code> owned struct, 用于通过 ownership 机制管理外设资源 - 仅 svd2rust</li>
-  <li><code class="language-plaintext highlighter-rouge">CorePeripherals</code> owned struct, 用于管理核心外设资源 - 仅 svd2rust + Cortex-M</li>
-  <li><code class="language-plaintext highlighter-rouge">memory.x</code> 定义内存布局 - 实际上由于应用各异, 可能不会被使用到, 通过 feature gate 启用</li>
-  <li>各种 METADATA 信息 - 仅本文提到的 metapac</li>
+  <li><code class="language-plaintext highlighter-rouge">CorePeripherals</code> owned struct, 用于管理核心外设资源, 一般是内核定时器中断处理器等 - 仅 svd2rust + Cortex-M</li>
+  <li><code class="language-plaintext highlighter-rouge">memory.x</code> 定义内存布局 - 实际上由于平台的多样性, 不一定非要由 pac 来提供内存布局定义, 比如某些可自由配置 FLASH/RAM 的芯片, 更适合最终应用提供</li>
+  <li>各种 METADATA 信息 - 仅适用于本文提到的 metapac</li>
 </ul>
 
 <h2 id="总结及对比">总结及对比</h2>
