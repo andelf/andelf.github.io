@@ -27,8 +27,7 @@ url: "https://andelf.github.io" # the base hostname & protocol for your site, e.
 twitter_username: bc12edd8ae2cb21
 github_username:  andelf
 
-author:
-  twitter: bc12edd8ae2cb21
+author: 猫·仁波切
 
 # Build settings
 theme: minima
