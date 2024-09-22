@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-09-22T14:57:13+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-09-22T15:21:50+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><author><name>猫·仁波切</name></author><entry><title type="html">Follow Verification</title><link href="https://andelf.github.io/2024/09/22/follow-verification/" rel="alternate" type="text/html" title="Follow Verification" /><published>2024-09-22T15:20:00+00:00</published><updated>2024-09-22T15:20:00+00:00</updated><id>https://andelf.github.io/2024/09/22/follow-verification</id><content type="html" xml:base="https://andelf.github.io/2024/09/22/follow-verification/"><![CDATA[<p>This message is used to verify that this feed (feedId:41419917272088576) belongs to me (userId:41417426693153792). Join me in enjoying the next generation information browser https://follow.is.</p>]]></content><author><name>猫·仁波切</name></author><summary type="html"><![CDATA[This message is used to verify that this feed (feedId:41419917272088576) belongs to me (userId:41417426693153792). Join me in enjoying the next generation information browser https://follow.is.]]></summary></entry><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
 
 <p>本文是基础向文章, 介绍了 Rust 嵌入式开发中的外设寄存器访问问题，以及社区提供的解决方案。包括以下内容:</p>
 
@@ -2770,7 +2770,7 @@ Rust Embassy 把 <code class="language-plaintext highlighter-rouge">async</code>
 
 <p>施阿姨也许只是孤例，纯流水帐记录，供大家思考。为何视频聊天室这种似乎已经在大中城市过气很久的互联网应用，却可以占有部分三四线城镇及农村的市场，得到生存。</p>
 
-<p>参考：两个网站 <code class="language-plaintext highlighter-rouge">ht tp: / /w ww.99 dzr.com/</code> 大自然娱乐、 <code class="language-plaintext highlighter-rouge">ht tp:/ /w ww.78 90 xy.com/</code> 丰彩人生，还有个未知来源的游戏大厅，实际上是类似在线老虎机的样式，不停地转动切换下一个中奖的商标，可以看到下注量其实很高，单个商标下注在百万金币左右。网站均是未备案，注册地在二线城市。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="interview" /><summary type="html"><![CDATA[这是几年前田野调查时候的一篇访谈稿。最近的聊天室热，让我想起了这个有意思的阿姨。]]></summary></entry><entry><title type="html">Play with 2.13 inch E-Ink display</title><link href="https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display/" rel="alternate" type="text/html" title="Play with 2.13 inch E-Ink display" /><published>2021-01-14T17:24:00+00:00</published><updated>2021-01-14T17:24:00+00:00</updated><id>https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display</id><content type="html" xml:base="https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display/"><![CDATA[<p>故事从买屏幕说起。</p>
+<p>参考：两个网站 <code class="language-plaintext highlighter-rouge">ht tp: / /w ww.99 dzr.com/</code> 大自然娱乐、 <code class="language-plaintext highlighter-rouge">ht tp:/ /w ww.78 90 xy.com/</code> 丰彩人生，还有个未知来源的游戏大厅，实际上是类似在线老虎机的样式，不停地转动切换下一个中奖的商标，可以看到下注量其实很高，单个商标下注在百万金币左右。网站均是未备案，注册地在二线城市。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="interview" /><summary type="html"><![CDATA[这是几年前田野调查时候的一篇访谈稿。最近的聊天室热，让我想起了这个有意思的阿姨。]]></summary></entry><entry><title type="html">Play with 2.13 inch E-Ink display</title><link href="https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display/" rel="alternate" type="text/html" title="Play with 2.13 inch E-Ink display" /><published>2021-01-14T17:24:00+00:00</published><updated>2021-01-14T17:24:00+00:00</updated><id>https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display</id><content type="html" xml:base="https://andelf.github.io/blog/2021/01/14/play-with-2-13-inch-e-ink-display/"><![CDATA[<p>故事从买屏幕说起。</p>
 
 <p>无聊逛咸鱼，发现有便宜的电子墨水屏，这玩意正常价格大几十，而咸鱼一片 2.13 寸模块只需要 15 块钱人民币。</p>
 
@@ -3580,7 +3580,7 @@ It is a memory buffer containing data representing all the pixels in a complete 
 
 <p>“总是这样，来不及相认就失散。”</p>]]></content><author><name>andelf</name></author><category term="blog" /><category term="diary" /><summary type="html"><![CDATA[“为什么呢，这次你这么坏，我却还是会想你。”]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://user-images.githubusercontent.com/72891/100425593-7cc8e600-30ca-11eb-873c-1f9878911c20.jpg" /><media:content medium="image" url="https://user-images.githubusercontent.com/72891/100425593-7cc8e600-30ca-11eb-873c-1f9878911c20.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Welcome to Jekyll!</title><link href="https://andelf.github.io/blog/2020/11/16/welcome-to-jekyll/" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2020-11-16T06:54:24+00:00</published><updated>2020-11-16T06:54:24+00:00</updated><id>https://andelf.github.io/blog/2020/11/16/welcome-to-jekyll</id><content type="html" xml:base="https://andelf.github.io/blog/2020/11/16/welcome-to-jekyll/"><![CDATA[<p>是的我升级了.</p>
 
-<p>是的我又回来了.</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><summary type="html"><![CDATA[是的我升级了.]]></summary></entry><entry><title type="html">迷之一键部署</title><link href="https://andelf.github.io/blog/2020/02/27/one-click/" rel="alternate" type="text/html" title="迷之一键部署" /><published>2020-02-27T06:00:00+00:00</published><updated>2020-02-27T06:00:00+00:00</updated><id>https://andelf.github.io/blog/2020/02/27/one-click</id><content type="html" xml:base="https://andelf.github.io/blog/2020/02/27/one-click/"><![CDATA[<p>搞 IT 技术相关的，尤其是后端技术和分布式相关的同学，怕是不只一次听过所谓的一键部署的提法，与此相似或者相关的，可能还包括自动化部署，一键上线/回滚，以及 CI/CD 相关的持续部署，持续集成，持续交付等等概念。</p>
+<p>是的我又回来了.</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><summary type="html"><![CDATA[是的我升级了.]]></summary></entry><entry><title type="html">迷之一键部署</title><link href="https://andelf.github.io/blog/2020/02/27/one-click/" rel="alternate" type="text/html" title="迷之一键部署" /><published>2020-02-27T06:00:00+00:00</published><updated>2020-02-27T06:00:00+00:00</updated><id>https://andelf.github.io/blog/2020/02/27/one-click</id><content type="html" xml:base="https://andelf.github.io/blog/2020/02/27/one-click/"><![CDATA[<p>搞 IT 技术相关的，尤其是后端技术和分布式相关的同学，怕是不只一次听过所谓的一键部署的提法，与此相似或者相关的，可能还包括自动化部署，一键上线/回滚，以及 CI/CD 相关的持续部署，持续集成，持续交付等等概念。</p>
 
 <p>这里，不谈 CI/CD，只谈作为对用户产品的一键部署，无论是叫 one-click, single-click, one-key, one-press, one-button, one-command, single-command… 还是只是对外发布的某种快速部署工具(集)。部署，俗称上线，不过细究概念，上线似乎更侧重日常功能更新，而部署的概念，更侧重首次的初始环境搭建。无论何，传统上，部署都是运维(OP)同学的日常工作。</p>
 
@@ -3755,7 +3755,7 @@ It is a memory buffer containing data representing all the pixels in a complete 
 
 <p>一键部署，终将要被云平台或是云平台的容器编排消灭的吧。</p>
 
-<p>但到时候，又是给容器编排做 UI 了。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="ci" /><summary type="html"><![CDATA[搞 IT 技术相关的，尤其是后端技术和分布式相关的同学，怕是不只一次听过所谓的一键部署的提法，与此相似或者相关的，可能还包括自动化部署，一键上线/回滚，以及 CI/CD 相关的持续部署，持续集成，持续交付等等概念。]]></summary></entry><entry><title type="html">Fix Ansible Tower: stdout capture is missing</title><link href="https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/" rel="alternate" type="text/html" title="Fix Ansible Tower: stdout capture is missing" /><published>2016-12-07T08:33:20+00:00</published><updated>2016-12-07T08:33:20+00:00</updated><id>https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing</id><content type="html" xml:base="https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/"><![CDATA[<p>Ansible Tower will report <code class="language-plaintext highlighter-rouge">stdout capture is missing</code> when restoring from previous backup.</p>
+<p>但到时候，又是给容器编排做 UI 了。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="ci" /><summary type="html"><![CDATA[搞 IT 技术相关的，尤其是后端技术和分布式相关的同学，怕是不只一次听过所谓的一键部署的提法，与此相似或者相关的，可能还包括自动化部署，一键上线/回滚，以及 CI/CD 相关的持续部署，持续集成，持续交付等等概念。]]></summary></entry><entry><title type="html">Fix Ansible Tower: stdout capture is missing</title><link href="https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/" rel="alternate" type="text/html" title="Fix Ansible Tower: stdout capture is missing" /><published>2016-12-07T08:33:20+00:00</published><updated>2016-12-07T08:33:20+00:00</updated><id>https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing</id><content type="html" xml:base="https://andelf.github.io/blog/2016/12/07/fix-ansible-tower-stdout-capture-is-missing/"><![CDATA[<p>Ansible Tower will report <code class="language-plaintext highlighter-rouge">stdout capture is missing</code> when restoring from previous backup.</p>
 
 <p>Or run from docker?</p>
 
@@ -3780,7 +3780,7 @@ environment=HOME="/var/lib/awx",USER="awx"
 
 <p>是的，为找到原因，逆向了整个 Ansible Tower。</p>
 
-<p>Ref: <a href="https://github.com/ansible/ansible/issues/13904">GitHub Issue</a></p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="linux" /><category term="ansible" /><summary type="html"><![CDATA[Ansible Tower will report stdout capture is missing when restoring from previous backup.]]></summary></entry><entry><title type="html">在 CircleCI 上使用 Rust(CircleCI meets Rust)</title><link href="https://andelf.github.io/blog/2016/11/18/circleci-meets-rust/" rel="alternate" type="text/html" title="在 CircleCI 上使用 Rust(CircleCI meets Rust)" /><published>2016-11-18T05:26:15+00:00</published><updated>2016-11-18T05:26:15+00:00</updated><id>https://andelf.github.io/blog/2016/11/18/circleci-meets-rust</id><content type="html" xml:base="https://andelf.github.io/blog/2016/11/18/circleci-meets-rust/"><![CDATA[<p>最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长，
+<p>Ref: <a href="https://github.com/ansible/ansible/issues/13904">GitHub Issue</a></p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="linux" /><category term="ansible" /><summary type="html"><![CDATA[Ansible Tower will report stdout capture is missing when restoring from previous backup.]]></summary></entry><entry><title type="html">在 CircleCI 上使用 Rust(CircleCI meets Rust)</title><link href="https://andelf.github.io/blog/2016/11/18/circleci-meets-rust/" rel="alternate" type="text/html" title="在 CircleCI 上使用 Rust(CircleCI meets Rust)" /><published>2016-11-18T05:26:15+00:00</published><updated>2016-11-18T05:26:15+00:00</updated><id>https://andelf.github.io/blog/2016/11/18/circleci-meets-rust</id><content type="html" xml:base="https://andelf.github.io/blog/2016/11/18/circleci-meets-rust/"><![CDATA[<p>最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长，
 影响开发效率。</p>
 
 <p>了解到 CircleCI 是不错的替代品，所以打算迁移 Rust 项目过去。当然说起来， CircleCI 的野心更大，是要来替代 jenkins 的。</p>
@@ -3837,7 +3837,7 @@ Action failed: cargo build
     <span class="pi">-</span> <span class="s">cargo test</span>
 </code></pre></div></div>
 
-<p>嗯, Ugly but works.</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="rust" /><category term="ci" /><summary type="html"><![CDATA[最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长， 影响开发效率。]]></summary></entry><entry><title type="html">折腾 Raspberry Pi + HomeKit 手记</title><link href="https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/" rel="alternate" type="text/html" title="折腾 Raspberry Pi + HomeKit 手记" /><published>2016-09-16T12:34:43+00:00</published><updated>2016-09-16T12:34:43+00:00</updated><id>https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi</id><content type="html" xml:base="https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/"><![CDATA[<p>9月14日凌晨苹果终于推送了 iOS 10 的更新。从之前发布会来看，并没有多少亮点，除了几天的新鲜感之外，
+<p>嗯, Ugly but works.</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="rust" /><category term="ci" /><summary type="html"><![CDATA[最近由于频频遇到 travis-ci 的问题，主要是 Linux 资源排队、macOS 资源更需要排队，导致自动测试时间被拉长， 影响开发效率。]]></summary></entry><entry><title type="html">折腾 Raspberry Pi + HomeKit 手记</title><link href="https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/" rel="alternate" type="text/html" title="折腾 Raspberry Pi + HomeKit 手记" /><published>2016-09-16T12:34:43+00:00</published><updated>2016-09-16T12:34:43+00:00</updated><id>https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi</id><content type="html" xml:base="https://andelf.github.io/blog/2016/09/16/play-homekit-with-ios-10-and-raspberry-pi/"><![CDATA[<p>9月14日凌晨苹果终于推送了 iOS 10 的更新。从之前发布会来看，并没有多少亮点，除了几天的新鲜感之外，
 尤其是对于目前还在用上两代机型的我来说，2333。</p>
 
 <p>两年前苹果发布 Swift 语言的同时，新增了 HomeKit，当时用工具 dump 过最老版本的 Swift 声明。传送门：<a href="https://github.com/andelf/Defines-Swift/blob/6a8cda2e12bf6e5a23979a1ad121e70a0eeef6dd/HomeKit.swift">HomeKit.swift</a>。目前所有官方相关的资料位于 <a href="http://www.apple.com/ios/home/">HomeKit - Apple</a>。</p>
@@ -4019,7 +4019,7 @@ amixer set PCM off
   <li>Service: 一组值，合起来提供服务，例如中央空调（调节温度，风速等等）</li>
 </ul>
 
-<p>TODO</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="ios" /><summary type="html"><![CDATA[9月14日凌晨苹果终于推送了 iOS 10 的更新。从之前发布会来看，并没有多少亮点，除了几天的新鲜感之外， 尤其是对于目前还在用上两代机型的我来说，2333。]]></summary></entry><entry><title type="html">Swift 3.0 尝试——从入门到再学一门(A Glimpse of Swift 3.0)</title><link href="https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/" rel="alternate" type="text/html" title="Swift 3.0 尝试——从入门到再学一门(A Glimpse of Swift 3.0)" /><published>2016-04-28T02:06:53+00:00</published><updated>2016-04-28T02:06:53+00:00</updated><id>https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0</id><content type="html" xml:base="https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/"><![CDATA[<p>安装工具</p>
+<p>TODO</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="ios" /><summary type="html"><![CDATA[9月14日凌晨苹果终于推送了 iOS 10 的更新。从之前发布会来看，并没有多少亮点，除了几天的新鲜感之外， 尤其是对于目前还在用上两代机型的我来说，2333。]]></summary></entry><entry><title type="html">Swift 3.0 尝试——从入门到再学一门(A Glimpse of Swift 3.0)</title><link href="https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/" rel="alternate" type="text/html" title="Swift 3.0 尝试——从入门到再学一门(A Glimpse of Swift 3.0)" /><published>2016-04-28T02:06:53+00:00</published><updated>2016-04-28T02:06:53+00:00</updated><id>https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0</id><content type="html" xml:base="https://andelf.github.io/blog/2016/04/28/a-glimpse-of-swift-3-dot-0/"><![CDATA[<p>安装工具</p>
 
 <p>https://github.com/kylef/swiftenv</p>
 
@@ -4121,7 +4121,7 @@ amixer set PCM off
       <p>(apple/swift-evolution)[https://github.com/apple/swift-evolution] <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
-</div>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[安装工具]]></summary></entry><entry><title type="html">Rust Pattern Match(Rust中的模式匹配)</title><link href="https://andelf.github.io/blog/2016/03/22/rust-pattern-match/" rel="alternate" type="text/html" title="Rust Pattern Match(Rust中的模式匹配)" /><published>2016-03-22T15:35:19+00:00</published><updated>2016-03-22T15:35:19+00:00</updated><id>https://andelf.github.io/blog/2016/03/22/rust-pattern-match</id><content type="html" xml:base="https://andelf.github.io/blog/2016/03/22/rust-pattern-match/"><![CDATA[<h1 id="模式匹配">模式匹配</h1>
+</div>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[安装工具]]></summary></entry><entry><title type="html">Rust Pattern Match(Rust中的模式匹配)</title><link href="https://andelf.github.io/blog/2016/03/22/rust-pattern-match/" rel="alternate" type="text/html" title="Rust Pattern Match(Rust中的模式匹配)" /><published>2016-03-22T15:35:19+00:00</published><updated>2016-03-22T15:35:19+00:00</updated><id>https://andelf.github.io/blog/2016/03/22/rust-pattern-match</id><content type="html" xml:base="https://andelf.github.io/blog/2016/03/22/rust-pattern-match/"><![CDATA[<h1 id="模式匹配">模式匹配</h1>
 
 <p>汉语字典中对“模式”的解释是：事物的标准样式。在计算机科学中，它指特定类型的数据（往往是序列或是树形结构）满足某一特定结构或格式。“匹配”本身是指一个判断寻找过程。最早的模式匹配用于文本编辑器中的正则字符串搜索，之后才作为编程语言特性。</p>
 
@@ -4338,7 +4338,7 @@ amixer set PCM off
 
 <h2 id="参考">参考</h2>
 
-<p>https://doc.rust-lang.org/book/patterns.html</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="rust" /><summary type="html"><![CDATA[模式匹配]]></summary></entry><entry><title type="html">广州实时工具App逆向</title><link href="https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus/" rel="alternate" type="text/html" title="广州实时工具App逆向" /><published>2015-06-18T09:39:06+00:00</published><updated>2015-06-18T09:39:06+00:00</updated><id>https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus</id><content type="html" xml:base="https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus/"><![CDATA[<p>简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。</p>
+<p>https://doc.rust-lang.org/book/patterns.html</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="rust" /><summary type="html"><![CDATA[模式匹配]]></summary></entry><entry><title type="html">广州实时工具App逆向</title><link href="https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus/" rel="alternate" type="text/html" title="广州实时工具App逆向" /><published>2015-06-18T09:39:06+00:00</published><updated>2015-06-18T09:39:06+00:00</updated><id>https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus</id><content type="html" xml:base="https://andelf.github.io/blog/2015/06/18/guangzhou-realtime-bus/"><![CDATA[<p>简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。</p>
 
 <p><a href="https://github.com/andelf/guangzhou-realtime-bus">Github: guangzhou-realtime-bus</a></p>
 
@@ -4353,11 +4353,11 @@ amixer set PCM off
 <p>base64封装过程：先打包字符串长度，然后是原始字符串（JSON），然后是<code class="language-plaintext highlighter-rouge">0x10</code>(md5字符串长度)，
 然后是 md5 校验值。整个二进制字符串用 base64 转码，POST 给服务器。</p>
 
-<p>具体的登录注册过程还需要进一步抓包分析，不过暂时兴趣不在这里了。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="crack" /><summary type="html"><![CDATA[简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。]]></summary></entry><entry><title type="html">北京实时公交分析</title><link href="https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus/" rel="alternate" type="text/html" title="北京实时公交分析" /><published>2015-06-01T05:17:50+00:00</published><updated>2015-06-01T05:17:50+00:00</updated><id>https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus</id><content type="html" xml:base="https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus/"><![CDATA[<p>361 条线路，705条单向线路。 aibang 负责数据服务。</p>
+<p>具体的登录注册过程还需要进一步抓包分析，不过暂时兴趣不在这里了。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="crack" /><summary type="html"><![CDATA[简记。用了 IDA Pro，安卓手机的 Remote 客户端。以及 apktool 等。]]></summary></entry><entry><title type="html">北京实时公交分析</title><link href="https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus/" rel="alternate" type="text/html" title="北京实时公交分析" /><published>2015-06-01T05:17:50+00:00</published><updated>2015-06-01T05:17:50+00:00</updated><id>https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus</id><content type="html" xml:base="https://andelf.github.io/blog/2015/06/01/beijing-realtime-bus/"><![CDATA[<p>361 条线路，705条单向线路。 aibang 负责数据服务。</p>
 
 <p>每辆车，每15秒更新一次 GPS，</p>
 
-<p>整理成为 Repo <a href="https://github.com/andelf/beijing-realtime-bus">andelf/beijing-realtime-bus</a>.</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><summary type="html"><![CDATA[361 条线路，705条单向线路。 aibang 负责数据服务。]]></summary></entry><entry><title type="html">为第三方扩展创建 Swift 模块</title><link href="https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/" rel="alternate" type="text/html" title="为第三方扩展创建 Swift 模块" /><published>2015-01-23T15:21:00+00:00</published><updated>2015-01-23T15:21:00+00:00</updated><id>https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules</id><content type="html" xml:base="https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/"><![CDATA[<p>本文提出了一种将第三方扩展引入到 Swift 标准库的方法。</p>
+<p>整理成为 Repo <a href="https://github.com/andelf/beijing-realtime-bus">andelf/beijing-realtime-bus</a>.</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><summary type="html"><![CDATA[361 条线路，705条单向线路。 aibang 负责数据服务。]]></summary></entry><entry><title type="html">为第三方扩展创建 Swift 模块</title><link href="https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/" rel="alternate" type="text/html" title="为第三方扩展创建 Swift 模块" /><published>2015-01-23T15:21:00+00:00</published><updated>2015-01-23T15:21:00+00:00</updated><id>https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules</id><content type="html" xml:base="https://andelf.github.io/blog/2015/01/23/swift-3rd-library-install-as-swift-modules/"><![CDATA[<p>本文提出了一种将第三方扩展引入到 Swift 标准库的方法。</p>
 
 <p>以 Alamofire 为例，</p>
 
@@ -4410,7 +4410,7 @@ ar rvs libswiftSwiftyJSON.a SwiftyJSON.o
 
 <p>下对应目录。</p>
 
-<p>然后在 Xcode 里，直接 import。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[本文提出了一种将第三方扩展引入到 Swift 标准库的方法。]]></summary></entry><entry><title type="html">Swift beta3 Changes ( Swift 在 beta3 中的变化）</title><link href="https://andelf.github.io/blog/2014/07/08/swift-beta3-changes/" rel="alternate" type="text/html" title="Swift beta3 Changes ( Swift 在 beta3 中的变化）" /><published>2014-07-08T09:22:11+00:00</published><updated>2014-07-08T09:22:11+00:00</updated><id>https://andelf.github.io/blog/2014/07/08/swift-beta3-changes</id><content type="html" xml:base="https://andelf.github.io/blog/2014/07/08/swift-beta3-changes/"><![CDATA[<p>准确说是 beta2 <code class="language-plaintext highlighter-rouge">Swift version 1.0 (swift-600.0.34.4.8)</code> 到 beta3 <code class="language-plaintext highlighter-rouge">Swift version 1.0 (swift-600.0.38.7)</code> 的变化。</p>
+<p>然后在 Xcode 里，直接 import。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[本文提出了一种将第三方扩展引入到 Swift 标准库的方法。]]></summary></entry><entry><title type="html">Swift beta3 Changes ( Swift 在 beta3 中的变化）</title><link href="https://andelf.github.io/blog/2014/07/08/swift-beta3-changes/" rel="alternate" type="text/html" title="Swift beta3 Changes ( Swift 在 beta3 中的变化）" /><published>2014-07-08T09:22:11+00:00</published><updated>2014-07-08T09:22:11+00:00</updated><id>https://andelf.github.io/blog/2014/07/08/swift-beta3-changes</id><content type="html" xml:base="https://andelf.github.io/blog/2014/07/08/swift-beta3-changes/"><![CDATA[<p>准确说是 beta2 <code class="language-plaintext highlighter-rouge">Swift version 1.0 (swift-600.0.34.4.8)</code> 到 beta3 <code class="language-plaintext highlighter-rouge">Swift version 1.0 (swift-600.0.38.7)</code> 的变化。</p>
 
 <p>对了，补充下。 beta1 <code class="language-plaintext highlighter-rouge">Swift version 1.0 (swift-600.0.34.4.5)</code> 到 beta2 几乎没有什么变化。</p>
 
@@ -4491,7 +4491,7 @@ func sorted(isOrderedBefore: (T, T) -&gt; Bool) -&gt; Array&lt;T&gt;
 
 <h2 id="模块">模块</h2>
 
-<p>增加了  StdlibUnittest 模块。 <a href="https://github.com/andelf/Defines-Swift/blob/79ed8d40659e4d038f41e3c30b4b3358106bd50a/StdlibUnittest.swift">声明代码</a>。单元测试终于有了。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[准确说是 beta2 Swift version 1.0 (swift-600.0.34.4.8) 到 beta3 Swift version 1.0 (swift-600.0.38.7) 的变化。]]></summary></entry><entry><title type="html">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</title><link href="https://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library/" rel="alternate" type="text/html" title="Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)" /><published>2014-07-07T04:09:54+00:00</published><updated>2014-07-07T04:09:54+00:00</updated><id>https://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library</id><content type="html" xml:base="https://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library/"><![CDATA[<p>排名 16 了。啧啧。你看才刚出一个月。</p>
+<p>增加了  StdlibUnittest 模块。 <a href="https://github.com/andelf/Defines-Swift/blob/79ed8d40659e4d038f41e3c30b4b3358106bd50a/StdlibUnittest.swift">声明代码</a>。单元测试终于有了。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[准确说是 beta2 Swift version 1.0 (swift-600.0.34.4.8) 到 beta3 Swift version 1.0 (swift-600.0.38.7) 的变化。]]></summary></entry><entry><title type="html">Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)</title><link href="https://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library/" rel="alternate" type="text/html" title="Use Swift Dynamic Framework （如何科学地引用第三方 Swift 库)" /><published>2014-07-07T04:09:54+00:00</published><updated>2014-07-07T04:09:54+00:00</updated><id>https://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library</id><content type="html" xml:base="https://andelf.github.io/blog/2014/07/07/use-swift-dynamic-library/"><![CDATA[<p>排名 16 了。啧啧。你看才刚出一个月。</p>
 
 <p>目前已经有了很多非常棒的 Swift 第三方库， JSON 处理啊、 HTTP 访问啊、 UIView 插件啊等等。</p>
 
@@ -4575,7 +4575,7 @@ LTMorphingLabel 两个 <code class="language-plaintext highlighter-rouge">.frame
 <ul>
   <li><a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
   <li><a href="http://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</a></li>
-</ul>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[排名 16 了。啧啧。你看才刚出一个月。]]></summary></entry><entry><title type="html">Swift Undocumented Grammar （Swift 黑语法）</title><link href="https://andelf.github.io/blog/2014/07/03/swift-undocumented-grammar/" rel="alternate" type="text/html" title="Swift Undocumented Grammar （Swift 黑语法）" /><published>2014-07-03T19:05:11+00:00</published><updated>2014-07-03T19:05:11+00:00</updated><id>https://andelf.github.io/blog/2014/07/03/swift-undocumented-grammar</id><content type="html" xml:base="https://andelf.github.io/blog/2014/07/03/swift-undocumented-grammar/"><![CDATA[<p>本文介绍 Swift 的 Undocumented 语法特性。</p>
+</ul>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[排名 16 了。啧啧。你看才刚出一个月。]]></summary></entry><entry><title type="html">Swift Undocumented Grammar （Swift 黑语法）</title><link href="https://andelf.github.io/blog/2014/07/03/swift-undocumented-grammar/" rel="alternate" type="text/html" title="Swift Undocumented Grammar （Swift 黑语法）" /><published>2014-07-03T19:05:11+00:00</published><updated>2014-07-03T19:05:11+00:00</updated><id>https://andelf.github.io/blog/2014/07/03/swift-undocumented-grammar</id><content type="html" xml:base="https://andelf.github.io/blog/2014/07/03/swift-undocumented-grammar/"><![CDATA[<p>本文介绍 Swift 的 Undocumented 语法特性。</p>
 
 <p>电子书上介绍的 default function parameter 这里都不好意思拿出来写。</p>
 
@@ -4605,7 +4605,7 @@ LTMorphingLabel 两个 <code class="language-plaintext highlighter-rouge">.frame
 
 <h2 id="how-i-find-it">How I find it?</h2>
 
-<p>瞎试出来的。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[本文介绍 Swift 的 Undocumented 语法特性。]]></summary></entry><entry><title type="html">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</title><link href="https://andelf.github.io/blog/2014/07/03/cocoa-in-swift/" rel="alternate" type="text/html" title="Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）" /><published>2014-07-03T17:05:55+00:00</published><updated>2014-07-03T17:05:55+00:00</updated><id>https://andelf.github.io/blog/2014/07/03/cocoa-in-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/07/03/cocoa-in-swift/"><![CDATA[<p>最近看到了 <a href="https://github.com/raywenderlich/swift-style-guide">Swift Style Guide</a> 个人觉得内容太少，
+<p>瞎试出来的。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[本文介绍 Swift 的 Undocumented 语法特性。]]></summary></entry><entry><title type="html">Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）</title><link href="https://andelf.github.io/blog/2014/07/03/cocoa-in-swift/" rel="alternate" type="text/html" title="Cocoa Extensions in Swift ( Cocoa 在 Swift 中所添加的扩展）" /><published>2014-07-03T17:05:55+00:00</published><updated>2014-07-03T17:05:55+00:00</updated><id>https://andelf.github.io/blog/2014/07/03/cocoa-in-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/07/03/cocoa-in-swift/"><![CDATA[<p>最近看到了 <a href="https://github.com/raywenderlich/swift-style-guide">Swift Style Guide</a> 个人觉得内容太少，
 Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。</p>
 
 <p>Swift 本身的特性，导致它在一些用法上和 Objective-C 上有所不同，比如 ObjC 的 struct 单纯和 C 的一样，但是在 Swift
@@ -4873,7 +4873,7 @@ SKTextureAtlas SKTexture SKSpriteNode SKShapeNode
 
 <p>单独添加了自己的 <code class="language-plaintext highlighter-rouge">Mirror</code> 类型，单独实现。</p>
 
-<p><code class="language-plaintext highlighter-rouge">Mirror</code> 类型其实是为 <code class="language-plaintext highlighter-rouge">QuickLookObject</code> 准备的，也就是在 Xcode Playground 中快速查看。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[最近看到了 Swift Style Guide 个人觉得内容太少， Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。]]></summary></entry><entry><title type="html">Swift Type Hierarchy ( Swift 类型层次结构 ）</title><link href="https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy/" rel="alternate" type="text/html" title="Swift Type Hierarchy ( Swift 类型层次结构 ）" /><published>2014-06-30T07:10:41+00:00</published><updated>2014-06-30T07:10:41+00:00</updated><id>https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy/"><![CDATA[<p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
+<p><code class="language-plaintext highlighter-rouge">Mirror</code> 类型其实是为 <code class="language-plaintext highlighter-rouge">QuickLookObject</code> 准备的，也就是在 Xcode Playground 中快速查看。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[最近看到了 Swift Style Guide 个人觉得内容太少， Swift 本身作为一门庞大的语言，语素众多。本文就 Swift 本身对 Cocoa 的扩展，看看对日常 Cocoa 风格有什么影响。]]></summary></entry><entry><title type="html">Swift Type Hierarchy ( Swift 类型层次结构 ）</title><link href="https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy/" rel="alternate" type="text/html" title="Swift Type Hierarchy ( Swift 类型层次结构 ）" /><published>2014-06-30T07:10:41+00:00</published><updated>2014-06-30T07:10:41+00:00</updated><id>https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/30/swift-type-hierarchy/"><![CDATA[<p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
 
 <p>本文主要介绍 Swift 所有标准库类型的层次结构，及所有标准类型。本文可作为参考手册使用。</p>
 
@@ -5233,7 +5233,7 @@ StringLiteralConvertible
 
 <ul>
   <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
-</ul>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载请注明，方便的情况下请知会本人. weibo]]></summary></entry><entry><title type="html">My View of Swift （闲扯对 Swift 语言的看法）</title><link href="https://andelf.github.io/blog/2014/06/30/my-view-of-swift/" rel="alternate" type="text/html" title="My View of Swift （闲扯对 Swift 语言的看法）" /><published>2014-06-30T03:05:13+00:00</published><updated>2014-06-30T03:05:13+00:00</updated><id>https://andelf.github.io/blog/2014/06/30/my-view-of-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/30/my-view-of-swift/"><![CDATA[<p>其实这是很早就像要说的了，大概当时信誓旦旦说要看完那本 epub 写个读后感谈谈对 Swift 看法什么的。后来不了了之。
+</ul>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载请注明，方便的情况下请知会本人. weibo]]></summary></entry><entry><title type="html">My View of Swift （闲扯对 Swift 语言的看法）</title><link href="https://andelf.github.io/blog/2014/06/30/my-view-of-swift/" rel="alternate" type="text/html" title="My View of Swift （闲扯对 Swift 语言的看法）" /><published>2014-06-30T03:05:13+00:00</published><updated>2014-06-30T03:05:13+00:00</updated><id>https://andelf.github.io/blog/2014/06/30/my-view-of-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/30/my-view-of-swift/"><![CDATA[<p>其实这是很早就像要说的了，大概当时信誓旦旦说要看完那本 epub 写个读后感谈谈对 Swift 看法什么的。后来不了了之。
 现在觉得这个时机或许差不多，对 Swift 的了解也算凑合了。</p>
 
 <p>纯个人观点。</p>
@@ -5288,7 +5288,7 @@ StringLiteralConvertible
 
 <p>总觉得 Cocoa 拖后腿，不然放到其他平台也不错。</p>
 
-<p>对了，之前不是在 App 开发领域，这才知道原来这个地盘水很深，太多唯利的培训机构，太多嗷嗷待哺等视频教程的新人。觉得挺有意思。就拿 ? ! 这个 Optional 为例，太多介绍的文章。可惜能说明白的太少太少。糊里糊涂做开发就是当前现状吧。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[其实这是很早就像要说的了，大概当时信誓旦旦说要看完那本 epub 写个读后感谈谈对 Swift 看法什么的。后来不了了之。 现在觉得这个时机或许差不多，对 Swift 的了解也算凑合了。]]></summary></entry><entry><title type="html">Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</title><link href="https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/" rel="alternate" type="text/html" title="Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）" /><published>2014-06-28T13:58:35+00:00</published><updated>2014-06-28T13:58:35+00:00</updated><id>https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/"><![CDATA[<p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
+<p>对了，之前不是在 App 开发领域，这才知道原来这个地盘水很深，太多唯利的培训机构，太多嗷嗷待哺等视频教程的新人。觉得挺有意思。就拿 ? ! 这个 Optional 为例，太多介绍的文章。可惜能说明白的太少太少。糊里糊涂做开发就是当前现状吧。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[其实这是很早就像要说的了，大概当时信誓旦旦说要看完那本 epub 写个读后感谈谈对 Swift 看法什么的。后来不了了之。 现在觉得这个时机或许差不多，对 Swift 的了解也算凑合了。]]></summary></entry><entry><title type="html">Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）</title><link href="https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/" rel="alternate" type="text/html" title="Swift Interop with C/ObjC Part 3 (Swift 与 ObjC 和 C 的交互，第三部分）" /><published>2014-06-28T13:58:35+00:00</published><updated>2014-06-28T13:58:35+00:00</updated><id>https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/28/swift-interop-with-c-slash-objc/"><![CDATA[<p>声明： 转载请注明，方便的情况下请知会本人. <a href="http://weibo.com/234632333">weibo</a></p>
 
 <p>之前说那是最后一篇。可惜越来越发现有很多东西还没介绍到。事不过三。再坑一篇。</p>
 
@@ -5467,7 +5467,7 @@ StringLiteralConvertible
 
 <ul>
   <li><a href="https://github.com/andelf/Defines-Swift">我的 Github andelf/Defines-Swift</a></li>
-</ul>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载请注明，方便的情况下请知会本人. weibo]]></summary></entry><entry><title type="html">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~&amp;gt; ）</title><link href="https://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/" rel="alternate" type="text/html" title="Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~&amp;gt; ）" /><published>2014-06-25T14:44:29+00:00</published><updated>2014-06-25T14:44:29+00:00</updated><id>https://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/"><![CDATA[<p>本文瞎写，没实际内容。请不用看了。</p>
+</ul>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载请注明，方便的情况下请知会本人. weibo]]></summary></entry><entry><title type="html">Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~&amp;gt; ）</title><link href="https://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/" rel="alternate" type="text/html" title="Tilde Arrow in Swift （Swift 标准库中的波浪箭头 ~&amp;gt; ）" /><published>2014-06-25T14:44:29+00:00</published><updated>2014-06-25T14:44:29+00:00</updated><id>https://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/25/tilde-arrow-in-swift/"><![CDATA[<p>本文瞎写，没实际内容。请不用看了。</p>
 
 <h2 id="摘要">摘要</h2>
 
@@ -5572,7 +5572,7 @@ protocol ForwardIndex : _ForwardIndex {
 
 <p>仔细查看目前的 <code class="language-plaintext highlighter-rouge">protocol</code> 实现，发现还是有点 BUG ，类型限制还是不清楚，表述高阶类型的时候。</p>
 
-<p>为了描述 <code class="language-plaintext highlighter-rouge">~&gt;</code> 的用法，我写了个 <a href="https://gist.github.com/andelf/6a8432ef0820de9991f6">Monad.swift</a> 。</p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[本文瞎写，没实际内容。请不用看了。]]></summary></entry><entry><title type="html">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</title><link href="https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/" rel="alternate" type="text/html" title="Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）" /><published>2014-06-25T13:20:55+00:00</published><updated>2014-06-25T13:20:55+00:00</updated><id>https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/"><![CDATA[<p>声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
+<p>为了描述 <code class="language-plaintext highlighter-rouge">~&gt;</code> 的用法，我写了个 <a href="https://gist.github.com/andelf/6a8432ef0820de9991f6">Monad.swift</a> 。</p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[本文瞎写，没实际内容。请不用看了。]]></summary></entry><entry><title type="html">Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）</title><link href="https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/" rel="alternate" type="text/html" title="Write Swift Module Cont. Static Library （使用 Swift 创建 Swift 模块 - 静态链接库）" /><published>2014-06-25T13:20:55+00:00</published><updated>2014-06-25T13:20:55+00:00</updated><id>https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/25/write-swift-module-with-swift-cont/"><![CDATA[<p>声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
 
 <p>本文的发现基于个人研究。请尊重原创。</p>
 
@@ -5661,7 +5661,7 @@ protocol ForwardIndex : _ForwardIndex {
 <ul>
   <li>我的另一篇 <a href="http://andelf.github.io/blog/2014/06/19/modules-for-swift/">Module System of Swift (简析 Swift 的模块系统)</a></li>
   <li><a href="http://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/">Use CocoaPods With Swift (在 Swift 中使用 CocoaPods）</a></li>
-</ul>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo]]></summary></entry><entry><title type="html">Use CocoaPods with Swift (在 Swift 中使用 CocoaPods）</title><link href="https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/" rel="alternate" type="text/html" title="Use CocoaPods with Swift (在 Swift 中使用 CocoaPods）" /><published>2014-06-23T12:15:39+00:00</published><updated>2014-06-23T12:15:39+00:00</updated><id>https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/"><![CDATA[<p>声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
+</ul>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina, 请在方便的情况下情尽量告知. weibo]]></summary></entry><entry><title type="html">Use CocoaPods with Swift (在 Swift 中使用 CocoaPods）</title><link href="https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/" rel="alternate" type="text/html" title="Use CocoaPods with Swift (在 Swift 中使用 CocoaPods）" /><published>2014-06-23T12:15:39+00:00</published><updated>2014-06-23T12:15:39+00:00</updated><id>https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/23/use-cocoapods-with-swift/"><![CDATA[<p>声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. <a href="http://weibo.com/234632333">weibo</a></p>
 
 <p>本文的发现基于个人研究。请尊重原创。已授权 CocoaChina 转载个人文章。</p>
 
@@ -5853,194 +5853,4 @@ module </span><span class="si">#{</span><span class="n">normalized_pod_name</spa
       <p><a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift and ObjectiveC Interop (Swift 与 Objective-C 之间的交互)</a> <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
-</div>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. weibo]]></summary></entry><entry><title type="html">Swift Reflection （Swift 的反射）</title><link href="https://andelf.github.io/blog/2014/06/20/swift-reflection/" rel="alternate" type="text/html" title="Swift Reflection （Swift 的反射）" /><published>2014-06-20T15:48:51+00:00</published><updated>2014-06-20T15:48:51+00:00</updated><id>https://andelf.github.io/blog/2014/06/20/swift-reflection</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/20/swift-reflection/"><![CDATA[<p>Swift 其实是支持反射的，不过功能略弱。本文介绍基本的反射用法和相关类型。</p>
-
-<h2 id="metatype-和-type-语法">MetaType 和 Type 语法</h2>
-
-<blockquote>
-  <p>The metatype of a class, structure, or enumeration type is the name of that type followed by .Type. The metatype of a protocol type—not the concrete type that conforms to the protocol at runtime—is the name of that protocol followed by .Protocol. For example, the metatype of the class type SomeClass is SomeClass.Type and the metatype of the protocol SomeProtocol is SomeProtocol.Protocol.</p>
-</blockquote>
-
-<blockquote>
-  <p>You can use the postfix self expression to access a type as a value. For example, SomeClass.self returns SomeClass itself, not an instance of SomeClass. And SomeProtocol.self returns SomeProtocol itself, not an instance of a type that conforms to SomeProtocol at runtime.</p>
-</blockquote>
-
-<ul>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>metatype-type -&gt; <code class="language-plaintext highlighter-rouge">type</code>.<strong>Type</strong></td>
-          <td><code class="language-plaintext highlighter-rouge">type</code>.<strong>Protocol</strong></td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-  <li>type-as-value -&gt; <code class="language-plaintext highlighter-rouge">type</code>.self</li>
-</ul>
-
-<p>其中 metatype-type 出现在代码中需要类型的地方， type-as-value 出现在代码中需要值、变量的地方。</p>
-
-<p><code class="language-plaintext highlighter-rouge">Any.Type</code> 类型大家可以猜下它表示什么。</p>
-
-<h2 id="基础定义">基础定义</h2>
-
-<p>反射信息用 <code class="language-plaintext highlighter-rouge">Mirror</code> 类型表示，类型协议是 <code class="language-plaintext highlighter-rouge">Reflectable</code>，但实际看起来 <code class="language-plaintext highlighter-rouge">Reflectable</code> 没有任何作用。</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol Reflectable {
-  func getMirror() -&gt; Mirror
-}
-protocol Mirror {
-  var value: Any { get }
-  var valueType: Any.Type { get }
-  var objectIdentifier: ObjectIdentifier? { get }
-  var count: Int { get }
-  subscript (i: Int) -&gt; (String, Mirror) { get }
-  var summary: String { get }
-  var quickLookObject: QuickLookObject? { get }
-  var disposition: MirrorDisposition { get }
-}
-</code></pre></div></div>
-
-<p>实际上所有类型都实现了 <code class="language-plaintext highlighter-rouge">Reflectable</code>。</p>
-
-<p><code class="language-plaintext highlighter-rouge">Mirror</code> 协议相关字段：</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">value</code> 相当于变量的 <code class="language-plaintext highlighter-rouge">as Any</code> 操作</li>
-  <li><code class="language-plaintext highlighter-rouge">valueType</code> 获得变量类型</li>
-  <li><code class="language-plaintext highlighter-rouge">objectIdentifier</code> 相当于一个 UInt 作用未知，可能是 metadata 表用到</li>
-  <li><code class="language-plaintext highlighter-rouge">count</code> 子项目个数（可以是类、结构体的成员变量，也可以是字典，数组的数据）</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 访问子项目, 和子项目的名字</li>
-  <li><code class="language-plaintext highlighter-rouge">summary</code> 相当于 <code class="language-plaintext highlighter-rouge">description</code></li>
-  <li><code class="language-plaintext highlighter-rouge">quickLookObject</code> 是一个枚举，这个在 WWDC 有讲到，就是 Playground 代码右边栏的显示内容，比如常见类型，颜色，视图都可以</li>
-  <li><code class="language-plaintext highlighter-rouge">disposition</code> 表示变量类型的性质，基础类型 or 结构 or 类 or 枚举 or 索引对象 or … 如下</li>
-</ul>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enum MirrorDisposition {
-  case Struct // 结构体
-  case Class // 类
-  case Enum // 枚举
-  case Tuple // 元组
-  case Aggregate // 基础类型
-  case IndexContainer // 索引对象
-  case KeyContainer // 键-值对象
-  case MembershipContainer // 未知
-  case Container // 未知
-  case Optional // Type?
-  var hashValue: Int { get }
-}
-</code></pre></div></div>
-
-<p>通过函数 <code class="language-plaintext highlighter-rouge">func reflect&lt;T&gt;(x: T) -&gt; Mirror</code> 可以获得反射对象 <code class="language-plaintext highlighter-rouge">Mirror</code> 。它定义在 <code class="language-plaintext highlighter-rouge">Any</code> 上，所有类型均可用。</p>
-
-<h2 id="实际操作">实际操作</h2>
-
-<h3 id="valuetype-处理"><code class="language-plaintext highlighter-rouge">.valueType</code> 处理</h3>
-
-<p><code class="language-plaintext highlighter-rouge">Any.Type</code> 是所有类型的元类型，所以 <code class="language-plaintext highlighter-rouge">.valueType</code> 属性表示类型。实际使用的时候还真是有点诡异：</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let mir = reflect(someVal)
-swith mir.valueType {
-case _ as String.Type:
-    println("type = string")
-case _ as Range&lt;Int&gt;.Type:
-    println("type = range of int")
-case _ as Dictionary&lt;Int, Int&gt;.Type:
-    println("type = dict of int")
-case _ as Point.Type:
-    println("type = a point struct")
-default:
-    println("unkown type")
-}
-</code></pre></div></div>
-
-<p>或者使用 <code class="language-plaintext highlighter-rouge">is</code> 判断：</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if mir.valueType is String.Type {
-    println("!!!type =&gt; String")
-}
-</code></pre></div></div>
-
-<p>勘误： 这里之前笔误了。遗漏了 <code class="language-plaintext highlighter-rouge">.valueType</code> 。</p>
-
-<p><code class="language-plaintext highlighter-rouge">is String</code> 判断变量是否是 String 类型，而 <code class="language-plaintext highlighter-rouge">is String.Type</code> 这里用来判断类型是否是 String 类型。</p>
-
-<h3 id="subscriptint-处理"><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 处理</h3>
-
-<p>实测发现直接用 <code class="language-plaintext highlighter-rouge">mir[0]</code> 访问偶尔会出错，也许是 beta 的原因。</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>for r in 0..mir.count {
-    let (name, subref) = mir[r]
-    prtln("name: \(name)")
-    // visit sub Mirror here
-}
-</code></pre></div></div>
-
-<p>通过上面的方法，基本上可以遍历大部分结构。</p>
-
-<h2 id="不同类型的处理">不同类型的处理</h2>
-
-<h3 id="struct-结构体-class-类">Struct 结构体、 Class 类</h3>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为字段个数。</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 返回 （字段名，字段值反射 <code class="language-plaintext highlighter-rouge">Mirror</code>） 元组</li>
-  <li><code class="language-plaintext highlighter-rouge">summary</code> 为 mangled name</li>
-</ul>
-
-<h3 id="tuple-元组">Tuple 元组</h3>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “.0”, “.1” …</li>
-</ul>
-
-<h3 id="aggregate-基础类型">Aggregate 基础类型</h3>
-
-<p>包括数字、字符串（含 <code class="language-plaintext highlighter-rouge">NSString</code>）、函数、部分 Foundation 类型、 MetaType 。</p>
-
-<p>很奇怪一点是测试发现枚举也被反射为基础类型。怀疑是没实现完。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为 0</li>
-</ul>
-
-<h3 id="indexcontainer-索引对象">IndexContainer 索引对象</h3>
-
-<p>包括 <code class="language-plaintext highlighter-rouge">Array&lt;T&gt;</code>, <code class="language-plaintext highlighter-rouge">T[]</code>, <code class="language-plaintext highlighter-rouge">NSArray</code> 等。可以通过 subscript 访问。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “[0]”, “[1]” …</li>
-</ul>
-
-<h3 id="keycontainer-键-值对象">KeyContainer 键-值对象</h3>
-
-<p>包括 <code class="language-plaintext highlighter-rouge">Dictionary&lt;T, U&gt;</code>、<code class="language-plaintext highlighter-rouge">NSDictionary</code></p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “[0]”, “[1]” … 实际访问是 <code class="language-plaintext highlighter-rouge">(name, (reflect(key), reflect(val)))</code></li>
-</ul>
-
-<h3 id="optional-type">Optional Type?</h3>
-
-<p>只包括 <code class="language-plaintext highlighter-rouge">Type?</code>，不包括 <code class="language-plaintext highlighter-rouge">Type!</code>。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为 0 或者 1 (对应 nil 和有值的情况)</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> , name 为 “Some”</li>
-</ul>
-
-<h3 id="其他">其他</h3>
-
-<ul>
-  <li>Enum 枚举 看起来是未使用</li>
-  <li>MembershipContainer // 未知</li>
-  <li>Container // 未知</li>
-</ul>
-
-<h2 id="示例代码">示例代码</h2>
-
-<p><a href="https://gist.github.com/anonymous/190fc7ecee30e83a5dca">Gist</a></p>]]></content><author><name>{&quot;twitter&quot;=&gt;&quot;bc12edd8ae2cb21&quot;}</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[Swift 其实是支持反射的，不过功能略弱。本文介绍基本的反射用法和相关类型。]]></summary></entry></feed>
+</div>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. weibo]]></summary></entry></feed>

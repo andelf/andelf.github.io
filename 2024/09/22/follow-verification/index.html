@@ -3,22 +3,22 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Erlang 的一些好玩 Tips | 猫·仁波切</title>
+<title>Follow Verification | 猫·仁波切</title>
 <meta name="generator" content="Jekyll v4.3.4" />
-<meta property="og:title" content="Erlang 的一些好玩 Tips" />
+<meta property="og:title" content="Follow Verification" />
 <meta name="author" content="猫·仁波切" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="可以模拟OO, 模块级别的继承." />
-<meta property="og:description" content="可以模拟OO, 模块级别的继承." />
-<link rel="canonical" href="https://andelf.github.io/blog/2013/11/21/erlang-tips/" />
-<meta property="og:url" content="https://andelf.github.io/blog/2013/11/21/erlang-tips/" />
+<meta name="description" content="This message is used to verify that this feed (feedId:41419917272088576) belongs to me (userId:41417426693153792). Join me in enjoying the next generation information browser https://follow.is." />
+<meta property="og:description" content="This message is used to verify that this feed (feedId:41419917272088576) belongs to me (userId:41417426693153792). Join me in enjoying the next generation information browser https://follow.is." />
+<link rel="canonical" href="https://andelf.github.io/2024/09/22/follow-verification/" />
+<meta property="og:url" content="https://andelf.github.io/2024/09/22/follow-verification/" />
 <meta property="og:site_name" content="猫·仁波切" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2013-11-21T03:36:18+00:00" />
+<meta property="article:published_time" content="2024-09-22T15:20:00+00:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Erlang 的一些好玩 Tips" />
+<meta property="twitter:title" content="Follow Verification" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"猫·仁波切"},"dateModified":"2013-11-21T03:36:18+00:00","datePublished":"2013-11-21T03:36:18+00:00","description":"可以模拟OO, 模块级别的继承.","headline":"Erlang 的一些好玩 Tips","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/blog/2013/11/21/erlang-tips/"},"url":"https://andelf.github.io/blog/2013/11/21/erlang-tips/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"猫·仁波切"},"dateModified":"2024-09-22T15:20:00+00:00","datePublished":"2024-09-22T15:20:00+00:00","description":"This message is used to verify that this feed (feedId:41419917272088576) belongs to me (userId:41417426693153792). Join me in enjoying the next generation information browser https://follow.is.","headline":"Follow Verification","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/09/22/follow-verification/"},"url":"https://andelf.github.io/2024/09/22/follow-verification/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -41,57 +41,24 @@
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Erlang 的一些好玩 Tips</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Follow Verification</h1>
     <p class="post-meta">
-      <time class="dt-published" datetime="2013-11-21T03:36:18+00:00" itemprop="datePublished">Nov 21, 2013
-      </time>• <span>Tags: erlang</span></p><div class="table-of-contents">
+      <time class="dt-published" datetime="2024-09-22T15:20:00+00:00" itemprop="datePublished">Sep 22, 2024
+      </time>• <span>Tags: </span></p><div class="table-of-contents">
       
     </div>
     <hr />
   </header>
   <div class="post-content e-content" itemprop="articleBody">
-    <p>可以模拟OO, 模块级别的继承.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-extends(parent).
-</code></pre></div></div>
-
-<p>反编译 beam, 对加密过或者 hipe 的似乎无效.</p>
-
-<div class="language-erlang highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="n">ok</span><span class="p">,{_,[{</span><span class="n">abstract_code</span><span class="p">,{_,</span><span class="nv">AC</span><span class="p">}}]}}</span> <span class="o">=</span> <span class="nn">beam_lib</span><span class="p">:</span><span class="nf">chunks</span><span class="p">(</span><span class="nv">Beam</span><span class="p">,[</span><span class="n">abstract_code</span><span class="p">]).</span>
-<span class="nn">io</span><span class="p">:</span><span class="nf">fwrite</span><span class="p">(</span><span class="s">"</span><span class="si">~s~n</span><span class="s">"</span><span class="p">,</span> <span class="p">[</span><span class="nn">erl_prettypr</span><span class="p">:</span><span class="nf">format</span><span class="p">(</span><span class="nn">erl_syntax</span><span class="p">:</span><span class="nf">form_list</span><span class="p">(</span><span class="nv">AC</span><span class="p">))]).</span>
-</code></pre></div></div>
-
-<p>语句块, 比较少用到.</p>
-
-<div class="language-erlang highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">begin</span>
-   <span class="p">...</span>
-<span class="k">end</span>
-</code></pre></div></div>
-
-<p>Parameterised Modules 参数化模块, 也是模拟 OO 的.
-很多 web 框架都这么用, 不过这货在 R16 被去掉了, 也是… 其实挺恶心.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-module(xxx, [Arg1, Arg2]).
-</code></pre></div></div>
-
-<p>Stateful Modules, 用于替换 Parameterised Modules. 将模块和对应状态保存在 tuple 里,
-看起来像是调用某一对象的方法一样.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>X = {Mod, P1, P2, ..., Pn},
-X:Func(A1, A2, ..., An).
-%% 等价于
-Mod:Func(A1, A2, ..., An, X).
-</code></pre></div></div>
-
-<p>所以 web 框架就转为使用这个特性了, 看起来很无害而且不反 FP.</p>
+    <p>This message is used to verify that this feed (feedId:41419917272088576) belongs to me (userId:41417426693153792). Join me in enjoying the next generation information browser https://follow.is.</p>
 
   </div>
 
   <div id="disqus_thread"></div>
   <script>
     var disqus_config = function () {
-      this.page.url = 'https://andelf.github.io/blog/2013/11/21/erlang-tips/';
-      this.page.identifier = 'https://andelf.github.io/blog/2013/11/21/erlang-tips/';
+      this.page.url = 'https://andelf.github.io/2024/09/22/follow-verification/';
+      this.page.identifier = 'https://andelf.github.io/2024/09/22/follow-verification/';
     };
     (function() {
       var d = document, s = d.createElement('script');
@@ -102,7 +69,7 @@ Mod:Func(A1, A2, ..., An, X).
   </script>
   <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 
-<a class="u-url" href="/blog/2013/11/21/erlang-tips/" hidden></a>
+<a class="u-url" href="/2024/09/22/follow-verification/" hidden></a>
 </article>
 
 
@@ -110,8 +77,8 @@ Mod:Func(A1, A2, ..., An, X).
   <div id="disqus_thread"></div>
   <script>
     var disqus_config = function () {
-      this.page.url = 'https://andelf.github.io/blog/2013/11/21/erlang-tips/';
-      this.page.identifier = 'https://andelf.github.io/blog/2013/11/21/erlang-tips/';
+      this.page.url = 'https://andelf.github.io/2024/09/22/follow-verification/';
+      this.page.identifier = 'https://andelf.github.io/2024/09/22/follow-verification/';
     };
     (function() {
       var d = document, s = d.createElement('script');
