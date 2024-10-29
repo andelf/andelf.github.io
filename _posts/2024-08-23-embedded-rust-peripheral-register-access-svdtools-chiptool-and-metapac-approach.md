@@ -548,6 +548,20 @@ pac::IOC
 - `memory.x` 定义内存布局 - 实际上由于平台的多样性, 不一定非要由 pac 来提供内存布局定义, 比如某些可自由配置 FLASH/RAM 的芯片, 更适合最终应用提供
 - 各种 METADATA 信息 - 仅适用于本文提到的 metapac
 
+## 附录: svd2pac
+
+Infineon 是对 Rust 嵌入式方案支持比较友好的公司之一(非爱好者友好).
+他们提供了一个基于 svd2rust 的工具 [svd2pac], 用于生成 Infineon MCU 的 PAC 库.
+详细设计综合了 svd2rust 和 chiptool 的优点, 适合于单个芯片的 PAC 生成.
+使用方法极其类似 chiptool 的闭包方式.
+
+具体改进:
+
+- 寄存器访问应该是不安全的，因为它们类似于C FFI
+- 不使用 owned Peripherals 结构体，因为带有 ownership 的寄存器会妨碍编写低级驱动程序(Low Level Drivers, LLD)
+- 不使用宏，以便于调试(相比 [ral] 而言)
+- 较少的依赖
+
 ## 总结及对比
 
 - C 中的外设寄存器访问, 方式简单直接, 但容易出错, 不够类型安全, Rust 基于自己的类型系统, 可以提供更好的类型安全, 但需要额外的工具支持
@@ -575,3 +589,4 @@ pac::IOC
 [yaml2pac]: https://github.com/embedded-drivers/yaml2pac
 [ral-registers]: https://docs.rs/ral-registers/latest/ral_registers/
 [ral]: https://docs.rs/ral/latest/ral/
+[svd2pac]: https://github.com/Infineon/svd2pac
