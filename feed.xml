@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-09-22T15:23:25+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><author><name>猫·仁波切</name></author><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-10-29T09:17:26+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><author><name>猫·仁波切</name></author><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
 
 <p>本文是基础向文章, 介绍了 Rust 嵌入式开发中的外设寄存器访问问题，以及社区提供的解决方案。包括以下内容:</p>
 
@@ -542,6 +542,22 @@ I2C 传感器寄存器格式的定义等等. 甚至诸如 RISC-V CSR 字段的�
   <li><code class="language-plaintext highlighter-rouge">CorePeripherals</code> owned struct, 用于管理核心外设资源, 一般是内核定时器中断处理器等 - 仅 svd2rust + Cortex-M</li>
   <li><code class="language-plaintext highlighter-rouge">memory.x</code> 定义内存布局 - 实际上由于平台的多样性, 不一定非要由 pac 来提供内存布局定义, 比如某些可自由配置 FLASH/RAM 的芯片, 更适合最终应用提供</li>
   <li>各种 METADATA 信息 - 仅适用于本文提到的 metapac</li>
+</ul>
+
+<h2 id="附录-svd2pac">附录: svd2pac</h2>
+
+<p>Infineon 是对 Rust 嵌入式方案支持比较友好的公司之一(非爱好者友好).
+他们提供了一个基于 svd2rust 的工具 <a href="https://github.com/Infineon/svd2pac">svd2pac</a>, 用于生成 Infineon MCU 的 PAC 库.
+详细设计综合了 svd2rust 和 chiptool 的优点, 适合于单个芯片的 PAC 生成.
+使用方法极其类似 chiptool 的闭包方式.</p>
+
+<p>具体改进:</p>
+
+<ul>
+  <li>寄存器访问应该是不安全的，因为它们类似于C FFI</li>
+  <li>不使用 owned Peripherals 结构体，因为带有 ownership 的寄存器会妨碍编写低级驱动程序(Low Level Drivers, LLD)</li>
+  <li>不使用宏，以便于调试(相比 <a href="https://docs.rs/ral/latest/ral/">ral</a> 而言)</li>
+  <li>较少的依赖</li>
 </ul>
 
 <h2 id="总结及对比">总结及对比</h2>
