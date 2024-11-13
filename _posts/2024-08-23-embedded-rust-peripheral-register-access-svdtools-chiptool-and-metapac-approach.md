@@ -223,7 +223,7 @@ SVD 文件往往是芯片厂商提供的, 有些芯片厂商会在 SVD 文件或
 [chiptool] 是一个由 [Embassy] 社区提供的工具，用于生成 Rust 外设寄存器访问代码, 主要用于 [stm32-data], 为 Embassy 框架提供 STM32 所有 MCU 的外设寄存器访问支持.
 相关背景可以参考项目首页, 其中有详细的介绍. 要点如下:
 
-- [chiptool] 其实是 [svd2rust] 的一个 fork, 使之更适用于创建 `metapac` 式的 pac 库, 即厂商的一系列不同芯片的所有外设寄存器都放在一个库中. 这样做的好处是可以更好地复用代码和元数据信息
+- [chiptool] 实际上是 [svd2rust] 的一个 fork, 使之更适用于创建 `metapac` 式的 pac 库, 即厂商的一系列不同芯片的所有外设寄存器都放在一个库中. 这样做的好处是可以更好地复用代码和元数据信息
 - chiptool 没有使用 owned struct 的方式, 避免滥用 ownership, 提供更宽松的使用方式
 - chiptool 没有使用字段的 read/write proy, 这样字段本身作为类型(`repr(u32)`)可以直接拿来保存寄存器值 - 一个常见场景是拿到中断 flags 值, 依次判断, 修改, 最后写回寄存器, 用来清除中断标志
 - chiptool 没有使用 MMIO 结构体, 而是直接保存外设地址
@@ -245,6 +245,17 @@ r.ctlr1().modify(|w| w.set_adc_en(false)); // 修改寄存器字段, 闭包不�
 ```
 
 ### 使用 chiptool 生成 pac 库
+
+chiptool 可以通过命令行调用快速生成单个寄存器块的定义(RegisterBlock), 并生成对应 `.rs` 文件.
+
+```shell
+chiptool extract-all --svd soc.svd --output tmp
+
+chiptool gen-block --input tmp/UART.yaml -o src/uart.rs
+```
+
+此时生成的定义不包含具体外设实例(UART1, UART2, TIM1), 而是外设类型的结构定义. 想完全按照 `pac` 库的方式使用, 还需要额外处理外设外设实例和外设地址信息,
+通过类型的 `::from_ptr` 方法从地址构建.
 
 相比之下, chiptool 更适合于生成 metapac 风格的 pac 库, 这也就意味着它的门槛更高, 需要更多的元数据信息, 以及更多的工作量.
 
