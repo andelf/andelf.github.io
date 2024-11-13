@@ -551,16 +551,17 @@ pac::IOC
 ## 附录: svd2pac
 
 Infineon 是对 Rust 嵌入式方案支持比较友好的公司之一(非爱好者友好).
-他们提供了一个基于 svd2rust 的工具 [svd2pac], 用于生成 Infineon MCU 的 PAC 库.
+他们也提供了一个基于 svd2rust 的工具 [svd2pac], 用于生成 Infineon MCU 的 PAC 库.
 详细设计综合了 svd2rust 和 chiptool 的优点, 适合于单个芯片的 PAC 生成.
-使用方法极其类似 chiptool 的闭包方式.
+使用方法极其类似 chiptool 的闭包方式. 不过由于项目在 Infineon 之外使用较少, 对完整的 SVD 特性支持还不完善.
 
 具体改进:
 
-- 寄存器访问应该是不安全的，因为它们类似于C FFI
+- 整体使用方式类似 [chiptool]
+- 寄存器访问应该是不安全的，因为它们相当于 C FFI
 - 不使用 owned Peripherals 结构体，因为带有 ownership 的寄存器会妨碍编写低级驱动程序(Low Level Drivers, LLD)
 - 不使用宏，以便于调试(相比 [ral] 而言)
-- 较少的依赖
+- 较少的外部依赖
 
 ## 总结及对比
 
