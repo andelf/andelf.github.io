@@ -640,17 +640,18 @@ I2C 传感器寄存器格式的定义等等. 甚至诸如 RISC-V CSR 字段的�
 <h2 id="附录-svd2pac">附录: svd2pac</h2>
 
 <p>Infineon 是对 Rust 嵌入式方案支持比较友好的公司之一(非爱好者友好).
-他们提供了一个基于 svd2rust 的工具 <a href="https://github.com/Infineon/svd2pac">svd2pac</a>, 用于生成 Infineon MCU 的 PAC 库.
+他们也提供了一个基于 svd2rust 的工具 <a href="https://github.com/Infineon/svd2pac">svd2pac</a>, 用于生成 Infineon MCU 的 PAC 库.
 详细设计综合了 svd2rust 和 chiptool 的优点, 适合于单个芯片的 PAC 生成.
-使用方法极其类似 chiptool 的闭包方式.</p>
+使用方法极其类似 chiptool 的闭包方式. 不过由于项目在 Infineon 之外使用较少, 对完整的 SVD 特性支持还不完善.</p>
 
 <p>具体改进:</p>
 
 <ul>
-  <li>寄存器访问应该是不安全的，因为它们类似于C FFI</li>
+  <li>整体使用方式类似 <a href="https://github.com/embassy-rs/chiptool">chiptool</a></li>
+  <li>寄存器访问应该是不安全的，因为它们相当于 C FFI</li>
   <li>不使用 owned Peripherals 结构体，因为带有 ownership 的寄存器会妨碍编写低级驱动程序(Low Level Drivers, LLD)</li>
   <li>不使用宏，以便于调试(相比 <a href="https://docs.rs/ral/latest/ral/">ral</a> 而言)</li>
-  <li>较少的依赖</li>
+  <li>较少的外部依赖</li>
 </ul>
 
 <h2 id="总结及对比">总结及对比</h2>
