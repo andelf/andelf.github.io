@@ -246,16 +246,17 @@ r.ctlr1().modify(|w| w.set_adc_en(false)); // 修改寄存器字段, 闭包不�
 
 ### 使用 chiptool 生成 pac 库
 
-chiptool 可以通过命令行调用快速生成单个寄存器块的定义(RegisterBlock), 并生成对应 `.rs` 文件.
+chiptool 提供了简单的命令行接口来生成外设寄存器块定义(`RegisterBlock`):
 
 ```shell
+# 从 SVD 文件提取所有外设信息
 chiptool extract-all --svd soc.svd --output tmp
 
+# 为单个外设生成 Rust 代码
 chiptool gen-block --input tmp/UART.yaml -o src/uart.rs
 ```
 
-此时生成的定义不包含具体外设实例(UART1, UART2, TIM1), 而是外设类型的结构定义. 想完全按照 `pac` 库的方式使用, 还需要额外处理外设外设实例和外设地址信息,
-通过类型的 `::from_ptr` 方法从地址构建.
+生成的代码仅包含外设类型定义(如 UART 结构体)，不包含具体实例(如 UART1、UART2)。要完整使用这些外设，还需要添加外设实例的地址信息, 使用 `::from_ptr` 方法从地址构造实例.
 
 相比之下, chiptool 更适合于生成 metapac 风格的 pac 库, 这也就意味着它的门槛更高, 需要更多的元数据信息, 以及更多的工作量.
 
