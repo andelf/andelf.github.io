@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-11-13T14:27:38+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><author><name>猫·仁波切</name></author><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-11-14T00:28:10+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><author><name>猫·仁波切</name></author><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
 
 <p>本文是基础向文章, 介绍了 Rust 嵌入式开发中的外设寄存器访问问题，以及社区提供的解决方案。包括以下内容:</p>
 
@@ -231,15 +231,16 @@ SVD 文件为 IDE 的调试功能提供了外设寄存器视图, 所以在对应
 
 <h3 id="使用-chiptool-生成-pac-库">使用 chiptool 生成 pac 库</h3>
 
-<p>chiptool 可以通过命令行调用快速生成单个寄存器块的定义(RegisterBlock), 并生成对应 <code class="language-plaintext highlighter-rouge">.rs</code> 文件.</p>
+<p>chiptool 提供了简单的命令行接口来生成外设寄存器块定义(<code class="language-plaintext highlighter-rouge">RegisterBlock</code>):</p>
 
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chiptool extract-all <span class="nt">--svd</span> soc.svd <span class="nt">--output</span> tmp
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 从 SVD 文件提取所有外设信息</span>
+chiptool extract-all <span class="nt">--svd</span> soc.svd <span class="nt">--output</span> tmp
 
+<span class="c"># 为单个外设生成 Rust 代码</span>
 chiptool gen-block <span class="nt">--input</span> tmp/UART.yaml <span class="nt">-o</span> src/uart.rs
 </code></pre></div></div>
 
-<p>此时生成的定义不包含具体外设实例(UART1, UART2, TIM1), 而是外设类型的结构定义. 想完全按照 <code class="language-plaintext highlighter-rouge">pac</code> 库的方式使用, 还需要额外处理外设外设实例和外设地址信息,
-通过类型的 <code class="language-plaintext highlighter-rouge">::from_ptr</code> 方法从地址构建.</p>
+<p>生成的代码仅包含外设类型定义(如 UART 结构体)，不包含具体实例(如 UART1、UART2)。要完整使用这些外设，还需要添加外设实例的地址信息, 使用 <code class="language-plaintext highlighter-rouge">::from_ptr</code> 方法从地址构造实例.</p>
 
 <p>相比之下, chiptool 更适合于生成 metapac 风格的 pac 库, 这也就意味着它的门槛更高, 需要更多的元数据信息, 以及更多的工作量.</p>
 
