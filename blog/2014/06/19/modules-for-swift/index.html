@@ -80,7 +80,7 @@
 
 <p>在 Xcode 目录寻找相关信息，最后目标锁定到了一个特殊的文件名 <code class="language-plaintext highlighter-rouge">module.map</code>。</p>
 
-<p>原来这个文件叫 Module map(这个名字还真是缺乏想象力)，属于 llvm 的 Module 系统。本来是用来颠覆传统的 C/C++/Objc 中的 <code class="language-plaintext highlighter-rouge">#include</code> 和 <code class="language-plaintext highlighter-rouge">#import</code>。最早在 2012 年 11 月的 LLVM DevMeeting 中由 Apple 的 Doug Gregor 提出 <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>。相关内容 CSDN 也有文章介绍，不过是直译版，没有提出自己见解 <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>。</p>
+<p>原来这个文件叫 Module map(这个名字还真是缺乏想象力)，属于 llvm 的 Module 系统。本来是用来颠覆传统的 C/C++/Objc 中的 <code class="language-plaintext highlighter-rouge">#include</code> 和 <code class="language-plaintext highlighter-rouge">#import</code>。最早在 2012 年 11 月的 LLVM DevMeeting 中由 Apple 的 Doug Gregor 提出 <sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>。相关内容 CSDN 也有文章介绍，不过是直译版，没有提出自己见解 <sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup>。</p>
 
 <h3 id="关于-llvm-module-系统">关于 llvm Module 系统</h3>
 
@@ -102,7 +102,7 @@
 
 <p><code class="language-plaintext highlighter-rouge">module.map</code> 文件就是对一个框架，一个库的所有头文件的结构化描述。通过这个描述，桥接了新语言特性和老的头文件。默认文件名是 <code class="language-plaintext highlighter-rouge">module.modulemap</code>，<code class="language-plaintext highlighter-rouge">module.map</code> 其实是为了兼容老标准，不过现在 Xcode 里的还都是这个文件名，相信以后会改成新名字。</p>
 
-<p>文件的内容以 <code class="language-plaintext highlighter-rouge">Module Map Language</code> 描述，大概语法我从 llvm 官方文档 <sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup> 摘录一段，大家体会一下：</p>
+<p>文件的内容以 <code class="language-plaintext highlighter-rouge">Module Map Language</code> 描述，大概语法我从 llvm 官方文档 <sup id="fnref:3"><a href="#fn:3" class="footnote" rel="footnote" role="doc-noteref">3</a></sup> 摘录一段，大家体会一下：</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module MyLib {
   explicit module A {
@@ -119,7 +119,7 @@
 
 <p>类似上面的语法，描述了 <code class="language-plaintext highlighter-rouge">MyLib</code>、<code class="language-plaintext highlighter-rouge">MyLib.A</code>、<code class="language-plaintext highlighter-rouge">MyLib.B</code> 这样的模块结构。</p>
 
-<p>官方文档 <sup id="fnref:3:1" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup> 中有更多相关内容，可以描述框架，描述系统头文件，控制导出的范围，描述依赖关系，链接参数等等。这里不多叙述，举个 libcurl 的例子：</p>
+<p>官方文档 <sup id="fnref:3:1"><a href="#fn:3" class="footnote" rel="footnote" role="doc-noteref">3</a></sup> 中有更多相关内容，可以描述框架，描述系统头文件，控制导出的范围，描述依赖关系，链接参数等等。这里不多叙述，举个 libcurl 的例子：</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module curl [system] [extern_c] {
     header "/usr/include/curl/curl.h"
@@ -307,7 +307,7 @@ swiftFoundation
 
 <h2 id="结论">结论</h2>
 
-<p>LLVM Module 作为 Apple 提出的特性，已经被 Swift 完全采用，直接在它基础上建立了自己的模块系统。我相信它会影响到我们处理第三方库的方式方法。相信不久就会有相关工具基于它来管理依赖关系，比如老的 cocoapods<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">4</a></sup> 可以加入新特性。</p>
+<p>LLVM Module 作为 Apple 提出的特性，已经被 Swift 完全采用，直接在它基础上建立了自己的模块系统。我相信它会影响到我们处理第三方库的方式方法。相信不久就会有相关工具基于它来管理依赖关系，比如老的 cocoapods<sup id="fnref:4"><a href="#fn:4" class="footnote" rel="footnote" role="doc-noteref">4</a></sup> 可以加入新特性。</p>
 
 <p>用 Swift 写模块目前并没有很好的 IDE 支持，所以不是很方便。基于猜测验证，上面的方法可以实现在 Swift 里 import Swift 模块，方法和结果看起来完全和官方模块相同。</p>
 
@@ -317,16 +317,16 @@ swiftFoundation
 
 <div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1" role="doc-endnote">
+    <li id="fn:1">
       <p>Modules - Doug Gregor, Apple, 2012 LLVM DevMeeting <a href="http://llvm.org/devmtg/2012-11/Gregor-Modules.pdf">PDF</a> <a href="http://llvm.org/devmtg/2012-11/videos/Gregor-Modules.mp4">Video</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:2" role="doc-endnote">
+    <li id="fn:2">
       <p><a href="http://www.csdn.net/article/2012-11-28/2812274-module-replace-C-based-languages-headers">为什么应该用模块取代C/C++中的头文件？</a> <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:3" role="doc-endnote">
+    <li id="fn:3">
       <p><a href="http://clang.llvm.org/docs/Modules.html">Modules - Clang 3.5 documentation</a> <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a> <a href="#fnref:3:1" class="reversefootnote" role="doc-backlink">&#8617;<sup>2</sup></a></p>
     </li>
-    <li id="fn:4" role="doc-endnote">
+    <li id="fn:4">
       <p><a href="http://cocoapods.org/">CocoaPods</a> <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>

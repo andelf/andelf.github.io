@@ -60,7 +60,7 @@
 
 <blockquote>
   <p>CocoaPods is the dependency manager for Objective-C projects.
-It has thousands of libraries and can help you scale your projects elegantly. <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></p>
+It has thousands of libraries and can help you scale your projects elegantly. <sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup></p>
 </blockquote>
 
 <p>从介绍看，它是主要给 Objective-C 项目用的，但是我们可以很容易地混合 Objective-C 和 Swift 到同个项目，从而利用大量的 CocoaPods 库和 Swift 漂亮舒服的语法。</p>
@@ -73,7 +73,7 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
 
 <h3 id="安装">安装</h3>
 
-<p>系统默认安装，可以参考其他教程<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> 。在命令行下执行。</p>
+<p>系统默认安装，可以参考其他教程<sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup> 。在命令行下执行。</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo gem install cocoapods
 </code></pre></div></div>
@@ -95,7 +95,7 @@ pod
 
 <h3 id="使用">使用</h3>
 
-<p>假设我们已经有个项目，叫 ProjName ，需要使用一些注明的 CocoaPods 库，比如 AFNetworking<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>.</p>
+<p>假设我们已经有个项目，叫 ProjName ，需要使用一些注明的 CocoaPods 库，比如 AFNetworking<sup id="fnref:3"><a href="#fn:3" class="footnote" rel="footnote" role="doc-noteref">3</a></sup>.</p>
 
 <p>首先，命令行 cd 到我们的项目目录，一般 ls 命令会看到如下几个文件夹：</p>
 
@@ -140,7 +140,7 @@ pod "AFNetworking", "~&gt; 2.0"
             <span class="o">})</span>
 </code></pre></div></div>
 
-<p>这里直接抄了 JakeLin 的 SwiftWeather 代码<sup id="fnref:5" role="doc-noteref"><a href="#fn:5" class="footnote" rel="footnote">4</a></sup>，就一小段，希望他不会打我。</p>
+<p>这里直接抄了 JakeLin 的 SwiftWeather 代码<sup id="fnref:5"><a href="#fn:5" class="footnote" rel="footnote" role="doc-noteref">4</a></sup>，就一小段，希望他不会打我。</p>
 
 <h4 id="swift-坑爹了">Swift 坑爹了</h4>
 
@@ -152,7 +152,7 @@ pod "AFNetworking", "~&gt; 2.0"
 
 <h4 id="继续">继续</h4>
 
-<p>之前简单介绍过和  Objective-C 交互的内容<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">5</a></sup>，大家可以去围观。</p>
+<p>之前简单介绍过和  Objective-C 交互的内容<sup id="fnref:4"><a href="#fn:4" class="footnote" rel="footnote" role="doc-noteref">5</a></sup>，大家可以去围观。</p>
 
 <p>一般说来，你在 Swift 项目新建 Objective-C 类的时候，直接弹出是否创建 Bridge Header 的窗口，点 YES 就是了，这时候一般多出来个 <code class="language-plaintext highlighter-rouge">ProjectName-Bridging-Header.h</code> 。然后删掉这个类， Bridging Header 头文件还在。</p>
 
@@ -226,19 +226,19 @@ module </span><span class="si">#{</span><span class="n">normalized_pod_name</spa
 
 <div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1" role="doc-endnote">
+    <li id="fn:1">
       <p><a href="http://cocoapods.org/">CocoaPods Offical Site</a> CocoaPods 官网 <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:2" role="doc-endnote">
+    <li id="fn:2">
       <p><a href="http://www.cocoachina.com/applenews/devnews/2014/0623/8917.html">CocoaPods - CocoaChina</a> CocoaChina 对 CocoaPods 的介绍 <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:3" role="doc-endnote">
+    <li id="fn:3">
       <p><a href="https://github.com/AFNetworking/AFNetworking">AFNetworking - Github</a> <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:5" role="doc-endnote">
+    <li id="fn:5">
       <p><a href="https://github.com/JakeLin/SwiftWeather/blob/master/Swift%20Weather/ViewController.swift">SwiftWeather</a> <a href="#fnref:5" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:4" role="doc-endnote">
+    <li id="fn:4">
       <p><a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift and ObjectiveC Interop (Swift 与 Objective-C 之间的交互)</a> <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>

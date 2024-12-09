@@ -1,4 +1,626 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-11-14T00:28:10+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><author><name>猫·仁波切</name></author><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://andelf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andelf.github.io/" rel="alternate" type="text/html" /><updated>2024-12-09T17:13:58+00:00</updated><id>https://andelf.github.io/feed.xml</id><title type="html">猫·仁波切</title><subtitle>会研发的PM才是好OP.</subtitle><author><name>猫·仁波切</name></author><entry><title type="html">基于 Rust 的 K230 裸机嵌入式编程 - K230 Bare-Metal Embedded Programming Using Rust</title><link href="https://andelf.github.io/2024/12/09/k230-bare-metal-embedded-programming-using-rust/" rel="alternate" type="text/html" title="基于 Rust 的 K230 裸机嵌入式编程 - K230 Bare-Metal Embedded Programming Using Rust" /><published>2024-12-09T08:53:00+00:00</published><updated>2024-12-09T08:53:00+00:00</updated><id>https://andelf.github.io/2024/12/09/k230-bare-metal-embedded-programming-using-rust</id><content type="html" xml:base="https://andelf.github.io/2024/12/09/k230-bare-metal-embedded-programming-using-rust/"><![CDATA[<blockquote>
+  <table>
+    <tbody>
+      <tr>
+        <td>难度: 中等</td>
+        <td>适用读者: 具备嵌入式系统基础知识</td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+
+<p>本文相关代码库: <a href="https://github.com/andelf/k230-bare-metal">k230-bare-metal</a>。建议参考早期提交记录如 <a href="https://github.com/andelf/k230-bare-metal/tree/e1596804045b95b2f639036e10653605f04c72a6">e15968040</a> 进行学习。</p>
+
+<h2 id="项目背景-background">项目背景 (Background)</h2>
+
+<p>之前从立创开发板获得了 [立创·庐山派K230-CanMV] 的测评机会, 另外我自己也有一块块 <a href="https://wiki.youyeetoo.com/en/CanMV-K230">CanMV-K230</a> 开发板.</p>
+
+<p>K230芯片是嘉楠科技推出的 AIoT SoC, 采用异构单元加速计算架构，集成了 2 个 RISC-V 算核心和 AI 子系统 KPU(Knowledge Process Unit).
+按照时间线, 应该是市面上最早一批支持 RV 向量扩展 RVV 1.0 的芯片之一. 主要特点：</p>
+
+<ul>
+  <li>双核 RISC-V 处理器
+    <ul>
+      <li>Core 0: 64位 RISC-V (RV64GCB)，800MHz</li>
+      <li>Core 1: 64位 RISC-V，1.6GHz，支持 RVV 1.0 向量扩展</li>
+    </ul>
+  </li>
+  <li>专用加速单元
+    <ul>
+      <li>KPU: AI 推理加速器，支持 INT8/INT16</li>
+      <li>DPU: 3D 结构光深度计算单元</li>
+      <li>VPU: 视频编解码器，支持 4K 分辨率</li>
+    </ul>
+  </li>
+  <li>丰富的外设接口
+    <ul>
+      <li>通信接口: UART×5、I2C×5、SPI×3</li>
+      <li>存储接口: USB 2.0×2、SD/eMMC</li>
+      <li>其他: GPIO×72、PWM×6、WDT/RTC/Timer</li>
+    </ul>
+  </li>
+</ul>
+
+<p>正常使用的话, 板子使用 <a href="https://github.com/kendryte/canmv_k230">CanMV</a> 固件, 该固件兼容 <a href="https://openmv.io/">OpenMV</a>, 是非常方便开发环境.
+固件底层实现基于 <a href="https://github.com/RT-Thread/rt-thread">RT-Thread</a> Smart, CanMV 实现为 RT-Thread 的一个应用(MicroPython fork).
+RT-Thread Smart(RT-Smart) 是支持用户态应用的 RT-Thread 版本, 适用于支持 MMU 的 SoC, 例如 K230.
+另外早期版本的 CanMV 固件使用 Linux + RT-Thread + Micropython. 官方也有纯 Linux 版本固件.</p>
+
+<p>本项目旨在探索:</p>
+
+<ol>
+  <li>MPU 与 MCU 在启动方式和使用模式上的区别</li>
+  <li>如何使用 Rust 进行 MPU 芯片的裸机开发</li>
+  <li>K230 的底层启动机制和硬件特性</li>
+</ol>
+
+<p>对于 MPU 及多数 MCU 来说都存在一个片上 Boot ROM 用于启动系统. 一般来说, Boot ROM 会初始化一些硬件(例如 SPI Flash, TF Card等), 将固件加载到内存
+然后加载系统固件的第一行逻辑(例如 U-Boot). 之后用户提供的系统固件会初始化更多硬件及加载真正的操作系统.</p>
+
+<p>所谓的裸机开发, 就是不使用操作系统, 直接在硬件上运行程序, 类似 MCU 直接在系统 Boot ROM 之后运行的方式.</p>
+
+<h2 id="启动代码分析-boot-code-analysis">启动代码分析 (Boot Code Analysis)</h2>
+
+<p>首先需要查看官方仓库 <a href="https://github.com/kendryte/canmv_k230">CanMV</a> 的代码, 确定是否有不开源的部分. 尤其是核心的 U-Boot 和 RT-Thread/Linux 驱动部分.
+另外对于 U-Boot 还需要确认第一阶段启动代码 SPL(Secondary Program Loader) 是否开源. 因为 SPL 往往用于初始化 DDR 等外设, 以及加载 U-Boot, 很多厂商不开源,
+只提供二进制文件.</p>
+
+<p>好消息是, 相关的代码都在 <a href="https://github.com/kendryte/canmv_k230">CanMV</a> 仓库中, 且开源. 但是代码结构比较复杂, 需要一定时间阅读分析具体的启动流程和逻辑.</p>
+
+<p>然而, 随着 ChatGPT 的出现, 我们可以更快地完成代码分析. 我曾自嘲, ChatGPT 早出现几年的话, 很多工具链都不需要存在.</p>
+
+<p>这里只考虑 TF card 启动的情况, 系统固件在 TF 卡上, 片上 Boot ROM 加载固件到内存. 也就是我们的程序需要做到和 U-Boot 一样的事情, 包括 SPL 的功能.</p>
+
+<blockquote>
+  <p>注：TF 卡、SD 卡、eMMC 在协议层面基本相同，本文不做严格区分</p>
+</blockquote>
+
+<h3 id="上电复位到加载并执行用户固件">上电复位到加载并执行用户固件</h3>
+
+<p>首先，Boot ROM 加载固件到内存。这一部分的逻辑是直接固化在芯片内部的 Boot ROM 中，属于无法控制的部分，因为 Boot ROM 的代码和逻辑都集成在芯片内部，无法被用户修改或干预。Boot ROM 内部的实现机制是通过读取 BOOT0 和 BOOT1 两个引脚的状态来判断启动方式。这两个引脚的电平状态决定了芯片在启动时从何种介质加载引导程序。</p>
+
+<p>从芯片手册看, Boot ROM 的内存映射位置位于 0x9120_0000 ~ 0x9121_0000, 使用 SRAM 的前半部分 0x8020_0000 ~ 0x8030_0000. 这些信息可以通过裸机程序读取 sp/ra 等特征确认. 例如 Boot ROM 会将 sp 可用内存的最大值. Boot ROM 跳转到用户固件往往使用 call 指令, ra 会被设置为 Boot ROM 的返回地址.</p>
+
+<p>Boot ROM 会按照预先设定的固定格式，从 TF 卡中加载固件（通常是 U-Boot）到内存中。具体来说，Boot ROM 会访问 TF 卡，按照特定的协议和数据格式读取固件文件，将其解码并存储到指定的内存位置 0x8030_0000.</p>
+
+<p>当固件加载完成后，Boot ROM 将程序的执行权转移到刚刚加载到内存的固件上，也就是跳转执行 U-Boot。这标志着启动过程从 Boot ROM 阶段进入了固件（U-Boot）阶段。U-Boot 作为一个功能更为强大的引导加载程序，可以进一步初始化系统硬件、加载操作系统内核，以及执行其他用户定义的启动任务。</p>
+
+<p>接下来是用户固件的启动(U-Boot).</p>
+
+<p>K230 配备了两个 CPU，分别称为 CPU0（小核）和 CPU1（大核）。在启动过程中，当芯片的复位信号被解除后，嵌入式启动 ROM（BOOTROM）会在 CPU0（小核）上开始执行。这意味着 CPU0（小核）是第一个被激活的核心，它负责执行初始的引导程序，进行系统的基本初始化。与此同时，CPU1（大核）的解除复位（de-reset）过程是由 CPU0（小核）来控制的。也就是说，CPU0（小核）在完成自身初始化的同时，还需要发送指令来解除 CPU1（大核）的复位状态，使其开始运行。这种架构设计使得 CPU0（小核）不仅肩负着引导系统启动的重任，还掌控着 CPU1（大核）的启动流程，为双核协同工作奠定了基础。</p>
+
+<p>U-boot 分为两阶段启动, SPL 和 U-Boot, SPL 用于初始化 DDR 等外设, 加载 U-Boot, U-Boot 之后的逻辑(OpenSBI, RT-Thread Smart), 我们此次不考虑.
+从固件格式看, 这部分以固件分区的方式存在.</p>
+
+<h3 id="固件格式">固件格式</h3>
+
+<p>为了让我们的固件被 Boot ROM 识别, 需要特定的固件格式. 各家的 SoC 此类方案不同, 有使用 fat32 固定文件名的, 有使用特定偏移的固定格式的.</p>
+
+<p>K230 的 Boot ROM 会识别 TF 卡的固定偏移位置数据特征, 满足格式的固件会被加载到内存.
+Boot ROM 已经初始化了 UART0, 会有简单的报错信息, 例如 “boot failed with exit code 19” 表示未找到 TF 卡, “boot failed with exit code 13” 表示固件格式错误等.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00000000  +-------------+-------------+-------------+-------------+
+          | ........... | ........... | ........... | ........... |  &lt;- Partition table / any other data
+          | ........... | ........... | ........... | ........... |
+          +-------------+-------------+-------------+-------------+
+00100000  | 4b 32 33 30 | 8c fc 02 00 | 00 00 00 00 | bf 8d 0f 38 |   &lt;- Firmware header: |K230...........8|
+          | MAGIC: K230 | Length      | Encryption  | SHA256 hash |   &lt;- Encryption 0: non encryption, 1: SM4, 2: AES+RSA
+          +-------------+-------------+-------------+-------------+
+00100010  | 03 f3 87 07 | fa 1b d8 1d | 4f a0 cd a0 | 7b 54 35 bd |.  &lt;- SHA256 hash cont.
+          +-------------+-------------+-------------+-------------+
+00100020  | 35 82 85 89 | 66 4d ac 27 | ca f8 56 49 | 00 00 00 00 |   &lt;- SHA256 hash cont. + Padding
+          +-------------+-------------+-------------+-------------+
+00100030  | 00 00 00 00 | 00 00 00 00 | 00 00 00 00 | 00 00 00 00 |   &lt;- Padding zeros
+          +-------------+-------------+-------------+-------------+
+          | ........... | ........... | ........... | ........... |   &lt;- Padding zeros
+          +-------------+-------------+-------------+-------------+
+00100210  | 00 00 00 00 | 73 25 40 f1 | 2a 82 ae 84 | 93 01 00 00 |   &lt;- Firmware data, length zero position
+          | Version     | OpCodes     | Data        | Padding     |   &lt;- Version: 0
+          | ........... | ........... | ........... | ........... |   &lt;- Firmware data, raw opcodes
+          +-------------+-------------+-------------+-------------+
+</code></pre></div></div>
+
+<p>相关 C 结构定义位于 <a href="https://github.com/kendryte/canmv_k230">CanMV</a> <code class="language-plaintext highlighter-rouge">src/uboot/uboot/board/kendryte/common/board_common.h</code>. 这里我们简化处理, 不加密固件, 版本号使用 0.</p>
+
+<p>编写一个 Python 脚本完成固件 .img 的创建:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+# genimage.py
+</span>
+<span class="kn">import</span> <span class="n">hashlib</span>
+
+<span class="n">MAGIC</span> <span class="o">=</span> <span class="sa">b</span><span class="sh">"</span><span class="s">K230</span><span class="sh">"</span>
+
+<span class="k">def</span> <span class="nf">sha256</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="n">digest</span> <span class="o">=</span> <span class="n">hashlib</span><span class="p">.</span><span class="nf">sha256</span><span class="p">(</span><span class="n">message</span><span class="p">).</span><span class="nf">digest</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">digest</span>
+
+
+<span class="n">VERSION</span> <span class="o">=</span> <span class="sa">b</span><span class="sh">"</span><span class="se">\x00\x00\x00\x00</span><span class="sh">"</span>
+
+<span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">./firmware.bin</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">rb</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="nf">read</span><span class="p">()</span>
+
+<span class="n">intput_data</span> <span class="o">=</span> <span class="n">VERSION</span> <span class="o">+</span> <span class="n">data</span>
+
+<span class="n">data_len</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">intput_data</span><span class="p">)</span>
+<span class="n">raw_data_len</span> <span class="o">=</span> <span class="n">data_len</span><span class="p">.</span><span class="nf">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="sh">"</span><span class="s">little</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">encryption_type</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">encryption_type</span> <span class="o">=</span> <span class="n">encryption_type</span><span class="p">.</span><span class="nf">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="sh">"</span><span class="s">little</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">hash_data</span> <span class="o">=</span> <span class="nf">sha256</span><span class="p">(</span><span class="n">intput_data</span><span class="p">)</span>
+
+<span class="n">firmware</span> <span class="o">=</span> <span class="n">MAGIC</span> <span class="o">+</span> <span class="n">raw_data_len</span> <span class="o">+</span> <span class="n">encryption_type</span> <span class="o">+</span> <span class="n">hash_data</span>
+
+<span class="n">firmware</span> <span class="o">+=</span> <span class="nf">bytes</span><span class="p">(</span><span class="mi">516</span> <span class="o">-</span> <span class="mi">32</span><span class="p">)</span>  <span class="c1"># padding
+</span><span class="n">firmware</span> <span class="o">+=</span> <span class="n">intput_data</span>
+
+<span class="n">img</span> <span class="o">=</span> <span class="nf">bytes</span><span class="p">(</span><span class="mh">0x100000</span><span class="p">)</span> <span class="o">+</span> <span class="n">firmware</span>  <span class="c1"># image offset 0x100000
+</span>
+<span class="c1"># fill 512 boundary, make sure the image size is multiple of 512
+</span><span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="o">%</span> <span class="mi">512</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">img</span> <span class="o">+=</span> <span class="nf">bytes</span><span class="p">(</span><span class="mi">512</span> <span class="o">-</span> <span class="nf">len</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="o">%</span> <span class="mi">512</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">./firmware.img</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">wb</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">len</span><span class="sh">"</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">firmware.bin</code> 通过 objcopy -O binary 生成:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cargo objcopy <span class="nt">--release</span> <span class="nt">--</span> <span class="nt">-O</span> binary firmware.bin <span class="o">&amp;&amp;</span> python3 genimage.py
+</code></pre></div></div>
+
+<p>固件的写入可以借助任何烧录工具, 包括 <code class="language-plaintext highlighter-rouge">dd</code> 命令.</p>
+
+<h2 id="开始编写裸机-rust-程序">开始编写裸机 Rust 程序</h2>
+
+<p>搞定了固件的加载, SoC 的控制流程就可以交给我们的程序了. 这里我们使用 Rust 语言编写裸机程序.
+从相关代码阅读得知, TF card 中代码被加载到了 0x80300000 ~ 0x80400000. 为了避免额外的不确定性, 可以直接使用 U-Boot 的 linker script.</p>
+
+<p>由于缺乏芯片开发的第一手资料, 我们并不知道 Boot ROM 之后初始化的状态具体如何, 这时候只能靠猜测和尝试.</p>
+
+<h3 id="验证裸机执行---uart">验证裸机执行 - UART</h3>
+
+<p>对于裸机编程来说, 需要初始化设备的初始状态, 包括堆栈 sp, 系统执行模式, 中断表, 中断开启等等. 这些工作通常由 <code class="language-plaintext highlighter-rouge">start.S</code> 或 <code class="language-plaintext highlighter-rouge">crt0.c</code> 完成.
+极小初始化代码往往只需要设置堆栈 sp, 保证函数可以跳转调用执行. 在 sp 非法的情况下, 如果函数调用返回, 会导致异常.</p>
+
+<p>由于没有 JTAG 调试环境(芯片支持, 我这里没有用 CK-LINK), 如何判断我们的代码是否被执行, 以及代码是否正确执行, 是一个问题.
+这里我们可以使用 UART0 输出调试信息. 由于 Boot ROM 已经初始化了 UART0, 我们可以直接使用.</p>
+
+<p>从 U-Boot 源码中的 dtsi 文件中可以得知, K230 大量使用了 DesignWare IP 的外设, 例如 UART0, SPI, I2C 等.
+这些外设的具体寄存器手册可以从网上获得. UART 外设兼容 16550, 即我们熟悉的 PC 串口芯片.</p>
+
+<p>可以直接使用 <code class="language-plaintext highlighter-rouge">global_asm!</code>, 串口打印字符来验证代码是否被执行. 例如:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#![no_std]</span>
+<span class="nd">#![no_main]</span>
+
+<span class="nd">global_asm!</span><span class="p">(</span><span class="s">r#"
+.section .text.start
+.global _start
+     la sp, _stack_start
+     call _start_rust
+"#</span><span class="p">);</span>
+
+<span class="nd">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">_start_rust</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">loop</span> <span class="p">{</span>
+        <span class="c1">// UART0.THR = 'A'</span>
+        <span class="nn">core</span><span class="p">::</span><span class="nn">ptr</span><span class="p">::</span><span class="nf">write_volatile</span><span class="p">(</span><span class="mi">0x9140_0000</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u32</span><span class="p">,</span> <span class="mi">0x41</span><span class="p">);</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="k">in</span> <span class="mi">0</span><span class="o">..</span><span class="mi">100000000</span> <span class="p">{</span>
+            <span class="k">unsafe</span> <span class="p">{</span> <span class="nd">asm!</span><span class="p">(</span><span class="s">"nop"</span><span class="p">)</span> <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>编译烧录如上代码, 不出意外, 你会在串口终端看到一串 A 字符. 这说明我们的代码被执行了.</p>
+
+<h3 id="访问外设寄存器---pac">访问外设寄存器 - PAC</h3>
+
+<p>Rust 嵌入式访问寄存器往往通过 PAC crate 的方式, 例如 <code class="language-plaintext highlighter-rouge">stm32xxxx-pac</code> crate. 但是由于 K230 是一个新的芯片, 没有相关的 PAC crate.
+也不太可能有 SVD 文件供生成. 这里我选择了 <a href="https://github.com/embassy-rs/chiptool">chiptool</a> 的方式, 使用 <a href="https://github.com/embedded-drivers/yaml2pac">yaml2pac</a> 工具完成 PAC crate 的生成. 手动维护外设寄存器的 YAML 定义.
+关于 PAC 的访问, 请参考 <a href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</a> 一文.</p>
+
+<p>相关 YAML 文件完全可以通过 LLM 协助从 PDF 手册 OCR.</p>
+
+<p>使用 <a href="https://github.com/embedded-drivers/yaml2pac">yaml2pac</a> 工具可以方便地形成我们自己的 PAC 库:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[path</span> <span class="nd">=</span> <span class="s">"uart_dw.rs"</span><span class="nd">]</span>
+<span class="k">pub</span> <span class="k">mod</span> <span class="n">uart</span><span class="p">;</span>
+
+<span class="k">pub</span> <span class="k">const</span> <span class="n">UART0</span><span class="p">:</span> <span class="nn">uart</span><span class="p">::</span><span class="n">Uart</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">uart</span><span class="p">::</span><span class="nn">Uart</span><span class="p">::</span><span class="nf">from_ptr</span><span class="p">(</span><span class="mi">0x9140_0000</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="p">())</span> <span class="p">};</span>
+<span class="k">pub</span> <span class="k">const</span> <span class="n">UART1</span><span class="p">:</span> <span class="nn">uart</span><span class="p">::</span><span class="n">Uart</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">uart</span><span class="p">::</span><span class="nn">Uart</span><span class="p">::</span><span class="nf">from_ptr</span><span class="p">(</span><span class="mi">0x9140_1000</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="p">())</span> <span class="p">};</span>
+<span class="k">pub</span> <span class="k">const</span> <span class="n">UART2</span><span class="p">:</span> <span class="nn">uart</span><span class="p">::</span><span class="n">Uart</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">uart</span><span class="p">::</span><span class="nn">Uart</span><span class="p">::</span><span class="nf">from_ptr</span><span class="p">(</span><span class="mi">0x9140_2000</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="p">())</span> <span class="p">};</span>
+<span class="k">pub</span> <span class="k">const</span> <span class="n">UART3</span><span class="p">:</span> <span class="nn">uart</span><span class="p">::</span><span class="n">Uart</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="nn">uart</span><span class="p">::</span><span class="nn">Uart</span><span class="p">::</span><span class="nf">from_ptr</span><span class="p">(</span><span class="mi">0x9140_3000</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="p">())</span> <span class="p">};</span>
+</code></pre></div></div>
+
+<p>通过简单的封装, 可以方便地访问外设. 相关的 PAC 维护在缺乏资料的情况下, 是比较困难的. 但是一旦完成, 可以大大提高开发效率.</p>
+
+<h3 id="方便调试---println-宏">方便调试 - println! 宏</h3>
+
+<p>有了外设寄存器定义, 此时可以写个完整的 HAL Driver, 也可以简单寄存器访问, 实现一个 <code class="language-plaintext highlighter-rouge">println!</code> 宏.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Debug)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Console</span><span class="p">;</span>
+
+<span class="k">impl</span> <span class="nn">core</span><span class="p">::</span><span class="nn">fmt</span><span class="p">::</span><span class="n">Write</span> <span class="k">for</span> <span class="n">Console</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">write_str</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">core</span><span class="p">::</span><span class="nn">fmt</span><span class="p">::</span><span class="nb">Result</span> <span class="p">{</span>
+        <span class="k">use</span> <span class="nn">pac</span><span class="p">::</span><span class="n">UART0</span><span class="p">;</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="k">in</span> <span class="n">s</span><span class="nf">.as_bytes</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">unsafe</span> <span class="p">{</span>
+                <span class="k">while</span> <span class="o">!</span><span class="n">UART0</span><span class="nf">.lsr</span><span class="p">()</span><span class="nf">.read</span><span class="p">()</span><span class="nf">.thre</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="nd">asm!</span><span class="p">(</span><span class="s">"nop"</span><span class="p">);</span>
+                <span class="p">}</span>
+
+                <span class="n">UART0</span><span class="nf">.thr</span><span class="p">()</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_thr</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="nf">Ok</span><span class="p">(())</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nd">#[macro_export]</span>
+<span class="nd">macro_rules!</span> <span class="n">println</span> <span class="p">{</span>
+    <span class="p">(</span><span class="nv">$</span><span class="p">(</span><span class="nv">$arg:tt</span><span class="p">)</span><span class="o">*</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
+        <span class="p">{</span>
+            <span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">fmt</span><span class="p">::</span><span class="n">Write</span><span class="p">;</span>
+            <span class="nd">writeln!</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="nv">$crate</span><span class="p">::</span><span class="n">Console</span><span class="p">,</span> <span class="nv">$</span><span class="p">(</span><span class="nv">$arg</span><span class="p">)</span><span class="o">*</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+    <span class="p">()</span> <span class="k">=&gt;</span> <span class="p">{</span>
+        <span class="p">{</span>
+            <span class="k">use</span> <span class="nn">core</span><span class="p">::</span><span class="nn">fmt</span><span class="p">::</span><span class="n">Write</span><span class="p">;</span>
+            <span class="nd">writeln!</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="nv">$crate</span><span class="p">::</span><span class="n">Console</span><span class="p">,</span> <span class="s">""</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>有了 <code class="language-plaintext highlighter-rouge">println!</code> 宏, 我们可以方便地输出调试信息了! 大大提高了开发效率.</p>
+
+<h2 id="完善初始化代码">完善初始化代码</h2>
+
+<p>目前为止, 我们只初始化了堆栈, 系统的中断, 乃至 .bss 段都没有初始化. 这些在一个完整的嵌入式程序中都是必顼的.</p>
+
+<p>和 MCU 编程不同的是, MPU 的代码执行是被 Boot ROM 加载到内存中某一区域的, 所以 MCU 中常见的 .data 区域 copy 是不需要的.
+而 .bss 清零则依情况而定, 因为比较简单, 本节略过内存初始化部分.</p>
+
+<h3 id="中断处理函数">中断处理函数</h3>
+
+<p>对于 RISC-V 来说, 中断处理函数是一个特殊的函数. Rust 提供了 <code class="language-plaintext highlighter-rouge">"riscv-interrupt-m"</code> ABI 专门用于中断处理函数的特殊逻辑.
+具体就是增加了中断处理函数的栈帧保存和恢复, 以及使用 <code class="language-plaintext highlighter-rouge">mret</code> 指令返回.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[link_section</span> <span class="nd">=</span> <span class="s">".trap"</span><span class="nd">]</span>
+<span class="nd">#[no_mangle]</span>
+<span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"riscv-interrupt-m"</span> <span class="k">fn</span> <span class="nf">_start_trap_rust</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"trap!"</span><span class="p">);</span>
+
+    <span class="k">let</span> <span class="n">mcause</span> <span class="o">=</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mcause</span><span class="p">::</span><span class="nf">read</span><span class="p">();</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"mstatus: {:016x}"</span><span class="p">,</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mstatus</span><span class="p">::</span><span class="nf">read</span><span class="p">()</span><span class="nf">.bits</span><span class="p">());</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"mcause:  {:016x}"</span><span class="p">,</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mcause</span><span class="p">::</span><span class="nf">read</span><span class="p">()</span><span class="nf">.bits</span><span class="p">());</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"mtval:   {:016x}"</span><span class="p">,</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mtval</span><span class="p">::</span><span class="nf">read</span><span class="p">());</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"mepc:    {:016x}"</span><span class="p">,</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="nn">mepc</span><span class="p">::</span><span class="nf">read</span><span class="p">());</span>
+
+    <span class="k">loop</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里打印了一些中断的重要信息, 协助判断中断函数是否被正常调用.</p>
+
+<p>使用 <code class="language-plaintext highlighter-rouge">#[no_mangle]</code> 是为了暴露符号, 我们可以在汇编代码中使用这个符号设置中断处理入口地址.</p>
+
+<p>使用 <code class="language-plaintext highlighter-rouge">#[link_section = ".trap"]</code> 是为了将这个函数放到 <code class="language-plaintext highlighter-rouge">.trap</code> 段, 以便于在链接脚本中处理, 尤其是内存对齐(<code class="language-plaintext highlighter-rouge">ALIGN(8)</code>).
+这是写裸机代码常见错误, 因为 mtvec 寄存器的地址必须对齐(低2位由向量处理模式位占用), 否则会导致异常.</p>
+
+<p>暂时我们不需要处理中断, 只需要观察中断是否被触发, 以及观察中断处理函数是否被执行. 所以使用 <code class="language-plaintext highlighter-rouge">loop {}</code>.</p>
+
+<h3 id="中断初始化">中断初始化</h3>
+
+<p>对于 RISC-V 来说, 中断的初始化大概需要如下步骤:</p>
+
+<ul>
+  <li>设置 mtvec: 中断处理入口地址</li>
+  <li>设置 mstatus 的 MIE 位: 允许中断</li>
+  <li>设置 mie 的 MEIE 位: 允许外部中断, 定时器中断等</li>
+</ul>
+
+<p>K230 使用了 Xuantie C908 核心, 支持 CLINT 和 PLIC 中断控制器. 相关资料可以从 C908 手册中获得.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">global_asm!</span><span class="p">(</span><span class="s">"
+    .option push
+    .option norelax
+    la gp, __global_pointer$
+    .option pop
+
+    la t1, __stack_start__
+    addi sp, t1, -16
+
+    la t0, _start_trap_rust
+    csrw mtvec, t0
+
+    call _early_init
+
+    // 继续调用 _start_rust
+    call _start_rust
+"</span><span class="p">);</span>
+
+<span class="nd">#[no_mangle]</span>
+<span class="k">unsafe</span> <span class="k">extern</span> <span class="s">"C"</span> <span class="k">fn</span> <span class="nf">_early_init</span><span class="p">()</span> <span class="p">{</span>
+    <span class="p">{</span>
+        <span class="k">use</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">register</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
+
+        <span class="nn">mstatus</span><span class="p">::</span><span class="nf">set_mie</span><span class="p">();</span> <span class="c1">// enable global interrupt</span>
+        <span class="nn">mstatus</span><span class="p">::</span><span class="nf">set_sie</span><span class="p">();</span> <span class="c1">// and supervisor interrupt</span>
+        <span class="nn">mie</span><span class="p">::</span><span class="nf">set_mext</span><span class="p">();</span> <span class="c1">// and external interrupt</span>
+        <span class="nn">mie</span><span class="p">::</span><span class="nf">set_msoft</span><span class="p">();</span> <span class="c1">// and software interrupt</span>
+        <span class="nn">mie</span><span class="p">::</span><span class="nf">set_mtimer</span><span class="p">();</span> <span class="c1">// and timer interrupt</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>mstatus 寄存器的 MIE 位用于控制中断使能, mie 寄存器的 MEXT 位用于控制外部中断使能, 例如 PLIC 中断.</p>
+
+<p>这里同时初始化了 gp, 它是一个全局指针寄存器, 用于 Rust 的全局变量访问(在链接脚本中定义的特殊位置).
+当然, 在使用内存区域较小较集中的时候, 很可能你不会见到使用 gp 寄存器的指令.</p>
+
+<h3 id="验证中断处理">验证中断处理</h3>
+
+<p>我们可以通过直接触发软件中断的方式, 来验证中断处理函数是否被执行. K230 的 CLINT 中断控制器可以通过 <code class="language-plaintext highlighter-rouge">msip</code> 寄存器触发软件中断.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">pac</span><span class="p">::</span><span class="n">CLINT</span><span class="nf">.msip</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_msip</span><span class="p">(</span><span class="k">true</span><span class="p">));</span> <span class="c1">// trigger software interrupt</span>
+</code></pre></div></div>
+
+<p>修改中断处理函数 <code class="language-plaintext highlighter-rouge">_start_trap_rust</code> 增加返回:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">if</span> <span class="n">mcause</span><span class="nf">.is_interrupt</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">mcause</span><span class="nf">.code</span><span class="p">()</span> <span class="o">==</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">interrupt</span><span class="p">::</span><span class="nn">Interrupt</span><span class="p">::</span><span class="n">MachineSoft</span> <span class="k">as</span> <span class="n">_</span> <span class="p">{</span>
+        <span class="nd">println!</span><span class="p">(</span><span class="s">"Machine Software Interrupt"</span><span class="p">);</span>
+        <span class="nn">pac</span><span class="p">::</span><span class="n">CLINT</span><span class="nf">.msip</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_msip</span><span class="p">(</span><span class="k">false</span><span class="p">));</span> <span class="c1">// clear software interrupt</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>使用 mtime, mtimecmp 也可以验证定时器中断. 但我在使用中发现一个坑,
+K230 的 CLINT 的 mtime 无法通过 64 位 load 指令读取, 读出内容随机. 不抛出任何异常.
+这导致 64 位的 mtime 必须通过两次 32 位读取, 然后组合成 64 位.
+只有 <code class="language-plaintext highlighter-rouge">rdtime</code> 指令可以一次读取 64 位 mtime.</p>
+
+<h3 id="其他-csr-初始化">其他 CSR 初始化</h3>
+
+<p>基于平台不同, 还需要初始化其他硬件, 例如关闭 PMP, 初始化 FPU, 开启 mcycle, mtime 计数器等等.
+其中 FPU 的初始化是必须的, 否则任意浮点数指令会导致异常. Rust 的 “riscv-interrupt-m” 不够智能, 无法判断 FPU 的使用情况,
+所以当 target 包含 <code class="language-plaintext highlighter-rouge">+f</code>/<code class="language-plaintext highlighter-rouge">+d</code> 时, ABI 会默认使用 FPU 压栈指令.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 这里省略平台特定的寄存器初始化部分</span>
+<span class="c1">// 包括关闭 PMP</span>
+<span class="nd">asm!</span><span class="p">(</span><span class="s">"
+    li    t0, 0x00001800
+    csrw  mstatus, t0"</span><span class="p">);</span>
+
+<span class="nn">mcounteren</span><span class="p">::</span><span class="nf">set_cy</span><span class="p">();</span> <span class="c1">// enable cycle counter</span>
+<span class="nn">mcounteren</span><span class="p">::</span><span class="nf">set_tm</span><span class="p">();</span> <span class="c1">// and time counter</span>
+
+<span class="c1">// FPU init</span>
+<span class="nn">mstatus</span><span class="p">::</span><span class="nf">set_fs</span><span class="p">(</span><span class="nn">mstatus</span><span class="p">::</span><span class="nn">FS</span><span class="p">::</span><span class="n">Clean</span><span class="p">);</span>
+<span class="nn">mstatus</span><span class="p">::</span><span class="nf">set_fs</span><span class="p">(</span><span class="nn">mstatus</span><span class="p">::</span><span class="nn">FS</span><span class="p">::</span><span class="n">Initial</span><span class="p">);</span>
+<span class="nd">asm!</span><span class="p">(</span><span class="s">"csrwi fcsr, 0"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>mstatus 除了中断使能之外, 还负责当前 CPU 的运行模式, 例如 M/S/U 模式.</p>
+
+<p>有了系统的 mcycle, 就可以方便地使用 <code class="language-plaintext highlighter-rouge">embedded-hal</code> 的 <code class="language-plaintext highlighter-rouge">Delay</code> trait, 实现较为精确的延时.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="n">CPU0_CORE_CLK</span><span class="p">:</span> <span class="nb">u32</span> <span class="o">=</span> <span class="mi">800_000_000</span><span class="p">;</span>
+
+<span class="k">let</span> <span class="k">mut</span> <span class="n">delay</span> <span class="o">=</span> <span class="nn">riscv</span><span class="p">::</span><span class="nn">delay</span><span class="p">::</span><span class="nn">McycleDelay</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">CPU0_CORE_CLK</span><span class="p">);</span>
+<span class="n">delay</span><span class="nf">.delay_ms</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="ddr-init">DDR init</h3>
+
+<p>DDR init / (SDRAM 初始化) 是一个比较复杂的过程, 一般需要初始化时钟, 复位控制器, PHY 训练, 芯片初始化, 时序配置, 自检等等.
+这些内容往往都是厂商直接提供, 在相关的 DDR 初始化代码中, 相关寄存器写入流程也是如同天书一般.</p>
+
+<p>所以 DDR init 代码直接通过 LLM 从 C 翻译. 不做额外解释. DDR 芯片不同, DDR init 代码也是不同的.</p>
+
+<p>DDR init 之后, 我们就可以使用 DDR 区域的内存. 这里有个比较坑的地方, DDR 内存起始地址是 0x0000_0000,
+然而 Rust 访问零地址有诸多限制, 多数函数会直接 panic. 程序中应该避免使用 0x0000_0000 地址.</p>
+
+<h2 id="正式开始裸机编程">正式开始裸机编程</h2>
+
+<p>有了以上的初始化基础, 我们终于可以开始正式的裸机编程了. 例如初始化其他外设, 读写外设寄存器, 甚至是实现一些简单的功能.</p>
+
+<p>这里以两个外设为例简单展示. 相关的外设寄存器定义我已经人肉写好在 <a href="https://github.com/andelf/k230-bare-metal">k230-bare-metal</a> 仓库中.</p>
+
+<h3 id="gpio-点灯">GPIO 点灯</h3>
+
+<p>无论 MCU 还是 MPU, GPIO 点灯的步骤都是类似的:</p>
+
+<ul>
+  <li>使能(或复位) GPIO 外设时钟, 电源</li>
+  <li>设置引脚功能复用, 引脚模式</li>
+  <li>GPIO write</li>
+</ul>
+
+<p>K230 默认情况下外设的时钟和电源信号都是开启的(检查相关寄存器可以确认). 所以我们只需要通过 IOMUX 设置复用功能, 通过 GPIO 外设设置好引脚模式即可.
+相关的功能可以参考官方文档, 引脚复用的文档位于 <code class="language-plaintext highlighter-rouge">K230_PINOUT_V*.xlsx</code>.</p>
+
+<p>IOMUX 外设是一个类似 PAD 的结构, 每个引脚通过一个 32 位寄存器设置复用功能, 上拉下拉, 输入输出使能等. 这部分定义我是通过 dtsi 文件和 C 头文件获得,
+也是交给 LLM 来转译成 YAML 定义. <code class="language-plaintext highlighter-rouge">IOMUX.pad(n).set_sel(0)</code> 即将引脚的模式设置为对应的 GPIO.</p>
+
+<p>GPIO 外设来自 <a href="https://www.synopsys.com/dw/ipdir.php?c=DW_apb_gpio">DW_apb_gpio</a>, 熟悉 Verilog 等 HDL 的朋友一看文档就知道这个是一个最多
+4 端口的可配置 GPIO. 有若干配置寄存器可以获取外设的初始参数:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GPIO0 config_reg1: num_ports=1
+GPIO0 config_reg2: len(PA)=32
+GPIO1 config_reg1: num_ports=2
+GPIO1 config_reg2: len(PA)=32 len(PB)=8
+</code></pre></div></div>
+
+<p>一共 32 + 32 + 8 = 72 个引脚. 分两个 GPIO 控制器, 其中 GPIO1 控制器有两个 PORT.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">blinky</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// RGB LED of LCKFB</span>
+    <span class="c1">// - R: GPIO62</span>
+    <span class="c1">// - G: GPIO20</span>
+    <span class="c1">// - B: GPIO63</span>
+    <span class="k">use</span> <span class="nn">pac</span><span class="p">::{</span><span class="n">GPIO0</span><span class="p">,</span> <span class="n">GPIO1</span><span class="p">,</span> <span class="n">IOMUX</span><span class="p">};</span>
+
+    <span class="n">IOMUX</span><span class="nf">.pad</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_sel</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span> <span class="c1">// function = GPIOx</span>
+    <span class="n">IOMUX</span><span class="nf">.pad</span><span class="p">(</span><span class="mi">62</span><span class="p">)</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_sel</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+    <span class="n">IOMUX</span><span class="nf">.pad</span><span class="p">(</span><span class="mi">63</span><span class="p">)</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_sel</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+
+    <span class="n">GPIO0</span><span class="nf">.swport</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.ddr</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="o">*</span><span class="n">w</span> <span class="p">|</span><span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">);</span> <span class="c1">// output</span>
+    <span class="n">GPIO1</span><span class="nf">.swport</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.ddr</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="o">*</span><span class="n">w</span> <span class="p">|</span><span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">);</span>
+    <span class="n">GPIO1</span><span class="nf">.swport</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.ddr</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="o">*</span><span class="n">w</span> <span class="p">|</span><span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">);</span>
+
+    <span class="k">loop</span> <span class="p">{</span>
+        <span class="n">GPIO0</span><span class="nf">.swport</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.dr</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="o">*</span><span class="n">w</span> <span class="o">^=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">);</span>
+        <span class="c1">// GPIO1.swport(0).dr().modify(|w| *w ^= 1 &lt;&lt; 30);</span>
+        <span class="n">GPIO1</span><span class="nf">.swport</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.dr</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="o">*</span><span class="n">w</span> <span class="o">^=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">);</span>
+
+        <span class="nn">riscv</span><span class="p">::</span><span class="nn">delay</span><span class="p">::</span><span class="nn">McycleDelay</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">CPU0_CORE_CLK</span><span class="p">)</span><span class="nf">.delay_ms</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="pwm-蜂鸣器">PWM 蜂鸣器</h3>
+
+<p>K230 有 6 个 PWM 输出, 分两个 PWM 控制器. 每个控制器内部是 3 个 PWM 输出通道. 1 个额外的通道 0 负责配置 Reload.
+LCKFB 上的蜂鸣器是通过 PWM1 GPIO43 控制的. PWM 外设的输入时钟是 100MHz, 通过 PWMCFG.SCALE 设置 2^n 分频.</p>
+
+<p>为了使蜂鸣器达到人耳可听的频率, 一般 PWM 的频率设置在 1KHz 左右. 通过 PWMCFG.SCALE 和 PWMx.CMP 设置周期和占空比.
+相关代码如下, 寄存器值计算请参考注释</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">buzzer</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// GPIO43 - PWM1</span>
+    <span class="k">use</span> <span class="nn">pac</span><span class="p">::{</span><span class="n">IOMUX</span><span class="p">,</span> <span class="n">PWM0</span><span class="p">};</span>
+
+    <span class="c1">// PCLK, PWM use APB clock to program registers as well as to generate waveforms. The default frequency is 100MHz.</span>
+    <span class="n">IOMUX</span><span class="nf">.pad</span><span class="p">(</span><span class="mi">43</span><span class="p">)</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="p">{</span>
+        <span class="n">w</span><span class="nf">.set_sel</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span> <span class="c1">// PWM = 2</span>
+        <span class="n">w</span><span class="nf">.set_oe</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+        <span class="n">w</span><span class="nf">.set_ds</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="c1">// Calc:</span>
+    <span class="c1">// scale = 2</span>
+    <span class="c1">// period = 0x5000</span>
+    <span class="c1">// freq = 100_000_000 / (1 &lt;&lt; 2) / 0x5000  = 1220.7 Hz</span>
+    <span class="c1">// duty = period / 2 = 0x2800</span>
+    <span class="n">PWM0</span><span class="nf">.pwmcfg</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="p">{</span>
+        <span class="n">w</span><span class="nf">.set_zerocomp</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+        <span class="n">w</span><span class="nf">.set_scale</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="n">PWM0</span><span class="nf">.pwmcmp</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="nf">.write</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="na">.0</span> <span class="o">=</span> <span class="mi">0x5000</span><span class="p">);</span>
+    <span class="k">let</span> <span class="n">duty</span> <span class="o">=</span> <span class="mi">0x2800</span><span class="p">;</span>
+
+    <span class="n">PWM0</span><span class="nf">.pwmcmp</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="na">.0</span> <span class="o">=</span> <span class="n">duty</span><span class="p">);</span>
+
+    <span class="c1">// enable</span>
+    <span class="n">PWM0</span><span class="nf">.pwmcfg</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_enalways</span><span class="p">(</span><span class="k">true</span><span class="p">));</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">delay</span><span class="p">::</span><span class="nn">McycleDelay</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">CPU0_CORE_CLK</span><span class="p">)</span><span class="nf">.delay_ms</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+
+    <span class="c1">// disable</span>
+    <span class="n">PWM0</span><span class="nf">.pwmcfg</span><span class="p">()</span><span class="nf">.modify</span><span class="p">(|</span><span class="n">w</span><span class="p">|</span> <span class="n">w</span><span class="nf">.set_enalways</span><span class="p">(</span><span class="k">false</span><span class="p">));</span>
+    <span class="nn">riscv</span><span class="p">::</span><span class="nn">delay</span><span class="p">::</span><span class="nn">McycleDelay</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">CPU0_CORE_CLK</span><span class="p">)</span><span class="nf">.delay_ms</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="一些延展思考">一些延展思考</h2>
+
+<h3 id="why-裸机">Why 裸机?</h3>
+
+<p>裸机编程是嵌入式开发的基础, 也是最底层的开发方式. 通过裸机编程, 我们可以更好地理解硬件的工作原理, 以及操作系统的工作原理.
+用遍全天下的库, 不如自己写一个.</p>
+
+<h3 id="shell">Shell?</h3>
+
+<p>在裸机环境下, 由于没有操作系统, 也没有标准输入输出, 也没有文件系统, 完整的 Shell 是不可能的. 但是我们可以通过串口, 实现简单的命令行交互.
+所需要的只是两个串口函数 <code class="language-plaintext highlighter-rouge">putchar</code> 和 <code class="language-plaintext highlighter-rouge">getchar</code>, 以及一个简单的解析器.</p>
+
+<p><a href="https://docs.rs/noline/latest/noline/">noline</a> 是一个小巧的 no_std line-editing crate, 可以用于实现简单的命令行交互. 而且它基于 embedded-hal 生态, 可以方便地移植.</p>
+
+<p>通过实现若干 shell 命令, 我们可以实现简单的交互, 例如读写外设寄存器, 读写内存, 打印系统信息等等.</p>
+
+<p>相关实现可以参考 <a href="https://github.com/andelf/k230-bare-metal">k230-bare-metal</a> 仓库.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>K230&gt; <span class="nb">help
+</span>Available commands:
+  <span class="nb">help</span> - print this <span class="nb">help
+  echo</span> &lt;text&gt; - print &lt;text&gt;
+  reboot - reboot the system
+  mem_read &lt;address&gt; &lt;length&gt; - <span class="nb">read </span>memory
+  mem_write &lt;address&gt; &lt;u32&gt; - write memory
+  tsensor - <span class="nb">read </span>temperature sensor
+  cpuid - print CPUID
+  serialboot - enter serial boot mode
+</code></pre></div></div>
+
+<h3 id="download">Download?</h3>
+
+<p>K230 究其定位, 其实更像是 SBC(单板计算机), 烧录固件往往通过 TF 卡, 在逻辑开发中极为不便, 持续插拔 TF 卡会导致接触不良, 甚至损坏.</p>
+
+<p>联想到 <a href="https://github.com/enjoy-digital/litex">LiteX</a> 为 FPGA 软核环境提供了非常方便的 kernel/firmware 加载方式, 通过串口下载固件, 甚至可以通过网络下载固件.
+我尝试移植了 litex_term 的下载逻辑. 最终的效果是:</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">&gt;</span><span class="w"> </span>litex_term /dev/tty.usbmodem56C40035621 <span class="nt">--kernel-adr</span> 0x01000000 <span class="nt">--kernel</span> ../firmware.img
+<span class="c">......
+</span><span class="go">Press Q or ESC to abort boot completely.
+sL5DdSMmkekro
+[LITEX-TERM] Received firmware download request from the device.
+[LITEX-TERM] Uploading ../k230-bare-metal-app/big-core.bin to 0x01000000 (17400 bytes)...
+[LITEX-TERM] Upload calibration... failed, switching to --safe mode.
+[LITEX-TERM] Upload complete (8.7KB/s).
+[LITEX-TERM] Booting the device.
+[LITEX-TERM] Done.
+Jumping to 0x01000000...
+</span></code></pre></div></div>
+
+<p>有机会单独额外介绍.</p>
+
+<h3 id="跳转大核">跳转大核</h3>
+
+<p>前面说道, CPU1(大核) 的启动是由 CPU0(小核) 控制的. 具体启动逻辑也很简单, 设置复位向量并复位 CPU1 即可:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">unsafe</span> <span class="p">{</span>
+    <span class="nn">ptr</span><span class="p">::</span><span class="nf">write_volatile</span><span class="p">(</span><span class="mi">0x91102104</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u32</span><span class="p">,</span> <span class="n">jump_addr</span> <span class="k">as</span> <span class="nb">u32</span><span class="p">);</span>
+    <span class="nn">ptr</span><span class="p">::</span><span class="nf">write_volatile</span><span class="p">(</span><span class="mi">0x9110100c</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u32</span><span class="p">,</span> <span class="mi">0x10001000</span><span class="p">);</span>
+    <span class="nn">ptr</span><span class="p">::</span><span class="nf">write_volatile</span><span class="p">(</span><span class="mi">0x9110100c</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u32</span><span class="p">,</span> <span class="mi">0x10001</span><span class="p">);</span>
+    <span class="nn">ptr</span><span class="p">::</span><span class="nf">write_volatile</span><span class="p">(</span><span class="mi">0x9110100c</span> <span class="k">as</span> <span class="o">*</span><span class="k">mut</span> <span class="nb">u32</span><span class="p">,</span> <span class="mi">0x10000</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>为了方便开发测试, 我把跳转大核也做成了 shell 命令. 通过 UART0 输入 <code class="language-plaintext highlighter-rouge">jumpbig 0x01000000</code> 即可跳转大核执行内存区域代码.
+尝试 dump 大核寄存器信息, 可以看到启动信息:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Rust 2nd stage on CPU1
+mstatus: 0000000a00001900
+mie: 0000000000000000
+mip: 0000000000000000
+misa: 8000000000b4112f
+  RV64ABCDFIMSUVX
+mvendorid: 5b7
+marchid: 8000000009140d00
+mhartid: 0
+cpuid: 09140b0d 10050000 260c0001
+</code></pre></div></div>
+
+<p>这里 <code class="language-plaintext highlighter-rouge">RV64ABCDFIMSUVX</code> 中的 <code class="language-plaintext highlighter-rouge">V</code> 表示支持 RVV 向量指令集, K230 是异构双核, 小核不支持 RVV. 可以证明我们的代码成功跳转到了大核.</p>
+
+<p>当然有个搞笑的, <code class="language-plaintext highlighter-rouge">mhartid</code> 是 0, 说明 K230 并没有满足 RISC-V 规范给不同的 hart 分配不同的 ID. 这个在实际开发中是需要注意的.
+只能通过 misc CSR 来区分不同的 hart.</p>
+
+<h2 id="结语">结语</h2>
+
+<p>至此, 我们已经成功在 K230 的大小核上编写了 Rust 语言的裸机程序. 通过这个过程, 我们可以更好地理解 MPU 的启动流程, 以及裸机编程的基本步骤.</p>]]></content><author><name>猫·仁波切</name></author><category term="embedded" /><category term="rust" /><category term="risc-v" /><summary type="html"><![CDATA[难度: 中等 适用读者: 具备嵌入式系统基础知识]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://andelf.github.io/assets/k230-boards.jpg" /><media:content medium="image" url="https://andelf.github.io/assets/k230-boards.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例</title><link href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="alternate" type="text/html" title="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" /><published>2024-08-23T01:51:00+00:00</published><updated>2024-08-23T01:51:00+00:00</updated><id>https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach</id><content type="html" xml:base="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"><![CDATA[<p>Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.</p>
 
 <p>本文是基础向文章, 介绍了 Rust 嵌入式开发中的外设寄存器访问问题，以及社区提供的解决方案。包括以下内容:</p>
 
@@ -1396,7 +2018,7 @@ LC7931 手册很详细, 是影印版的 PDF. 我们常把这种显示单元称�
 <p>PCB 丝印: Endor Telink1020 2021-07-22 change U5, 可见这是 BLOZI(保资) 的价签. 但是在今天, 他家官网都是挂的.
 难道价签厂家也倒闭了…</p>
 
-<p>24pin 屏幕排线丝印: HINK-E102A01-A1, 搜索可以找到全网唯一参考资料<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>, 虽然是个 CSDN, 但提供了不少线索,
+<p>24pin 屏幕排线丝印: HINK-E102A01-A1, 搜索可以找到全网唯一参考资料<sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>, 虽然是个 CSDN, 但提供了不少线索,
 里面说明了驱动 IC 是 SSD1677, 微雪 3in7 也使用了相同驱动 IC, 但那是一个黑白屏幕.</p>
 
 <p>如果没有找到对应的驱动 IC, 那可能就需要参考 <a href="https://www.youtube.com/watch?v=t_YXjM7Keqw">wenting</a> 的方法逆向了.
@@ -1934,7 +2556,7 @@ UCxxxx 系列的驱动 IC, 也会直接提供 Partial Update 的相关命令.
 </ul>
 <div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1" role="doc-endnote">
+    <li id="fn:1">
       <p><a href="https://blog.csdn.net/lymacadam/article/details/132178619">https://blog.csdn.net/lymacadam/article/details/132178619</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
@@ -4053,7 +4675,7 @@ amixer set PCM off
 
 <h2 id="swift-30-新变化">Swift 3.0 新变化</h2>
 
-<p>以下内容来自 Swift 语言提案<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>。</p>
+<p>以下内容来自 Swift 语言提案<sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>。</p>
 
 <p>Swift 3.0 发布计划</p>
 
@@ -4145,7 +4767,7 @@ amixer set PCM off
 <p><code class="language-plaintext highlighter-rouge">swift -repl</code> 子命令选择可用的 REPL 进入，一般是 <code class="language-plaintext highlighter-rouge">lldb-repl</code>，除非找不到 lldb 时。这也是 Swift 命令不带任何参数的默认行为。</p>
 <div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1" role="doc-endnote">
+    <li id="fn:1">
       <p>(apple/swift-evolution)[https://github.com/apple/swift-evolution] <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
@@ -5699,7 +6321,7 @@ protocol ForwardIndex : _ForwardIndex {
 
 <blockquote>
   <p>CocoaPods is the dependency manager for Objective-C projects.
-It has thousands of libraries and can help you scale your projects elegantly. <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></p>
+It has thousands of libraries and can help you scale your projects elegantly. <sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup></p>
 </blockquote>
 
 <p>从介绍看，它是主要给 Objective-C 项目用的，但是我们可以很容易地混合 Objective-C 和 Swift 到同个项目，从而利用大量的 CocoaPods 库和 Swift 漂亮舒服的语法。</p>
@@ -5712,7 +6334,7 @@ It has thousands of libraries and can help you scale your projects elegantly. <s
 
 <h3 id="安装">安装</h3>
 
-<p>系统默认安装，可以参考其他教程<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> 。在命令行下执行。</p>
+<p>系统默认安装，可以参考其他教程<sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup> 。在命令行下执行。</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo gem install cocoapods
 </code></pre></div></div>
@@ -5734,7 +6356,7 @@ pod
 
 <h3 id="使用">使用</h3>
 
-<p>假设我们已经有个项目，叫 ProjName ，需要使用一些注明的 CocoaPods 库，比如 AFNetworking<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>.</p>
+<p>假设我们已经有个项目，叫 ProjName ，需要使用一些注明的 CocoaPods 库，比如 AFNetworking<sup id="fnref:3"><a href="#fn:3" class="footnote" rel="footnote" role="doc-noteref">3</a></sup>.</p>
 
 <p>首先，命令行 cd 到我们的项目目录，一般 ls 命令会看到如下几个文件夹：</p>
 
@@ -5779,7 +6401,7 @@ pod "AFNetworking", "~&gt; 2.0"
             <span class="o">})</span>
 </code></pre></div></div>
 
-<p>这里直接抄了 JakeLin 的 SwiftWeather 代码<sup id="fnref:5" role="doc-noteref"><a href="#fn:5" class="footnote" rel="footnote">4</a></sup>，就一小段，希望他不会打我。</p>
+<p>这里直接抄了 JakeLin 的 SwiftWeather 代码<sup id="fnref:5"><a href="#fn:5" class="footnote" rel="footnote" role="doc-noteref">4</a></sup>，就一小段，希望他不会打我。</p>
 
 <h4 id="swift-坑爹了">Swift 坑爹了</h4>
 
@@ -5791,7 +6413,7 @@ pod "AFNetworking", "~&gt; 2.0"
 
 <h4 id="继续">继续</h4>
 
-<p>之前简单介绍过和  Objective-C 交互的内容<sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">5</a></sup>，大家可以去围观。</p>
+<p>之前简单介绍过和  Objective-C 交互的内容<sup id="fnref:4"><a href="#fn:4" class="footnote" rel="footnote" role="doc-noteref">5</a></sup>，大家可以去围观。</p>
 
 <p>一般说来，你在 Swift 项目新建 Objective-C 类的时候，直接弹出是否创建 Bridge Header 的窗口，点 YES 就是了，这时候一般多出来个 <code class="language-plaintext highlighter-rouge">ProjectName-Bridging-Header.h</code> 。然后删掉这个类， Bridging Header 头文件还在。</p>
 
@@ -5865,210 +6487,20 @@ module </span><span class="si">#{</span><span class="n">normalized_pod_name</spa
 
 <div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1" role="doc-endnote">
+    <li id="fn:1">
       <p><a href="http://cocoapods.org/">CocoaPods Offical Site</a> CocoaPods 官网 <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:2" role="doc-endnote">
+    <li id="fn:2">
       <p><a href="http://www.cocoachina.com/applenews/devnews/2014/0623/8917.html">CocoaPods - CocoaChina</a> CocoaChina 对 CocoaPods 的介绍 <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:3" role="doc-endnote">
+    <li id="fn:3">
       <p><a href="https://github.com/AFNetworking/AFNetworking">AFNetworking - Github</a> <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:5" role="doc-endnote">
+    <li id="fn:5">
       <p><a href="https://github.com/JakeLin/SwiftWeather/blob/master/Swift%20Weather/ViewController.swift">SwiftWeather</a> <a href="#fnref:5" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:4" role="doc-endnote">
+    <li id="fn:4">
       <p><a href="http://andelf.github.io/blog/2014/06/11/swift-and-objectivec-interop/">Swift and ObjectiveC Interop (Swift 与 Objective-C 之间的交互)</a> <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
-</div>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. weibo]]></summary></entry><entry><title type="html">Swift Reflection （Swift 的反射）</title><link href="https://andelf.github.io/blog/2014/06/20/swift-reflection/" rel="alternate" type="text/html" title="Swift Reflection （Swift 的反射）" /><published>2014-06-20T15:48:51+00:00</published><updated>2014-06-20T15:48:51+00:00</updated><id>https://andelf.github.io/blog/2014/06/20/swift-reflection</id><content type="html" xml:base="https://andelf.github.io/blog/2014/06/20/swift-reflection/"><![CDATA[<p>Swift 其实是支持反射的，不过功能略弱。本文介绍基本的反射用法和相关类型。</p>
-
-<h2 id="metatype-和-type-语法">MetaType 和 Type 语法</h2>
-
-<blockquote>
-  <p>The metatype of a class, structure, or enumeration type is the name of that type followed by .Type. The metatype of a protocol type—not the concrete type that conforms to the protocol at runtime—is the name of that protocol followed by .Protocol. For example, the metatype of the class type SomeClass is SomeClass.Type and the metatype of the protocol SomeProtocol is SomeProtocol.Protocol.</p>
-</blockquote>
-
-<blockquote>
-  <p>You can use the postfix self expression to access a type as a value. For example, SomeClass.self returns SomeClass itself, not an instance of SomeClass. And SomeProtocol.self returns SomeProtocol itself, not an instance of a type that conforms to SomeProtocol at runtime.</p>
-</blockquote>
-
-<ul>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>metatype-type -&gt; <code class="language-plaintext highlighter-rouge">type</code>.<strong>Type</strong></td>
-          <td><code class="language-plaintext highlighter-rouge">type</code>.<strong>Protocol</strong></td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-  <li>type-as-value -&gt; <code class="language-plaintext highlighter-rouge">type</code>.self</li>
-</ul>
-
-<p>其中 metatype-type 出现在代码中需要类型的地方， type-as-value 出现在代码中需要值、变量的地方。</p>
-
-<p><code class="language-plaintext highlighter-rouge">Any.Type</code> 类型大家可以猜下它表示什么。</p>
-
-<h2 id="基础定义">基础定义</h2>
-
-<p>反射信息用 <code class="language-plaintext highlighter-rouge">Mirror</code> 类型表示，类型协议是 <code class="language-plaintext highlighter-rouge">Reflectable</code>，但实际看起来 <code class="language-plaintext highlighter-rouge">Reflectable</code> 没有任何作用。</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol Reflectable {
-  func getMirror() -&gt; Mirror
-}
-protocol Mirror {
-  var value: Any { get }
-  var valueType: Any.Type { get }
-  var objectIdentifier: ObjectIdentifier? { get }
-  var count: Int { get }
-  subscript (i: Int) -&gt; (String, Mirror) { get }
-  var summary: String { get }
-  var quickLookObject: QuickLookObject? { get }
-  var disposition: MirrorDisposition { get }
-}
-</code></pre></div></div>
-
-<p>实际上所有类型都实现了 <code class="language-plaintext highlighter-rouge">Reflectable</code>。</p>
-
-<p><code class="language-plaintext highlighter-rouge">Mirror</code> 协议相关字段：</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">value</code> 相当于变量的 <code class="language-plaintext highlighter-rouge">as Any</code> 操作</li>
-  <li><code class="language-plaintext highlighter-rouge">valueType</code> 获得变量类型</li>
-  <li><code class="language-plaintext highlighter-rouge">objectIdentifier</code> 相当于一个 UInt 作用未知，可能是 metadata 表用到</li>
-  <li><code class="language-plaintext highlighter-rouge">count</code> 子项目个数（可以是类、结构体的成员变量，也可以是字典，数组的数据）</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 访问子项目, 和子项目的名字</li>
-  <li><code class="language-plaintext highlighter-rouge">summary</code> 相当于 <code class="language-plaintext highlighter-rouge">description</code></li>
-  <li><code class="language-plaintext highlighter-rouge">quickLookObject</code> 是一个枚举，这个在 WWDC 有讲到，就是 Playground 代码右边栏的显示内容，比如常见类型，颜色，视图都可以</li>
-  <li><code class="language-plaintext highlighter-rouge">disposition</code> 表示变量类型的性质，基础类型 or 结构 or 类 or 枚举 or 索引对象 or … 如下</li>
-</ul>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enum MirrorDisposition {
-  case Struct // 结构体
-  case Class // 类
-  case Enum // 枚举
-  case Tuple // 元组
-  case Aggregate // 基础类型
-  case IndexContainer // 索引对象
-  case KeyContainer // 键-值对象
-  case MembershipContainer // 未知
-  case Container // 未知
-  case Optional // Type?
-  var hashValue: Int { get }
-}
-</code></pre></div></div>
-
-<p>通过函数 <code class="language-plaintext highlighter-rouge">func reflect&lt;T&gt;(x: T) -&gt; Mirror</code> 可以获得反射对象 <code class="language-plaintext highlighter-rouge">Mirror</code> 。它定义在 <code class="language-plaintext highlighter-rouge">Any</code> 上，所有类型均可用。</p>
-
-<h2 id="实际操作">实际操作</h2>
-
-<h3 id="valuetype-处理"><code class="language-plaintext highlighter-rouge">.valueType</code> 处理</h3>
-
-<p><code class="language-plaintext highlighter-rouge">Any.Type</code> 是所有类型的元类型，所以 <code class="language-plaintext highlighter-rouge">.valueType</code> 属性表示类型。实际使用的时候还真是有点诡异：</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let mir = reflect(someVal)
-swith mir.valueType {
-case _ as String.Type:
-    println("type = string")
-case _ as Range&lt;Int&gt;.Type:
-    println("type = range of int")
-case _ as Dictionary&lt;Int, Int&gt;.Type:
-    println("type = dict of int")
-case _ as Point.Type:
-    println("type = a point struct")
-default:
-    println("unkown type")
-}
-</code></pre></div></div>
-
-<p>或者使用 <code class="language-plaintext highlighter-rouge">is</code> 判断：</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if mir.valueType is String.Type {
-    println("!!!type =&gt; String")
-}
-</code></pre></div></div>
-
-<p>勘误： 这里之前笔误了。遗漏了 <code class="language-plaintext highlighter-rouge">.valueType</code> 。</p>
-
-<p><code class="language-plaintext highlighter-rouge">is String</code> 判断变量是否是 String 类型，而 <code class="language-plaintext highlighter-rouge">is String.Type</code> 这里用来判断类型是否是 String 类型。</p>
-
-<h3 id="subscriptint-处理"><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 处理</h3>
-
-<p>实测发现直接用 <code class="language-plaintext highlighter-rouge">mir[0]</code> 访问偶尔会出错，也许是 beta 的原因。</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>for r in 0..mir.count {
-    let (name, subref) = mir[r]
-    prtln("name: \(name)")
-    // visit sub Mirror here
-}
-</code></pre></div></div>
-
-<p>通过上面的方法，基本上可以遍历大部分结构。</p>
-
-<h2 id="不同类型的处理">不同类型的处理</h2>
-
-<h3 id="struct-结构体-class-类">Struct 结构体、 Class 类</h3>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为字段个数。</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 返回 （字段名，字段值反射 <code class="language-plaintext highlighter-rouge">Mirror</code>） 元组</li>
-  <li><code class="language-plaintext highlighter-rouge">summary</code> 为 mangled name</li>
-</ul>
-
-<h3 id="tuple-元组">Tuple 元组</h3>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “.0”, “.1” …</li>
-</ul>
-
-<h3 id="aggregate-基础类型">Aggregate 基础类型</h3>
-
-<p>包括数字、字符串（含 <code class="language-plaintext highlighter-rouge">NSString</code>）、函数、部分 Foundation 类型、 MetaType 。</p>
-
-<p>很奇怪一点是测试发现枚举也被反射为基础类型。怀疑是没实现完。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为 0</li>
-</ul>
-
-<h3 id="indexcontainer-索引对象">IndexContainer 索引对象</h3>
-
-<p>包括 <code class="language-plaintext highlighter-rouge">Array&lt;T&gt;</code>, <code class="language-plaintext highlighter-rouge">T[]</code>, <code class="language-plaintext highlighter-rouge">NSArray</code> 等。可以通过 subscript 访问。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “[0]”, “[1]” …</li>
-</ul>
-
-<h3 id="keycontainer-键-值对象">KeyContainer 键-值对象</h3>
-
-<p>包括 <code class="language-plaintext highlighter-rouge">Dictionary&lt;T, U&gt;</code>、<code class="language-plaintext highlighter-rouge">NSDictionary</code></p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为元组子元素个数</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> 的 name 为 “[0]”, “[1]” … 实际访问是 <code class="language-plaintext highlighter-rouge">(name, (reflect(key), reflect(val)))</code></li>
-</ul>
-
-<h3 id="optional-type">Optional Type?</h3>
-
-<p>只包括 <code class="language-plaintext highlighter-rouge">Type?</code>，不包括 <code class="language-plaintext highlighter-rouge">Type!</code>。</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">.count</code> 为 0 或者 1 (对应 nil 和有值的情况)</li>
-  <li><code class="language-plaintext highlighter-rouge">subscript(Int)</code> , name 为 “Some”</li>
-</ul>
-
-<h3 id="其他">其他</h3>
-
-<ul>
-  <li>Enum 枚举 看起来是未使用</li>
-  <li>MembershipContainer // 未知</li>
-  <li>Container // 未知</li>
-</ul>
-
-<h2 id="示例代码">示例代码</h2>
-
-<p><a href="https://gist.github.com/anonymous/190fc7ecee30e83a5dca">Gist</a></p>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[Swift 其实是支持反射的，不过功能略弱。本文介绍基本的反射用法和相关类型。]]></summary></entry></feed>
+</div>]]></content><author><name>猫·仁波切</name></author><category term="blog" /><category term="swift" /><summary type="html"><![CDATA[声明： 转载注明我或者 SwiftChina 。请在方便的情况下情尽量告知. weibo]]></summary></entry></feed>
