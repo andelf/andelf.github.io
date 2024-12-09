@@ -284,7 +284,7 @@ Boot ROM 已经初始化了 UART0, 会有简单的报错信息, 例如 “boot f
 <h3 id="验证裸机执行---uart">验证裸机执行 - UART</h3>
 
 <p>对于裸机编程来说, 需要初始化设备的初始状态, 包括堆栈 sp, 系统执行模式, 中断表, 中断开启等等. 这些工作通常由 <code class="language-plaintext highlighter-rouge">start.S</code> 或 <code class="language-plaintext highlighter-rouge">crt0.c</code> 完成.
-极小初始化代码往往只需要设置堆栈 sp, 保证函数可以跳转调用执行. 在 sp 非法的情况下, 如果函数调用返回, 会导致异常.</p>
+极小初始化代码往往只需要设置堆栈 sp, 保证函数可以跳转调用执行. 在 sp 非法的情况下, 如果使用堆栈, 例如函数调用, 会导致异常.</p>
 
 <p>由于没有 JTAG 调试环境(芯片支持, 我这里没有用 CK-LINK), 如何判断我们的代码是否被执行, 以及代码是否正确执行, 是一个问题.
 这里我们可以使用 UART0 输出调试信息. 由于 Boot ROM 已经初始化了 UART0, 我们可以直接使用.</p>
