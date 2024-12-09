@@ -58,14 +58,14 @@
 <li class="toc-entry toc-h3"><a href="#固件格式">固件格式</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#开始编写裸机-rust-程序">开始编写裸机 Rust 程序</a>
+<li class="toc-entry toc-h2"><a href="#开始编写裸机-rust-程序-start-writing-some-bare-metal-code">开始编写裸机 Rust 程序 (Start Writing Some Bare-Metal Code)</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#验证裸机执行---uart">验证裸机执行 - UART</a></li>
 <li class="toc-entry toc-h3"><a href="#访问外设寄存器---pac">访问外设寄存器 - PAC</a></li>
 <li class="toc-entry toc-h3"><a href="#方便调试---println-宏">方便调试 - println! 宏</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#完善初始化代码">完善初始化代码</a>
+<li class="toc-entry toc-h2"><a href="#完善初始化代码-complete-initialization-code">完善初始化代码 (Complete Initialization Code)</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#中断处理函数">中断处理函数</a></li>
 <li class="toc-entry toc-h3"><a href="#中断初始化">中断初始化</a></li>
@@ -74,13 +74,13 @@
 <li class="toc-entry toc-h3"><a href="#ddr-init">DDR init</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#正式开始裸机编程">正式开始裸机编程</a>
+<li class="toc-entry toc-h2"><a href="#正式开始裸机编程-start-real-bare-metal-programming">正式开始裸机编程 (Start Real Bare-Metal Programming)</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#gpio-点灯">GPIO 点灯</a></li>
 <li class="toc-entry toc-h3"><a href="#pwm-蜂鸣器">PWM 蜂鸣器</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#一些延展思考">一些延展思考</a>
+<li class="toc-entry toc-h2"><a href="#一些延展思考-some-extended-thoughts">一些延展思考 (Some Extended Thoughts)</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#why-裸机">Why 裸机?</a></li>
 <li class="toc-entry toc-h3"><a href="#shell">Shell?</a></li>
@@ -88,7 +88,7 @@
 <li class="toc-entry toc-h3"><a href="#跳转大核">跳转大核</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#结语">结语</a></li>
+<li class="toc-entry toc-h2"><a href="#结语-conclusion">结语 (Conclusion)</a></li>
 </ul>
     </div>
     <hr />
@@ -274,7 +274,7 @@ Boot ROM 已经初始化了 UART0, 会有简单的报错信息, 例如 “boot f
 
 <p>固件的写入可以借助任何烧录工具, 包括 <code class="language-plaintext highlighter-rouge">dd</code> 命令.</p>
 
-<h2 id="开始编写裸机-rust-程序">开始编写裸机 Rust 程序</h2>
+<h2 id="开始编写裸机-rust-程序-start-writing-some-bare-metal-code">开始编写裸机 Rust 程序 (Start Writing Some Bare-Metal Code)</h2>
 
 <p>搞定了固件的加载, SoC 的控制流程就可以交给我们的程序了. 这里我们使用 Rust 语言编写裸机程序.
 从相关代码阅读得知, TF card 中代码被加载到了 0x80300000 ~ 0x80400000. 为了避免额外的不确定性, 可以直接使用 U-Boot 的 linker script.</p>
@@ -384,7 +384,7 @@ Boot ROM 已经初始化了 UART0, 会有简单的报错信息, 例如 “boot f
 
 <p>有了 <code class="language-plaintext highlighter-rouge">println!</code> 宏, 我们可以方便地输出调试信息了! 大大提高了开发效率.</p>
 
-<h2 id="完善初始化代码">完善初始化代码</h2>
+<h2 id="完善初始化代码-complete-initialization-code">完善初始化代码 (Complete Initialization Code)</h2>
 
 <p>目前为止, 我们只初始化了堆栈, 系统的中断, 乃至 .bss 段都没有初始化. 这些在一个完整的嵌入式程序中都是必顼的.</p>
 
@@ -531,7 +531,7 @@ K230 的 CLINT 的 mtime 无法通过 64 位 load 指令读取, 读出内容随�
 <p>DDR init 之后, 我们就可以使用 DDR 区域的内存. 这里有个比较坑的地方, DDR 内存起始地址是 0x0000_0000,
 然而 Rust 访问零地址有诸多限制, 多数函数会直接 panic. 程序中应该避免使用 0x0000_0000 地址.</p>
 
-<h2 id="正式开始裸机编程">正式开始裸机编程</h2>
+<h2 id="正式开始裸机编程-start-real-bare-metal-programming">正式开始裸机编程 (Start Real Bare-Metal Programming)</h2>
 
 <p>有了以上的初始化基础, 我们终于可以开始正式的裸机编程了. 例如初始化其他外设, 读写外设寄存器, 甚至是实现一些简单的功能.</p>
 
@@ -633,7 +633,7 @@ LCKFB 上的蜂鸣器是通过 PWM1 GPIO43 控制的. PWM 外设的输入时钟�
 <span class="p">}</span>
 </code></pre></div></div>
 
-<h2 id="一些延展思考">一些延展思考</h2>
+<h2 id="一些延展思考-some-extended-thoughts">一些延展思考 (Some Extended Thoughts)</h2>
 
 <h3 id="why-裸机">Why 裸机?</h3>
 
@@ -717,7 +717,7 @@ cpuid: 09140b0d 10050000 260c0001
 <p>当然有个搞笑的, <code class="language-plaintext highlighter-rouge">mhartid</code> 是 0, 说明 K230 并没有满足 RISC-V 规范给不同的 hart 分配不同的 ID. 这个在实际开发中是需要注意的.
 只能通过 misc CSR 来区分不同的 hart.</p>
 
-<h2 id="结语">结语</h2>
+<h2 id="结语-conclusion">结语 (Conclusion)</h2>
 
 <p>通过此次在 K230 芯片 上的 Rust 裸机嵌入式开发，我们深入探索了 MPU 与 MCU 在启动方式和使用模式上的区别，掌握了使用 Rust 进行 MPU 芯片裸机开发的关键步骤，包括启动流程、固件格式解析、中断和外设的初始化等。实践中，我们成功实现了 UART 调试输出、GPIO 点灯、PWM 蜂鸣器等功能，加深了对 K230 底层启动机制和硬件特性的理解。这些成果为日后在 K230 以及其他 RISC-V 芯片上开展更复杂的嵌入式开发奠定了坚实的基础。展望未来，我们可以进一步完善外设驱动，探索多核协同工作、RVV 向量指令的应用，以及结合 Rust 生态构建高效、安全的嵌入式系统，为 RISC-V 开源社区贡献更多力量。(由 GPT 总结)</p>
 
