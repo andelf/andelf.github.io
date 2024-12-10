@@ -13,7 +13,7 @@ published: true
 
 > 难度: 中等, 读者应具备嵌入式系统基础知识和 Rust 嵌入式开发基础
 
-本文记录了在 K230 芯片上进行 Rust 裸机开发的过程. 从启动流程的分析, 固件格式的解析，到编写裸机 Rust 程序, 完善初始化代码, 再到实际的外设控制和功能实现，
+本文记录了在 K230 芯片上进行 Rust 裸机开发的过程. 从启动流程的分析, 固件格式的解析, 到编写裸机 Rust 程序, 完善初始化代码, 再到实际的外设控制和功能实现,
 和后续开发过程的优化方案, 都进行了探索.
 
 本文相关代码库: [k230-bare-metal](https://github.com/andelf/k230-bare-metal). 建议参考早期提交记录如 [e15968040](https://github.com/andelf/k230-bare-metal/tree/e1596804045b95b2f639036e10653605f04c72a6) 配合阅读.
@@ -21,18 +21,18 @@ published: true
 ## 项目背景 (Background)
 
 之前从立创开发板获得了 [立创·庐山派K230-CanMV](https://wiki.lckfb.com/zh-hans/lushan-pi-k230/) 的测评机会,
-另外我自己也有一块块 [CanMV-K230](https://wiki.youyeetoo.com/en/CanMV-K230) 开发板.
+另外我自己也有一块 [CanMV-K230](https://wiki.youyeetoo.com/en/CanMV-K230) 开发板.
 
-K230芯片是嘉楠科技推出的 AIoT SoC, 采用异构单元加速计算架构，集成了 2 个 RISC-V 算核心和 AI 子系统 KPU(Knowledge Process Unit).
-按照时间线, 应该是市面上最早一批支持 RV 向量扩展 RVV 1.0 的芯片之一. 主要特点：
+K230芯片是嘉楠科技推出的 AIoT SoC, 采用异构单元加速计算架构, 集成了 2 个 RISC-V 算核心和 AI 子系统 KPU(Knowledge Process Unit).
+按照时间线, 应该是市面上最早一批支持 RV 向量扩展 RVV 1.0 的芯片之一. 主要特点:
 
 - 双核 RISC-V 处理器
-  - Core 0: 64位 RISC-V (RV64GCB)，800MHz
-  - Core 1: 64位 RISC-V，1.6GHz，支持 RVV 1.0 向量扩展
+  - Core 0: 64位 RISC-V (RV64GCB), 800MHz
+  - Core 1: 64位 RISC-V, 1.6GHz, 支持 RVV 1.0 向量扩展
 - 专用加速单元
-  - KPU: AI 推理加速器，支持 INT8/INT16
+  - KPU: AI 推理加速器, 支持 INT8/INT16
   - DPU: 3D 结构光深度计算单元
-  - VPU: 视频编解码器，支持 4K 分辨率
+  - VPU: 视频编解码器, 支持 4K 分辨率
 - 丰富的外设接口
   - 通信接口: UART×5、I2C×5、SPI×3
   - 存储接口: USB 2.0×2、SD/eMMC
@@ -40,7 +40,7 @@ K230芯片是嘉楠科技推出的 AIoT SoC, 采用异构单元加速计算架�
 
 在正常使用情况下, 开发板使用 [CanMV] 固件, 该固件兼容 [OpenMV], 为开发者提供了非常便捷的开发环境.
 固件底层实现基于 [RT-Thread] Smart(RT-Smart), 是支持用户态应用的 RT-Thread 版本, 适用于支持 MMU 的 SoC, 例如 K230.
-CanMV 实现为 RT-Thread 的一个 app 应用(MicroPython fork).
+CanMV 实现为 RT-Thread 的一个 APP(MicroPython fork).
 另外早期版本的 CanMV 固件使用 Linux + RT-Thread + Micropython. 官方也有纯 Linux 版本固件.
 
 本项目旨在探索:
@@ -57,37 +57,37 @@ CanMV 实现为 RT-Thread 的一个 app 应用(MicroPython fork).
 ## 启动代码分析 (Boot Code Analysis)
 
 首先需要阅读官方仓库 [CanMV] 的代码, 确定是否有不开源的部分. 尤其是核心的 U-Boot 和 RT-Thread/Linux 驱动部分.
-对于 U-Boot 还需要确认第二阶段启动代码 SPL(Secondary Program Loader) 是否开源. 因为 SPL 往往用于初始化 DDR 等外设, 以及加载 U-Boot, 很多厂商不开源,
+对于 U-Boot 还需要确认第一阶段启动代码 SPL(Secondary Program Loader) 是否开源. 因为 SPL 往往用于初始化 DDR 等外设, 以及加载 U-Boot, 很多厂商不开源,
 只提供二进制文件.
 
-> SPL 字面意思是第二阶段启动加载器, Boot ROM 一般被认为是第一阶段加载器
+> SPL 字面意思是 **第二阶段** 启动加载器, Boot ROM 一般被认为是第一阶段加载器
 
 好消息是, 相关的代码都在 [CanMV] 仓库中, 且开源. 但是代码结构比较复杂, 需要一定时间阅读分析具体的启动流程和逻辑.
 然而, 随着 ChatGPT 的出现, 我们可以更快地完成代码分析. 我曾自嘲, ChatGPT 早出现几年的话, 很多工具链都不需要存在.
 
 这里只考虑 TF card 启动的情况, 系统固件在 TF 卡上, 片上 Boot ROM 加载固件到内存. 也就是我们的程序需要做到和 U-Boot 一样的事情, 包括 SPL 的功能.
 
-> 注：TF 卡、SD 卡、eMMC 在协议层面基本相同，本文不做严格区分
+> 注: TF 卡、SD 卡、eMMC 在协议层面基本相同, 本文不做严格区分/
 
 ### 上电复位到加载并执行用户固件
 
-首先，Boot ROM 加载固件到内存。这一部分的逻辑是直接固化在芯片内部的 Boot ROM 中，属于无法控制的部分，因为 Boot ROM 的代码和逻辑都集成在芯片内部，无法被用户修改或干预。Boot ROM 内部的实现机制是通过读取 BOOT0 和 BOOT1 两个引脚的状态来判断启动方式。这两个引脚的电平状态决定了芯片在启动时从何种介质加载引导程序。
+首先, Boot ROM 加载固件到内存。这一部分的逻辑是直接固化在芯片内部的 Boot ROM 中, 属于无法控制的部分, 因为 Boot ROM 的代码和逻辑都集成在芯片内部, 无法被用户修改或干预。Boot ROM 内部的实现机制是通过读取 BOOT0 和 BOOT1 两个引脚的状态来判断启动方式。这两个引脚的电平状态决定了芯片在启动时从何种介质加载引导程序。
 
 从芯片手册看, Boot ROM 的内存映射位置位于 0x9120_0000 ~ 0x9121_0000, 使用 SRAM 的前半部分 0x8020_0000 ~ 0x8030_0000.
 这些信息可以通过裸机程序读取 sp/ra 等特征确认. 例如 Boot ROM 会将堆栈指针 sp 设置为可用内存的最高地址.
 Boot ROM 跳转到用户固件往往使用 call 指令, ra 会被设置为当前跳转函数的 pc.
 
-Boot ROM 会按照预先设定的固定格式，从 TF 卡中加载固件（通常是 U-Boot）到内存中。具体来说，Boot ROM 会访问 TF 卡，
-读取固件区域，将其解码并复制到指定的内存位置 0x8030_0000.
+Boot ROM 会按照预先设定的固定格式, 从 TF 卡中加载固件(通常是 U-Boot)到内存中。具体来说, Boot ROM 会访问 TF 卡,
+读取固件区域, 将其解码并复制到指定的内存位置 0x8030_0000.
 
-当固件加载完成后，Boot ROM 会将系统的执行权转移到刚刚加载到内存的固件上，也就是跳转执行 U-Boot。这标志着启动过程从 Boot ROM 阶段进入了固件（U-Boot）阶段。U-Boot 作为一个功能更为强大的引导加载程序，可以进一步初始化系统硬件、加载操作 RT-Thread 或 Linux Kernel，以及执行其他用户定义的启动任务。
+当固件加载完成后, Boot ROM 会将系统的执行权转移到刚刚加载到内存的固件上, 也就是跳转执行 U-Boot。这标志着启动过程从 Boot ROM 阶段进入了固件（U-Boot）阶段。U-Boot 作为一个功能更为强大的引导加载程序, 可以进一步初始化系统硬件、加载操作 RT-Thread 或 Linux Kernel, 以及执行其他用户定义的启动任务。
 U-boot 分为两阶段启动, SPL 和 U-Boot, SPL 用于初始化 DDR 等外设, 加载 U-Boot, U-Boot 之后的逻辑(OpenSBI, RT-Thread Smart), 我们此次不考虑.
 从固件格式看, 这部分以固件分区的方式存在, 依次由 U-Boot SPL 加载 U-Boot, U-Boot 加载 RT-Thread/Linux Kernel.
 
 K230 配备了两个 CPU, 分别称为 CPU0(小核) 和 CPU1(大核), 两个核心工作在不同频率, 且 CPU1 支持 RVV 1.0 向量扩展, 属于异构多核架构.
-在启动过程中，当芯片的复位信号被解除后，Boot ROM 会在 小核上开始执行. 这意味着 CPU0 是第一个被激活的核心, 它负责执行初始的引导程序, 进行系统的基本初始化.
-与此同时, 大核的解除复位(de-reset)过程是由小核来控制的。也就是说，小核完成自身初始化的同时，还需要发送指令来解除大核的复位状态，使其从某一位置开始运行.
-小核不仅肩负着引导系统启动的重任，还掌控着大核的启动流程，为 SoC 整体开始工作奠定了基础.
+在启动过程中, 当芯片的复位信号被解除后, Boot ROM 会在小核上开始执行. 这意味着 CPU0 是第一个被激活的核心, 它负责执行初始的引导程序, 进行系统的基本初始化.
+与此同时, 大核的解除复位(de-reset)过程是由小核来控制的。也就是说, 小核完成自身初始化的同时, 还需要发送指令来解除大核的复位状态, 使其从某一位置开始运行.
+小核不仅肩负着引导系统启动的重任, 还掌控着大核的启动流程, 为 SoC 整体开始工作奠定了基础.
 
 ### 固件格式
 
@@ -249,8 +249,8 @@ pub extern "C" fn _start_rust() {
 ### 访问外设寄存器 - PAC
 
 Rust 嵌入式访问外设寄存器往往通过 PAC(peripheral access crate) 的方式, 例如 `stm32xxxx-pac` crate. 但是由于 K230 是一个较新的芯片, 没有相关的 PAC crate.
-同时官方也不太可提供 SVD 文件供参考. 所这里我选择了 [chiptool] 的方式, 使用 [yaml2pac] 工具完成 PAC crate 的生成. 手动维护外设寄存器的 YAML 定义.
-关于 PAC 的访问, 请参考我 [Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例](https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/) 一文.
+同时官方也不太可能提供 SVD 文件供参考. 所这里我选择了 [chiptool] 的方式, 使用 [yaml2pac] 工具完成 PAC crate 的生成. 手动维护外设寄存器的 YAML 定义.
+关于 PAC 的访问, 请参考我 [Rust 嵌入式开发中的外设寄存器访问: 从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例](https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/) 一文.
 
 相关 YAML 文件完全可以通过 LLM 协助从 PDF 手册 OCR.
 
@@ -468,7 +468,7 @@ DDR init / (SDRAM 初始化) 是一个比较复杂的过程, 一般需要初始�
 
 所以 DDR init 代码直接通过 LLM 从 C 翻译. 不做额外解释. DDR 芯片不同, DDR init 代码也是不同的.
 
-DDR init 之后, 我们就可以使用 DDR 区域的内存. 这里有个比较坑的地方, DDR 内存起始地址是 0x0000_0000,
+DDR init 之后, 我们就可以使用 DDR 区域的内存. 这里有一个需要注意的地方是, DDR 内存起始地址是 0x0000_0000,
 然而 Rust 访问零地址有诸多限制, 多数函数会直接 panic. 程序中应该避免使用 0x0000_0000 地址.
 
 ## 正式开始裸机编程 (Start Real Bare-Metal Programming)
@@ -581,9 +581,9 @@ fn buzzer() {
 裸机编程是嵌入式开发的基础, 也是最底层的开发方式. 通过裸机编程, 我们可以更好地理解硬件的工作原理, 以及操作系统的底层.
 用遍全天下的库和 SDK, 不如自己写一个, 通一则通百.
 
-### Shell?
+### SHELL?
 
-在裸机环境下, 由于没有操作系统, 没有标准输入输出, 也没有文件系统, 完整的 Shell 是不可能的. 但是我们可以通过串口, 实现简单的命令行交互.
+在裸机环境下, 由于没有操作系统, 没有标准输入输出, 也没有文件系统, 完整的 SHELL 是不可能的. 但是我们可以通过串口, 实现简单的命令行交互.
 所需要的只是两个串口函数 `putchar` 和 `getchar`, 以及一个简单的解析器.
 
 [noline] 是一个小巧的 no_std line-editing crate, 可以用于实现简单的命令行交互. 而且它基于 embedded-hal 生态, 可以方便地移植.
@@ -647,7 +647,7 @@ unsafe {
 }
 ```
 
-为了方便开发测试, 我把跳转大核也做成了 shell 命令. 通过 UART0 输入 `jumpbig 0x01000000` 即可跳转大核执行内存区域代码.
+为了方便开发测试, 我把跳转大核也做成了 SHELL 命令. 通过 UART0 输入 `jumpbig 0x01000000` 即可跳转大核执行内存区域代码.
 尝试 dump 大核寄存器信息, 可以看到启动信息:
 
 ```text
@@ -672,17 +672,16 @@ cpuid: 09140b0d 10050000 260c0001
 
 ## 结语 (Conclusion)
 
-通过此次在 K230 芯片 上的 Rust 裸机嵌入式开发，我们深入探索了 MPU 与 MCU 在启动方式和使用模式上的区别，掌握了使用 Rust 进行 MPU 芯片裸机开发的关键步骤，
-包括启动流程、固件格式解析、中断和外设的初始化等。实践中，我们成功实现了 UART 调试输出、GPIO 点灯、PWM 蜂鸣器等功能，
+通过此次在 K230 芯片上的 Rust 裸机嵌入式开发, 我们深入探索了 MPU 与 MCU 在启动方式和使用模式上的区别, 掌握了使用 Rust 进行 MPU 芯片裸机开发的关键步骤,
+包括启动流程、固件格式解析、中断和外设的初始化等。实践中, 我们成功实现了 UART 调试输出、GPIO 点灯、PWM 蜂鸣器等功能,
 加深了对 K230 底层启动机制和硬件特性的理解。这些成果为日后在 K230 以及其他 RISC-V 芯片上开展更复杂的嵌入式开发奠定了坚实的基础。
-展望未来，我们可以进一步完善外设驱动，探索多核协同工作、RVV 向量指令的应用，以及结合 Rust 生态构建高效、
-安全的嵌入式系统，为 RISC-V 开源社区贡献更多力量。(由 GPT 总结)
+展望未来, 我们可以进一步完善外设驱动, 探索多核协同工作、RVV 向量指令的应用, 以及结合 Rust 生态构建高效、
+安全的嵌入式系统, 为 RISC-V 开源社区贡献更多力量。(由 GPT 总结)
 
 ### Tips
 
 - Boot ROM 对于非法执行情况有异常报错, 可以用这种报错行为反向验证代码是否被执行, 例如插入非法指令查看报错位置的 pc
 - 裸机代码最好避免使用完整 target feature, 避免编译器生成还未使能的指令特性, 例如 V 扩展
-- Rust 裸机开发中, 由于没有操作系统, 无法使用标准库, 也无法使用 panic, 所以需要自行实现 panic handler
 - D-Cache 和 I-Cache 的状态需要处理, 一般在跳转到新代码前关闭, 以避免缓存不一致
 - `println!` 宏可以方便地输出调试信息, 但是需要注意, 打印是阻塞的, 影响时间敏感的操作
 - 学会使用 LLM 协助自己的探索过程, 例如从 PDF 手册 OCR 导出 YAML 定义, DDR init 代码的翻译, 以及对于特定寄存器的解释
