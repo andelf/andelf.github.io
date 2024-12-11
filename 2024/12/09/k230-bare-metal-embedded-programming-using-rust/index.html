@@ -521,7 +521,6 @@ Boot ROM 已经初始化了 UART0, 会有简单的报错信息, 例如 “boot f
 <span class="nn">mcounteren</span><span class="p">::</span><span class="nf">set_tm</span><span class="p">();</span> <span class="c1">// and time counter</span>
 
 <span class="c1">// FPU init</span>
-<span class="nn">mstatus</span><span class="p">::</span><span class="nf">set_fs</span><span class="p">(</span><span class="nn">mstatus</span><span class="p">::</span><span class="nn">FS</span><span class="p">::</span><span class="n">Clean</span><span class="p">);</span>
 <span class="nn">mstatus</span><span class="p">::</span><span class="nf">set_fs</span><span class="p">(</span><span class="nn">mstatus</span><span class="p">::</span><span class="nn">FS</span><span class="p">::</span><span class="n">Initial</span><span class="p">);</span>
 <span class="nd">asm!</span><span class="p">(</span><span class="s">"csrwi fcsr, 0"</span><span class="p">);</span>
 </code></pre></div></div>
