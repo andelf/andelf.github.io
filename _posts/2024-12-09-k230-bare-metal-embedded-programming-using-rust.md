@@ -422,7 +422,6 @@ mcounteren::set_cy(); // enable cycle counter
 mcounteren::set_tm(); // and time counter
 
 // FPU init
-mstatus::set_fs(mstatus::FS::Clean);
 mstatus::set_fs(mstatus::FS::Initial);
 asm!("csrwi fcsr, 0");
 ```
