@@ -19,9 +19,32 @@ layout: default
       {%- endif -%}
     </p>
 
+    {%- if page.revisions -%}
+    <p class="post-revision">
+      <table>
+        <thead>
+          <th>Commit</th>
+          <th>Date</th>
+          <th>Commit Message</th>
+          <th></th>
+        </thead>
+        <tbody>
+        {%- for revision in page.revisions -%}
+          <tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/{{ revision.hash }}">{{ revision.hash }}</a></code></td>
+            <td>{{ revision.date }}</td>
+            <td>{{ revision.message }}</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/{{ revision.hash }}/{{ page.path}}">View this version</a></td>
+          </tr>
+          {%- endfor -%}
+          </tbody>
+      </table>
+    </p>
+    {%- endif -%}
+
     {%- if page.image -%}
-    <p>
-      <img src="{{ page.image}}" alt="thumbnail" height="200px" />
+    <p class="post-headimage">
+      <img src="{{ page.image}}" alt="thumbnail" width="100%" />
     </p>
     <hr />
     {%- endif -%}
@@ -40,6 +63,7 @@ layout: default
 
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
 </article>
+
 {% if site.disqus.shortname %}
 {% include disqus_comments.html %}
 {% endif %}
