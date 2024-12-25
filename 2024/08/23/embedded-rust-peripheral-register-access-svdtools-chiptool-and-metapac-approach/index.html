@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2024-08-23T01:51:00+00:00","datePublished":"2024-08-23T01:51:00+00:00","description":"Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.","headline":"Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"},"url":"https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2024-12-25T12:34:15+00:00","datePublished":"2024-08-23T01:51:00+00:00","description":"Embedded Rust Peripheral Register Access: svd2rust, chiptool and metapac Approach.","headline":"Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"},"url":"https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -45,7 +45,22 @@
     <p class="post-meta">
       <time class="dt-published" datetime="2024-08-23T01:51:00+00:00" itemprop="datePublished">Aug 23, 2024
       </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card"
-          itemprop="name">andelf</span></span>• <span>Tags: embedded, rust, embassy</span></p><div class="table-of-contents">
+          itemprop="name">andelf</span></span>• <span>Tags: embedded, rust, embassy</span></p><p class="post-revision">
+      <table>
+        <thead>
+          <th>Commit</th>
+          <th>Date</th>
+          <th>Commit Message</th>
+          <th></th>
+        </thead>
+        <tbody><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/e0e5178">e0e5178</a></code></td>
+            <td>2024-12-25 20:34:15 +0800</td>
+            <td>feat: add revision plugin</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/e0e5178/_posts/2024-08-23-embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach.md">View this version</a></td>
+          </tr></tbody>
+      </table>
+    </p><div class="table-of-contents">
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#背景">背景</a></li>
 <li class="toc-entry toc-h2"><a href="#由来">由来</a>
@@ -697,6 +712,7 @@ I2C 传感器寄存器格式的定义等等. 甚至诸如 RISC-V CSR 字段的�
 
 <a class="u-url" href="/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" hidden></a>
 </article>
+
 
 
 
