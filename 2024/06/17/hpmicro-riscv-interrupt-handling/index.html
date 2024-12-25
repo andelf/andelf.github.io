@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU / Andes RISC-V" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2024-12-25T12:34:15+00:00","datePublished":"2024-06-17T07:30:00+00:00","description":"Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode.","headline":"HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU / Andes RISC-V","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling/"},"url":"https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"andelf"},"dateModified":"2024-06-17T12:43:43+00:00","datePublished":"2024-06-17T07:30:00+00:00","description":"Interrupt Handling for HPMicro RISC-V MCU(Andes RISC-V IP Core) - Direct Address Mode and Vector Mode.","headline":"HPM RISC-V MCU 中断处理简介: 直接地址模式和向量模式 - Interrupt Handling for HPMicro RISC-V MCU / Andes RISC-V","mainEntityOfPage":{"@type":"WebPage","@id":"https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling/"},"url":"https://andelf.github.io/2024/06/17/hpmicro-riscv-interrupt-handling/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://andelf.github.io/feed.xml" title="猫·仁波切" /></head>
 <body><header class="site-header" role="banner">
@@ -54,10 +54,64 @@
           <th></th>
         </thead>
         <tbody><tr>
-            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/e0e5178">e0e5178</a></code></td>
-            <td>2024-12-25 20:34:15 +0800</td>
-            <td>feat: add revision plugin</td>
-            <td><a href="https://github.com/andelf/andelf.github.io/blob/e0e5178/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/69544ab">69544ab</a></code></td>
+            <td>2024-06-17 20:43:43 +0800</td>
+            <td>fix: minor update
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/69544ab/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/1f4ba8f">1f4ba8f</a></code></td>
+            <td>2024-06-17 15:53:51 +0800</td>
+            <td>fix: typo
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/1f4ba8f/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/1b0aa3e">1b0aa3e</a></code></td>
+            <td>2024-06-17 15:50:39 +0800</td>
+            <td>fix: wording
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/1b0aa3e/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/3a53f0f">3a53f0f</a></code></td>
+            <td>2024-06-17 15:43:22 +0800</td>
+            <td>fix: typo
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/3a53f0f/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/f5ff471">f5ff471</a></code></td>
+            <td>2024-06-17 15:40:53 +0800</td>
+            <td>fix: intro
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/f5ff471/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/0d819e3">0d819e3</a></code></td>
+            <td>2024-06-17 15:40:18 +0800</td>
+            <td>fix: date
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/0d819e3/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/b0ecb62">b0ecb62</a></code></td>
+            <td>2024-06-17 15:39:42 +0800</td>
+            <td>fix: date
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/b0ecb62/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/49c49ea">49c49ea</a></code></td>
+            <td>2024-06-17 15:38:25 +0800</td>
+            <td>fix: title
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/49c49ea/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/790beed">790beed</a></code></td>
+            <td>2024-06-17 15:36:52 +0800</td>
+            <td>chore: add links
+</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/790beed/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
+          </tr><tr>
+            <td><code><a href="https://github.com/andelf/andelf.github.io/commit/38c3995">38c3995</a></code></td>
+            <td>2024-06-17 15:32:01 +0800</td>
+            <td>fix: title</td>
+            <td><a href="https://github.com/andelf/andelf.github.io/blob/38c3995/_posts/2024-06-17-hpmicro-riscv-interrupt-handling.md">View this version</a></td>
           </tr></tbody>
       </table>
     </p><div class="table-of-contents">
