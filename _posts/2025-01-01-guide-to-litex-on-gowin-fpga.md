@@ -8,14 +8,21 @@ tags:
   - risc-v
   - rust
 toc: true
-published: false
+published: true
 ---
 
 > 难度: 入门. 本文介绍 LiteX 的基础性内容, 最终实现一个在 FPGA 上运行的 RISC-V 软核, 并基于此编写简单嵌入式代码.
 > 读者应具有 FPGA 和嵌入式编程的基础知识. 对 Verilog 或其他 HDL 语言有一定的了解.
 
-前段时间在立创商城购买了一块 [立创开发板] 出品的 Gowin GW2A-18C FPGA 开发板, 名字很喜人, 逻辑派 [LCKFB LJPI].
-这是立创开发板系列出的第一块 FPGA 开发板, 使用了 GD32 MCU + FPGA 的组合, 两者之间提供了 GD32 的 PA0~PA7 的连接,
+前段时间在立创商城购买了一块 [立创开发板] 出品的 Gowin GW2A-LV18 FPGA 开发板(GW2A-18C), 名字很喜人, 叫做逻辑派 [LCKFB LJPI].
+之前对 FPGA 只有很基础的了解, 大概水平是 Verilog 点灯计数器, Chisel/SpinalHDL 写简单 LED 效果的水平.
+手头几块 FPGA 开发板, 很多也在吃灰, 却又不断新买板子, 惭愧至极.
+
+本文讲介绍 [LiteX] 开发的基础内容, 不涉及到底层 Wishbone 及其他总线协议相关内容.
+
+## 环境介绍
+
+逻辑派是立创开发板系列出的第一块 FPGA 开发板, 使用了 GD32 MCU + Gowin FPGA 的组合, 两者之间提供了 GD32 的 PA0~PA7 的连接,
 支持八位总线, 或 QSPI0, USART1 实现两者的通信.
 
 简明参数如下:
@@ -97,7 +104,7 @@ LiteX 内部组件多使用 [migen] 编写, 这是一个 Python 方言的 HDL, �
 ## Refs
 
 [立创开发板]: https://lckfb.com/
-[LCKFB LJPI]: http://wiki.lckfb.com/zh-hans/fpga-ljpi
+[LCKFB LJPI]: https://wiki.lckfb.com/zh-hans/fpga-ljpi/
 [LiteX]: https://github.com/enjoy-digital/litex
 [Gowin]: https://www.gowinsemi.com.cn/
 [openFPGALoader]: https://github.com/trabucayre/openFPGALoader
